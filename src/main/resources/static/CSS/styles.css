@@ -1,17 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* esto le pide al navegador que anime el cambio de una pagina a otra en vez
-   de que se vea el salto seco. Solo lo hacen los navegadores que lo soportan,
-   a los demas no les hace nada, asi que tranquilo si no lo ven en su Firefox */
-@view-transition {
-    navigation: auto;
-}
-
-::view-transition-group(root) {
-    animation-duration: .22s;
-    animation-timing-function: cubic-bezier(.4, 0, .2, 1);
-}
-
 /* ===================================
               VARIABLES
 ======================================*/
