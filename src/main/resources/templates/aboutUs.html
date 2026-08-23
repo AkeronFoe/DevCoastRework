@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Talento creativo</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="landing-shell">
+
+        <header class="landing-nav" id="main-nav" style="background:var(--bg-2);border-bottom:1px solid var(--border);">
+            <div class="brand">
+                <div class="brand-mark"><img th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast" width="42"
+                        height="42"></div>
+                <div>
+                    <div class="brand-name">DevCoast</div>
+                    <div class="brand-tag">Talento creativo</div>
+                </div>
+            </div>
+            <nav class="landing-links">
+                <a class="nav-link active" href="#inicio">Inicio</a>
+                <a class="nav-link" href="#para-quien">Para quién es</a>
+                <a class="nav-link" href="#como-funciona">Cómo funciona</a>
+                <a class="nav-link" href="#destacados">Destacados</a>
+                <a class="nav-link" href="#testimonios">Testimonios</a>
+                <a class="nav-link" href="#faq">FAQ</a>
+            </nav>
+            <div class="nav-actions">
+                <a class="btn btn-ghost btn-icon" th:href="@{/login}">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    Iniciar sesión
+                </a>
+                <a class="btn btn-primary btn-icon" th:href="@{/register-options}">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="23" y1="11" x2="17" y2="11" />
+                    </svg>
+                    Crear cuenta
+                </a>
+            </div>
+        </header>
+
+        <main class="landing-main">
+
+            <section id="inicio" class="hero reveal">
+                <div class="hero-content">
+                    <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Plataforma de talento creativo</div>
+                    <h2>Encuentra proyectos serios y talento que habla tu <span class="accent-word">mismo
+                            lenguaje.</span></h2>
+                    <p class="hero-desc">DevCoast combina empleos curados, portafolios vivos y un perfil profesional
+                        listo para compartir. Sin ruido, sin formularios eternos.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary btn-icon" th:href="@{/register-options}">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="8.5" cy="7" r="4" />
+                                <line x1="20" y1="8" x2="20" y2="14" />
+                                <line x1="23" y1="11" x2="17" y2="11" />
+                            </svg>
+                            Crear cuenta gratis
+                        </a>
+                        <a class="btn btn-outline btn-icon" th:href="@{/empleos}">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polygon points="16 8 14 14 8 16 10 10 16 8" />
+                            </svg>
+                            Explorar empleos
+                        </a>
+                    </div>
+                    <div class="hero-social-proof">
+                        <div class="avatars-row">
+                            <div class="avatar-sm avatar-blue">JS</div>
+                            <div class="avatar-sm avatar-green">CR</div>
+                            <div class="avatar-sm avatar-amber">LV</div>
+                            <div class="avatar-sm avatar-pink">AM</div>
+                        </div>
+                        <span class="social-proof-text">Más de <strong
+                                th:text="${kpiTalentos} + ' talentos'">talentos</strong> ya están adentro</span>
+                    </div>
+                </div>
+
+                <div class="hero-stats-panel">
+                    <p class="hero-stats-label">Actividad en tiempo real</p>
+                    <div class="hero-stat-row">
+                        <div class="hero-stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number" th:data-count="${kpiTalentos}" th:text="${kpiTalentos}">0
+                            </div>
+                            <div class="hero-stat-lbl">Talentos activos</div>
+                        </div>
+                        <span class="hero-stat-trend">+12%</span>
+                    </div>
+                    <div class="hero-stat-row">
+                        <div class="hero-stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number" th:data-count="${kpiEmpresas}" th:text="${kpiEmpresas}">0
+                            </div>
+                            <div class="hero-stat-lbl">Empresas creativas</div>
+                        </div>
+                        <span class="hero-stat-trend">+8%</span>
+                    </div>
+                    <div class="hero-stat-row">
+                        <div class="hero-stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12 3-1.912 5.744a2 2 0 0 1-1.265 1.265L3 12l5.823 1.912a2 2 0 0 1 1.265 1.265L12 21l1.912-5.823a2 2 0 0 1 1.265-1.265L21 12l-5.823-1.912a2 2 0 0 1-1.265-1.265L12 3Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number" th:data-count="${kpiEmpleos}" th:text="${kpiEmpleos}">0</div>
+                            <div class="hero-stat-lbl">Empleos nuevos hoy</div>
+                        </div>
+                        <span class="hero-stat-trend">+23%</span>
+                    </div>
+                    <div class="hero-stat-row">
+                        <div class="hero-stat-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number" th:data-count="${kpiTasaRespuesta}"
+                                th:text="${kpiTasaRespuesta}">0</div>
+                            <div class="hero-stat-lbl">% tasa de respuesta</div>
+                        </div>
+                        <span class="hero-stat-trend">+5%</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="reveal rd1">
+                <p class="marquee-label">Tecnologías y roles que encontrarás en DevCoast</p>
+                <div class="marquee-section">
+                    <div class="marquee-track">
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>React</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>Vue.js</span>
+                        <span class="marquee-item"><span class="mdot"
+                                style="background:#1d7fd0"></span>TypeScript</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>Node.js</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>Spring
+                            Boot</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#10b981"></span>Branding</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#10b981"></span>UI / UX</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#10b981"></span>Motion
+                            Design</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#10b981"></span>Figma</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#f59e0b"></span>Product
+                            Manager</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#f59e0b"></span>Scrum
+                            Master</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>Next.js</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>Python</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#10b981"></span>3D /
+                            Blender</span>
+                        <span class="marquee-item"><span class="mdot"
+                                style="background:#f59e0b"></span>Copywriting</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#1d7fd0"></span>DevOps</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#ec4899"></span>Mobile</span>
+                        <span class="marquee-item"><span class="mdot" style="background:#7c3aed"></span>Machine
+                            Learning</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>React</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>Vue.js</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>TypeScript</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>Node.js</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>Spring Boot</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#10b981"></span>Branding</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#10b981"></span>UI / UX</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#10b981"></span>Motion Design</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#10b981"></span>Figma</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#f59e0b"></span>Product Manager</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#f59e0b"></span>Scrum Master</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>Next.js</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>Python</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#10b981"></span>3D / Blender</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#f59e0b"></span>Copywriting</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#1d7fd0"></span>DevOps</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#ec4899"></span>Mobile</span>
+                        <span class="marquee-item" aria-hidden="true"><span class="mdot"
+                                style="background:#7c3aed"></span>Machine Learning</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="numbers-bar reveal rd2">
+                <div class="nb-cell">
+                    <div class="nb-num" th:text="${kpiTalentos} + '+'">0+</div>
+                    <div class="nb-label">Talentos registrados</div>
+                    <div class="nb-desc">Desarrolladores, diseñadores y creativos verificados</div>
+                </div>
+                <div class="nb-cell">
+                    <div class="nb-num" th:text="${kpiEmpresas} + '+'">0+</div>
+                    <div class="nb-label">Empresas activas</div>
+                    <div class="nb-desc">Startups, agencias y estudios de producto</div>
+                </div>
+                <div class="nb-cell">
+                    <div class="nb-num" th:text="${kpiTasaRespuesta} + '%'">0%</div>
+                    <div class="nb-label">Tasa de respuesta</div>
+                    <div class="nb-desc">Empresas que responden en menos de 48 horas</div>
+                </div>
+                <div class="nb-cell">
+                    <div class="nb-num" th:text="${kpiConexiones}">0</div>
+                    <div class="nb-label">Conexiones logradas</div>
+                    <div class="nb-desc">Talentos contratados a través de la plataforma</div>
+                </div>
+            </div>
+
+            <section id="para-quien" class="card reveal rd1">
+                <div>
+                    <p class="sec-eyebrow">Audiencia</p>
+                    <h3 class="sec-title">¿Para quién es DevCoast?</h3>
+                    <p class="sec-sub">Una plataforma construida para los tres actores del ecosistema creativo digital.
+                    </p>
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-card reveal rd1">
+                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="16 18 22 12 16 6" />
+                                <polyline points="8 6 2 12 8 18" />
+                            </svg></div>
+                        <h4>Programadores de producto</h4>
+                        <p>Busca equipos que valoran el código limpio, la escalabilidad y el trabajo remoto real. Sin
+                            empresas que te pidan 10 años de experiencia en tecnologías de 3 años.</p>
+                        <div class="chip-row"><span class="chip">Frontend</span><span class="chip">Backend</span><span
+                                class="chip">Full stack</span><span class="chip">DevOps</span></div>
+                    </div>
+                    <div class="feature-card reveal rd2">
+                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+                                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+                                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+                                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+                                <path
+                                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+                            </svg></div>
+                        <h4>Diseñadores gráficos</h4>
+                        <p>Conecta con marcas que buscan identidad visual, motion design y packaging memorable. Tu
+                            portafolio habla más que tu hoja de vida.</p>
+                        <div class="chip-row"><span class="chip">Branding</span><span class="chip">UI/UX</span><span
+                                class="chip">3D</span><span class="chip">Motion</span></div>
+                    </div>
+                    <div class="feature-card reveal rd3">
+                        <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg></div>
+                        <h4>Equipos y empresas</h4>
+                        <p>Publica vacantes con foco en portafolios reales y habilidades demostrables. Llega a
+                            candidatos que ya demostraron lo que pueden hacer.</p>
+                        <div class="chip-row"><span class="chip">Curado</span><span class="chip">Rápido</span><span
+                                class="chip">Verificado</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card reveal">
+                <div>
+                    <p class="sec-eyebrow">Comparativa</p>
+                    <h3 class="sec-title">¿Talento o empresa? Ambos ganan</h3>
+                    <p class="sec-sub">Cada lado de la plataforma tiene lo que necesita para conectar bien.</p>
+                </div>
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <span class="compare-tag talent">Para talentos</span>
+                        <h4>Tu portafolio es tu CV</h4>
+                        <p>Arma tu perfil una vez y aplica a cientos de vacantes sin llenar formularios repetitivos.</p>
+                        <div class="compare-list">
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Perfil público con proyectos y stack</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Aplicación con un clic usando tu perfil</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Filtros por modalidad, seniority y salario</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Modo "no disponible" para no ser molestado</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>100% gratis para talentos, siempre</span>
+                            </div>
+                        </div>
+                        <a class="btn btn-outline btn-icon" th:href="@{/register-options}">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="8.5" cy="7" r="4" />
+                                <line x1="20" y1="8" x2="20" y2="14" />
+                                <line x1="23" y1="11" x2="17" y2="11" />
+                            </svg>
+                            Crear perfil de talento
+                        </a>
+                    </div>
+                    <div class="compare-card">
+                        <span class="compare-tag empresa">Para empresas</span>
+                        <h4>Candidatos que ya tienen portafolio</h4>
+                        <p>Publica vacantes detalladas y accede a un directorio de talentos verificados con trabajo
+                            real.</p>
+                        <div class="compare-list">
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Panel de gestión de vacantes activas y cerradas</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Campos detallados: salario, timezone, inglés</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Perfil de empresa con sector y descripción</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Revisión de solicitudes y gestión de candidatos</span>
+                            </div>
+                            <div class="compare-item">
+                                <div class="ci-icon yes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg></div><span>Vacante visible hasta cerrarla manualmente</span>
+                            </div>
+                        </div>
+                        <a class="btn btn-outline btn-icon" th:href="@{/register-options}">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" />
+                                <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
+                            </svg>
+                            Crear cuenta de empresa
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <div class="how-grid">
+                <section id="como-funciona" class="card reveal rd1">
+                    <div>
+                        <p class="sec-eyebrow">Proceso</p>
+                        <h3 class="sec-title">Cómo funciona</h3>
+                        <p class="sec-sub">Tres pasos para conectar con el proyecto ideal.</p>
+                    </div>
+                    <div class="steps-list">
+                        <div class="step-item">
+                            <div class="step-num">1</div>
+                            <div class="step-body"><strong>Crea tu perfil</strong>
+                                <p>Tu stack, portafolio y el rol que buscas. Armalo una vez y usalo para siempre. Sin
+                                    formularios que repitan lo mismo.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-num">2</div>
+                            <div class="step-body"><strong>Explora y aplica</strong>
+                                <p>Filtra por modalidad, seniority, salario y tecnologías. Tus datos y tu mejor proyecto
+                                    viajan juntos con un clic.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-num">3</div>
+                            <div class="step-body"><strong>Haz match</strong>
+                                <p>Las empresas activas en DevCoast responden rápido. Sin blackholes de reclutamiento ni
+                                    silencio de semanas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="destacados" class="card reveal rd2">
+                    <div
+                        style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <div>
+                            <p class="sec-eyebrow">Esta semana</p>
+                            <h3 class="sec-title">Destacados</h3>
+                            <p class="sec-sub">Las mejores oportunidades del momento.</p>
+                        </div>
+                        <span
+                            style="font-size:.72rem;background:rgba(22,163,74,.12);color:#16a34a;font-weight:700;padding:4px 10px;border-radius:20px;height:fit-content;white-space:nowrap;margin-top:4px;">4
+                            nuevas hoy</span>
+                    </div>
+                    <div class="activity-list">
+                        <div class="highlight-card">
+                            <div class="hl-left">
+                                <div class="hl-logo hl-aurora">AU</div>
+                                <div class="hl-info"><strong>Frontend React Senior</strong><span>Aurora Labs · Remoto ·
+                                        $4k–$6k USD</span></div>
+                            </div><span class="hl-badge b-new">Nuevo</span>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="hl-left">
+                                <div class="hl-logo hl-lumen">LU</div>
+                                <div class="hl-info"><strong>Diseño de identidad</strong><span>Estudio Lumen ·
+                                        Presencial · Bogotá</span></div>
+                            </div><span class="hl-badge b-hot">Popular</span>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="hl-left">
+                                <div class="hl-logo hl-caps">CC</div>
+                                <div class="hl-info"><strong>Motion Designer</strong><span>Cápsula Creativa · Remoto ·
+                                        Latam</span></div>
+                            </div><span class="hl-badge b-remote">Remoto</span>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="hl-left">
+                                <div class="hl-logo hl-nova">NV</div>
+                                <div class="hl-info"><strong>Backend Python / FastAPI</strong><span>Nova Studio ·
+                                        Híbrido · Medellín</span></div>
+                            </div><span class="hl-badge b-feat">Destacado</span>
+                        </div>
+                    </div>
+                    <a class="btn btn-outline btn-icon" th:href="@{/empleos}"
+                        style="margin-top:16px;width:100%;justify-content:center;">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="16 8 14 14 8 16 10 10 16 8" />
+                        </svg>
+                        Ver todos los empleos
+                    </a>
+                </section>
+            </div>
+
+            <section class="reveal">
+                <div style="margin-bottom:16px;">
+                    <p class="sec-eyebrow">Flujo</p>
+                    <h3 class="sec-title">El proceso de principio a fin</h3>
+                    <p class="sec-sub">Así va la experiencia desde que entras hasta que conectas.</p>
+                </div>
+                <div class="process-flow">
+                    <div class="pf-step">
+                        <div class="pf-num">1</div>
+                        <div class="pf-title">Registrarte</div>
+                        <p class="pf-desc">Crea tu cuenta como talento o empresa en menos de 2 minutos.</p>
+                    </div>
+                    <div class="pf-step">
+                        <div class="pf-num">2</div>
+                        <div class="pf-title">Armar tu perfil</div>
+                        <p class="pf-desc">Sube tus proyectos, stack y expectativas. Una vez y listo.</p>
+                    </div>
+                    <div class="pf-step">
+                        <div class="pf-num">3</div>
+                        <div class="pf-title">Explorar y aplicar</div>
+                        <p class="pf-desc">Filtra empleos con detalle real y aplica con tu perfil completo.</p>
+                    </div>
+                    <div class="pf-step">
+                        <div class="pf-num">4</div>
+                        <div class="pf-title">Conectar</div>
+                        <p class="pf-desc">La empresa ve tu trabajo real y responde con contexto. Sin filtros de ATS.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="trust-bar reveal rd1">
+                <span class="trust-label">Empresas que confían</span>
+                <div class="trust-pills">
+                    <span class="trust-pill">Aurora Labs</span>
+                    <span class="trust-pill">Estudio Lumen</span>
+                    <span class="trust-pill">Cápsula Creativa</span>
+                    <span class="trust-pill">Nova Studio</span>
+                    <span class="trust-pill">Pixel Factory</span>
+                    <span class="trust-pill">DataBridge</span>
+                </div>
+            </div>
+
+            <section class="reveal" id="testimonios">
+                <div>
+                    <p class="sec-eyebrow">Testimonios</p>
+                    <h3 class="sec-title">Lo que dicen los que ya están adentro</h3>
+                    <p class="sec-sub">Talentos y empresas que encontraron lo que buscaban en DevCoast.</p>
+                </div>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card reveal rd1">
+                        <div class="tstars">★★★★★</div>
+                        <p class="tquote">En dos semanas ya tenía tres entrevistas con empresas que de verdad leyeron mi
+                            portafolio. Eso no pasa en otras plataformas.</p>
+                        <div class="tauthor">
+                            <div class="tavatar av-blue">JS</div>
+                            <div><span class="tname">Jorge Salcedo</span><span class="trole">Frontend Developer ·
+                                    Bogotá</span></div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card reveal rd2">
+                        <div class="tstars">★★★★★</div>
+                        <p class="tquote">Contratamos a nuestra diseñadora de identidad a través de DevCoast. El proceso
+                            fue rápido y el nivel del talento, impresionante.</p>
+                        <div class="tauthor">
+                            <div class="tavatar av-orange">LV</div>
+                            <div><span class="tname">Laura Vega</span><span class="trole">CEO · Estudio Lumen,
+                                    Medellín</span></div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card reveal rd3">
+                        <div class="tstars">★★★★★</div>
+                        <p class="tquote">Mi perfil en DevCoast reemplaza cualquier CV. Los clientes ven mi trabajo
+                            antes de hablar conmigo y llegan con mucho mejor contexto.</p>
+                        <div class="tauthor">
+                            <div class="tavatar av-green">CR</div>
+                            <div><span class="tname">Camila Ríos</span><span class="trole">Motion Designer · Remoto,
+                                    Latam</span></div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card reveal rd4">
+                        <div class="tstars">★★★★★</div>
+                        <p class="tquote">Publicamos nuestra vacante y en 48 horas teníamos candidatos con portafolios
+                            increíbles. Sin spam, sin CVs vacíos.</p>
+                        <div class="tauthor">
+                            <div class="tavatar av-pink">AM</div>
+                            <div><span class="tname">Andrés Mora</span><span class="trole">CTO · Nova Studio,
+                                    CDMX</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="skills-section reveal">
+                <div class="skills-header">
+                    <div>
+                        <p class="sec-eyebrow">Ecosistema</p>
+                        <h3 class="sec-title" style="margin-bottom:0">Tecnologías y roles que encontrarás</h3>
+                    </div>
+                    <a class="btn btn-outline" th:href="@{/empleos}" style="white-space:nowrap;font-size:.85rem;">Ver
+                        todos</a>
+                </div>
+                <div class="skills-cats">
+                    <div class="skill-row">
+                        <span class="skill-row-label">Desarrollo</span>
+                        <span class="skill-tag ft">React</span><span class="skill-tag ft">Vue.js</span><span
+                            class="skill-tag ft">TypeScript</span>
+                        <span class="skill-tag">Node.js</span><span class="skill-tag">Python</span><span
+                            class="skill-tag">Spring Boot</span>
+                        <span class="skill-tag">Next.js</span><span class="skill-tag">DevOps</span><span
+                            class="skill-tag">Docker</span>
+                        <span class="skill-tag">FastAPI</span><span class="skill-tag">Go</span>
+                    </div>
+                    <div class="skill-row">
+                        <span class="skill-row-label">Diseño</span>
+                        <span class="skill-tag ft">UI / UX</span><span class="skill-tag ft">Figma</span>
+                        <span class="skill-tag">Branding</span><span class="skill-tag">Motion</span><span
+                            class="skill-tag">3D</span>
+                        <span class="skill-tag">Ilustración</span><span class="skill-tag">Packaging</span><span
+                            class="skill-tag">Tipografía</span>
+                    </div>
+                    <div class="skill-row">
+                        <span class="skill-row-label">Gestión</span>
+                        <span class="skill-tag">Product Manager</span><span class="skill-tag">Scrum Master</span>
+                        <span class="skill-tag">UX Research</span><span class="skill-tag">Copywriting</span>
+                        <span class="skill-tag">Estrategia</span><span class="skill-tag">Data Analysis</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="newsletter-bar reveal">
+                <div class="nl-text">
+                    <strong>¿Quieres que te avisemos de nuevas oportunidades?</strong>
+                    <span>Recibe las mejores vacantes de la semana directo en tu correo. Sin spam.</span>
+                </div>
+                <div class="nl-form">
+                    <input class="nl-input" type="email" placeholder="tu@correo.com">
+                    <button class="btn btn-primary" type="button">Suscribirme</button>
+                </div>
+            </div>
+
+            <section class="card reveal" id="faq">
+                <div class="faq-layout">
+                    <div class="faq-intro">
+                        <p class="sec-eyebrow">FAQ</p>
+                        <h3>Preguntas frecuentes</h3>
+                        <p>Todo lo que necesitas saber antes de crear tu cuenta. Si no encuentras tu respuesta,
+                            escríbenos.</p>
+                        <a class="btn btn-outline btn-icon" href="#">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                            Contactar soporte
+                        </a>
+                    </div>
+                    <div class="faq-list">
+                        <div class="faq-item open">
+                            <div class="faq-q" role="button" tabindex="0">¿DevCoast es gratis para los talentos?<div
+                                    class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>Sí, completamente. Crear tu perfil, armar tu portafolio y aplicar a empleos es 100%
+                                    gratuito para talentos. Las empresas son quienes pagan por publicar vacantes y
+                                    acceder al directorio de talento.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-q" role="button" tabindex="0">¿En qué países opera DevCoast?<div
+                                    class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>DevCoast está disponible en toda Latinoamérica y España, con foco principal en
+                                    Colombia, México, Argentina y Perú. Muchas de las vacantes son remotas y aceptan
+                                    talento de cualquier país.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-q" role="button" tabindex="0">¿Qué tan rápido responden las empresas?<div
+                                    class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>Solo listamos empresas activas. El tiempo promedio de primera respuesta es de 48
+                                    horas. Si una vacante lleva más de 7 días sin actividad, la marcamos y notificamos a
+                                    la empresa.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-q" role="button" tabindex="0">¿Puedo publicar mi portafolio aunque no busque
+                                trabajo?<div class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>Por supuesto. Puedes crear tu perfil, cargar proyectos y activar el modo "No
+                                    disponible" para que las empresas vean tu trabajo pero sepan que no estás en
+                                    búsqueda activa en este momento.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-q" role="button" tabindex="0">¿Qué tipo de empresas publican en DevCoast?
+                                <div class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>Startups de producto, agencias creativas, estudios de diseño y empresas tech que
+                                    valoran el trabajo por portafolio sobre el CV tradicional. Todas pasan por un
+                                    proceso de verificación antes de publicar.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-q" role="button" tabindex="0">¿Cómo cierro o elimino una vacante publicada?
+                                <div class="faq-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg></div>
+                            </div>
+                            <div class="faq-a">
+                                <p>Desde el panel "Mis Empleos" puedes cerrar una vacante con un clic — deja de aparecer
+                                    en el listado público pero la conservas en tu historial. Si quieres eliminarla
+                                    completamente, también puedes hacerlo desde la pestaña de Cerrados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section reveal">
+                <div class="cta-text">
+                    <h3>¿Listo para encontrar tu próximo proyecto?</h3>
+                    <p>Únete a más de <span th:text="${kpiTalentos}">0</span> talentos que ya están construyendo su
+                        carrera en DevCoast. Gratis para
+                        empezar, sin letra pequeña.</p>
+                </div>
+                <div class="cta-actions">
+                    <a class="btn btn-white btn-icon" th:href="@{/register-options}">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <line x1="20" y1="8" x2="20" y2="14" />
+                            <line x1="23" y1="11" x2="17" y2="11" />
+                        </svg>
+                        Crear cuenta gratis
+                    </a>
+                    <button class="btn-ghost-white" type="button"
+                        onclick="document.getElementById('como-funciona')?.scrollIntoView({behavior:'smooth'})">
+                        Ver cómo funciona
+                        <svg style="width:14px;height:14px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="landing-footer">
+            <div class="footer-brand">
+                <img th:src="@{/img/DevCoast iconx256.png}" alt="DevCoast" width="28" height="28"
+                    style="border-radius:8px;">
+                <div>
+                    <div style="font-weight:700;font-size:.95rem;">DevCoast</div>
+                    <div style="font-size:.78rem;color:var(--muted);">Talento creativo</div>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a class="footer-link" href="#">Términos</a>
+                <a class="footer-link" href="#">Privacidad</a>
+                <a class="footer-link" href="#">Contacto</a>
+                <a class="footer-link" href="#">Blog</a>
+                <a class="footer-link" th:href="@{/empleos}">Empleos</a>
+            </div>
+            <span class="footer-copy">© 2026 DevCoast. Todos los derechos reservados.</span>
+        </footer>
+
+    </div>
+
+    <script>
+        const nav = document.getElementById('main-nav');
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 10), { passive: true });
+
+        const navLinks = document.querySelectorAll('.landing-nav .nav-link');
+        const sectionMap = {
+            'inicio': document.getElementById('inicio'),
+            'para-quien': document.getElementById('para-quien'),
+            'como-funciona': document.getElementById('como-funciona'),
+            'destacados': document.getElementById('destacados'),
+            'testimonios': document.getElementById('testimonios'),
+            'faq': document.getElementById('faq')
+        };
+        function updateActive() {
+            const y = scrollY + 110; let cur = 'inicio';
+            for (const [id, el] of Object.entries(sectionMap)) { if (el && el.offsetTop <= y) cur = id; }
+            navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+        }
+        window.addEventListener('scroll', updateActive, { passive: true });
+
+        navLinks.forEach(l => l.addEventListener('click', e => {
+            const h = l.getAttribute('href');
+            if (!h.startsWith('#')) return;
+            e.preventDefault();
+            document.querySelector(h)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }));
+
+        const revEls = document.querySelectorAll('.reveal');
+        const revObs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revObs.unobserve(e.target); } });
+        }, { threshold: 0.1 });
+        revEls.forEach(el => revObs.observe(el));
+
+        function animCount(el, target, dur = 1400) {
+            const s = performance.now();
+            const upd = now => {
+                const p = Math.min((now - s) / dur, 1);
+                const v = Math.round((1 - Math.pow(1 - p, 3)) * target);
+                el.textContent = v >= 1000 ? (v / 1000).toFixed(1).replace('.0', '') + 'k' : v;
+                if (p < 1) requestAnimationFrame(upd);
+            };
+            requestAnimationFrame(upd);
+        }
+        const cntObs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    animCount(e.target, parseInt(e.target.dataset.count));
+                    cntObs.unobserve(e.target);
+                }
+            });
+        }, { threshold: .5 });
+        document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
+
+        document.querySelectorAll('.faq-q').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.closest('.faq-item');
+                const isOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+                if (!isOpen) item.classList.add('open');
+            });
+            btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); } });
+        });
+
+        const track = document.querySelector('.marquee-track');
+        const mSec = document.querySelector('.marquee-section');
+        if (track && mSec) {
+            mSec.addEventListener('mouseenter', () => track.style.animationPlayState = 'paused');
+            mSec.addEventListener('mouseleave', () => track.style.animationPlayState = 'running');
+        }
+    </script>
+</body>
+
+</html>

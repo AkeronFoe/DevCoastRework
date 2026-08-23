@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | DevCoast</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+</head>
+
+<body>
+    <div class="content-login">
+        <div class="izq-l">
+            <h1>DevCoast</h1>
+            <h2 class="text-l">
+                Conecta tu talento con <span class="text-c">oportunidades.</span>
+            </h2>
+            <p class="text-l2">La plataforma especializada donde desarrolladores y diseñadores encuentran su próximo
+                proyecto ideal.
+            </p>
+            <div class="widgets">
+                <div class="widget-i">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-code-xml w-5 h-5 text-[#00d9ff]"
+                        data-fg-mbo21="1.20:3.3597:/src/app/pages/Login.tsx:44:17:2337:44:e:Code2::::::Oap"
+                        data-fgid-mbo21=":rf:">
+                        <path d="m18 16 4-4-4-4"></path>
+                        <path d="m6 8-4 4 4 4"></path>
+                        <path d="m14.5 4-5 16"></path>
+                    </svg>
+                    <p class="text-l3">Para<span class="text-b"> Desarrolladores</span></p>
+                </div>
+                <div class="widget-i">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-palette w-5 h-5 text-purple-500"
+                        data-fg-mbo29="1.20:3.3597:/src/app/pages/Login.tsx:53:17:2839:47:e:Palette::::::CGQb"
+                        data-fgid-mbo29=":rl:">
+                        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                        <path
+                            d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z">
+                        </path>
+                    </svg>
+                    <p class="text-l3">Para<span class="text-b"> Diseñadores</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="der-l login-panel">
+            <h2>Bienvenido de nuevo</h2>
+            <form class="form-l" th:action="@{/login}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div class="field">
+                    <input type="text" name="correo" placeholder=" " class="input-l" required>
+
+                    <label>Correo</label>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="password" placeholder=" " class="input-l" required>
+
+                    <label>Contraseña</label>
+                </div>
+
+                <button type="submit" class="btn-l">
+                    Iniciar sesión
+                </button>
+
+                <p class="text-l4">
+                    ¿No tienes cuenta?
+
+                    <a th:href="@{/register-options}" class="link-l">
+                        Crear cuenta
+                    </a>
+                </p>
+
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${flashMessage != null}" class="flash-banner login-toast"
+        th:classappend="${flashType != null ? ' ' + flashType : ''}">
+        <span th:text="${flashMessage}">Notificacion</span>
+        <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
+    </div>
+    <div th:if="${param.registro != null and flashMessage == null}" class="flash-banner login-toast success">
+        <span>Cuenta creada. Ya puedes iniciar sesión.</span>
+        <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Ajustes</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <style>
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width:700px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 6px;
+            }
+
+            .settings-nav-item {
+                width: auto;
+                padding: 8px 12px;
+            }
+        }
+
+        .settings-nav {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 8px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: .86rem;
+            font-weight: 500;
+            text-align: left;
+            transition: background .15s, color .15s;
+        }
+
+        .settings-nav-item:hover {
+            background: var(--surface-2);
+        }
+
+        .settings-nav-item.active {
+            background: var(--accent-soft, rgba(99, 210, 210, .12));
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .settings-nav-item svg {
+            flex-shrink: 0;
+        }
+
+        .settings-nav-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        .settings-nav-item.danger:hover {
+            background: rgba(239, 68, 68, .08);
+            color: var(--danger, #ef4444);
+        }
+
+        .settings-nav-item.danger.active {
+            background: rgba(239, 68, 68, .12);
+            color: var(--danger, #ef4444);
+        }
+
+        .nav-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            margin-left: auto;
+            flex-shrink: 0;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity .25s;
+        }
+
+        .nav-dot.visible {
+            opacity: 1;
+        }
+
+        .settings-section {
+            display: none;
+        }
+
+        @keyframes secFade {
+            from {
+                opacity: 0;
+                transform: translateY(7px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-section.active {
+            display: block;
+            animation: secFade .18s ease both;
+        }
+
+        .settings-group {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .settings-group-title {
+            padding: 12px 20px 10px;
+            font-size: .74rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-text strong {
+            font-size: .88rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .settings-text p {
+            font-size: .78rem;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .theme-swatches {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .theme-swatch {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+            transition: border-color .2s, transform .15s;
+            flex-shrink: 0;
+            min-width: 100px;
+        }
+
+        .theme-swatch:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-swatch.active {
+            border-color: var(--accent);
+        }
+
+        .swatch-preview {
+            height: 54px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swatch-surface {
+            position: absolute;
+            bottom: 0;
+            left: 6px;
+            right: 6px;
+            height: 28px;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .swatch-accent {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .swatch-lines {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .swatch-line {
+            height: 2px;
+            border-radius: 1px;
+            background: rgba(255, 255, 255, .25);
+        }
+
+        .swatch-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 10px;
+            font-size: .74rem;
+            font-weight: 600;
+            border-top: 1px solid var(--border);
+            background: var(--card-bg);
+            white-space: nowrap;
+        }
+
+        .swatch-check {
+            color: var(--accent);
+            opacity: 0;
+            transition: opacity .15s;
+            font-size: .7rem;
+        }
+
+        .theme-swatch.active .swatch-check {
+            opacity: 1;
+        }
+
+        .density-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .density-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            background: transparent;
+            transition: border-color .15s, background .15s;
+            min-width: 90px;
+        }
+
+        .density-option:hover {
+            background: var(--surface-2);
+        }
+
+        .density-option.active {
+            border-color: var(--accent);
+            background: var(--accent-soft, rgba(99, 210, 210, .08));
+        }
+
+        .density-option span {
+            font-size: .73rem;
+            font-weight: 600;
+        }
+
+        .d-lines {
+            display: flex;
+            flex-direction: column;
+            width: 36px;
+        }
+
+        .d-line {
+            height: 2px;
+            border-radius: 1px;
+            background: var(--muted);
+            opacity: .6;
+        }
+
+        .privacy-panel {
+            display: flex;
+            gap: 0;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .privacy-status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            padding: 14px 18px;
+            border-right: 1px solid var(--border);
+        }
+
+        .privacy-status-item:last-child {
+            border-right: none;
+        }
+
+        .privacy-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: background .3s, box-shadow .3s;
+        }
+
+        .privacy-dot.on {
+            background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+        }
+
+        .privacy-dot.off {
+            background: var(--muted);
+            opacity: .45;
+            box-shadow: none;
+        }
+
+        .privacy-status-item strong {
+            font-size: .76rem;
+            display: block;
+            margin-bottom: 1px;
+        }
+
+        .privacy-status-item .pval {
+            font-size: .7rem;
+            color: var(--muted);
+        }
+
+        .save-indicator {
+            font-size: .7rem;
+            color: var(--accent);
+            font-weight: 700;
+            opacity: 0;
+            transform: translateX(-5px);
+            transition: opacity .2s, transform .2s;
+            white-space: nowrap;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .hero-progress-track {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .hero-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .4s;
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('ajustes')}" />
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1>Ajustes</h1>
+                    <p>Personaliza tu cuenta y experiencia.</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="theme-toggle">
+                        <span id="theme-icon">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2" />
+                                <path d="M12 20v2" />
+                                <path d="m4.93 4.93 1.41 1.41" />
+                                <path d="m17.66 17.66 1.41 1.41" />
+                                <path d="M2 12h2" />
+                                <path d="M20 12h2" />
+                                <path d="m6.34 17.66-1.41 1.41" />
+                                <path d="m19.07 4.93-1.41 1.41" />
+                            </svg>
+                        </span>
+                        <span class="theme-dot"></span>
+                        <span id="theme-label">Modo claro</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="card"
+                style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 24px;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.15rem;color:var(--accent);background:var(--accent-soft,rgba(99,210,210,.15));"
+                        th:style="${usuario != null and usuario.fotoUrl != null}
+                        ? 'width:48px;height:48px;border-radius:50%;flex-shrink:0;background-image:url(' + ${usuario.fotoUrl} + ');background-size:cover;background-position:center;'
+                        : 'width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.15rem;color:var(--accent);background:var(--accent-soft,rgba(99,210,210,.15));'"
+                        th:text="${usuario != null and usuario.fotoUrl == null ? (usuario.nombre != null ? usuario.nombre.substring(0,1).toUpperCase() : 'D') : ''}">
+                        D</div>
+                    <div style="flex:1;min-width:0;">
+                        <strong th:text="${usuario != null ? usuario.nombre : 'Usuario'}">Usuario</strong>
+                        <div style="font-size:.79rem;color:var(--muted);margin-top:1px;"
+                            th:text="${usuarioActualCorreo ?: ''}"></div>
+                        <div
+                            style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:8px;">
+                            <span id="miembro-desde-label" style="margin-right:8px;">Miembro DevCoast</span>
+                            <span th:text="${usuario != null ? usuario.completitudPerfil : 0} + '% perfil'">0%
+                                perfil</span>
+                        </div>
+                        <div class="hero-progress-track">
+                            <div class="hero-progress-fill"
+                                th:style="'width:' + (${usuario != null ? usuario.completitudPerfil : 0}) + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span class="pill"
+                        th:text="${usuarioActualTipo == 'empresa' ? 'Empresa' : 'Talento'}">Talento</span>
+                    <span class="pill"
+                        style="background:rgba(34,197,94,.1);color:#16a34a;border-color:rgba(34,197,94,.2);">Activo</span>
+                    <a class="btn btn-outline" th:href="@{/perfil}" style="font-size:.83rem;">Editar perfil</a>
+                </div>
+            </section>
+
+            <div class="settings-layout">
+
+                <nav class="settings-nav" aria-label="Secciones de ajustes">
+                    <button class="settings-nav-item active" data-section="apariencia">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4" />
+                            <path
+                                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                        </svg>
+                        Apariencia
+                    </button>
+                    <button class="settings-nav-item" data-section="cuenta">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Cuenta
+                    </button>
+                    <button class="settings-nav-item" data-section="privacidad">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        Privacidad
+                        <span class="nav-dot" id="navdot-privacidad"></span>
+                    </button>
+                    <button class="settings-nav-item" data-section="notificaciones">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                        </svg>
+                        Notificaciones
+                        <span class="nav-dot" id="navdot-notif"></span>
+                    </button>
+                    <button class="settings-nav-item" data-section="accesibilidad">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M2.062 12.348a1 1 0 0 1 0-.696C3.423 8.743 6.5 6 12 6s8.577 2.743 9.938 5.652a1 1 0 0 1 0 .696C20.577 15.257 17.5 18 12 18s-8.577-2.743-9.938-5.652" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Accesibilidad
+                    </button>
+                    <div class="settings-nav-divider"></div>
+                    <button class="settings-nav-item danger" data-section="peligro">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                            <path d="M12 9v4" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                        Zona de peligro
+                    </button>
+                </nav>
+
+                <div>
+
+                    <section class="settings-section active" id="section-apariencia">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Tema</div>
+                            <div class="settings-row" style="flex-wrap:wrap;gap:14px;">
+                                <div class="settings-text">
+                                    <strong>Color del sitio</strong>
+                                    <p>Se aplica de inmediato y se recuerda entre sesiones.</p>
+                                </div>
+                                <div class="theme-swatches" id="theme-swatches">
+                                    <button class="theme-swatch" data-theme="light" title="Modo claro">
+                                        <div class="swatch-preview" style="background:#f6f9ff;">
+                                            <div class="swatch-surface" style="background:#ffffff;"></div>
+                                            <div class="swatch-accent" style="background:#1d7fd0;"></div>
+                                            <div class="swatch-lines">
+                                                <div class="swatch-line"
+                                                    style="width:28px;background:rgba(30,80,140,.18);"></div>
+                                                <div class="swatch-line"
+                                                    style="width:20px;background:rgba(30,80,140,.12);"></div>
+                                            </div>
+                                        </div>
+                                        <div class="swatch-footer">Claro <span class="swatch-check">✓</span></div>
+                                    </button>
+                                    <button class="theme-swatch" data-theme="dark" title="Modo oscuro">
+                                        <div class="swatch-preview" style="background:#121316;">
+                                            <div class="swatch-surface" style="background:#1d2026;"></div>
+                                            <div class="swatch-accent" style="background:#45b6f6;"></div>
+                                            <div class="swatch-lines">
+                                                <div class="swatch-line" style="width:28px;"></div>
+                                                <div class="swatch-line" style="width:20px;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="swatch-footer">Oscuro <span class="swatch-check">✓</span></div>
+                                    </button>
+                                    <button class="theme-swatch" data-theme="midnight" title="Midnight">
+                                        <div class="swatch-preview" style="background:#0b0f1a;">
+                                            <div class="swatch-surface" style="background:#111827;"></div>
+                                            <div class="swatch-accent" style="background:#63d2d2;"></div>
+                                            <div class="swatch-lines">
+                                                <div class="swatch-line" style="width:28px;"></div>
+                                                <div class="swatch-line" style="width:20px;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="swatch-footer">Midnight <span class="swatch-check">✓</span></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-group-title">Densidad y texto</div>
+                            <div class="settings-row" style="flex-wrap:wrap;gap:14px;">
+                                <div class="settings-text">
+                                    <strong>Espaciado</strong>
+                                    <p>Cuánto espacio hay entre los componentes.</p>
+                                </div>
+                                <div class="density-options" id="density-options">
+                                    <button class="density-option" data-density="compact" title="Compacto">
+                                        <div class="d-lines" style="gap:2px;">
+                                            <div class="d-line" style="width:100%;"></div>
+                                            <div class="d-line" style="width:75%;"></div>
+                                            <div class="d-line" style="width:90%;"></div>
+                                            <div class="d-line" style="width:65%;"></div>
+                                            <div class="d-line" style="width:80%;"></div>
+                                        </div>
+                                        <span>Compacto</span>
+                                    </button>
+                                    <button class="density-option" data-density="normal" title="Normal">
+                                        <div class="d-lines" style="gap:5px;">
+                                            <div class="d-line" style="width:100%;"></div>
+                                            <div class="d-line" style="width:75%;"></div>
+                                            <div class="d-line" style="width:90%;"></div>
+                                            <div class="d-line" style="width:65%;"></div>
+                                        </div>
+                                        <span>Normal</span>
+                                    </button>
+                                    <button class="density-option" data-density="spacious" title="Amplio">
+                                        <div class="d-lines" style="gap:9px;">
+                                            <div class="d-line" style="width:100%;"></div>
+                                            <div class="d-line" style="width:75%;"></div>
+                                            <div class="d-line" style="width:90%;"></div>
+                                        </div>
+                                        <span>Amplio</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Tamaño de texto</strong>
+                                    <p>Ajusta la legibilidad general de la interfaz.</p>
+                                </div>
+                                <select id="text-size-select" class="select" aria-label="Tamaño de texto">
+                                    <option value="small">Pequeño</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="large">Grande</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section" id="section-cuenta">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Información</div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Correo</strong>
+                                    <p th:text="${usuarioActualCorreo ?: '—'}">—</p>
+                                </div>
+                                <span class="pill" style="font-size:.74rem;">Verificado</span>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Tipo de cuenta</strong>
+                                    <p th:text="${usuarioActualTipo == 'empresa' ? 'Empresa' : 'Talento creativo'}">
+                                        Talento</p>
+                                </div>
+                                <span class="chip" style="font-size:.74rem;">Activa</span>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-group-title">Seguridad</div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Correo electrónico</strong>
+                                    <p th:text="${usuarioActualCorreo ?: '—'}">—</p>
+                                </div>
+                                <button class="btn btn-outline" style="font-size:.82rem;" id="btn-cambiar-correo">Cambiar</button>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Contraseña</strong>
+                                    <p>Cambia tu contraseña de acceso a DevCoast.</p>
+                                </div>
+                                <a th:href="@{/cambiarPassword}" class="btn btn-outline"
+                                    style="font-size:.82rem;">Cambiar</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section" id="section-privacidad">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Visibilidad</div>
+                            <div class="privacy-panel">
+                                <div class="privacy-status-item">
+                                    <div class="privacy-dot" id="pdot-perfil"></div>
+                                    <div>
+                                        <strong>Perfil</strong>
+                                        <div class="pval" id="pval-perfil">—</div>
+                                    </div>
+                                </div>
+                                <div class="privacy-status-item">
+                                    <div class="privacy-dot" id="pdot-correo"></div>
+                                    <div>
+                                        <strong>Correo</strong>
+                                        <div class="pval" id="pval-correo">—</div>
+                                    </div>
+                                </div>
+                                <div class="privacy-status-item">
+                                    <div class="privacy-dot" id="pdot-mensajes"></div>
+                                    <div>
+                                        <strong>Contacto</strong>
+                                        <div class="pval" id="pval-mensajes">—</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Perfil público</strong>
+                                    <p>Tu perfil aparece en el directorio de talentos para empresas.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-perfil"></span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="toggle-perfil-publico"
+                                            th:checked="${usuario != null and usuario.perfilPublico}">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Mostrar correo</strong>
+                                    <p>Visible en tu perfil público para empresas interesadas.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-correo"></span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="toggle-mostrar-correo"
+                                            th:checked="${usuario != null and usuario.mostrarCorreo}">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Permitir contacto directo</strong>
+                                    <p>Las empresas pueden enviarte invitaciones directamente.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-mensajes"></span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="toggle-permitir-mensajes"
+                                            th:checked="${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes}">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section" id="section-notificaciones">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Alertas</div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Nuevas invitaciones</strong>
+                                    <p>Cuando una empresa te contacte directamente.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-notif-inv"></span>
+                                    <label class="switch"><input type="checkbox" id="notif-invitaciones" checked><span
+                                            class="switch-slider"></span></label>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Cambios en solicitudes</strong>
+                                    <p>Cuando una empresa revise o responda tu solicitud.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-notif-sol"></span>
+                                    <label class="switch"><input type="checkbox" id="notif-solicitudes" checked><span
+                                            class="switch-slider"></span></label>
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Novedades de DevCoast</strong>
+                                    <p>Nuevas funciones y actualizaciones de la plataforma.</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span class="save-indicator" id="si-notif-prod"></span>
+                                    <label class="switch"><input type="checkbox" id="notif-producto"><span
+                                            class="switch-slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section" id="section-accesibilidad">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Lectura y percepción</div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Contraste alto</strong>
+                                    <p>Aumenta el contraste visual para mejor legibilidad.</p>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-contrast"><span
+                                        class="switch-slider"></span></label>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Reducir animaciones</strong>
+                                    <p>Desactiva las transiciones y animaciones de página.</p>
+                                </div>
+                                <label class="switch"><input type="checkbox" id="toggle-reduce-motion"><span
+                                        class="switch-slider"></span></label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="settings-section" id="section-peligro">
+                        <div class="settings-group" style="border-color:rgba(239,68,68,.25);">
+                            <div class="settings-group-title"
+                                style="color:var(--danger,#ef4444);border-color:rgba(239,68,68,.15);">
+                                Zona de peligro
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong>Cerrar sesión</strong>
+                                    <p>Salir de tu cuenta en este dispositivo.</p>
+                                </div>
+                                <a th:href="@{/logout}" class="btn btn-ghost"
+                                    style="border-color:rgba(239,68,68,.3);color:var(--danger,#ef4444);font-size:.82rem;">
+                                    Cerrar sesión
+                                </a>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-text">
+                                    <strong style="color:var(--danger,#ef4444);">Eliminar cuenta</strong>
+                                    <p>Elimina permanentemente tu cuenta y todos tus datos. Esta acción es irreversible.
+                                    </p>
+                                </div>
+                                <button class="btn btn-ghost" type="button" id="btn-eliminar-cuenta"
+                                    style="border-color:rgba(239,68,68,.3);color:var(--danger,#ef4444);font-size:.82rem;">
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div id="modal-eliminar" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+        <div style="background:var(--card-bg);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-lg);padding:28px 28px 24px;max-width:420px;width:calc(100% - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.3);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div style="width:38px;height:38px;border-radius:50%;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+                    </svg>
+                </div>
+                <div>
+                    <strong style="font-size:.95rem;display:block;color:var(--danger,#ef4444);">Eliminar cuenta</strong>
+                    <span style="font-size:.78rem;color:var(--muted);">Esta acción es permanente e irreversible</span>
+                </div>
+            </div>
+            <p style="font-size:.84rem;color:var(--muted);margin-bottom:18px;line-height:1.5;">
+                Se eliminarán <strong style="color:var(--text);">todos tus datos</strong>: perfil, proyectos, solicitudes e invitaciones. No podrás recuperar tu cuenta.
+            </p>
+            <div style="margin-bottom:14px;">
+                <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:6px;">
+                    Escribe <span style="color:var(--danger,#ef4444);font-family:monospace;">ELIMINAR</span> para confirmar
+                </label>
+                <input type="text" id="input-confirmar-eliminar" placeholder="ELIMINAR"
+                    style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text);font-size:.88rem;">
+            </div>
+            <form th:action="@{/cuenta/eliminar}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div style="margin-bottom:18px;">
+                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:6px;">
+                        Tu contraseña actual
+                    </label>
+                    <input type="password" id="input-password-eliminar" name="password" placeholder="Contraseña"
+                        style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text);font-size:.88rem;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="btn btn-ghost" type="button" id="btn-cancelar-eliminar">Cancelar</button>
+                    <button id="btn-confirmar-eliminar" type="submit" disabled
+                        style="opacity:.4;padding:8px 16px;border-radius:var(--radius-md);background:#ef4444;color:#fff;font-size:.84rem;font-weight:600;border:none;cursor:default;transition:opacity .2s;">
+                        Sí, eliminar cuenta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-correo" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 28px 24px;max-width:400px;width:calc(100% - 2rem);box-shadow:0 24px 64px rgba(0,0,0,.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <strong style="font-size:.95rem;">Cambiar correo electrónico</strong>
+                <button id="btn-cerrar-correo" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;line-height:1;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:6px;">Nuevo correo</label>
+                <input type="email" id="input-nuevo-correo" placeholder="nuevo@correo.com"
+                    style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text);font-size:.88rem;">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:6px;">Contraseña actual</label>
+                <input type="password" id="input-password-correo" placeholder="Para confirmar tu identidad"
+                    style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text);font-size:.88rem;">
+            </div>
+            <p id="correo-error" style="display:none;font-size:.78rem;color:var(--danger,#ef4444);margin-bottom:12px;"></p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-ghost" id="btn-cancelar-correo">Cancelar</button>
+                <button class="btn btn-primary" id="btn-guardar-correo" style="font-size:.84rem;">Guardar correo</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const _USUARIO_ID = /*[[${usuario != null ? usuario.id : ''}]]*/ '';
+        const _PERFIL_PUBLICO = /*[[${usuario != null and usuario.perfilPublico}]]*/ false;
+        const _MOSTRAR_CORREO = /*[[${usuario != null and usuario.mostrarCorreo}]]*/ false;
+        const _PERMITIR_MENSAJES = /*[[${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes}]]*/ true;
+    </script>
+
+    <script>
+        const settingsNavBtns = document.querySelectorAll('.settings-nav-item[data-section]')
+
+        function activarSeccion(nombre, updateHash) {
+            const btn = document.querySelector('.settings-nav-item[data-section="' + nombre + '"]')
+            if (!btn) return false
+            settingsNavBtns.forEach(b => b.classList.remove('active'))
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'))
+            btn.classList.add('active')
+            document.getElementById('section-' + nombre)?.classList.add('active')
+            if (updateHash) history.replaceState(null, '', '#' + nombre)
+            return true
+        }
+
+        settingsNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => activarSeccion(btn.dataset.section, true))
+        })
+
+        const seccionInicial = (location.hash || '').replace('#', '')
+        if (!seccionInicial || !activarSeccion(seccionInicial, false)) {
+            activarSeccion('apariencia', false)
+        }
+
+        window.addEventListener('hashchange', () => {
+            const s = (location.hash || '').replace('#', '')
+            if (s) activarSeccion(s, false)
+        })
+
+        // el id de mongo trae el timestamp codificado en los primeros 8 caracteres hex, de ahí saco la fecha de registro
+        function calcMiembroDesde(hexId) {
+            if (!hexId || hexId.length < 8) return null
+            const ts = parseInt(hexId.substring(0, 8), 16) * 1000
+            if (isNaN(ts)) return null
+            const d = new Date(ts)
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+            return `Miembro desde ${meses[d.getMonth()]} ${d.getFullYear()}`
+        }
+        const miembroLabel = document.getElementById('miembro-desde-label')
+        if (miembroLabel && _USUARIO_ID) {
+            const texto = calcMiembroDesde(_USUARIO_ID)
+            if (texto) miembroLabel.textContent = texto
+        }
+
+        document.addEventListener('dc:theme-changed', (e) => {
+            document.querySelectorAll('.theme-swatch').forEach(b => b.classList.toggle('active', b.dataset.theme === e.detail.theme))
+        })
+
+        function initThemeSwatches() {
+            const saved = localStorage.getItem('theme') || 'dark'
+            document.querySelectorAll('.theme-swatch').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === saved)
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.theme-swatch').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    if (window.applyTheme) window.applyTheme(btn.dataset.theme)
+                })
+            })
+        }
+
+        function initDensity() {
+            const saved = localStorage.getItem('ui-density') || 'normal'
+            document.querySelectorAll('.density-option[data-density]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.density === saved)
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.density-option').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    localStorage.setItem('ui-density', btn.dataset.density)
+                    if (window.applyUiPreferences) window.applyUiPreferences()
+                })
+            })
+        }
+
+        function initTextSize() {
+            const sel = document.getElementById('text-size-select')
+            if (!sel) return
+            sel.value = localStorage.getItem('ui-text-size') || 'normal'
+            sel.addEventListener('change', () => {
+                localStorage.setItem('ui-text-size', sel.value)
+                if (window.applyUiPreferences) window.applyUiPreferences()
+            })
+        }
+
+        let privacyState = {
+            perfilPublico: _PERFIL_PUBLICO,
+            mostrarCorreo: _MOSTRAR_CORREO,
+            permitirMensajes: _PERMITIR_MENSAJES
+        }
+
+        function updatePrivacyPanel() {
+            const dot = (id, on) => {
+                const el = document.getElementById(id)
+                if (el) { el.className = 'privacy-dot ' + (on ? 'on' : 'off') }
+            }
+            const val = (id, txt) => {
+                const el = document.getElementById(id)
+                if (el) el.textContent = txt
+            }
+            dot('pdot-perfil', privacyState.perfilPublico)
+            dot('pdot-correo', privacyState.mostrarCorreo)
+            dot('pdot-mensajes', privacyState.permitirMensajes)
+            val('pval-perfil', privacyState.perfilPublico ? 'Visible públicamente' : 'Oculto')
+            val('pval-correo', privacyState.mostrarCorreo ? 'Expuesto' : 'Oculto')
+            val('pval-mensajes', privacyState.permitirMensajes ? 'Permitido' : 'Bloqueado')
+
+            const navdot = document.getElementById('navdot-privacidad')
+            if (navdot) navdot.classList.toggle('visible', privacyState.perfilPublico)
+        }
+
+        function inlineFeedback(indicatorId, success = true) {
+            const el = document.getElementById(indicatorId)
+            if (!el) return
+            el.textContent = success ? '✓ Guardado' : '✗ Error'
+            el.style.color = success ? 'var(--accent)' : 'var(--danger,#ef4444)'
+            el.classList.add('show')
+            clearTimeout(el._t)
+            el._t = setTimeout(() => el.classList.remove('show'), 1800)
+        }
+
+        async function savePrivacy(field, value, indicatorId) {
+            privacyState[field] = value
+            updatePrivacyPanel()
+            try {
+                const res = await fetch('/ajustes/privacidad', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: value })
+                })
+                const data = await res.json()
+                inlineFeedback(indicatorId, data.ok)
+            } catch {
+                inlineFeedback(indicatorId, false)
+            }
+        }
+
+        document.getElementById('toggle-perfil-publico')?.addEventListener('change', function () {
+            savePrivacy('perfilPublico', this.checked, 'si-perfil')
+        })
+        document.getElementById('toggle-mostrar-correo')?.addEventListener('change', function () {
+            savePrivacy('mostrarCorreo', this.checked, 'si-correo')
+        })
+        document.getElementById('toggle-permitir-mensajes')?.addEventListener('change', function () {
+            savePrivacy('permitirMensajes', this.checked, 'si-mensajes')
+        })
+
+        function initNotif() {
+            try {
+                const p = JSON.parse(localStorage.getItem('dc-notif') || '{}')
+                if ('invitaciones' in p) document.getElementById('notif-invitaciones').checked = p.invitaciones
+                if ('solicitudes' in p) document.getElementById('notif-solicitudes').checked = p.solicitudes
+                if ('producto' in p) document.getElementById('notif-producto').checked = p.producto
+            } catch { }
+            updateNotifDot()
+        }
+
+        function updateNotifDot() {
+            const allOn =
+                (document.getElementById('notif-invitaciones')?.checked ?? true) &&
+                (document.getElementById('notif-solicitudes')?.checked ?? true)
+            const dot = document.getElementById('navdot-notif')
+            if (dot) dot.classList.toggle('visible', !allOn)
+        }
+
+        function saveNotif(indicatorId) {
+            const prefs = {
+                invitaciones: document.getElementById('notif-invitaciones')?.checked ?? true,
+                solicitudes: document.getElementById('notif-solicitudes')?.checked ?? true,
+                producto: document.getElementById('notif-producto')?.checked ?? false
+            }
+            localStorage.setItem('dc-notif', JSON.stringify(prefs))
+            inlineFeedback(indicatorId, true)
+            updateNotifDot()
+        }
+
+        document.getElementById('notif-invitaciones')?.addEventListener('change', () => saveNotif('si-notif-inv'))
+        document.getElementById('notif-solicitudes')?.addEventListener('change', () => saveNotif('si-notif-sol'))
+        document.getElementById('notif-producto')?.addEventListener('change', () => saveNotif('si-notif-prod'))
+
+        function initAccesibilidad() {
+            const hc = localStorage.getItem('ui-contrast') === 'high'
+            const rm = localStorage.getItem('dc-reduce-motion') === 'true'
+            const c = document.getElementById('toggle-contrast')
+            const r = document.getElementById('toggle-reduce-motion')
+            if (c) c.checked = hc
+            if (r) r.checked = rm
+        }
+
+        document.getElementById('toggle-contrast')?.addEventListener('change', function () {
+            localStorage.setItem('ui-contrast', this.checked ? 'high' : 'normal')
+            if (window.applyUiPreferences) window.applyUiPreferences()
+        })
+        document.getElementById('toggle-reduce-motion')?.addEventListener('change', function () {
+            localStorage.setItem('dc-reduce-motion', this.checked)
+            if (window.applyUiPreferences) window.applyUiPreferences()
+        })
+
+        const modalEliminar = document.getElementById('modal-eliminar')
+        const inputConfirmar = document.getElementById('input-confirmar-eliminar')
+        const btnConfirmar = document.getElementById('btn-confirmar-eliminar')
+
+        const inputPasswordEliminar = document.getElementById('input-password-eliminar')
+
+        function actualizarBotonEliminar() {
+            const ok = inputConfirmar.value.trim() === 'ELIMINAR' && inputPasswordEliminar.value.length > 0
+            btnConfirmar.disabled = !ok
+            btnConfirmar.style.opacity = ok ? '1' : '.4'
+            btnConfirmar.style.cursor = ok ? 'pointer' : 'default'
+        }
+
+        document.getElementById('btn-eliminar-cuenta')?.addEventListener('click', () => {
+            if (inputConfirmar) inputConfirmar.value = ''
+            if (inputPasswordEliminar) inputPasswordEliminar.value = ''
+            if (btnConfirmar) { btnConfirmar.disabled = true; btnConfirmar.style.opacity = '.4' }
+            modalEliminar.style.display = 'flex'
+        })
+        document.getElementById('btn-cancelar-eliminar')?.addEventListener('click', () => {
+            modalEliminar.style.display = 'none'
+        })
+        inputConfirmar?.addEventListener('input', actualizarBotonEliminar)
+        inputPasswordEliminar?.addEventListener('input', actualizarBotonEliminar)
+        modalEliminar?.addEventListener('click', (e) => {
+            if (e.target === modalEliminar) modalEliminar.style.display = 'none'
+        })
+
+        const modalCorreo = document.getElementById('modal-correo')
+        document.getElementById('btn-cambiar-correo')?.addEventListener('click', () => {
+            document.getElementById('input-nuevo-correo').value = ''
+            document.getElementById('input-password-correo').value = ''
+            document.getElementById('correo-error').style.display = 'none'
+            modalCorreo.style.display = 'flex'
+        })
+        const cerrarCorreo = () => { modalCorreo.style.display = 'none' }
+        document.getElementById('btn-cancelar-correo')?.addEventListener('click', cerrarCorreo)
+        document.getElementById('btn-cerrar-correo')?.addEventListener('click', cerrarCorreo)
+        modalCorreo?.addEventListener('click', (e) => { if (e.target === modalCorreo) cerrarCorreo() })
+
+        document.getElementById('btn-guardar-correo')?.addEventListener('click', async () => {
+            const nuevoCorreo = document.getElementById('input-nuevo-correo').value.trim()
+            const password = document.getElementById('input-password-correo').value
+            const errEl = document.getElementById('correo-error')
+            if (!nuevoCorreo || !nuevoCorreo.includes('@')) {
+                errEl.textContent = 'Ingresa un correo válido.'; errEl.style.display = 'block'; return
+            }
+            if (!password) {
+                errEl.textContent = 'Ingresa tu contraseña actual.'; errEl.style.display = 'block'; return
+            }
+            const btn = document.getElementById('btn-guardar-correo')
+            btn.textContent = 'Guardando…'; btn.disabled = true
+            try {
+                const res = await fetch('/ajustes/cambiarCorreo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nuevoCorreo, password })
+                })
+                const data = await res.json()
+                if (data.ok) {
+                    cerrarCorreo()
+                    showToast('Correo actualizado correctamente', 'success')
+                    setTimeout(() => window.location.reload(), 1200)
+                } else {
+                    errEl.textContent = data.mensaje || 'Error al actualizar el correo.'; errEl.style.display = 'block'
+                }
+            } catch {
+                errEl.textContent = 'Error de conexión. Intenta de nuevo.'; errEl.style.display = 'block'
+            } finally {
+                btn.textContent = 'Guardar correo'; btn.disabled = false
+            }
+        })
+
+        function showToast(msg, type) {
+            if (window.UIFeedback?.toast) { window.UIFeedback.toast(msg, type); return }
+            const t = document.getElementById('toast')
+            if (!t) return
+            t.textContent = msg; t.className = `toast ${type} show`
+            setTimeout(() => t.classList.remove('show'), 3000)
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeSwatches()
+            initDensity()
+            initTextSize()
+            initNotif()
+            initAccesibilidad()
+            updatePrivacyPanel()
+        })
+    </script>
+</body>
+
+</html>

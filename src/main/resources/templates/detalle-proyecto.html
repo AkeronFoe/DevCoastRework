@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Detalle del proyecto</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('misProyectos')}" />
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1 th:text="${proyecto.nombre}">Detalle del proyecto</h1>
+                    <p>Vista privada del proyecto para su creador.</p>
+                </div>
+                <div class="topbar-actions">
+                    <a class="btn btn-ghost btn-icon" th:href="@{/misProyectos}">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m12 19-7-7 7-7" />
+                            <path d="M19 12H5" />
+                        </svg>
+                        Volver a mis proyectos
+                    </a>
+                </div>
+            </header>
+
+            <section class="card dashboard-card project-detail">
+                <div class="project-banner"
+                    th:classappend="${#strings.isEmpty(proyecto.bannerClase)} ? '' : ' ' + proyecto.bannerClase"
+                    th:attr="data-cover=${proyecto.bannerClase}, data-banner-color=${proyecto.colorIcono}">
+                    <img th:if="${proyecto.bannerDataUrl} != null and proyecto.bannerDataUrl != ''"
+                        th:src="${proyecto.bannerDataUrl}" class="banner-bg" alt="">
+                    <div class="banner-top">
+                        <span class="banner-tag" th:text="${proyecto.categoria}">Categoria</span>
+                        <span class="banner-tag ghost" th:text="${proyecto.tipo}">Tipo</span>
+                    </div>
+                    <div class="banner-bottom">
+                        <span class="banner-note" th:text="${proyecto.nombre}">Nombre</span>
+                        <span class="banner-time dc-mono"
+                            th:text="${proyecto.anio != null ? proyecto.anio : 'Sin año'}">Año</span>
+                    </div>
+                </div>
+
+                <div class="project-detail-body">
+                    <div class="project-head project-detail-head">
+                        <div class="project-title">
+                            <div class="icon-tile project-icon"
+                                th:attr="data-icon-key=${proyecto.iconoClave},data-icon-color=${proyecto.colorIcono},data-logo-url=${proyecto.imagenUrl != null ? proyecto.imagenUrl : proyecto.logoDataUrl}">
+                            </div>
+                            <div>
+                                <strong style="font-size:1.1rem;" th:text="${proyecto.nombre}">Nombre</strong>
+                                <div class="project-meta"
+                                    th:text="${proyecto.categoria + ' · ' + proyecto.tipo + (proyecto.rol != null ? ' · ' + proyecto.rol : '')}">
+                                    Meta</div>
+                            </div>
+                        </div>
+                        <span th:class="'status-pill ' + (${proyecto.publicado} ? 'status-live' : 'status-draft')"
+                            th:text="${proyecto.publicado} ? 'Publicado' : 'Borrador'">Estado</span>
+                    </div>
+
+                    <p class="muted project-detail-summary" th:text="${proyecto.descripcionCorta}">Descripción corta</p>
+                </div>
+            </section>
+
+            <section class="card dashboard-card">
+                <h2 class="section-title">Resumen del proyecto</h2>
+                <p class="muted" style="margin:0 0 14px;">Lo esencial en un vistazo.</p>
+                <div class="detail-kpis">
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">Categoría</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.categoria != null ? proyecto.categoria : 'Sin definir'}">-</span>
+                    </div>
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">Tipo</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.tipo != null ? proyecto.tipo : 'Sin definir'}">-</span>
+                    </div>
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">Rol</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.rol != null ? proyecto.rol : 'No especificado'}">-</span>
+                    </div>
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">Duración</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.duracion != null ? proyecto.duracion : 'No especificada'}">-</span>
+                    </div>
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">En el CV</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.incluirCv} ? 'Incluido' : 'No incluido'">-</span>
+                    </div>
+                    <div class="detail-kpi">
+                        <span class="detail-kpi-label">Destacado</span>
+                        <span class="detail-kpi-value" th:text="${proyecto.destacar} ? 'Sí' : 'No'">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- esta es la descripción larga, la corta ya sale arriba en el hero -->
+            <section class="card dashboard-card"
+                th:if="${proyecto.descripcionExtendida != null and !#strings.isEmpty(proyecto.descripcionExtendida)}">
+                <h2 class="section-title">Descripción</h2>
+                <p class="muted" style="white-space:pre-line;" th:text="${proyecto.descripcionExtendida}">Descripción</p>
+            </section>
+
+            <section class="card dashboard-card" th:if="${!#lists.isEmpty(proyecto.stack)}">
+                <h2 class="section-title">Stack tecnológico</h2>
+                <div class="chip-row">
+                    <span class="pill" th:each="item : ${proyecto.stack}" th:text="${item}">Stack</span>
+                </div>
+            </section>
+
+            <section class="card dashboard-card" th:if="${!#lists.isEmpty(proyecto.etiquetas)}">
+                <h2 class="section-title">Etiquetas</h2>
+                <div class="chip-row">
+                    <span class="pill pill-outline" th:each="item : ${proyecto.etiquetas}" th:text="${item}">Etiqueta</span>
+                </div>
+            </section>
+
+            <section class="card dashboard-card detail-actions">
+                <a class="btn btn-primary btn-icon"
+                    th:if="${proyecto.linkProyecto != null and !#strings.isEmpty(proyecto.linkProyecto)}"
+                    th:href="${proyecto.linkProyecto}" target="_blank" rel="noopener noreferrer">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Abrir proyecto
+                </a>
+                <span class="muted" th:if="${proyecto.linkProyecto == null or #strings.isEmpty(proyecto.linkProyecto)}">
+                    No se agregó enlace externo.
+                </span>
+                <form th:action="@{/proyectos/eliminar/{id}(id=${proyecto.id})}" method="post"
+                    style="display:inline;" data-confirm-message="¿Eliminar proyecto?"
+                    data-confirm-title="Confirmar eliminacion" data-confirm-ok="Eliminar"
+                    data-confirm-variant="danger">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-ghost btn-danger">Eliminar proyecto</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script th:src="@{/JS/project-icons.js}"></script>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+</body>
+
+</html>

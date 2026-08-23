@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Solicitudes</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('solicitudes')}" />
+
+        <main class="main solicitudes-page">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1>Solicitudes</h1>
+                    <p>Seguimiento de tus postulaciones e invitaciones recibidas.</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="search">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input id="buscar-solicitud" type="text" aria-label="Buscar solicitud">
+                    </div>
+                    <div class="theme-toggle">
+                        <span id="theme-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2" /><path d="M12 20v2" />
+                                <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+                                <path d="M2 12h2" /><path d="M20 12h2" />
+                                <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+                            </svg></span>
+                        <span class="theme-dot"></span>
+                        <span id="theme-label">Modo claro</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="sol-tabs">
+                <a th:href="@{/solicitudes(tab='solicitudes')}"
+                    th:classappend="${tabActiva == 'solicitudes'} ? ' active' : ''" class="sol-tab">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    </svg>
+                    Mis solicitudes
+                    <span class="tab-badge tab-badge-neutral" th:text="${totalSolicitudes}">0</span>
+                </a>
+                <a th:href="@{/solicitudes(tab='invitaciones')}"
+                    th:classappend="${tabActiva == 'invitaciones'} ? ' active' : ''" class="sol-tab">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    Invitaciones
+                    <span th:if="${invPendienteCount != null and invPendienteCount > 0}"
+                        class="tab-badge tab-badge-alert" th:text="${invPendienteCount}">1</span>
+                    <span th:unless="${invPendienteCount != null and invPendienteCount > 0}"
+                        class="tab-badge tab-badge-neutral"
+                        th:text="${invitaciones != null ? #lists.size(invitaciones) : 0}">0</span>
+                </a>
+            </div>
+
+            <div th:if="${tabActiva == 'solicitudes'}">
+                <section class="stat-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--dev"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
+                        <h3 th:text="${totalSolicitudes}">0</h3><p>Totales</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--success"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg></div>
+                        <h3 th:text="${aprobadaCount}">0</h3><p>Aprobadas</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--data"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></svg></div>
+                        <h3 th:text="${revisionCount}">0</h3><p>En revisión</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--error"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg></div>
+                        <h3 th:text="${rechazadaCount}">0</h3><p>Rechazadas</p>
+                    </div>
+                </section>
+
+                <section class="card sol-panel">
+                    <h3 class="section-title">Mis solicitudes</h3>
+                    <div class="filter-bar">
+                        <span class="filter-chip active" data-filter="todas">Todas</span>
+                        <span class="filter-chip chip-revision" data-filter="revision">En revisión</span>
+                        <span class="filter-chip chip-aprobada" data-filter="aprobada">Aprobadas</span>
+                        <span class="filter-chip chip-rechazada" data-filter="rechazada">Rechazadas</span>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(solicitudes)}" class="sol-empty">
+                        <div class="sol-empty__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);">
+                                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                            </svg>
+                        </div>
+                        <h3>Aún no has aplicado a ningún empleo</h3>
+                        <p class="muted sol-empty__text">Cuando apliques, aparecerá aquí el historial de tus solicitudes.</p>
+                        <a class="btn btn-primary" th:href="@{/empleos}">Ver empleos disponibles</a>
+                    </div>
+
+                    <table class="table sol-table" th:unless="${#lists.isEmpty(solicitudes)}">
+                        <thead>
+                            <tr>
+                                <th>Empleo</th>
+                                <th>Empresa</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th style="width:48px; text-align:center;">Chat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="solicitud : ${solicitudes}" class="solicitud-row"
+                                th:attr="data-estado=${solicitud.estado}"
+                                th:onclick="|window.location='@{/solicitudes/{id}(id=${solicitud.id})}'|"
+                                style="cursor:pointer;">
+                                <td>
+                                    <strong th:text="${solicitud.empleoTitulo}">Empleo</strong>
+                                    <div class="muted"
+                                        th:text="${solicitud.empleoCategoria} + ' · ' + ${solicitud.empleoModalidad}">Cat</div>
+                                </td>
+                                <td th:text="${solicitud.empleoEmpresaNombre}">Empresa</td>
+                                <td class="dc-mono" th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                                <td>
+                                    <span class="status-pill status-review"    th:if="${solicitud.estado == 'revision'}">Revisión</span>
+                                    <span class="status-pill status-approved"  th:if="${solicitud.estado == 'aprobada'}">Aprobada</span>
+                                    <span class="status-pill status-rejected"  th:if="${solicitud.estado == 'rechazada'}">Rechazada</span>
+                                </td>
+                                <!-- stopPropagation aquí, si no el click también dispara el onclick del tr y te lleva a otra parte -->
+                                <td style="text-align:center;">
+                                    <a th:href="@{|/chat/${solicitud.id}|}"
+                                       class="btn-chat-sol"
+                                       onclick="event.stopPropagation()"
+                                       title="Ir al chat con esta empresa">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <div th:if="${tabActiva == 'invitaciones'}">
+                <section class="stat-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--dev"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z" /></svg></div>
+                        <h3 th:text="${invitaciones != null ? #lists.size(invitaciones) : 0}">0</h3><p>Totales</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--data"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></div>
+                        <h3 th:text="${invPendienteCount != null ? invPendienteCount : 0}">0</h3><p>Pendientes</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--success"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg></div>
+                        <h3 th:text="${invAceptadaCount != null ? invAceptadaCount : 0}">0</h3><p>Aceptadas</p>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon stat-icon--error"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg></div>
+                        <h3 th:text="${invRechazadaCount != null ? invRechazadaCount : 0}">0</h3><p>Rechazadas</p>
+                    </div>
+                </section>
+
+                <section class="card sol-panel">
+                    <h3 class="section-title">Invitaciones de empresas</h3>
+                    <p class="muted inv-subtitle">Filtra por estado o busca por empresa/puesto.</p>
+                    <div class="inv-toolbar">
+                        <div class="filter-bar inv-filter-bar">
+                            <span class="filter-chip inv-filter active" data-inv-filter="todas">Todas</span>
+                            <span class="filter-chip inv-filter chip-revision" data-inv-filter="pendiente">Pendientes</span>
+                            <span class="filter-chip inv-filter chip-aprobada" data-inv-filter="aceptada">Aceptadas</span>
+                            <span class="filter-chip inv-filter chip-rechazada" data-inv-filter="rechazada">Rechazadas</span>
+                        </div>
+                        <div class="inv-controls">
+                            <div class="inv-sort">
+                                <label for="inv-sort-select">Orden</label>
+                                <select id="inv-sort-select" class="form-select inv-sort-select">
+                                    <option value="recent" selected>Mas recientes</option>
+                                    <option value="oldest">Mas antiguas</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${invitaciones == null or #lists.isEmpty(invitaciones)}" class="sol-empty">
+                        <div class="sol-empty__icon sol-empty__icon--accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--accent);">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                        </div>
+                        <h3>Aún no tienes invitaciones</h3>
+                        <p class="muted sol-empty__text">
+                            Activa tu perfil público en <a th:href="@{/ajustes}" style="color:var(--accent);font-weight:600;">Ajustes</a> para que las empresas puedan encontrarte.
+                        </p>
+                    </div>
+
+                    <div th:unless="${invitaciones == null or #lists.isEmpty(invitaciones)}" class="inv-list">
+                        <div th:each="inv : ${invitaciones}" class="inv-card" th:classappend="${inv.estado}"
+                            th:attr="data-estado=${inv.estado}, data-date=${inv.fechaEnvio != null ? #dates.format(inv.fechaEnvio, 'yyyy-MM-dd''T''HH:mm:ss') : ''}">
+
+                            <div class="inv-card-header">
+                                <div class="inv-avatar" th:text="${inv.empresaNombre != null ? inv.empresaNombre.substring(0,1).toUpperCase() : 'E'}">E</div>
+                                <div class="inv-header-info">
+                                    <div class="inv-header-top">
+                                        <span class="inv-empresa-name" th:text="${inv.empresaNombre != null ? inv.empresaNombre : 'Empresa'}">Empresa</span>
+                                        <span class="inv-estado-badge" th:classappend="${inv.estado}"
+                                            th:text="${inv.estado == 'pendiente'} ? 'Pendiente' : (${inv.estado == 'aceptada'} ? 'Aceptada' : 'Rechazada')">Estado</span>
+                                    </div>
+                                    <span class="inv-sector" th:text="${(inv.empresaSector != null ? inv.empresaSector : '') + (inv.empresaTamano != null ? ' · ' + inv.empresaTamano : '')}">Sector</span>
+                                </div>
+                                <div class="inv-fecha-header dc-mono" th:if="${inv.fechaEnvio != null}" th:text="${#dates.format(inv.fechaEnvio, 'dd/MM/yyyy')}">Fecha</div>
+                            </div>
+
+                            <div class="inv-card-body">
+                                <div th:if="${inv.empleoId != null}" class="inv-empleo-block">
+                                    <div class="inv-empleo-header">
+                                        <div class="inv-empleo-label">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" /></svg>
+                                            Empleo ofrecido
+                                        </div>
+                                        <a th:href="@{|/empleos/${inv.empleoId}|}" class="inv-empleo-link" target="_blank">Ver empleo <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg></a>
+                                    </div>
+                                    <strong class="inv-empleo-titulo" th:text="${inv.empleoTitulo}">Puesto</strong>
+                                    <div class="inv-chips">
+                                        <span class="inv-chip" th:if="${inv.empleoModalidad != null}" th:text="${inv.empleoModalidad}">Modalidad</span>
+                                        <span class="inv-chip" th:if="${inv.empleoContrato != null}" th:text="${inv.empleoContrato}">Contrato</span>
+                                        <span class="inv-chip" th:if="${inv.empleoCategoria != null}" th:text="${inv.empleoCategoria}">Categoría</span>
+                                        <span class="inv-chip inv-chip-salary" th:if="${inv.empleoMostrarSalario and inv.empleoSalarioMin != null}" th:text="'$ ' + ${inv.empleoSalarioMin} + ' – ' + ${inv.empleoSalarioMax} + ' ' + ${inv.empleoMoneda}">Salario</span>
+                                    </div>
+                                </div>
+                                <div th:if="${inv.empleoId == null}" class="inv-empleo-block" style="display:flex;align-items:center;gap:10px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                                    <span style="font-size:.83rem;color:var(--muted);">Invitación de contacto general sin empleo específico.</span>
+                                </div>
+                                <div th:if="${inv.mensaje != null and inv.mensaje != ''}" class="inv-mensaje-block">
+                                    <div class="inv-mensaje-label">Mensaje de la empresa</div>
+                                    <p class="inv-mensaje-texto" th:text="${inv.mensaje}">Mensaje</p>
+                                </div>
+                                <div class="inv-card-footer">
+                                    <div class="inv-footer-left">
+                                        <span class="inv-hora inv-rel-date" th:if="${inv.fechaEnvio != null}"
+                                            th:attr="data-fecha-iso=${#dates.format(inv.fechaEnvio, 'yyyy-MM-dd''T''HH:mm:ss')}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                            <span class="inv-hora-texto dc-mono" th:text="${#dates.format(inv.fechaEnvio, 'dd/MM/yyyy')}">Fecha</span>
+                                        </span>
+                                        <button type="button" class="btn btn-ghost inv-copy-btn"
+                                            th:if="${inv.empleoId != null}"
+                                            th:attr="data-copy-url=@{|/empleos/${inv.empleoId}|}">
+                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                                            <span class="inv-copy-label">Copiar enlace</span>
+                                        </button>
+                                    </div>
+                                    <div class="inv-footer-right" th:if="${inv.estado == 'pendiente'}">
+                                        <div class="inv-acciones">
+                                            <button type="button" class="btn btn-ghost btn-rechazar-inv" th:attr="data-inv-id=${inv.id}" style="font-size:.82rem;padding:7px 16px;">Rechazar</button>
+                                            <button type="button" class="btn btn-primary btn-aceptar-inv" th:attr="data-inv-id=${inv.id}" style="font-size:.82rem;padding:7px 18px;display:flex;align-items:center;gap:6px;">
+                                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                                Aceptar invitación
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="inv-footer-right" th:unless="${inv.estado == 'pendiente'}">
+                                        <span th:if="${inv.estado == 'aceptada'}" class="inv-estado-final aceptada">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="m9 12 2 2 4-4" /><circle cx="12" cy="12" r="10" /></svg>
+                                            Aceptaste — la empresa puede contactarte.
+                                        </span>
+                                        <span th:if="${inv.estado == 'rechazada'}" class="inv-estado-final rechazada">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
+                                            Invitación rechazada.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="confirm-rechazar-overlay"
+                    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:380px;width:90%;text-align:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--cat-error);margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <h3 style="margin:0 0 8px;">¿Rechazar invitación?</h3>
+                        <p class="muted" style="font-size:.88rem;margin-bottom:20px;">Esta acción no se puede deshacer. La empresa no recibirá ninguna notificación.</p>
+                        <div style="display:flex;gap:10px;justify-content:center;">
+                            <button id="confirm-rechazar-no" class="btn btn-ghost" type="button">Cancelar</button>
+                            <button id="confirm-rechazar-si" class="btn" type="button" style="background:var(--cat-error);color:#fff;border:none;">Sí, rechazar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script th:src="@{/JS/solicitudes.js}"></script>
+</body>
+
+</html>

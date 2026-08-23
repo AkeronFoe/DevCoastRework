@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Talentos</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('talentos')}" />
+
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1>Talentos</h1>
+                    <p>Descubre profesionales con perfil público activo.</p>
+                </div>
+                <div class="topbar-actions">
+                    <form class="page-size-form" method="get" th:action="@{/talentos}">
+                        <label for="page-size">Por página</label>
+                        <select id="page-size" name="size" class="select" onchange="this.form.submit()">
+                            <option value="10" th:selected="${pageSize == 10}">10</option>
+                            <option value="25" th:selected="${pageSize == 25}">25</option>
+                            <option value="50" th:selected="${pageSize == 50}">50</option>
+                        </select>
+                        <input type="hidden" name="page" value="0">
+                        <input type="hidden" name="q" th:value="${query}">
+                    </form>
+                    <form id="buscar-talento-form" class="search" method="get" th:action="@{/talentos}">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input id="buscar-talento" name="q" type="text" placeholder="Buscar por nombre, rol, stack..."
+                            aria-label="Buscar talento" th:value="${query}">
+                        <input type="hidden" name="page" value="0">
+                        <input type="hidden" name="size" th:value="${pageSize}">
+                    </form>
+                    <div class="theme-toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Cambiar tema">
+                        <span id="theme-icon">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2" /><path d="M12 20v2" />
+                                <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+                                <path d="M2 12h2" /><path d="M20 12h2" />
+                                <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+                            </svg>
+                        </span>
+                        <span class="theme-dot"></span>
+                        <span id="theme-label">Modo claro</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="info-banner" th:unless="${esEmpresa}">
+                <div class="info-banner-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="color:var(--accent); flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <div>
+                        <p style="margin:0 0 4px; font-size:.9rem; font-weight:600; color:var(--accent);">Solo lectura para talentos</p>
+                        <p style="margin:0; font-size:.84rem; color:var(--muted);">Puedes explorar perfiles, pero solo las
+                            <strong>empresas</strong> pueden enviar invitaciones. ¿Quieres ser encontrado? Activa tu perfil
+                            público en <a th:href="@{/perfil}" style="color:var(--accent); text-decoration:underline;">Perfil →</a>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card dashboard-card">
+                <h3 class="section-title">Resumen del directorio</h3>
+                <p class="muted">Perfiles públicos listos para colaborar en este momento.</p>
+                <div class="dc-metric-grid" style="margin-top:14px;">
+                    <div class="dc-metric-card">
+                        <div class="dc-metric-top">
+                            <div class="dc-icon-pill dc-icon-pill--dev">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                            </div>
+                            <span class="dc-status-pill dc-status-pill--dev">Directorio</span>
+                        </div>
+                        <div class="dc-metric-num dc-mono" th:text="${totalTalentos}">0</div>
+                        <div class="dc-metric-label">Talentos activos</div>
+                    </div>
+                    <div class="dc-metric-card">
+                        <div class="dc-metric-top">
+                            <div class="dc-icon-pill dc-icon-pill--data">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                </svg>
+                            </div>
+                            <span class="dc-status-pill dc-status-pill--data" id="talento-filter-pill" style="display:none;">Filtrado</span>
+                        </div>
+                        <div class="dc-metric-num dc-mono" id="talento-visible-count" th:text="${#lists.size(talentos)}">0</div>
+                        <div class="dc-metric-label">Mostrando ahora</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card talento-panel">
+                <div class="talento-panel__head">
+                    <div>
+                        <h3 class="section-title">Directorio de talentos</h3>
+                        <p class="muted talento-panel__desc">Explora perfiles con stack y disponibilidad listos para colaborar.</p>
+                    </div>
+                    <div class="talento-panel__meta">
+                        <span class="talento-panel__query" th:if="${query != null and !#strings.isEmpty(query)}"
+                            th:text="'Filtrado por: ' + ${query}">Filtrado por: UX</span>
+                    </div>
+                </div>
+
+                <div class="talento-filter-bar" id="talento-filter-bar">
+                    <span class="filter-chip active" data-talento-filter="todos">Todos</span>
+                    <span class="filter-chip" data-talento-filter="Remoto">Remoto</span>
+                    <span class="filter-chip" data-talento-filter="Presencial">Presencial</span>
+                    <span class="filter-chip" data-talento-filter="Híbrido">Híbrido</span>
+                    <span style="width:1px;height:18px;background:var(--border);display:inline-block;margin:0 4px;"></span>
+                    <span class="filter-chip" data-talento-filter="Full-time">Full-time</span>
+                    <span class="filter-chip" data-talento-filter="Part-time">Part-time</span>
+                    <span class="filter-chip" data-talento-filter="Freelance">Freelance</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(talentos)}" class="talento-empty-state">
+                    <div class="talento-empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <h3 th:if="${query != null and !#strings.isEmpty(query)}">Sin resultados para "<span th:text="${query}"></span>"</h3>
+                    <h3 th:if="${query == null or #strings.isEmpty(query)}">Aún no hay talentos públicos</h3>
+                    <p class="muted" th:if="${query != null and !#strings.isEmpty(query)}">Intenta con otro nombre, rol o tecnología.</p>
+                    <p class="muted" th:if="${query == null or #strings.isEmpty(query)}">Los talentos registrados que activen su perfil público aparecerán aquí.</p>
+                    <a th:if="${!esEmpresa}" th:href="@{/perfil}" class="btn btn-primary btn-icon" style="margin-top:8px;">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Activar mi perfil público
+                    </a>
+                </div>
+
+                <div class="talento-empty-state" id="talento-filter-empty" style="display:none;">
+                    <div class="talento-empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                        </svg>
+                    </div>
+                    <h3>Sin perfiles con ese filtro</h3>
+                    <p class="muted">Prueba con otro filtro o busca por texto.</p>
+                    <button class="btn btn-outline" onclick="resetTalentoFilters()" style="margin-top:8px;">Ver todos</button>
+                </div>
+
+                <div id="talentos-grid" class="talentos-grid" th:unless="${#lists.isEmpty(talentos)}">
+                    <a th:each="t, tIter : ${talentos}" th:href="@{|/talentos/${t.id}|}" class="talento-card"
+                        th:style="'animation-delay:' + (${tIter.index < 6 ? tIter.index * 0.04 : 0.24}) + 's'"
+                        th:attr="data-nombre=${t.nombre},
+                                 data-rol=${t.rolTitulo},
+                                 data-stack=${t.stack != null ? #strings.listJoin(t.stack, ',') : ''},
+                                 data-modalidad=${t.modalidad != null ? t.modalidad : ''},
+                                 data-disponibilidad=${t.disponibilidad != null ? t.disponibilidad : ''},
+                                 data-talento-id=${t.id}">
+
+                        <div class="talento-card__header">
+                            <div class="profile-avatar talento-avatar"
+                                th:style="${t.fotoUrl != null}
+                                    ? 'background-image:url(' + ${t.fotoUrl} + '); background-size:cover; background-position:center; color:transparent;'
+                                    : ''">
+                                <span th:if="${t.fotoUrl == null}"
+                                    th:text="${t.nombre != null ? t.nombre.substring(0,1).toUpperCase() : 'D'}">D</span>
+                            </div>
+                            <div class="talento-card__identity">
+                                <strong class="talento-card__name" th:text="${t.nombre}">Nombre</strong>
+                                <span class="talento-card__role"
+                                    th:text="${t.rolTitulo != null ? t.rolTitulo : 'Profesional'}">Rol</span>
+                                <span class="muted talento-card__since" style="font-size:.7rem;"></span>
+                            </div>
+                        </div>
+
+                        <p th:if="${t.bio != null}" class="muted talento-card__bio" th:text="${t.bio}">Bio</p>
+
+                        <div th:if="${t.stack != null and !t.stack.isEmpty()}" class="talento-card__stack">
+                            <span th:each="s, st : ${t.stack}" th:if="${st.index < 4}"
+                                class="talento-stack-pill" th:text="${s}">Tech</span>
+                            <span th:if="${#lists.size(t.stack) > 4}"
+                                class="talento-stack-pill talento-stack-more"
+                                th:text="'+' + (${#lists.size(t.stack)} - 4)">+n</span>
+                        </div>
+
+                        <div class="talento-card__footer">
+                            <div class="talento-card__tags">
+                                <span th:if="${t.modalidad != null}" class="chip chip-sm" th:text="${t.modalidad}">Remoto</span>
+                                <span th:if="${t.disponibilidad != null}" class="chip chip-sm" th:text="${t.disponibilidad}">Full-time</span>
+                            </div>
+                            <span class="talento-card__cta">Ver perfil →</span>
+                        </div>
+                    </a>
+                </div>
+
+                <nav class="pagination-tabs" th:if="${totalPages > 1}">
+                    <a class="pagination-tab pagination-arrow"
+                        th:classappend="${currentPage == 0} ? ' is-disabled' : ''"
+                        th:href="@{/talentos(page=${currentPage - 1},size=${pageSize},q=${query})}">Anterior</a>
+                    <a class="pagination-tab" th:if="${showStartEllipsis}"
+                        th:href="@{/talentos(page=0,size=${pageSize},q=${query})}">1</a>
+                    <span class="pagination-ellipsis" th:if="${showStartEllipsis}">…</span>
+                    <a class="pagination-tab" th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                        th:href="@{/talentos(page=${i},size=${pageSize},q=${query})}" th:text="${i + 1}"
+                        th:classappend="${i == currentPage} ? ' active' : ''">1</a>
+                    <span class="pagination-ellipsis" th:if="${showEndEllipsis}">…</span>
+                    <a class="pagination-tab" th:if="${showEndEllipsis}"
+                        th:href="@{/talentos(page=${totalPages - 1},size=${pageSize},q=${query})}"
+                        th:text="${totalPages}">1</a>
+                    <a class="pagination-tab pagination-arrow"
+                        th:classappend="${currentPage + 1 >= totalPages} ? ' is-disabled' : ''"
+                        th:href="@{/talentos(page=${currentPage + 1},size=${pageSize},q=${query})}">Siguiente</a>
+                </nav>
+
+                <p th:if="${totalPages > 1}"
+                    style="text-align:center; font-size:.78rem; color:var(--muted); margin-top:12px;"
+                    th:text="'Página ' + (${currentPage + 1}) + ' de ' + ${totalPages} + ' · ' + ${totalTalentos} + ' talentos en total'">
+                    Página 1 de N
+                </p>
+            </section>
+        </main>
+    </div>
+
+    <style>
+        @keyframes talentoFadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .talento-card { animation: talentoFadeUp .28s ease both; }
+    </style>
+
+    <script>
+        // ── Búsqueda con debounce ──
+        const searchInput = document.getElementById('buscar-talento');
+        const searchForm  = document.getElementById('buscar-talento-form');
+        let searchTimer;
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => searchForm.submit(), 350);
+            });
+        }
+
+        // ── Filtros de modalidad/disponibilidad (client-side) ──
+        const chips      = document.querySelectorAll('[data-talento-filter]');
+        const grid       = document.getElementById('talentos-grid');
+        const emptyFilt  = document.getElementById('talento-filter-empty');
+        const countMetric = document.getElementById('talento-visible-count');
+        const filterPill  = document.getElementById('talento-filter-pill');
+        let activeFilter = 'todos';
+
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeFilter = chip.dataset.talentoFilter;
+                applyFilter();
+            });
+        });
+
+        function applyFilter() {
+            if (!grid) return;
+            const cards   = grid.querySelectorAll('.talento-card');
+            let visible   = 0;
+
+            cards.forEach(card => {
+                if (activeFilter === 'todos') {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    const modalidad     = (card.dataset.modalidad     || '').toLowerCase();
+                    const disponibilidad = (card.dataset.disponibilidad || '').toLowerCase();
+                    const filter        = activeFilter.toLowerCase();
+                    const match = modalidad === filter || disponibilidad === filter;
+                    card.style.display = match ? '' : 'none';
+                    if (match) visible++;
+                }
+            });
+
+            if (emptyFilt) emptyFilt.style.display = (visible === 0 && activeFilter !== 'todos') ? 'flex' : 'none';
+            if (grid)       grid.style.display      = visible === 0 ? 'none' : '';
+            if (countMetric) countMetric.textContent = visible;
+            if (filterPill)  filterPill.style.display = activeFilter === 'todos' ? 'none' : 'inline-flex';
+        }
+
+        function resetTalentoFilters() {
+            chips.forEach(c => c.classList.remove('active'));
+            document.querySelector('[data-talento-filter="todos"]')?.classList.add('active');
+            activeFilter = 'todos';
+            applyFilter();
+        }
+
+        // ── "En DevCoast desde hace…" a partir del ObjectId de Mongo ──
+        function idToRelDate(hexId) {
+            if (!hexId || hexId.length < 8) return '';
+            const ts = parseInt(hexId.substring(0, 8), 16) * 1000;
+            const d = Date.now() - ts;
+            if (d < 86400000)       return 'Se unió hoy';
+            if (d < 30 * 86400000)  return 'En DevCoast hace ' + Math.floor(d / 86400000) + ' días';
+            if (d < 365 * 86400000) return 'En DevCoast hace ' + Math.floor(d / (30 * 86400000)) + ' meses';
+            return 'En DevCoast hace más de 1 año';
+        }
+        document.querySelectorAll('.talento-card[data-talento-id]').forEach(card => {
+            const since = card.querySelector('.talento-card__since');
+            const rel = idToRelDate(card.dataset.talentoId);
+            if (since && rel) since.textContent = '· ' + rel;
+        });
+    </script>
+</body>
+</html>

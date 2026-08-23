@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Postulaciones</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <div id="flash-data" th:if="${flashMessage != null}"
+        th:attr="data-message=${flashMessage}, data-type=${flashType ?: 'info'}" style="display:none"></div>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+</head>
+<body data-theme="light">
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('misEmpleos')}" />
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">
+                <h1 th:text="${empleo.titulo}">Nombre del empleo</h1>
+                <p th:text="'Candidatos que aplicaron · ' + ${empleo.empresaNombre}">Postulaciones recibidas</p>
+            </div>
+            <div class="topbar-actions">
+                <div class="theme-toggle">
+                    <span id="theme-icon">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/><path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                    </span>
+                    <span class="theme-dot"></span>
+                    <span id="theme-label">Modo claro</span>
+                </div>
+                <a th:href="@{/misEmpleos}" class="btn btn-ghost">← Mis empleos</a>
+            </div>
+        </header>
+
+        <div class="postul-stat-row">
+            <div class="postul-stat">
+                <div class="postul-stat-num" th:text="${totalTodas}">0</div>
+                <div class="postul-stat-label">Total</div>
+            </div>
+            <div class="postul-stat accent">
+                <div class="postul-stat-num" th:text="${totalRevision}">0</div>
+                <div class="postul-stat-label">En revisión</div>
+            </div>
+            <div class="postul-stat success">
+                <div class="postul-stat-num" th:text="${totalAprobadas}">0</div>
+                <div class="postul-stat-label">Aceptadas</div>
+            </div>
+            <div class="postul-stat muted">
+                <div class="postul-stat-num" th:text="${totalRechazadas}">0</div>
+                <div class="postul-stat-label">Rechazadas</div>
+            </div>
+            <div class="postul-stat" th:if="${totalDescartados > 0}"
+                 style="border-color:rgba(234,179,8,.3);background:rgba(234,179,8,.04);">
+                <div class="postul-stat-num" style="color:#ca8a04;" th:text="${totalDescartados}">0</div>
+                <div class="postul-stat-label">Filtrados</div>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+            <span style="font-size:.78rem;color:var(--muted);font-weight:600;white-space:nowrap;">Fase del proceso:</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;" id="fase-selector">
+                <button th:each="f : ${fasesReclutamiento}"
+                        th:text="${f == 'CERRADO_PROCESO' ? 'Cerrado' : (f == 'ABIERTO' ? 'Abierto' : (f == 'SCREENING' ? 'Screening' : (f == 'ENTREVISTAS' ? 'Entrevistas' : 'Oferta')))}"
+                        th:attr="data-fase=${f}"
+                        th:classappend="${(empleo.faseReclutamiento == f or (empleo.faseReclutamiento == null and f == 'ABIERTO')) ? ' fase-btn-active' : ''}"
+                        class="fase-btn"
+                        type="button">
+                </button>
+            </div>
+        </div>
+
+        <div class="sol-tabs" style="margin-bottom:20px;">
+            <a th:href="@{|/empleos/${empleo.id}/postulaciones|}"
+               th:classappend="${estadoFiltro == 'todas'} ? ' active' : ''" class="sol-tab">
+                Todos
+                <span class="tab-badge tab-badge-neutral" th:text="${totalTodas}">0</span>
+            </a>
+            <a th:href="@{|/empleos/${empleo.id}/postulaciones?estado=revision|}"
+               th:classappend="${estadoFiltro == 'revision'} ? ' active' : ''" class="sol-tab">
+                En revisión
+                <span class="tab-badge tab-badge-alert" th:if="${totalRevision > 0}" th:text="${totalRevision}">0</span>
+                <span class="tab-badge tab-badge-neutral" th:unless="${totalRevision > 0}" th:text="${totalRevision}">0</span>
+            </a>
+            <a th:href="@{|/empleos/${empleo.id}/postulaciones?estado=aprobada|}"
+               th:classappend="${estadoFiltro == 'aprobada'} ? ' active' : ''" class="sol-tab">
+                Aceptadas
+                <span class="tab-badge tab-badge-neutral" th:text="${totalAprobadas}">0</span>
+            </a>
+            <a th:href="@{|/empleos/${empleo.id}/postulaciones?estado=rechazada|}"
+               th:classappend="${estadoFiltro == 'rechazada'} ? ' active' : ''" class="sol-tab">
+                Rechazadas
+                <span class="tab-badge tab-badge-neutral" th:text="${totalRechazadas}">0</span>
+            </a>
+            <a th:if="${totalDescartados > 0}"
+               th:href="@{|/empleos/${empleo.id}/postulaciones?estado=descartado|}"
+               th:classappend="${estadoFiltro == 'descartado'} ? ' active' : ''" class="sol-tab">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>Filtrados
+                <span class="tab-badge tab-badge-neutral" th:text="${totalDescartados}">0</span>
+            </a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(solicitudes)}" class="empty-zone">
+            <div class="empty-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <h3 th:text="${estadoFiltro == 'todas'} ? 'Aún no hay candidatos' : 'Sin resultados en este filtro'">Sin candidatos</h3>
+            <p th:text="${estadoFiltro == 'todas'} ? 'Las postulaciones aparecerán aquí cuando los talentos apliquen.' : 'Prueba con otro filtro para ver más candidatos.'">-</p>
+        </div>
+
+        <th:block th:unless="${#lists.isEmpty(solicitudes)}">
+
+            <div class="kan-view-toggle" style="margin-bottom:16px;">
+                <button class="kan-view-btn active" id="btn-view-lista" onclick="setView('lista')" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    Lista
+                </button>
+                <button class="kan-view-btn" id="btn-view-kanban" onclick="setView('kanban')" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+                        <rect x="3" y="3" width="5" height="18" rx="1"/>
+                        <rect x="10" y="3" width="5" height="12" rx="1"/>
+                        <rect x="17" y="3" width="5" height="15" rx="1"/>
+                    </svg>
+                    Kanban
+                </button>
+            </div>
+
+            <div id="view-lista">
+                <div class="postul-grid">
+                    <div th:each="sol : ${solicitudes}" class="postul-card"
+                         th:attr="data-estado=${sol.estado},
+                                  data-nombre=${sol.usuarioNombre ?: 'Candidato'},
+                                  data-rol=${sol.usuarioRolTitulo ?: sol.usuarioCorreo},
+                                  data-fecha=${sol.fechaSolicitud != null ? #dates.format(sol.fechaSolicitud, 'dd/MM/yyyy') : ''},
+                                  data-link=@{|/empleos/${empleo.id}/postulaciones/${sol.id}|},
+                                  data-sol-id=${sol.id}">
+
+                        <div class="postul-avatar"
+                            th:text="${sol.usuarioNombre != null and !#strings.isEmpty(sol.usuarioNombre) ? sol.usuarioNombre.substring(0,1).toUpperCase() : '?'}">?</div>
+
+                        <div class="postul-info">
+                            <div class="postul-name" th:text="${sol.usuarioNombre ?: 'Candidato'}">Nombre</div>
+                            <div class="postul-role" th:text="${sol.usuarioRolTitulo ?: sol.usuarioCorreo}">Rol</div>
+                            <div class="postul-meta">
+                                <span class="postul-date"
+                                    th:text="${sol.fechaSolicitud != null ? #dates.format(sol.fechaSolicitud, 'dd MMM yyyy') : ''}"></span>
+                                <span th:if="${sol.proyectosIds != null and !sol.proyectosIds.isEmpty()}" class="postul-tag">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>
+                                    <span th:text="${sol.proyectosIds.size()} + ' proyecto(s)'">proyectos</span>
+                                </span>
+                                <span th:if="${sol.mensajeMotivacion != null and !#strings.isEmpty(sol.mensajeMotivacion)}" class="postul-tag">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    Carta de motivación
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="postul-estado-wrap">
+                            <span class="postul-estado estado-revision"  th:if="${sol.estado == 'revision'}">En revisión</span>
+                            <span class="postul-estado estado-aprobada"  th:if="${sol.estado == 'aprobada'}">✓ Aceptada</span>
+                            <span class="postul-estado estado-rechazada" th:if="${sol.estado == 'rechazada'}">Rechazada</span>
+                            <span class="postul-estado" th:if="${sol.estado == 'descartado'}"
+                                  style="background:rgba(234,179,8,.12);color:#ca8a04;border:1px solid rgba(234,179,8,.25);">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>Filtrado</span>
+                            <span class="postul-estado estado-revision"  th:if="${sol.estado == null}">Pendiente</span>
+                        </div>
+
+                        <div class="postul-actions">
+                            <a th:href="@{|/empleos/${empleo.id}/postulaciones/${sol.id}|}"
+                               class="btn btn-outline" style="font-size:.75rem;padding:5px 12px;">Ver perfil →</a>
+                            <a th:href="@{|/chat/${sol.id}|}" class="btn btn-ghost"
+                               style="font-size:.75rem;padding:5px 12px;display:flex;align-items:center;gap:5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" style="width:13px;height:13px;">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                Chat
+                            </a>
+                            <form th:if="${sol.estado == 'descartado'}"
+                                  th:action="@{|/empleos/${empleo.id}/postulaciones/${sol.id}/reconsiderar|}"
+                                  method="post" style="display:inline;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-outline"
+                                        style="font-size:.75rem;padding:5px 12px;color:var(--accent);border-color:rgba(99,210,210,.4);"
+                                        title="Mover a revisión manual ignorando el screening automático">
+                                    Reconsiderar
+                                </button>
+                            </form>
+                            <form th:if="${sol.estado != 'aprobada' and sol.estado != 'descartado'}"
+                                  th:action="@{|/empleos/${empleo.id}/postulaciones/${sol.id}/aprobar|}"
+                                  method="post" style="display:inline;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-primary"
+                                        style="font-size:.75rem;padding:5px 12px;background:var(--badge-open-bg);color:var(--badge-open-text);border:1px solid rgba(22,163,74,.25);">
+                                    Aceptar
+                                </button>
+                            </form>
+                            <form th:if="${sol.estado != 'rechazada' and sol.estado != 'descartado'}"
+                                  th:action="@{|/empleos/${empleo.id}/postulaciones/${sol.id}/rechazar|}"
+                                  method="post" style="display:inline;"
+                                  onsubmit="return confirm('¿Rechazar esta postulación?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-ghost"
+                                        style="font-size:.75rem;padding:5px 12px;color:var(--muted);">
+                                    Rechazar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-kanban" style="display:none;">
+                <div class="kan-board">
+                    <div class="kan-col" data-estado="revision">
+                        <div class="kan-col-header kan-revision">
+                            <span>En revisión</span>
+                            <span class="kan-count" id="kan-count-revision">0</span>
+                        </div>
+                        <div class="kan-cards" id="kan-col-revision"></div>
+                    </div>
+                    <div class="kan-col" data-estado="aprobada">
+                        <div class="kan-col-header kan-aprobada">
+                            <span>Aceptadas</span>
+                            <span class="kan-count" id="kan-count-aprobada">0</span>
+                        </div>
+                        <div class="kan-cards" id="kan-col-aprobada"></div>
+                    </div>
+                    <div class="kan-col" data-estado="rechazada">
+                        <div class="kan-col-header kan-rechazada">
+                            <span>Rechazadas</span>
+                            <span class="kan-count" id="kan-count-rechazada">0</span>
+                        </div>
+                        <div class="kan-cards" id="kan-col-rechazada"></div>
+                    </div>
+                </div>
+            </div>
+
+        </th:block>
+
+        <script th:inline="javascript">
+        var EMPLEO_ID = /*[[${empleo.id}]]*/ '';
+        var _draggingFrom = null;
+
+        /* ── KANBAN BUILD ─────────────────────────────────────────── */
+        function buildKanban() {
+            var cards = document.querySelectorAll('#view-lista .postul-card');
+            var cols  = { revision: [], aprobada: [], rechazada: [] };
+
+            cards.forEach(function(card) {
+                var estado = card.dataset.estado  || 'revision';
+                // Los descartados no aparecen en el kanban
+                if (estado === 'descartado') return;
+                var nombre = card.dataset.nombre  || '—';
+                var rol    = card.dataset.rol     || '';
+                var fecha  = card.dataset.fecha   || '';
+                var link   = card.dataset.link    || '#';
+                var solId  = card.dataset.solId   || '';
+                var key    = estado === 'aprobada' ? 'aprobada'
+                           : estado === 'rechazada' ? 'rechazada' : 'revision';
+
+                var kanCard = document.createElement('div');
+                kanCard.className     = 'kan-card';
+                kanCard.draggable     = true;
+                kanCard.dataset.solId = solId;
+                kanCard.dataset.col   = key;
+
+                var rolHtml = rol ? '<span class="kan-card-rol">' + rol + '</span>' : '';
+
+                /* draggable=false en el link para que no lo intercepte el navegador */
+                kanCard.innerHTML =
+                    '<a href="' + link + '" class="kan-card-inner" draggable="false">' +
+                        '<div class="kan-card-avatar">' + nombre.charAt(0).toUpperCase() + '</div>' +
+                        '<div class="kan-card-info">' +
+                            '<strong>' + nombre + '</strong>' +
+                            rolHtml +
+                            '<span class="kan-card-fecha">' + fecha + '</span>' +
+                        '</div>' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;opacity:.4;"><path d="m9 18 6-6-6-6"/></svg>' +
+                    '</a>' +
+                    (solId
+                        ? '<a href="/chat/' + solId + '" class="kan-card-chat" title="Chat" draggable="false" onclick="event.stopPropagation()">' +
+                          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+                          '</a>'
+                        : '');
+
+                /* Evitar que hijos interfieran con pointer events durante drag */
+                kanCard.querySelectorAll('*').forEach(function(el) {
+                    el.style.pointerEvents = 'none';
+                });
+                kanCard.querySelector('.kan-card-inner').style.pointerEvents = 'auto';
+                if (kanCard.querySelector('.kan-card-chat'))
+                    kanCard.querySelector('.kan-card-chat').style.pointerEvents = 'auto';
+
+                kanCard.addEventListener('dragstart', function(e) {
+                    _draggingFrom = key;
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', solId);   /* algunos navegadores necesitan text/plain */
+                    e.dataTransfer.setData('solId', solId);
+                    e.dataTransfer.setData('fromCol', key);
+                    /* Deshabilitar pointer events en hijos para que no bloqueen el drop */
+                    kanCard.querySelectorAll('*').forEach(function(el) { el.style.pointerEvents = 'none'; });
+                    setTimeout(function() { kanCard.classList.add('dragging'); }, 0);
+                });
+                kanCard.addEventListener('dragend', function() {
+                    kanCard.classList.remove('dragging');
+                    kanCard.querySelectorAll('*').forEach(function(el) { el.style.pointerEvents = ''; });
+                    if (kanCard.querySelector('.kan-card-chat'))
+                        kanCard.querySelector('.kan-card-chat').style.pointerEvents = 'auto';
+                    document.querySelectorAll('.kan-col').forEach(function(c) { c.classList.remove('drag-over'); });
+                    _draggingFrom = null;
+                });
+
+                cols[key].push(kanCard);
+            });
+
+            ['revision','aprobada','rechazada'].forEach(function(k) {
+                var container = document.getElementById('kan-col-' + k);
+                var count     = document.getElementById('kan-count-' + k);
+                if (!container) return;
+                container.innerHTML = '';
+                if (cols[k].length === 0) {
+                    container.innerHTML = '<p class="kan-empty">Sin candidatos</p>';
+                } else {
+                    cols[k].forEach(function(c) { container.appendChild(c); });
+                }
+                if (count) count.textContent = cols[k].length;
+            });
+
+            /* Drop zones — escuchar en .kan-cards Y en .kan-col */
+            document.querySelectorAll('.kan-col').forEach(function(col) {
+                var estado = col.dataset.estado;
+
+                function onDragOver(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    col.classList.add('drag-over');
+                }
+                function onDragLeave(e) {
+                    if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+                }
+                function onDrop(e) {
+                    e.preventDefault();
+                    col.classList.remove('drag-over');
+                    var solId   = e.dataTransfer.getData('solId') || e.dataTransfer.getData('text/plain');
+                    var fromCol = e.dataTransfer.getData('fromCol') || _draggingFrom;
+                    if (!solId || fromCol === estado) return;
+                    moverCandidato(solId, estado, fromCol);
+                }
+
+                col.addEventListener('dragover',  onDragOver);
+                col.addEventListener('dragleave', onDragLeave);
+                col.addEventListener('drop',      onDrop);
+            });
+        }
+
+        /* ── DRAG: mover candidato via fetch ──────────────────────── */
+        function moverCandidato(solId, nuevoEstado, estadoAnterior) {
+            fetch('/empleos/' + EMPLEO_ID + '/postulaciones/' + solId + '/estado?nuevoEstado=' + nuevoEstado, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    /* Actualizar data-estado en la card de lista */
+                    var listaCard = document.querySelector('#view-lista .postul-card[data-sol-id="' + solId + '"]');
+                    if (listaCard) {
+                        listaCard.dataset.estado = nuevoEstado;
+                        /* Actualizar badge de estado */
+                        var badges = listaCard.querySelectorAll('.postul-estado');
+                        badges.forEach(function(b) { b.style.display = 'none'; });
+                        var map = { revision: 'estado-revision', aprobada: 'estado-aprobada', rechazada: 'estado-rechazada' };
+                        var newBadge = listaCard.querySelector('.' + map[nuevoEstado]);
+                        if (newBadge) newBadge.style.display = '';
+                    }
+                    /* Reconstruir kanban */
+                    buildKanban();
+                    showToast(nuevoEstado === 'aprobada' ? '✓ Candidato aceptado' : nuevoEstado === 'rechazada' ? 'Candidato rechazado' : 'Vuelto a revisión', nuevoEstado === 'aprobada' ? 'success' : 'info');
+                }
+            })
+            .catch(function() { showToast('Error al actualizar el estado', 'error'); });
+        }
+
+        /* ── Toast ligero ─────────────────────────────────────────── */
+        function showToast(msg, type) {
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:9999;transition:opacity .3s;' +
+                (type === 'success' ? 'background:#16a34a;color:#fff;' : type === 'error' ? 'background:#dc2626;color:#fff;' : 'background:var(--surface);color:var(--text);border:1px solid var(--border);');
+            document.body.appendChild(t);
+            setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 2500);
+        }
+
+        /* ── VIEW TOGGLE ──────────────────────────────────────────── */
+        function setView(view) {
+            var lista  = document.getElementById('view-lista');
+            var kanban = document.getElementById('view-kanban');
+            var btnL   = document.getElementById('btn-view-lista');
+            var btnK   = document.getElementById('btn-view-kanban');
+            if (!lista || !kanban) return;
+            if (view === 'kanban') {
+                lista.style.display  = 'none';
+                kanban.style.display = '';
+                btnL && btnL.classList.remove('active');
+                btnK && btnK.classList.add('active');
+                buildKanban();
+            } else {
+                lista.style.display  = '';
+                kanban.style.display = 'none';
+                btnL && btnL.classList.add('active');
+                btnK && btnK.classList.remove('active');
+            }
+        }
+        </script>
+
+        <script>
+        // fase del proceso: clicks van por delegación en vez de onclick inline en cada botón
+        function cambiarFase(fase, btn) {
+            fetch('/empleos/' + EMPLEO_ID + '/fase?fase=' + fase, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    document.querySelectorAll('.fase-btn').forEach(function(b) {
+                        b.classList.remove('fase-btn-active');
+                    });
+                    btn.classList.add('fase-btn-active');
+                    showToast('Fase actualizada: ' + btn.textContent, 'success');
+                }
+            })
+            .catch(function() { showToast('Error al cambiar la fase', 'error'); });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var selector = document.getElementById('fase-selector');
+            if (!selector) return;
+            selector.addEventListener('click', function (e) {
+                var btn = e.target.closest('.fase-btn');
+                if (!btn || !selector.contains(btn)) return;
+                cambiarFase(btn.dataset.fase, btn);
+            });
+        });
+        </script>
+
+        <style>
+        /* Fase selector */
+        .fase-btn {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--muted);
+            font-size: .75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .fase-btn:hover { border-color: rgba(99,210,210,.4); color: var(--accent); }
+        .fase-btn-active {
+            background: rgba(99,210,210,.12);
+            border-color: rgba(99,210,210,.4);
+            color: var(--accent);
+        }
+        </style>
+
+    </main>
+</div>
+</body>
+</html>

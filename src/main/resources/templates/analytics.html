@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Analytics</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        @keyframes analyticsFadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .kpi-card, .chart-card { animation: analyticsFadeUp .3s ease both; }
+        .kpi-grid .kpi-card:nth-child(1) { animation-delay: .02s }
+        .kpi-grid .kpi-card:nth-child(2) { animation-delay: .05s }
+        .kpi-grid .kpi-card:nth-child(3) { animation-delay: .08s }
+        .kpi-grid .kpi-card:nth-child(4) { animation-delay: .11s }
+        .kpi-grid .kpi-card:nth-child(5) { animation-delay: .14s }
+        .kpi-grid .kpi-card:nth-child(6) { animation-delay: .17s }
+        .charts-grid .chart-card, .charts-grid-3 .chart-card { animation-delay: .12s }
+    </style>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('analytics')}" />
+
+        <main class="main">
+
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1 th:text="${usuarioActualTipo == 'empresa'} ? 'Mis Analytics' : 'Mi Actividad'">Analytics</h1>
+                    <p th:text="${usuarioActualTipo == 'empresa'}
+                        ? 'Métricas de tus empleos y candidatos.'
+                        : 'Tu historial de postulaciones y actividad en la plataforma.'">
+                        Métricas personalizadas
+                    </p>
+                </div>
+                <div class="topbar-actions">
+                    <span class="analytics-badge">En vivo</span>
+                    <div class="theme-toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Cambiar tema">
+                        <span id="theme-icon">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2"/><path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/><path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                        </span>
+                        <span class="theme-dot"></span>
+                        <span id="theme-label">Modo claro</span>
+                    </div>
+                </div>
+            </header>
+
+            <th:block th:if="${usuarioActualTipo == 'empresa'}">
+
+                <div class="kpi-grid">
+                    <div class="kpi-card c1">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empActivos ?: 0}">0</div>
+                        <div class="kpi-label">Empleos activos</div>
+                        <div class="kpi-sub" th:if="${empCerrados > 0}" th:text="${empCerrados} + ' cerrados'">0 cerrados</div>
+                    </div>
+
+                    <div class="kpi-card c5">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empSolTotal ?: 0}">0</div>
+                        <div class="kpi-label">Solicitudes recibidas</div>
+                        <div class="kpi-sub" th:if="${empSolRevision > 0}" th:text="${empSolRevision} + ' en revisión'">0 en revisión</div>
+                    </div>
+
+                    <div class="kpi-card c2">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empSolAprobadas ?: 0}">0</div>
+                        <div class="kpi-label">Candidatos aprobados</div>
+                    </div>
+
+                    <div class="kpi-card c6">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empSolRechazadas ?: 0}">0</div>
+                        <div class="kpi-label">Rechazados</div>
+                    </div>
+
+                    <div class="kpi-card c3">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empTasa ?: 0} + '%'">0%</div>
+                        <div class="kpi-label">Tasa de conversión</div>
+                    </div>
+
+                    <div class="kpi-card c4">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${empInvAceptadas ?: 0}">0</div>
+                        <div class="kpi-label">Invitaciones aceptadas</div>
+                        <div class="kpi-sub" th:if="${empInvEnviadas > 0}" th:text="'de ' + ${empInvEnviadas} + ' enviadas'">de 0 enviadas</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Estado de solicitudes</div>
+                        <div class="chart-subtitle">Distribución por estado del proceso</div>
+                        <div class="remoto-ring">
+                            <div class="chart-wrap" style="flex:0 0 150px;height:150px;">
+                                <canvas id="empChartEstado"></canvas>
+                            </div>
+                            <div class="remoto-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#f59e0b"></span>
+                                    <span>En revisión</span>
+                                    <span class="legend-val" th:text="${empSolRevision ?: 0}">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#22c55e"></span>
+                                    <span>Aprobados</span>
+                                    <span class="legend-val" th:text="${empSolAprobadas ?: 0}">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#ef4444"></span>
+                                    <span>Rechazados</span>
+                                    <span class="legend-val" th:text="${empSolRechazadas ?: 0}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Demanda por empleo</div>
+                        <div class="chart-subtitle">Solicitudes recibidas por vacante (top 6)</div>
+                        <div class="chart-wrap h200">
+                            <canvas id="empChartTopEmpleos"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid-3">
+                    <div class="chart-card">
+                        <div class="chart-title">Modalidad de vacantes</div>
+                        <div class="chart-subtitle">Distribución de tus empleos</div>
+                        <div class="remoto-ring" style="margin-top:.5rem;">
+                            <div class="chart-wrap" style="flex:0 0 120px;height:120px;">
+                                <canvas id="empChartModalidad"></canvas>
+                            </div>
+                            <div class="remoto-legend" id="empModalLegend"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Categorías que contratas</div>
+                        <div class="chart-subtitle">Empleos por área (top 6)</div>
+                        <div class="chart-wrap h240">
+                            <canvas id="empChartCategorias"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Seniority requerido</div>
+                        <div class="chart-subtitle">Nivel de experiencia que buscas</div>
+                        <div class="chart-wrap h240">
+                            <canvas id="empChartSeniority"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="margin-bottom:1rem;">
+                    <div class="chart-title">Ranking de vacantes por demanda</div>
+                    <div class="chart-subtitle">Tus empleos ordenados por número de solicitudes recibidas</div>
+                    <table class="analytics-table" style="margin-top:.75rem;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Vacante</th>
+                                <th>Categoría</th>
+                                <th>Modalidad</th>
+                                <th>Estado</th>
+                                <th style="text-align:right;">Solicitudes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="row, i : ${empTopEmpleos}">
+                                <td th:text="${i.count}" style="color:var(--muted);font-weight:700;">1</td>
+                                <td th:text="${row.titulo}" style="font-weight:600;">Título</td>
+                                <td>
+                                    <span class="pill" th:text="${row.categoria ?: '—'}">Cat</span>
+                                </td>
+                                <td>
+                                    <span class="pill"
+                                        th:classappend="${row.modalidad == 'Remoto'} ? ' pill-blue' : (${row.modalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
+                                        th:text="${row.modalidad ?: '—'}">Remoto</span>
+                                </td>
+                                <td>
+                                    <span class="pill"
+                                        th:classappend="${row.estado == 'ACTIVO'} ? ' pill-green' : ' pill-red'"
+                                        th:text="${row.estado}">ACTIVO</span>
+                                </td>
+                                <td style="text-align:right;font-weight:800;font-size:.9rem;"
+                                    th:text="${row.totalSolicitudes}">0</td>
+                            </tr>
+                            <tr th:if="${empTopEmpleos == null or empTopEmpleos.isEmpty()}">
+                                <td colspan="6" class="analytics-empty-cell">
+                                    Aún no tienes empleos publicados.
+                                    <a th:href="@{/crearEmpleo}" style="color:var(--accent);font-weight:600;margin-left:4px;">Publicar ahora →</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </th:block>
+
+            <th:block th:if="${usuarioActualTipo != 'empresa'}">
+
+                <div class="kpi-grid">
+                    <div class="kpi-card c5">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talSolTotal ?: 0}">0</div>
+                        <div class="kpi-label">Solicitudes enviadas</div>
+                    </div>
+
+                    <div class="kpi-card c2">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talSolAprobadas ?: 0}">0</div>
+                        <div class="kpi-label">Aprobadas</div>
+                    </div>
+
+                    <div class="kpi-card c3">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talSolRevision ?: 0}">0</div>
+                        <div class="kpi-label">En revisión</div>
+                    </div>
+
+                    <div class="kpi-card c1">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talTasa ?: 0} + '%'">0%</div>
+                        <div class="kpi-label">Tasa de éxito</div>
+                        <div class="kpi-sub" th:if="${talSolTotal > 0}">de tus postulaciones</div>
+                    </div>
+
+                    <div class="kpi-card c4">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.28h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8a16 16 0 0 0 5.94 5.94l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talInvRecibidas ?: 0}">0</div>
+                        <div class="kpi-label">Invitaciones recibidas</div>
+                        <div class="kpi-sub" th:if="${talInvPendientes > 0}" th:text="${talInvPendientes} + ' pendientes'" style="color:var(--analytics-amber);">0 pendientes</div>
+                    </div>
+
+                    <div class="kpi-card c6">
+                        <div class="kpi-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-value" th:text="${talProyectos ?: 0}">0</div>
+                        <div class="kpi-label">Proyectos publicados</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Estado de mis postulaciones</div>
+                        <div class="chart-subtitle">Distribución actual de tus solicitudes</div>
+                        <div class="remoto-ring">
+                            <div class="chart-wrap" style="flex:0 0 150px;height:150px;">
+                                <canvas id="talChartEstado"></canvas>
+                            </div>
+                            <div class="remoto-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#f59e0b"></span>
+                                    <span>En revisión</span>
+                                    <span class="legend-val" th:text="${talSolRevision ?: 0}">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#22c55e"></span>
+                                    <span>Aprobadas</span>
+                                    <span class="legend-val" th:text="${talSolAprobadas ?: 0}">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background:#ef4444"></span>
+                                    <span>Rechazadas</span>
+                                    <span class="legend-val" th:text="${talSolRechazadas ?: 0}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Categorías donde postulo</div>
+                        <div class="chart-subtitle">En qué áreas buscas trabajo (top 6)</div>
+                        <div class="chart-wrap h200">
+                            <canvas id="talChartCategorias"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid-3">
+                    <div class="chart-card">
+                        <div class="chart-title">Modalidad que busco</div>
+                        <div class="chart-subtitle">Tipo de empleo al que postulo</div>
+                        <div class="remoto-ring" style="margin-top:.5rem;">
+                            <div class="chart-wrap" style="flex:0 0 120px;height:120px;">
+                                <canvas id="talChartModalidad"></canvas>
+                            </div>
+                            <div class="remoto-legend" id="talModalLegend"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Seniority al que aplico</div>
+                        <div class="chart-subtitle">Nivel de experiencia de los empleos</div>
+                        <div class="chart-wrap h240">
+                            <canvas id="talChartSeniority"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card analytics-tip-card">
+                        <div class="chart-title">Consejo</div>
+                        <div class="chart-subtitle">Basado en tu actividad</div>
+                        <div class="analytics-tip" th:if="${talSolTotal == 0}">
+                            <div class="analytics-tip-icon c1">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                                    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                                </svg>
+                            </div>
+                            <p>Aún no tienes postulaciones. Explora empleos y da el primer paso.</p>
+                            <a th:href="@{/empleos}" class="btn btn-primary" style="margin-top:.75rem;font-size:.8rem;padding:8px 16px;">Ver empleos</a>
+                        </div>
+                        <div class="analytics-tip" th:if="${talSolTotal > 0 and talSolAprobadas == 0 and talSolRevision > 0}">
+                            <div class="analytics-tip-icon c3">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 22h14"/><path d="M5 2h14"/>
+                                    <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/>
+                                    <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>
+                                </svg>
+                            </div>
+                            <p>Tienes <strong th:text="${talSolRevision}">0</strong> postulación(es) activa(s). ¡Las empresas están revisando tu perfil!</p>
+                        </div>
+                        <div class="analytics-tip" th:if="${talSolAprobadas > 0}">
+                            <div class="analytics-tip-icon c2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                                    <path d="M4 22h16"/>
+                                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                                </svg>
+                            </div>
+                            <p>¡Llevas <strong th:text="${talSolAprobadas}">0</strong> aprobación(es)! Sigue postulando para mejorar tus opciones.</p>
+                        </div>
+                        <div class="analytics-tip" th:if="${talSolTotal > 5 and talTasa < 10 and talSolAprobadas == 0}">
+                            <div class="analytics-tip-icon c4">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                                    <path d="M9 18h6"/><path d="M10 22h4"/>
+                                </svg>
+                            </div>
+                            <p>Muchas postulaciones sin respuesta. Considera actualizar tu perfil o CV para destacar más.</p>
+                            <a th:href="@{/curriculum}" class="btn btn-ghost" style="margin-top:.75rem;font-size:.8rem;padding:8px 16px;">Ver curriculum</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="margin-bottom:1rem;">
+                    <div class="chart-title">Mis últimas postulaciones</div>
+                    <div class="chart-subtitle">Historial reciente de solicitudes enviadas</div>
+                    <table class="analytics-table" style="margin-top:.75rem;">
+                        <thead>
+                            <tr>
+                                <th>Empleo</th>
+                                <th>Empresa</th>
+                                <th>Categoría</th>
+                                <th>Modalidad</th>
+                                <th style="text-align:right;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sol : ${talRecentSolicitudes}">
+                                <td style="font-weight:600;" th:text="${sol.empleoTitulo}">Título</td>
+                                <td th:text="${sol.empleoEmpresaNombre}">Empresa</td>
+                                <td>
+                                    <span class="pill" th:text="${sol.empleoCategoria ?: '—'}">Cat</span>
+                                </td>
+                                <td>
+                                    <span class="pill"
+                                        th:classappend="${sol.empleoModalidad == 'Remoto'} ? ' pill-blue' : (${sol.empleoModalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
+                                        th:text="${sol.empleoModalidad ?: '—'}">Remoto</span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <span class="pill pill-amber" th:if="${sol.estado == 'revision'}">En revisión</span>
+                                    <span class="pill pill-green" th:if="${sol.estado == 'aprobada'}" style="display:inline-flex;align-items:center;gap:4px;">
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Aprobada
+                                    </span>
+                                    <span class="pill pill-red"   th:if="${sol.estado == 'rechazada'}">Rechazada</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${talRecentSolicitudes == null or talRecentSolicitudes.isEmpty()}">
+                                <td colspan="5" class="analytics-empty-cell">
+                                    Aún no tienes postulaciones.
+                                    <a th:href="@{/empleos}" style="color:var(--accent);font-weight:600;margin-left:4px;">Explorar empleos →</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </th:block>
+
+            <div class="analytics-plat">
+                <span class="analytics-plat-label">Plataforma DevCoast</span>
+                <div class="analytics-plat-stats">
+                    <div class="analytics-plat-stat">
+                        <span class="analytics-plat-val" th:text="${platTalentos}">0</span>
+                        <span class="analytics-plat-lbl">Talentos</span>
+                    </div>
+                    <div class="analytics-plat-sep"></div>
+                    <div class="analytics-plat-stat">
+                        <span class="analytics-plat-val" th:text="${platEmpresas}">0</span>
+                        <span class="analytics-plat-lbl">Empresas</span>
+                    </div>
+                    <div class="analytics-plat-sep"></div>
+                    <div class="analytics-plat-stat">
+                        <span class="analytics-plat-val" th:text="${platEmpleos}">0</span>
+                        <span class="analytics-plat-lbl">Empleos</span>
+                    </div>
+                    <div class="analytics-plat-sep"></div>
+                    <div class="analytics-plat-stat">
+                        <span class="analytics-plat-val" th:text="${platConexiones}">0</span>
+                        <span class="analytics-plat-lbl">Conexiones logradas</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script th:inline="javascript">
+        const PALETTE      = ['#1f8f8f','#f59e0b','#8b5cf6','#3b82f6','#ef4444','#22c55e','#ec4899','#06b6d4'];
+        const MODAL_COLORS = { 'Remoto':'#1f8f8f', 'Presencial':'#f59e0b', 'Híbrido':'#8b5cf6', 'Hibrido':'#8b5cf6' };
+        const isDark    = () => { const t = localStorage.getItem('theme') || 'dark'; return t === 'dark' || t === 'midnight'; };
+        const gridColor = () => isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        const textColor = () => isDark() ? '#b2bcc6' : '#64748b';
+        const baseFont  = { family: 'inherit', size: 11 };
+
+        // chart.js no se entera solo de los cambios de tema, así que aquí recoloreamos a mano cuando cambia
+        const _charts = [];
+        document.addEventListener('dc:theme-changed', () => {
+            const grid = gridColor(), text = textColor();
+            _charts.forEach(chart => {
+                if (chart.options.scales) {
+                    Object.values(chart.options.scales).forEach(scale => {
+                        if (scale.grid)  scale.grid.color  = grid;
+                        if (scale.ticks) scale.ticks.color = text;
+                    });
+                }
+                if (chart.options.plugins?.legend?.labels) {
+                    chart.options.plugins.legend.labels.color = text;
+                }
+                chart.update();
+            });
+        });
+
+        function buildModalLegend(containerId, labels, values, colors) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = '';
+            const total = values.reduce((a, b) => a + b, 0);
+            labels.forEach((lbl, i) => {
+                const pct = total > 0 ? Math.round(values[i] * 100 / total) : 0;
+                el.innerHTML += `<div class="legend-item">
+                    <span class="legend-dot" style="background:${colors[i] || PALETTE[i]}"></span>
+                    <span>${lbl}</span>
+                    <span class="legend-val">${pct}%</span>
+                </div>`;
+            });
+        }
+    </script>
+
+    <script th:if="${usuarioActualTipo == 'empresa'}" th:inline="javascript">
+    (function () {
+        const rev  = /*[[${empSolRevision  ?: 0}]]*/ 0;
+        const apr  = /*[[${empSolAprobadas ?: 0}]]*/ 0;
+        const rec  = /*[[${empSolRechazadas?: 0}]]*/ 0;
+        const mLbl = /*[[${empModalidadLabels ?: {}}]]*/ [];
+        const mVal = /*[[${empModalidadValues ?: {}}]]*/ [];
+        const cLbl = /*[[${empCategoriaLabels ?: {}}]]*/ [];
+        const cVal = /*[[${empCategoriaValues ?: {}}]]*/ [];
+        const sLbl = /*[[${empSeniorityLabels ?: {}}]]*/ [];
+        const sVal = /*[[${empSeniorityValues ?: {}}]]*/ [];
+        const tLbl = /*[[${empTopLabels ?: {}}]]*/ [];
+        const tVal = /*[[${empTopValues  ?: {}}]]*/ [];
+        const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
+
+        _charts.push(new Chart(document.getElementById('empChartEstado'), {
+            type: 'doughnut',
+            data: { labels:['En revisión','Aprobados','Rechazados'],
+                datasets:[{data:[rev,apr,rec], backgroundColor:['#f59e0b','#22c55e','#ef4444'], borderWidth:0, hoverOffset:6}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
+                plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}} }
+        }));
+
+        _charts.push(new Chart(document.getElementById('empChartTopEmpleos'), {
+            type: 'bar',
+            data: { labels: tLbl.length ? tLbl : ['Sin empleos'],
+                datasets:[{data: tVal.length ? tVal : [0], backgroundColor:'#1d7fd0', borderRadius:5, borderWidth:0}] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+                scales:{ x:{grid:{color:gridColor()}, ticks:{color:textColor(),font:baseFont,precision:0}},
+                         y:{grid:{display:false}, ticks:{color:textColor(),font:{...baseFont,size:10}}} } }
+        }));
+
+        _charts.push(new Chart(document.getElementById('empChartModalidad'), {
+            type: 'doughnut',
+            data: { labels: mLbl.length ? mLbl : ['Sin datos'],
+                datasets:[{data: mVal.length ? mVal : [1],
+                    backgroundColor: mLbl.length ? mClr : ['#d1d5db'], borderWidth:0, hoverOffset:4}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
+        }));
+        buildModalLegend('empModalLegend', mLbl, mVal, mClr);
+
+        _charts.push(new Chart(document.getElementById('empChartCategorias'), {
+            type: 'bar',
+            data: { labels: cLbl.length ? cLbl : ['Sin datos'],
+                datasets:[{data: cVal.length ? cVal : [0], backgroundColor:PALETTE, borderRadius:5, borderWidth:0}] },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+                scales:{ x:{grid:{display:false}, ticks:{color:textColor(),font:{...baseFont,size:9},maxRotation:30}},
+                         y:{grid:{color:gridColor()}, ticks:{color:textColor(),font:baseFont,precision:0}} } }
+        }));
+
+        _charts.push(new Chart(document.getElementById('empChartSeniority'), {
+            type: 'doughnut',
+            data: { labels: sLbl.length ? sLbl : ['Sin datos'],
+                datasets:[{data: sVal.length ? sVal : [1],
+                    backgroundColor: sLbl.length ? PALETTE : ['#d1d5db'], borderWidth:0, hoverOffset:6}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'55%',
+                plugins:{legend:{position:'bottom', labels:{color:textColor(),font:baseFont,boxWidth:10,padding:10}}} }
+        }));
+    })();
+    </script>
+
+    <script th:unless="${usuarioActualTipo == 'empresa'}" th:inline="javascript">
+    (function () {
+        const rev  = /*[[${talSolRevision  ?: 0}]]*/ 0;
+        const apr  = /*[[${talSolAprobadas ?: 0}]]*/ 0;
+        const rec  = /*[[${talSolRechazadas?: 0}]]*/ 0;
+        const cLbl = /*[[${talCategoriaLabels ?: {}}]]*/ [];
+        const cVal = /*[[${talCategoriaValues ?: {}}]]*/ [];
+        const mLbl = /*[[${talModalidadLabels ?: {}}]]*/ [];
+        const mVal = /*[[${talModalidadValues ?: {}}]]*/ [];
+        const sLbl = /*[[${talSeniorityLabels ?: {}}]]*/ [];
+        const sVal = /*[[${talSeniorityValues ?: {}}]]*/ [];
+        const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
+
+        _charts.push(new Chart(document.getElementById('talChartEstado'), {
+            type: 'doughnut',
+            data: { labels:['En revisión','Aprobadas','Rechazadas'],
+                datasets:[{data:[rev,apr,rec], backgroundColor:['#f59e0b','#22c55e','#ef4444'], borderWidth:0, hoverOffset:6}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
+                plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}} }
+        }));
+
+        _charts.push(new Chart(document.getElementById('talChartCategorias'), {
+            type: 'bar',
+            data: { labels: cLbl.length ? cLbl : ['Sin postulaciones aún'],
+                datasets:[{data: cVal.length ? cVal : [0], backgroundColor:PALETTE, borderRadius:5, borderWidth:0}] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+                scales:{ x:{grid:{color:gridColor()}, ticks:{color:textColor(),font:baseFont,precision:0}},
+                         y:{grid:{display:false}, ticks:{color:textColor(),font:{...baseFont,size:10}}} } }
+        }));
+
+        _charts.push(new Chart(document.getElementById('talChartModalidad'), {
+            type: 'doughnut',
+            data: { labels: mLbl.length ? mLbl : ['Sin datos'],
+                datasets:[{data: mVal.length ? mVal : [1],
+                    backgroundColor: mLbl.length ? mClr : ['#d1d5db'], borderWidth:0, hoverOffset:4}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
+        }));
+        buildModalLegend('talModalLegend', mLbl, mVal, mClr);
+
+        _charts.push(new Chart(document.getElementById('talChartSeniority'), {
+            type: 'doughnut',
+            data: { labels: sLbl.length ? sLbl : ['Sin datos'],
+                datasets:[{data: sVal.length ? sVal : [1],
+                    backgroundColor: sLbl.length ? PALETTE : ['#d1d5db'], borderWidth:0, hoverOffset:6}] },
+            options:{ responsive:true, maintainAspectRatio:false, cutout:'55%',
+                plugins:{legend:{position:'bottom', labels:{color:textColor(),font:baseFont,boxWidth:10,padding:10}}} }
+        }));
+    })();
+    </script>
+
+</body>
+</html>

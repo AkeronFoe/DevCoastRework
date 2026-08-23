@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Solicitud</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="app-shell">
+        <th:block th:replace="~{fragments/sidebar :: sidebar('solicitudes')}" />
+
+        <main class="main solicitud-detail-page">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1 th:text="${solicitud.empleoTitulo}">Solicitud</h1>
+                    <p
+                        th:text="'Postulación a ' + ${solicitud.empleoEmpresaNombre} + ' · ' + ${solicitud.empleoModalidad}">
+                        Empresa · Modalidad</p>
+                </div>
+                <div class="topbar-actions">
+                    <a th:href="@{/solicitudes}" class="btn btn-ghost">Volver</a>
+                </div>
+            </header>
+            <div id="flash-data" style="display:none;"
+                th:attr="data-message=${flashMessage != null ? flashMessage : ''}, data-type=${flashType != null ? flashType : ''}">
+            </div>
+
+            <section class="card">
+                <div class="job-header">
+                    <div class="logo-tile"
+                        th:attr="style='background: ' + ${solicitud.empleoColorIcono} + '; color: white; display: flex; align-items: center; justify-content: center;'">
+                        <svg th:if="${solicitud.empleoIcono == 'code'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6" />
+                            <polyline points="8 6 2 12 8 18" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'layers'}" class="icon"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                            <polyline points="2 17 12 22 22 17" />
+                            <polyline points="2 12 12 17 22 12" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'zap'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'rocket'}" class="icon"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                            <path
+                                d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'box'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'cpu'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="2" />
+                            <rect x="9" y="9" width="6" height="6" />
+                            <line x1="9" y1="1" x2="9" y2="4" />
+                            <line x1="15" y1="1" x2="15" y2="4" />
+                            <line x1="9" y1="20" x2="9" y2="23" />
+                            <line x1="15" y1="20" x2="15" y2="23" />
+                            <line x1="20" y1="9" x2="23" y2="9" />
+                            <line x1="20" y1="14" x2="23" y2="14" />
+                            <line x1="1" y1="9" x2="4" y2="9" />
+                            <line x1="1" y1="14" x2="4" y2="14" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'globe'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'chart'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'pen'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'star'}" class="icon" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'shield'}" class="icon"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <svg th:if="${solicitud.empleoIcono == 'terminal'}" class="icon"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="4 17 10 11 4 5" />
+                            <line x1="12" y1="19" x2="20" y2="19" />
+                        </svg>
+                    </div>
+                    <div class="job-info">
+                        <strong th:text="${solicitud.empleoTitulo}">Título</strong>
+                        <p class="muted"
+                            th:text="${solicitud.empleoEmpresaNombre} + ' · ' + ${solicitud.empleoEmpresaSector}">
+                            Empresa · Sector</p>
+                        <div class="job-extra">
+                            <span class="status-pill status-approved" th:if="${solicitud.estado == 'aprobada'}">Aprobada</span>
+                            <span class="status-pill status-rejected" th:if="${solicitud.estado == 'rechazada' or solicitud.estado == 'descartado'}">
+                                <span th:text="${solicitud.estado == 'descartado'} ? 'Filtrada' : 'Rechazada'">Rechazada</span>
+                            </span>
+                            <span class="status-pill status-review" th:if="${solicitud.estado == 'revision' or solicitud.estado == null}">En revisión</span>
+                            <span class="rel-time dc-mono" style="color:var(--muted);"
+                                  th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"
+                                  th:attr="data-ts=${solicitud.fechaSolicitud.time}">Fecha</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card detail-panel">
+                <h2 class="section-title">Tu postulación</h2>
+                <div class="detail-grid-2">
+                    <div class="detail-item"><strong>Correo</strong>
+                        <p th:text="${solicitud.usuarioCorreo}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Estado</strong>
+                        <p th:text="${solicitud.estado}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Fecha de postulación</strong>
+                        <p class="dc-mono" th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"
+                           th:attr="data-ts=${solicitud.fechaSolicitud.time}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Referencia</strong>
+                        <p class="dc-mono" style="font-size:.82rem;" th:text="${solicitud.id}">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card detail-panel">
+                <h2 class="section-title">Historial de la postulación</h2>
+
+                <div class="sol-estado-actual"
+                     th:classappend="${solicitud.estado == 'aprobada'} ? ' sol-estado-ok'
+                                   : (${solicitud.estado == 'rechazada'} ? ' sol-estado-no'
+                                   : (${solicitud.estado == 'descartado'} ? ' sol-estado-warn' : ' sol-estado-pending'))">
+                    <div class="sol-estado-icon">
+                        <svg th:if="${solicitud.estado == 'aprobada'}" xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <svg th:if="${solicitud.estado == 'rechazada'}" xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        <svg th:if="${solicitud.estado == 'descartado'}" xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        <svg th:if="${solicitud.estado == 'revision' or solicitud.estado == null}"
+                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong th:text="${solicitud.estado == 'aprobada'} ? '¡Postulación aceptada!'
+                                       : (${solicitud.estado == 'rechazada'} ? 'Postulación rechazada'
+                                       : (${solicitud.estado == 'descartado'} ? 'Filtrada por screening automático'
+                                       : 'En revisión'))">Estado</strong>
+                        <p th:text="${solicitud.estado == 'aprobada'} ? 'La empresa aceptó tu perfil. Espera instrucciones sobre el siguiente paso.'
+                                  : (${solicitud.estado == 'rechazada'} ? 'No fue seleccionado en este proceso. Puedes seguir aplicando a otras vacantes.'
+                                  : (${solicitud.estado == 'descartado'} ? 'Tu stack no cumplió los requisitos mínimos definidos por la empresa para este empleo.'
+                                  : 'La empresa todavía no tomó una decisión. Te notificaremos cuando haya novedades.'))">Mensaje</p>
+                    </div>
+                </div>
+
+                <div th:if="${solicitud.historial != null and !#lists.isEmpty(solicitud.historial)}"
+                     style="margin-top: 24px;">
+                    <p class="muted" style="font-size:.8rem;margin-bottom:16px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Línea de tiempo</p>
+                    <div class="sol-timeline">
+                        <div th:each="ev,iter : ${solicitud.historial}" class="sol-tl-event">
+                            <div class="sol-tl-left">
+                                <div class="sol-tl-dot"
+                                     th:classappend="${ev.estado == 'aprobada'} ? ' dot-ok'
+                                                   : (${ev.estado == 'rechazada'} ? ' dot-no'
+                                                   : (${ev.estado == 'descartado'} ? ' dot-warn' : ' dot-pending'))">
+                                </div>
+                                <div class="sol-tl-connector" th:if="${!iter.last}"></div>
+                            </div>
+                            <div class="sol-tl-body">
+                                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:3px;">
+                                    <span class="sol-tl-badge"
+                                          th:classappend="${ev.estado == 'aprobada'} ? ' tl-badge-ok'
+                                                        : (${ev.estado == 'rechazada'} ? ' tl-badge-no'
+                                                        : (${ev.estado == 'descartado'} ? ' tl-badge-warn' : ' tl-badge-pending'))"
+                                          th:text="${ev.estado == 'aprobada'} ? 'Aceptada'
+                                                 : (${ev.estado == 'rechazada'} ? 'Rechazada'
+                                                 : (${ev.estado == 'descartado'} ? 'Filtrada'
+                                                 : 'En revisión'))">Estado</span>
+                                    <span class="muted dc-mono" style="font-size:.78rem;"
+                                          th:text="${#dates.format(ev.fecha, 'dd/MM/yyyy · HH:mm')}">Fecha</span>
+                                </div>
+                                <p style="font-size:.84rem;color:var(--muted);margin:0;"
+                                   th:if="${ev.nota != null and !#strings.isEmpty(ev.nota)}"
+                                   th:text="${ev.nota}">Nota</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <style>
+            /* ── Estado actual ─────────────────────────────────────── */
+            .sol-estado-actual {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 14px 16px;
+                border-radius: 10px;
+                border: 1px solid;
+            }
+            .sol-estado-actual p { margin: 4px 0 0; font-size: .85rem; }
+            .sol-estado-actual strong { font-size: .92rem; }
+            .sol-estado-icon {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .sol-estado-icon svg { width: 16px; height: 16px; }
+
+            .sol-estado-ok      { background: var(--cat-success-tint); border-color: var(--cat-success-tint); color: var(--cat-success-text, var(--cat-success)); }
+            .sol-estado-no      { background: var(--cat-error-tint);   border-color: var(--cat-error-tint);   color: var(--cat-error-text, var(--cat-error)); }
+            .sol-estado-warn    { background: var(--cat-error-tint);   border-color: var(--cat-error-tint);   color: var(--cat-error-text, var(--cat-error)); }
+            .sol-estado-pending { background: var(--cat-data-tint);    border-color: var(--cat-data-tint);    color: var(--cat-data-text, var(--cat-data)); }
+
+            .sol-estado-ok    .sol-estado-icon { background: var(--cat-success-tint); }
+            .sol-estado-no    .sol-estado-icon { background: var(--cat-error-tint); }
+            .sol-estado-warn  .sol-estado-icon { background: var(--cat-error-tint); }
+            .sol-estado-pending .sol-estado-icon { background: var(--cat-data-tint); }
+
+            /* ── Timeline ──────────────────────────────────────────── */
+            .sol-timeline { display: flex; flex-direction: column; }
+            .sol-tl-event { display: flex; gap: 16px; align-items: flex-start; }
+            .sol-tl-left {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex-shrink: 0;
+                width: 14px;
+                padding-top: 3px;
+            }
+            .sol-tl-dot {
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: 2.5px solid;
+                background: var(--bg-primary, #fff);
+                flex-shrink: 0;
+                z-index: 1;
+            }
+            .sol-tl-connector {
+                width: 1.5px;
+                flex: 1;
+                min-height: 24px;
+                background: var(--border, rgba(255,255,255,.1));
+                margin: 3px 0;
+            }
+            .sol-tl-body {
+                padding-bottom: 20px;
+                flex: 1;
+            }
+            .sol-tl-event:last-child .sol-tl-body { padding-bottom: 0; }
+
+            .dot-ok      { border-color: var(--cat-success); background: var(--cat-success-tint); }
+            .dot-no      { border-color: var(--cat-error); background: var(--cat-error-tint); }
+            .dot-warn    { border-color: var(--cat-error); background: var(--cat-error-tint); }
+            .dot-pending { border-color: var(--cat-data); background: var(--cat-data-tint); }
+
+            .sol-tl-badge {
+                display: inline-block;
+                font-size: .75rem;
+                font-weight: 600;
+                padding: 2px 9px;
+                border-radius: 20px;
+                border: 1px solid transparent;
+            }
+            .tl-badge-ok      { background: var(--cat-success-tint); color: var(--cat-success-text, var(--cat-success)); }
+            .tl-badge-no      { background: var(--cat-error-tint);   color: var(--cat-error-text, var(--cat-error)); }
+            .tl-badge-warn    { background: var(--cat-error-tint);   color: var(--cat-error-text, var(--cat-error)); }
+            .tl-badge-pending { background: var(--cat-data-tint);    color: var(--cat-data-text, var(--cat-data)); }
+            </style>
+
+            <section class="card detail-panel">
+                <h2 class="section-title">Vacante solicitada</h2>
+                <div class="detail-grid-2">
+                    <div class="detail-item"><strong>Empresa</strong>
+                        <p th:text="${solicitud.empleoEmpresaNombre}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Sector</strong>
+                        <p th:text="${solicitud.empleoEmpresaSector}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Categoría</strong>
+                        <p th:text="${solicitud.empleoCategoria}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Modalidad</strong>
+                        <p th:text="${solicitud.empleoModalidad}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Seniority</strong>
+                        <p th:text="${solicitud.empleoSeniority}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Contrato</strong>
+                        <p th:text="${solicitud.empleoContrato}">-</p>
+                    </div>
+                    <div class="detail-item"><strong>Vacantes</strong>
+                        <p class="dc-mono" th:text="${solicitud.empleoVacantes}">-</p>
+                    </div>
+                    <div class="detail-item" th:if="${solicitud.empleoMostrarSalario}"><strong>Salario</strong>
+                        <p class="dc-mono"
+                            th:text="${solicitud.empleoSalarioMin} + ' - ' + ${solicitud.empleoSalarioMax} + ' ' + ${solicitud.empleoMoneda}">
+                            -</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card detail-panel" th:if="${solicitud.mensajeMotivacion != null and solicitud.mensajeMotivacion != ''}">
+                <h2 class="section-title">Tu mensaje de motivación</h2>
+                <div class="detail-message">
+                    <p class="detail-message__text"
+                        th:text="${solicitud.mensajeMotivacion}">Mensaje</p>
+                </div>
+            </section>
+
+            <section class="card detail-panel"
+                th:if="${solicitud.proyectosIds != null and not #lists.isEmpty(solicitud.proyectosIds)}">
+                <div class="detail-header">
+                    <h2 class="section-title">Proyectos que adjuntaste</h2>
+                    <span class="detail-count dc-mono"
+                        th:text="${#lists.size(solicitud.proyectosIds)} + ' proyecto' + (${#lists.size(solicitud.proyectosIds)} > 1 ? 's' : '')">0</span>
+                </div>
+                <p class="detail-subtext">Estos proyectos de tu portafolio fueron enviados junto con tu postulación.</p>
+                <div class="detail-chips">
+                    <span th:each="pId : ${solicitud.proyectosIds}"
+                        class="detail-chip">
+                        <a th:href="@{|/misProyectos/${pId}|}" class="detail-chip__link" th:text="${pId}">ID</a>
+                    </span>
+                </div>
+                <p class="detail-footer-note">
+                    <a th:href="@{/misProyectos}">Ver todos tus proyectos →</a>
+                </p>
+            </section>
+
+            <section class="card detail-actions">
+                <a class="btn btn-primary" th:href="@{|/empleos/${solicitud.empleoId}|}">Ver empleo original</a>
+                <a class="btn btn-ghost" th:href="@{/solicitudes}">Volver a solicitudes</a>
+                <form method="POST" th:action="@{|/solicitudes/${solicitud.id}/delete|}" style="display:inline;"
+                    data-confirm-message="¿Estás seguro de que deseas eliminar esta solicitud?"
+                    data-confirm-title="Confirmar eliminacion" data-confirm-ok="Eliminar" data-confirm-variant="danger">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-danger">Eliminar solicitud</button>
+                </form>
+            </section>
+        </main>
+    </div>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+</body>
+
+</html>
