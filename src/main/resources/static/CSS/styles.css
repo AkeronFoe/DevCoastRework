@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
+/* esto le pide al navegador que anime el cambio de una pagina a otra en vez
+   de que se vea el salto seco. Solo lo hacen los navegadores que lo soportan,
+   a los demas no les hace nada, asi que tranquilo si no lo ven en su Firefox */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-group(root) {
+    animation-duration: .22s;
+    animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
 /* ===================================
               VARIABLES
 ======================================*/
@@ -1342,23 +1354,36 @@ select {
 /* ── Estado vacío ── */
 .dc-empty {
     text-align: center;
-    padding: 32px 16px;
+    padding: 40px 16px;
     color: var(--muted);
     border: 1px dashed var(--border);
     border-radius: 10px;
     background: var(--surface-2);
+    animation: dcEmptyIn .3s ease both;
 }
 
 .dc-empty svg {
-    width: 34px;
-    height: 34px;
-    margin-bottom: 10px;
-    opacity: .4;
+    width: 26px;
+    height: 26px;
+    padding: 12px;
+    margin-bottom: 14px;
+    box-sizing: content-box;
+    border-radius: 50%;
+    background: var(--accent-soft, rgba(31, 143, 143, .08));
+    color: var(--accent);
+    opacity: .8;
 }
 
 .dc-empty p {
-    font-size: 0.84rem;
-    margin-bottom: 10px;
+    font-size: 0.86rem;
+    margin-bottom: 14px;
+}
+
+/* nomas para que no se sienta tan brusco cuando aparece un empty state
+   (por ejemplo al filtrar y quedar sin resultados) */
+@keyframes dcEmptyIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Prioridades de hoy ── */

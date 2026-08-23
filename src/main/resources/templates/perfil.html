@@ -2,10 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title th:text="${usuario != null ? usuario.nombre + ' · DevCoast' : 'DevCoast | Perfil'}">DevCoast | Perfil</title>
     <meta name="description"
         th:content="${usuario != null and usuario.bio != null ? usuario.bio : 'Perfil profesional en DevCoast'}">
@@ -16,9 +13,7 @@
     <meta property="og:type" content="profile">
     <meta property="og:image"
         th:content="${usuario != null and usuario.fotoUrl != null ? usuario.fotoUrl : '/images/og-default.png'}">
-    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
-    <script th:src="@{/JS/themes.js}"></script>
-    <script th:src="@{/JS/i18n.js}"></script>
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
     <script th:src="@{/JS/ui-feedback.js}"></script>
     <script th:src="@{/JS/dashboard-extras.js}"></script>
     <script th:src="@{/JS/transitions.js}" defer></script>

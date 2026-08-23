@@ -221,6 +221,51 @@
     }
 
     /* ══════════════════════════════════════════════════════════
+       4.  BOTON EN "CARGANDO..." AL ENVIAR UN FORMULARIO
+           Antes, al darle a "Guardar" no pasaba nada visible hasta
+           que la pagina recargaba — la gente le daba doble click
+           pensando que no funcionó. Esto apaga el boton y le pone
+           un spinner mientras se procesa el submit.
+
+           Ojo: si una pagina ya maneja su propio submit con fetch
+           (y hace preventDefault), esto no se mete — solo actua
+           cuando el formulario de verdad se va a enviar solo.
+           Si algun form necesita quedar fuera si o si, ponerle
+           data-no-loading y listo.
+    ══════════════════════════════════════════════════════════ */
+    function initFormLoading() {
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (e.defaultPrevented) return;
+            if (form.dataset.noLoading !== undefined) return;
+
+            var btn = (e.submitter && e.submitter.type !== 'reset')
+                ? e.submitter
+                : form.querySelector('button[type="submit"], input[type="submit"]');
+            if (!btn || btn.disabled) return;
+
+            var original = btn.innerHTML;
+            btn.dataset.dcOriginalHtml = original;
+            btn.disabled = true;
+            btn.classList.add('dc-btn-loading');
+            btn.innerHTML = '<span class="dc-btn-spinner" aria-hidden="true"></span>' +
+                '<span>' + (btn.dataset.loadingText || 'Un momento…') + '</span>';
+
+            /* por si la navegación no llega a pasar (form raro, error de red, etc),
+               que no se quede pegado el boton para siempre */
+            setTimeout(function () {
+                if (btn.dataset.dcOriginalHtml) {
+                    btn.disabled = false;
+                    btn.classList.remove('dc-btn-loading');
+                    btn.innerHTML = btn.dataset.dcOriginalHtml;
+                    delete btn.dataset.dcOriginalHtml;
+                }
+            }, 15000);
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
        Estilos
     ══════════════════════════════════════════════════════════ */
     function injectStyles() {
@@ -257,6 +302,23 @@
             '[data-ts]:hover{',
             '  border-bottom-color:var(--accent);',
             '}',
+            /* Boton cargando */
+            '.dc-btn-loading{',
+            '  display:inline-flex;align-items:center;gap:8px;',
+            '  opacity:.85;cursor:not-allowed;',
+            '}',
+            '.dc-btn-spinner{',
+            '  width:14px;height:14px;border-radius:50%;',
+            '  border:2px solid rgba(255,255,255,.4);',
+            '  border-top-color:#fff;',
+            '  display:inline-block;',
+            '  animation:dcSpin .6s linear infinite;',
+            '}',
+            '.btn-outline .dc-btn-spinner,.btn-ghost .dc-btn-spinner{',
+            '  border-color:rgba(100,116,139,.35);',
+            '  border-top-color:var(--accent);',
+            '}',
+            '@keyframes dcSpin{to{transform:rotate(360deg)}}',
         ].join('');
         document.head.appendChild(s);
     }
@@ -277,6 +339,7 @@
         initTooltips();
         initCounters();
         initRelativeTime();
+        initFormLoading();
     });
 
 })();

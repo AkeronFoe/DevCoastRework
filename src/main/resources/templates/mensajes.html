@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title>DevCoast | Mensajes</title>
-    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
-    <script th:src="@{/JS/themes.js}"></script>
-    <script th:src="@{/JS/i18n.js}"></script>
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
     <script th:src="@{/JS/polish.js}" defer></script>
