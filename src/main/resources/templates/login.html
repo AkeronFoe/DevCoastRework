@@ -7,6 +7,8 @@
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
+    <!-- esta faltaba aca, sin ella cosas como el spinner del boton no funcionan en esta pagina -->
+    <script th:src="@{/JS/polish.js}" defer></script>
 </head>
 
 <body>
