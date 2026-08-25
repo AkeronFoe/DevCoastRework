@@ -7,12 +7,167 @@
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
+    <style>
+        .hero-code-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .hero-code-bg span {
+            position: absolute;
+            font-family: var(--font-mono, monospace);
+            font-weight: 600;
+            color: var(--accent);
+            opacity: .07;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes dcHeroFloatA {
+            0%   { transform: translate3d(0, 0, 0); }
+            33%  { transform: translate3d(10px, -20px, 0); }
+            66%  { transform: translate3d(-6px, -8px, 0); }
+            100% { transform: translate3d(0, 0, 0); }
+        }
+
+        @keyframes dcHeroFloatB {
+            0%   { transform: translate3d(0, 0, 0); }
+            33%  { transform: translate3d(-12px, -6px, 0); }
+            66%  { transform: translate3d(-4px, -20px, 0); }
+            100% { transform: translate3d(0, 0, 0); }
+        }
+
+        .hero-code-bg span:nth-child(odd)  { animation-name: dcHeroFloatA; }
+        .hero-code-bg span:nth-child(even) { animation-name: dcHeroFloatB; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-code-bg span { animation: none; }
+        }
+
+        .win-chrome {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .win-chrome span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .bg-code-block {
+            position: fixed;
+            bottom: -40px;
+            right: -60px;
+            font-family: var(--font-mono, monospace);
+            font-size: 21px;
+            line-height: 1.7;
+            font-weight: 600;
+            color: var(--text);
+            opacity: .045;
+            transform: rotate(-6deg);
+            white-space: pre;
+            z-index: -1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .bg-code-block .kw { color: var(--accent); }
+        .bg-code-block .fn { color: #7c3aed; }
+        .bg-code-block .st { color: #10b981; }
+
+        .bg-terminal {
+            position: fixed;
+            top: 140px;
+            left: -50px;
+            font-family: var(--font-mono, monospace);
+            font-size: 18px;
+            line-height: 1.8;
+            font-weight: 600;
+            color: var(--text);
+            opacity: .045;
+            transform: rotate(4deg);
+            white-space: pre;
+            z-index: -1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .bg-terminal .kw { color: #10b981; }
+
+        #scroll-progress {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            height: 2px;
+            width: 0%;
+            background: var(--accent);
+        }
+
+        .term-line {
+            font-family: var(--font-mono, monospace);
+            font-size: .74rem;
+            color: var(--muted);
+            margin-top: -2px;
+            margin-bottom: 14px;
+        }
+
+        .term-line-cursor {
+            display: inline-block;
+            width: 6px;
+            height: 11px;
+            margin-left: 2px;
+            background: var(--accent);
+            vertical-align: middle;
+            animation: dcBlink 1s step-end infinite;
+        }
+
+        @keyframes dcBlink {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .term-line-cursor { animation: none; opacity: .6; }
+        }
+
+        .hero h2 .accent-word {
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+
+        .win-chrome span:nth-child(1) { background: #ef4444; }
+        .win-chrome span:nth-child(2) { background: #f59e0b; }
+        .win-chrome span:nth-child(3) { background: #16a34a; }
+    </style>
 </head>
 
 <body data-theme="light">
     <div class="landing-shell">
+        <pre class="bg-code-block" aria-hidden="true"><span class="kw">function</span> findMatch(dev) {
+  <span class="kw">const</span> stack = dev.stack;
+  <span class="kw">return</span> empresas
+    .filter(<span class="fn">c</span> =&gt; c.stack
+      .some(<span class="fn">s</span> =&gt; stack
+        .includes(s)))
+    .sort(byFit);
+}</pre>
+
+        <pre class="bg-terminal" aria-hidden="true"><span class="kw">$</span> devcoast --match
+<span class="kw">&gt;</span> buscando desarrolladores...
+<span class="kw">&gt;</span> 1,240 resultados</pre>
 
         <header class="landing-nav" id="main-nav" style="background:var(--bg-2);border-bottom:1px solid var(--border);">
+            <div id="scroll-progress" aria-hidden="true"></div>
             <div class="brand">
                 <div class="brand-mark"><img th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast" width="42"
                         height="42"></div>
@@ -54,10 +209,29 @@
         <main class="landing-main">
 
             <section id="inicio" class="hero reveal">
+                <div class="hero-code-bg" aria-hidden="true">
+                    <span style="top:10%; left:8%; font-size:22px; animation-duration:15s;">&lt;/&gt;</span>
+                    <span style="top:72%; left:14%; font-size:18px; animation-duration:13s;">{ }</span>
+                    <span style="top:20%; left:38%; font-size:16px; animation-duration:17s;">=&gt;</span>
+                    <span style="top:60%; left:44%; font-size:20px; animation-duration:14s;">( )</span>
+                    <span style="top:12%; left:58%; font-size:16px; animation-duration:16s;">01</span>
+                    <span style="top:80%; left:30%; font-size:18px; animation-duration:18s;">::</span>
+                    <span style="top:45%; left:6%; font-size:16px; animation-duration:12s;">git</span>
+                    <span style="top:32%; left:20%; font-size:20px; animation-duration:19s;">&amp;&amp;</span>
+                    <span style="top:8%; left:28%; font-size:14px; animation-duration:16s;">if()</span>
+                    <span style="top:55%; left:52%; font-size:18px; animation-duration:13s;">[ ]</span>
+                    <span style="top:88%; left:10%; font-size:16px; animation-duration:15s;">npm</span>
+                    <span style="top:25%; left:48%; font-size:14px; animation-duration:18s;">::</span>
+                    <span style="top:65%; left:22%; font-size:20px; animation-duration:14s;">&lt;div&gt;</span>
+                    <span style="top:5%; left:16%; font-size:16px; animation-duration:17s;">async</span>
+                </div>
                 <div class="hero-content">
-                    <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Plataforma de talento creativo</div>
-                    <h2>Encuentra proyectos serios y talento que habla tu <span class="accent-word">mismo
-                            lenguaje.</span></h2>
+                    <div class="hero-eyebrow"><span class="eyebrow-prompt" aria-hidden="true">&gt;_</span>Plataforma de talento creativo</div>
+                    <h2 id="hero-typewriter"
+                        aria-label="Encuentra proyectos serios y talento que habla tu mismo lenguaje.">
+                        <span id="htw-normal" aria-hidden="true"></span><span id="htw-accent" class="accent-word"
+                            aria-hidden="true"></span>
+                    </h2>
                     <p class="hero-desc">DevCoast combina empleos curados, portafolios vivos y un perfil profesional
                         listo para compartir. Sin ruido, sin formularios eternos.</p>
                     <div class="hero-actions">
@@ -93,7 +267,9 @@
                 </div>
 
                 <div class="hero-stats-panel">
+                    <div class="win-chrome" aria-hidden="true"><span></span><span></span><span></span></div>
                     <p class="hero-stats-label">Actividad en tiempo real</p>
+                    <p class="term-line" aria-hidden="true"><span id="term-out"></span><span class="term-line-cursor"></span></p>
                     <div class="hero-stat-row">
                         <div class="hero-stat-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -809,8 +985,66 @@
     </div>
 
     <script>
+        (function () {
+            const normalPart = 'Encuentra proyectos serios y talento que habla tu ';
+            const accentPart = 'mismo lenguaje.';
+            const normalEl = document.getElementById('htw-normal');
+            const accentEl = document.getElementById('htw-accent');
+            if (!normalEl || !accentEl) return;
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                normalEl.textContent = normalPart;
+                accentEl.textContent = accentPart;
+                return;
+            }
+
+            const full = normalPart + accentPart;
+            let i = 0;
+            function tick() {
+                i++;
+                const shown = full.slice(0, i);
+                if (shown.length <= normalPart.length) {
+                    normalEl.textContent = shown;
+                } else {
+                    normalEl.textContent = normalPart;
+                    accentEl.textContent = shown.slice(normalPart.length);
+                }
+                if (i < full.length) setTimeout(tick, 30);
+            }
+            tick();
+        })();
+
+        (function () {
+            const el = document.getElementById('term-out');
+            if (!el) return;
+            const text = '$ sincronizando datos en vivo…';
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                el.textContent = text;
+                return;
+            }
+
+            let i = 0;
+            function tick() {
+                i++;
+                el.textContent = text.slice(0, i);
+                if (i < text.length) setTimeout(tick, 35);
+            }
+            setTimeout(tick, 900);
+        })();
+
         const nav = document.getElementById('main-nav');
         window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 10), { passive: true });
+
+        const progressBar = document.getElementById('scroll-progress');
+        function updateScrollProgress() {
+            const h = document.documentElement;
+            const max = h.scrollHeight - h.clientHeight;
+            const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+            if (progressBar) progressBar.style.width = pct + '%';
+        }
+        window.addEventListener('scroll', updateScrollProgress, { passive: true });
+        updateScrollProgress();
 
         const navLinks = document.querySelectorAll('.landing-nav .nav-link');
         const sectionMap = {

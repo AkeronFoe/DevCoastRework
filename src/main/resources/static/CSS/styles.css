@@ -329,6 +329,17 @@ select {
     width: 28px;
     height: 28px;
     border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* el img del logo a veces trae width/height fijo desde el HTML (o ninguno),
+   esto lo obliga a llenar el cuadrito bien sin importar el tamaño real del PNG */
+.brand-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-name {
@@ -3395,36 +3406,12 @@ select {
 .hero {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 60%);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;
     min-height: 420px;
-}
-
-.hero::before {
-    content: "";
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(29, 127, 208, 0.09) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-.hero::after {
-    content: "";
-    position: absolute;
-    bottom: -80px;
-    left: 160px;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 58, 237, 0.06) 0%, transparent 70%);
-    pointer-events: none;
 }
 
 .hero h2 {
@@ -3457,6 +3444,12 @@ select {
     z-index: 1;
 }
 
+.eyebrow-prompt {
+    font-family: var(--font-mono, monospace);
+    font-weight: 700;
+    opacity: .8;
+}
+
 .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -3473,13 +3466,6 @@ select {
     width: fit-content;
 }
 
-.eyebrow-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulsedot 2.2s ease-in-out infinite;
-}
 
 .hero-actions {
     display: flex;
@@ -3496,6 +3482,40 @@ select {
 .hero-actions .btn-primary:hover {
     box-shadow: 0 8px 28px rgba(29, 127, 208, 0.38);
     transform: translateY(-2px);
+}
+
+/* brillito que cruza el boton al pasar el mouse, nada de gradiente,
+   es solo una franja solida semi-transparente que se desliza */
+.hero-actions .btn-primary,
+.cta-actions .btn-white {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-actions .btn-primary::after,
+.cta-actions .btn-white::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 35%;
+    height: 100%;
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.hero-actions .btn-primary::after {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.cta-actions .btn-white::after {
+    background: rgba(29, 127, 208, 0.12);
+}
+
+.hero-actions .btn-primary:hover::after,
+.cta-actions .btn-white:hover::after {
+    left: 130%;
 }
 
 .hero-actions .btn-outline {
@@ -3530,6 +3550,11 @@ select {
 .avatar-sm:first-child {
     margin-left: 0;
 }
+
+.avatar-blue  { background: #1d7fd0; }
+.avatar-green { background: #10b981; }
+.avatar-amber { background: #f59e0b; }
+.avatar-pink  { background: #ec4899; }
 
 .social-proof-text {
     font-size: 0.8rem;
@@ -3636,6 +3661,20 @@ select {
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
+/* esquinita tipo visor de camara/terminal, fija, se ve en cualquier foto */
+.feature-card::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 14px;
+    height: 14px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+    opacity: .3;
+    pointer-events: none;
+}
+
 .feature-card::before {
     content: "";
     position: absolute;
@@ -3643,7 +3682,7 @@ select {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent), #7c3aed);
+    background: var(--accent);
     opacity: 0;
     transition: opacity 0.3s;
     border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -3839,11 +3878,12 @@ select {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
 }
 
 .nb-cell:hover {
     background: var(--surface-2);
+    transform: translateY(-2px);
 }
 
 .nb-num {
@@ -3852,6 +3892,15 @@ select {
     line-height: 1;
     letter-spacing: -0.03em;
     color: var(--accent);
+}
+
+.nb-num::before {
+    content: '>';
+    font-family: var(--font-mono, monospace);
+    font-size: 1.4rem;
+    color: var(--muted);
+    opacity: .6;
+    margin-right: 6px;
 }
 
 .nb-label {
@@ -3899,7 +3948,7 @@ select {
     top: 50px;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(180deg, var(--accent-soft), transparent);
+    background: var(--accent-soft);
 }
 
 .step-num {
@@ -3993,19 +4042,19 @@ select {
 }
 
 .hl-aurora {
-    background: linear-gradient(135deg, #1d7fd0, #7c3aed);
+    background: #1d7fd0;
 }
 
 .hl-lumen {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    background: #f59e0b;
 }
 
 .hl-caps {
-    background: linear-gradient(135deg, #10b981, #1d7fd0);
+    background: #10b981;
 }
 
 .hl-nova {
-    background: linear-gradient(135deg, #ec4899, #7c3aed);
+    background: #ec4899;
 }
 
 .hl-info strong {
@@ -4061,6 +4110,13 @@ select {
     padding: 28px;
     position: relative;
     overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.compare-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(29, 127, 208, 0.09);
+    border-color: rgba(29, 127, 208, 0.2);
 }
 
 .compare-card.featured {
@@ -4078,11 +4134,11 @@ select {
 }
 
 .compare-card:first-child::before {
-    background: linear-gradient(90deg, #1d7fd0, #10b981);
+    background: #1d7fd0;
 }
 
 .compare-card:last-child::before {
-    background: linear-gradient(90deg, #7c3aed, #ec4899);
+    background: #7c3aed;
 }
 
 .compare-tag {
@@ -4225,19 +4281,19 @@ select {
 }
 
 .av-blue {
-    background: linear-gradient(135deg, #1d7fd0, #7c3aed);
+    background: #1d7fd0;
 }
 
 .av-green {
-    background: linear-gradient(135deg, #10b981, #1d7fd0);
+    background: #10b981;
 }
 
 .av-orange {
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    background: #f59e0b;
 }
 
 .av-pink {
-    background: linear-gradient(135deg, #ec4899, #7c3aed);
+    background: #ec4899;
 }
 
 .tname {
@@ -4578,7 +4634,7 @@ select {
 }
 
 .cta-section {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    background: var(--accent);
     border-radius: var(--radius-lg);
     padding: 52px 44px;
     display: grid;
