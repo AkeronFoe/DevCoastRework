@@ -249,8 +249,8 @@
             btn.dataset.dcOriginalHtml = original;
             btn.disabled = true;
             btn.classList.add('dc-btn-loading');
-            btn.innerHTML = '<span class="dc-btn-spinner" aria-hidden="true"></span>' +
-                '<span>' + (btn.dataset.loadingText || 'Un momento…') + '</span>';
+            btn.innerHTML = '<span class="dc-btn-dots" aria-hidden="true"><span></span><span></span><span></span></span>' +
+                '<span>' + (btn.dataset.loadingText || 'Un momento') + '</span>';
 
             /* por si la navegación no llega a pasar (form raro, error de red, etc),
                que no se quede pegado el boton para siempre */
@@ -266,6 +266,91 @@
     }
 
     /* ══════════════════════════════════════════════════════════
+       5.  PESTAÑA DE EDITOR EN EL TOPBAR
+           Le pone a cada página un chip mono con los puntitos
+           rojo/ámbar/verde + la ruta actual (estilo pestaña de
+           VS Code) arriba del título. Puramente decorativo/
+           orientativo — por eso aria-hidden, el <h1> de al lado
+           ya dice de qué página se trata.
+    ══════════════════════════════════════════════════════════ */
+    function initTopbarTab() {
+        var titleBox = document.querySelector('.topbar .topbar-title');
+        if (!titleBox || titleBox.querySelector('.topbar-tab')) return;
+
+        var path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+        var segments = path.length ? path.split('/') : ['dashboard'];
+        var last = segments[segments.length - 1];
+        var head = segments.slice(0, -1);
+
+        var wrap = document.createElement('div');
+        wrap.className = 'topbar-tab';
+        wrap.setAttribute('aria-hidden', 'true');
+
+        var dots = document.createElement('span');
+        dots.className = 'win-chrome';
+        dots.innerHTML = '<span></span><span></span><span></span>';
+
+        var pathEl = document.createElement('span');
+        pathEl.className = 'topbar-tab-path';
+        var prefix = '$ cd ~/' + (head.length ? head.join('/') + '/' : '');
+        pathEl.innerHTML = prefix + '<b>' + last + '</b>';
+
+        var cursor = document.createElement('span');
+        cursor.className = 'topbar-tab-cursor';
+
+        wrap.appendChild(dots);
+        wrap.appendChild(pathEl);
+        wrap.appendChild(cursor);
+        titleBox.insertBefore(wrap, titleBox.firstChild);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       6.  CHROME EN ESTADOS VACIOS
+           Los .dc-empty (sin resultados, sin guardados, etc.) llevan
+           el mismo puntito rojo/ambar/verde que la pestaña del topbar,
+           para que se sientan parte de la misma familia visual.
+    ══════════════════════════════════════════════════════════ */
+    function initEmptyStateChrome() {
+        document.querySelectorAll('.dc-empty').forEach(function (el) {
+            if (el.querySelector('.win-chrome')) return;
+            var dots = document.createElement('span');
+            dots.className = 'win-chrome';
+            dots.setAttribute('aria-hidden', 'true');
+            dots.innerHTML = '<span></span><span></span><span></span>';
+            el.insertBefore(dots, el.firstChild);
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       7.  ATAJO Ctrl/Cmd+K PARA EL BUSCADOR
+           Como en cualquier herramienta de developer (GitHub, Linear,
+           VS Code): salta al buscador principal del topbar sin tocar
+           el mouse, con su pastilla de hint correspondiente.
+    ══════════════════════════════════════════════════════════ */
+    function initSearchShortcut() {
+        var search = document.querySelector('.topbar .search');
+        if (!search) return;
+        var input = search.querySelector('input');
+        if (!input) return;
+
+        var isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '');
+        var kbd = document.createElement('kbd');
+        kbd.className = 'dc-kbd';
+        kbd.setAttribute('aria-hidden', 'true');
+        kbd.textContent = isMac ? '⌘K' : 'Ctrl K';
+        search.appendChild(kbd);
+
+        document.addEventListener('keydown', function (e) {
+            var key = e.key ? e.key.toLowerCase() : '';
+            if ((e.metaKey || e.ctrlKey) && key === 'k') {
+                e.preventDefault();
+                input.focus();
+                if (input.select) input.select();
+            }
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
        Estilos
     ══════════════════════════════════════════════════════════ */
     function injectStyles() {
@@ -274,24 +359,24 @@
         s.id  = 'dc-polish-style';
         s.textContent = [
             /* Tooltip */
+            /* mismo chrome oscuro que la pestaña del topbar y los estados
+               vacios — la familia "siempre oscura" del sistema */
             '.dc-tip{',
             '  position:fixed;',
             '  z-index:99990;',
             '  display:none;',
             '  padding:5px 10px;',
-            '  background:#1a1a2e;',
-            '  color:#f1f5f9;',
-            '  font-size:12px;',
+            '  background:var(--term-chrome-bg,#0b0f14);',
+            '  color:var(--term-chrome-text,#f1f5f9);',
+            '  border:1px solid var(--term-chrome-border,transparent);',
+            '  font-family:var(--font-mono,monospace);',
+            '  font-size:11px;',
             '  font-weight:500;',
             '  border-radius:7px;',
             '  pointer-events:none;',
             '  white-space:nowrap;',
             '  box-shadow:0 4px 12px rgba(0,0,0,.25);',
             '  transition:opacity .15s ease,transform .15s ease;',
-            '}',
-            /* En tema claro, tooltip un poco más suave */
-            '[data-theme="light"] .dc-tip{',
-            '  background:#1e2a3b;',
             '}',
             /* Timestamps relativos */
             '[data-ts]{',
@@ -319,6 +404,17 @@
             '  border-top-color:var(--accent);',
             '}',
             '@keyframes dcSpin{to{transform:rotate(360deg)}}',
+            /* Puntos "escribiendo" — se sienten mas a sistema procesando
+               un comando que un spinner generico */
+            '.dc-btn-dots{display:inline-flex;gap:3px;align-items:center;}',
+            '.dc-btn-dots span{',
+            '  width:4px;height:4px;border-radius:50%;',
+            '  background:currentColor;opacity:.35;',
+            '  animation:dcDotPulse 1s ease-in-out infinite;',
+            '}',
+            '.dc-btn-dots span:nth-child(2){animation-delay:.15s}',
+            '.dc-btn-dots span:nth-child(3){animation-delay:.3s}',
+            '@keyframes dcDotPulse{0%,60%,100%{opacity:.35;transform:scale(1)}30%{opacity:1;transform:scale(1.3)}}',
         ].join('');
         document.head.appendChild(s);
     }
@@ -340,6 +436,9 @@
         initCounters();
         initRelativeTime();
         initFormLoading();
+        initTopbarTab();
+        initEmptyStateChrome();
+        initSearchShortcut();
     });
 
 })();

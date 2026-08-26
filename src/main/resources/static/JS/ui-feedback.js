@@ -10,17 +10,23 @@
         info: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
     };
     var TOAST_TITLES = { success: '¡Listo!', error: 'Error', warning: 'Atención', info: 'Información' };
+    var TOAST_TAGS = { success: 'OK', error: 'ERR', warning: 'WARN', info: 'i' };
 
     function getContainer() {
         var c = document.getElementById('toast-system');
-        if (!c) {
+        var isNew = !c;
+        if (isNew) {
             c = document.createElement('div');
             c.id = 'toast-system';
-            c.setAttribute('aria-live', 'polite');
-            c.setAttribute('aria-atomic', 'true');
-            c.style.cssText = 'position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column-reverse;gap:10px;z-index:5000;pointer-events:none;';
             document.body.appendChild(c);
-            if (!document.getElementById('toast-sys-styles')) {
+        }
+        /* algunas paginas ya traen el div #toast-system vacio en su HTML
+           (para reservar el lugar) — hay que posicionarlo e inyectar los
+           estilos igual, no solo cuando lo creamos nosotros nuevo */
+        c.setAttribute('aria-live', 'polite');
+        c.setAttribute('aria-atomic', 'true');
+        c.style.cssText = 'position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column-reverse;gap:10px;z-index:5000;pointer-events:none;';
+        if (!document.getElementById('toast-sys-styles')) {
                 var s = document.createElement('style');
                 s.id = 'toast-sys-styles';
                 s.textContent = [
@@ -43,6 +49,11 @@
                     '.ts-iw.info{background:var(--accent-soft,#e0f0fb);color:var(--accent,#1d7fd0);}',
                     '.ts-ct{flex:1;min-width:0;}',
                     '.ts-ttl{font-size:.88rem;font-weight:700;color:var(--text,#0f172a);}',
+                    '.ts-tag{font-family:var(--font-mono,monospace);margin-right:5px;}',
+                    '.ts-item.success .ts-tag{color:#16a34a;}',
+                    '.ts-item.error .ts-tag{color:#dc2626;}',
+                    '.ts-item.warning .ts-tag{color:#d97706;}',
+                    '.ts-item.info .ts-tag{color:var(--accent,#1d7fd0);}',
                     '.ts-msg{font-size:.78rem;color:var(--muted,#64748b);margin-top:2px;line-height:1.45;}',
                     '.ts-cls{background:none;border:none;cursor:pointer;color:var(--muted,#64748b);padding:2px;font-size:1.1rem;flex-shrink:0;border-radius:6px;line-height:1;transition:color .15s;}',
                     '.ts-cls:hover{color:var(--text,#0f172a);}',
@@ -54,7 +65,6 @@
                     '.ts-item.info .ts-fill{background:var(--accent,#1d7fd0);}'
                 ].join('');
                 document.head.appendChild(s);
-            }
         }
         return c;
     }
@@ -81,7 +91,7 @@
         toast.innerHTML = [
             '<div class="ts-iw ' + t + '">' + (TOAST_ICONS[t] || TOAST_ICONS.info) + '</div>',
             '<div class="ts-ct">',
-            '<div class="ts-ttl">' + ttl + '</div>',
+            '<div class="ts-ttl"><span class="ts-tag">[' + (TOAST_TAGS[t] || 'i') + ']</span>' + ttl + '</div>',
             '<div class="ts-msg">' + message + '</div>',
             '</div>',
             '<button class="ts-cls" aria-label="Cerrar">×</button>',

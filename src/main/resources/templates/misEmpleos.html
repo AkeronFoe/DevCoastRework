@@ -5,6 +5,7 @@
     <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title>DevCoast | Mis Empleos</title>
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
     <script th:src="@{/JS/polish.js}" defer></script>
@@ -183,7 +184,11 @@
                         </div>
 
                         <div class="job-mgmt-info">
-                            <div class="job-mgmt-title" th:text="${empleo.titulo}">Título del empleo</div>
+                            <div class="job-mgmt-title">
+                                <span th:text="${empleo.titulo}">Título del empleo</span>
+                                <span class="dc-mono" style="font-size:.7rem;font-weight:400;color:var(--text-faint,var(--muted));margin-left:8px;"
+                                    th:text="'#DC-' + ${#strings.toUpperCase(#strings.substring(empleo.id, empleo.id.length()-6, empleo.id.length()))}">#DC-000000</span>
+                            </div>
                             <div class="job-mgmt-tags">
                                 <span class="tag-pill accent" th:if="${empleo.modalidad}"
                                     th:text="${empleo.modalidad}">Modalidad</span>
@@ -359,7 +364,11 @@
                         </div>
 
                         <div class="job-mgmt-info">
-                            <div class="job-mgmt-title" th:text="${empleo.titulo}">Título del empleo</div>
+                            <div class="job-mgmt-title">
+                                <span th:text="${empleo.titulo}">Título del empleo</span>
+                                <span class="dc-mono" style="font-size:.7rem;font-weight:400;color:var(--text-faint,var(--muted));margin-left:8px;"
+                                    th:text="'#DC-' + ${#strings.toUpperCase(#strings.substring(empleo.id, empleo.id.length()-6, empleo.id.length()))}">#DC-000000</span>
+                            </div>
                             <div class="job-mgmt-tags">
                                 <span class="tag-pill" th:if="${empleo.modalidad}"
                                     th:text="${empleo.modalidad}">Modalidad</span>

@@ -76,6 +76,24 @@
     --cat-error: #DE5B5B;
     --cat-error-tint: rgba(222, 91, 91, .16);
     --cat-error-text: #c73f3f;
+
+    /* Chrome de terminal — SIEMPRE oscuro, no se reasigna en themes.js,
+       asi la barra de comando se ve igual sin importar el tema activo */
+    --term-chrome-bg: #0b0f14;
+    --term-chrome-text: #c9d6e0;
+    --term-chrome-border: rgba(0, 217, 255, 0.18);
+
+    /* Chrome "mas oscuro que el resto" — SI se reasigna por tema en
+       themes.js (a diferencia de --term-chrome-*), para que contraste
+       con la pagina sin quedar desconectado del resto de los colores */
+    --chrome-dark: #1b2333;
+    --chrome-dark-text: #e7ecf3;
+    --chrome-dark-border: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes dcBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
 }
 
 /* ===================================
@@ -126,6 +144,35 @@ a {
     text-decoration: none;
 }
 
+::selection {
+    background: var(--accent);
+    color: var(--accent-on, #ffffff);
+}
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 8px;
+    border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent);
+}
+
 img {
     max-width: 100%;
     display: block;
@@ -138,6 +185,11 @@ select {
     font-family: inherit;
     font-size: 1rem;
     color: var(--text);
+}
+
+input,
+textarea {
+    caret-color: var(--accent);
 }
 
 /* ===================================
@@ -347,12 +399,15 @@ select {
     font-weight: 600;
     letter-spacing: -0.3px;
     line-height: 1.2;
+    font-family: var(--font-mono);
 }
 
 .brand-tag {
     color: var(--muted);
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1;
+    font-family: var(--font-mono);
+    letter-spacing: 0.01em;
 }
 
 .nav-section {
@@ -360,13 +415,19 @@ select {
     font-size: 10px;
     font-weight: 600;
     color: var(--muted);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-transform: none;
     padding: 0 8px;
     margin: 14px 0 3px;
     pointer-events: none;
     user-select: none;
     opacity: 0.7;
+    font-family: var(--font-mono);
+}
+
+.nav-section::before {
+    content: "// ";
+    opacity: 0.65;
 }
 
 .nav {
@@ -382,6 +443,7 @@ select {
     color: var(--muted);
     font-weight: 500;
     font-size: 13px;
+    font-family: var(--font-mono);
     display: flex;
     align-items: center;
     gap: 9px;
@@ -409,7 +471,7 @@ select {
 .nav-badge {
     margin-left: auto;
     background: var(--accent);
-    color: #fff;
+    color: var(--accent-on, #fff);
     font-size: 10px;
     font-weight: 600;
     padding: 1px 6px;
@@ -417,6 +479,19 @@ select {
     min-width: 18px;
     text-align: center;
     line-height: 1.5;
+    /* algo nuevo entro — un anillo que se expande una sola vez, no un loop
+       infinito (eso ya se sentiria como notificacion molesta).
+       box-shadow (no un ::after) para no taparle el numero al badge. */
+    animation: dcPing 1.6s cubic-bezier(0, 0, 0.2, 1) 1;
+}
+
+@keyframes dcPing {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45); }
+    100% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-badge { animation: none; }
 }
 
 .sidebar-panel {
@@ -454,6 +529,7 @@ select {
 }
 
 .profile-avatar {
+    position: relative;
     width: 30px;
     height: 30px;
     border-radius: 8px;
@@ -468,6 +544,20 @@ select {
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
+}
+
+/* punto de "sesion activa" — como el indicador de proceso corriendo en una
+   terminal (htop, docker ps), no solo decorativo */
+.profile-avatar::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+    border: 2px solid var(--surface);
 }
 
 .profile-name {
@@ -523,6 +613,72 @@ select {
 }
 
 /* ===================================
+      SIGNATURE: IDE TAB CHROME
+   (inyectado por polish.js en .topbar-title
+    de cada pagina — ver initTopbarTab)
+======================================*/
+.win-chrome {
+    display: inline-flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.win-chrome span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    opacity: 0.85;
+}
+
+.win-chrome span:nth-child(1) { background: #ef4444; }
+.win-chrome span:nth-child(2) { background: #f59e0b; }
+.win-chrome span:nth-child(3) { background: #16a34a; }
+
+.topbar-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--chrome-dark-border);
+    border-radius: 8px;
+    background: var(--chrome-dark);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--chrome-dark-text);
+    width: fit-content;
+    max-width: 100%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.topbar-tab .topbar-tab-path {
+    letter-spacing: 0.01em;
+    max-width: min(360px, 60vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-tab .topbar-tab-path b {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.topbar-tab .topbar-tab-cursor {
+    display: inline-block;
+    width: 6px;
+    height: 12px;
+    background: var(--accent);
+    animation: dcBlink 1s step-end infinite;
+    flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .topbar-tab .topbar-tab-cursor { animation: none; opacity: .6; }
+}
+
+/* ===================================
              MAIN/TOPBAR
 ======================================*/
 .main {
@@ -555,10 +711,11 @@ select {
 }
 
 .topbar-title h1 {
-    font-family: "Space Grotesk", "DM Sans", sans-serif;
-    font-size: 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
     margin-bottom: 4px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     line-height: 1.2;
 }
 
@@ -615,8 +772,8 @@ select {
 
 .search:focus-within {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(29, 127, 208, 0.16);
-    background: #ffffff;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: var(--surface);
 }
 
 .search input {
@@ -625,10 +782,30 @@ select {
     outline: none;
     width: 100%;
     color: var(--text);
+    font-family: var(--font-mono);
 }
 
 .search #buscar-solicitud {
     min-width: 240px;
+}
+
+.dc-kbd {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-faint, var(--muted));
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s ease;
+}
+
+.search:focus-within .dc-kbd {
+    opacity: 0;
 }
 
 .select {
@@ -639,12 +816,13 @@ select {
     border-radius: 10px;
     outline: none;
     font-weight: bold;
+    font-family: var(--font-mono);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(29, 127, 208, 0.16);
+    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .btn {
@@ -659,6 +837,8 @@ select {
     justify-content: center;
     gap: 8px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-family: var(--font-mono);
+    letter-spacing: 0.01em;
 }
 
 .btn:active {
@@ -684,7 +864,7 @@ select {
 
 .btn-primary {
     background: var(--accent);
-    color: #ffffff;
+    color: var(--accent-on, #ffffff);
 }
 
 .btn-primary:hover {
@@ -869,6 +1049,8 @@ select {
     background: var(--surface-2);
     border: 1px solid var(--border);
     font-weight: bold;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
     color: var(--muted);
     transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
@@ -890,7 +1072,7 @@ select {
     height: 10px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 4px rgba(29, 127, 208, 0.18);
+    box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 /* ===================================
@@ -916,8 +1098,9 @@ select {
 }
 
 .section-title {
-    font-family: "Space Grotesk", "DM Sans", sans-serif;
-    font-size: 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -1352,13 +1535,20 @@ select {
 
 /* ── Estado vacío ── */
 .dc-empty {
+    position: relative;
     text-align: center;
-    padding: 40px 16px;
+    padding: 40px 16px 32px;
     color: var(--muted);
     border: 1px dashed var(--border);
     border-radius: 10px;
     background: var(--surface-2);
     animation: dcEmptyIn .3s ease both;
+}
+
+.dc-empty .win-chrome {
+    position: absolute;
+    top: 14px;
+    left: 16px;
 }
 
 .dc-empty svg {
@@ -1368,9 +1558,9 @@ select {
     margin-bottom: 14px;
     box-sizing: content-box;
     border-radius: 50%;
-    background: var(--accent-soft, rgba(31, 143, 143, .08));
+    background: var(--accent-soft);
     color: var(--accent);
-    opacity: .8;
+    opacity: .9;
 }
 
 .dc-empty p {
@@ -2125,10 +2315,23 @@ select {
 .talento-card__stack {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 6px;
 }
 
+.talento-card__stack::before,
+.talento-card__stack::after {
+    font-family: var(--font-mono);
+    color: var(--text-faint, var(--muted));
+    font-size: 0.78rem;
+    opacity: 0.7;
+}
+
+.talento-card__stack::before { content: "["; }
+.talento-card__stack::after { content: "]"; }
+
 .talento-stack-pill {
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     font-weight: 600;
     padding: 4px 10px;
@@ -5921,18 +6124,17 @@ select {
 }
 
 .password-strength-track {
-    height: 4px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    overflow: hidden;
+    display: flex;
+    gap: 4px;
     margin-top: 8px;
 }
 
-.password-strength-fill {
-    height: 100%;
-    width: 0;
+.password-strength-seg {
+    height: 4px;
+    flex: 1;
     border-radius: 4px;
-    transition: width 0.25s ease, background 0.25s ease;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease;
 }
 
 .password-strength-row {
@@ -8463,18 +8665,33 @@ select {
 .job-stack-row {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 5px;
     margin-top: 10px;
 }
 
+/* el stack de tecnologias se lee como un array de codigo, no como
+   una fila cualquiera de chips */
+.job-stack-row::before,
+.job-stack-row::after {
+    font-family: var(--font-mono);
+    color: var(--text-faint, var(--muted));
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.job-stack-row::before { content: "["; }
+.job-stack-row::after { content: "]"; }
+
 .stack-chip {
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     font-weight: 600;
     padding: 3px 9px;
     border-radius: 6px;
-    background: rgba(29, 127, 208, 0.07);
+    background: var(--accent-soft);
     color: var(--accent);
-    border: 1px solid rgba(29, 127, 208, 0.15);
+    border: 1px solid transparent;
 }
 
 .job-mgmt-side {

@@ -103,7 +103,8 @@
 
     // ── Medidor de fuerza de contraseña ────────────────────────────────
     const pwInput    = document.getElementById('password');
-    const pwMeter    = document.getElementById('password-strength-fill');
+    const pwTrack    = document.getElementById('password-strength-track');
+    const pwSegs     = pwTrack ? Array.from(pwTrack.querySelectorAll('.password-strength-seg')) : [];
     const pwLabel    = document.getElementById('password-strength-label');
     const pwHelp     = document.getElementById('password-help');
 
@@ -118,7 +119,7 @@
         return Math.min(score, 4);
     }
 
-    if (pwInput && pwMeter && pwLabel) {
+    if (pwInput && pwSegs.length && pwLabel) {
         const niveles = [
             { label: 'Muy corta', color: 'var(--cat-error, #ef4444)' },
             { label: 'Débil',     color: 'var(--cat-error, #ef4444)' },
@@ -137,9 +138,11 @@
                 pwHelp.classList.toggle('is-warning', tooShort);
             }
             const nivel = pw.length === 0 ? 0 : evaluarFuerza(pw);
-            const pct = pw.length === 0 ? 0 : Math.max(20, (nivel / 4) * 100);
-            pwMeter.style.width = pct + '%';
-            pwMeter.style.background = niveles[nivel].color;
+            // nivel va de 0 a 4 — encendemos ese mismo numero de segmentos,
+            // como un medidor de señal en vez de una barra continua
+            pwSegs.forEach((seg, i) => {
+                seg.style.background = i < nivel ? niveles[nivel].color : '';
+            });
             pwLabel.textContent = pw.length === 0 ? '' : niveles[nivel].label;
             pwLabel.style.color = niveles[nivel].color;
             checkConfirmMatch();

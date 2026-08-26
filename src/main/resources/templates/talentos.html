@@ -5,6 +5,9 @@
     <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title>DevCoast | Talentos</title>
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <div id="flash-data" th:if="${flashMessage != null}"
+        th:attr="data-message=${flashMessage}, data-type=${flashType ?: 'info'}" style="display:none"></div>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
     <script th:src="@{/JS/polish.js}" defer></script>

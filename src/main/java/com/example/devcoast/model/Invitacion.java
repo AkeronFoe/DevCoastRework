@@ -3,6 +3,7 @@ package com.example.devcoast.model;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -10,9 +11,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// el índice es para: contar invitaciones pendientes/aceptadas/rechazadas por talento rápido
 @Getter
 @Setter
 @NoArgsConstructor
+@CompoundIndex(name = "talento_estado_idx", def = "{'talento_id': 1, 'estado': 1}")
 @Document(collection = "invitaciones")
 public class Invitacion {
 

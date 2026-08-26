@@ -51,20 +51,23 @@ const THEMES = {
     '--input-bg': 'var(--surface)',
     '--accent-on': '#ffffff',
     '--border-strong': 'rgba(15, 23, 42, 0.16)',
-    '--text-faint': '#94a3b8'
+    '--text-faint': '#94a3b8',
+    '--chrome-dark': '#1b2333',
+    '--chrome-dark-text': '#e7ecf3',
+    '--chrome-dark-border': 'rgba(255, 255, 255, 0.08)'
   },
   dark: {
-    '--bg': '#16171A',
-    '--bg-2': '#131418',
-    '--surface': '#1D1E22',
-    '--surface-2': '#24252A',
-    '--text': '#EEEBE4',
-    '--muted': '#8B8A86',
-    '--accent': '#3B8EEA',
-    '--accent-strong': '#63A6EF',
-    '--accent-soft': 'rgba(59, 142, 234, .16)',
-    '--highlight': '#8FC0F5',
-    '--border': 'rgba(255, 255, 255, 0.07)',
+    '--bg': '#161a21',
+    '--bg-2': '#13161c',
+    '--surface': '#1b1f27',
+    '--surface-2': '#21252e',
+    '--text': '#e7ebf1',
+    '--muted': '#8891a1',
+    '--accent': '#2fb8d6',
+    '--accent-strong': '#5cc9e0',
+    '--accent-soft': 'rgba(47, 184, 214, .13)',
+    '--highlight': '#7fd4e8',
+    '--border': 'rgba(255, 255, 255, 0.08)',
     '--shadow-soft': '0 16px 32px rgba(0, 0, 0, 0.4)',
     '--radius-sm': '12px',
     '--radius-md': '18px',
@@ -79,14 +82,17 @@ const THEMES = {
     '--badge-open-bg': 'rgba(47, 179, 125, .16)',
     '--badge-open-text': '#7FE0B8',
     '--input-bg': 'var(--surface-2)',
-    '--accent-on': '#0B2440',
-    '--border-strong': 'rgba(255, 255, 255, 0.12)',
-    '--text-faint': '#6E6D69',
+    '--accent-on': '#0c1f26',
+    '--border-strong': 'rgba(255, 255, 255, 0.14)',
+    '--text-faint': '#5f6773',
     '--cat-dev-text': '#8FC0F5',
     '--cat-data-text': '#F5C583',
     '--cat-success-text': '#7FE0B8',
     '--cat-error-text': '#E98888',
-    '--cat-design-text': '#F0A0BE'
+    '--cat-design-text': '#F0A0BE',
+    '--chrome-dark': '#0a0d12',
+    '--chrome-dark-text': '#c9d6e0',
+    '--chrome-dark-border': 'rgba(255, 255, 255, 0.08)'
   },
   midnight: {
     '--bg': '#0b0f1a',
@@ -121,7 +127,10 @@ const THEMES = {
     '--cat-data-text': '#F5C583',
     '--cat-success-text': '#7FE0B8',
     '--cat-error-text': '#E98888',
-    '--cat-design-text': '#F0A0BE'
+    '--cat-design-text': '#F0A0BE',
+    '--chrome-dark': '#05070d',
+    '--chrome-dark-text': '#e2e8f4',
+    '--chrome-dark-border': '#1e2540'
   }
 }
 

@@ -284,6 +284,8 @@
                             th:text="${empleo.empresaNombre} + ' · ' + ${empleo.modalidad} + ' · ' + ${empleo.empresaSector}">
                             Empresa · Modalidad · Sector</p>
                         <div class="job-extra">
+                            <span class="dc-mono" style="color:var(--text-faint,var(--muted));"
+                                th:text="'#DC-' + ${#strings.toUpperCase(#strings.substring(empleo.id, empleo.id.length()-6, empleo.id.length()))}">#DC-000000</span>
                             <span class="badge-open">Abierta</span>
                             <span th:text="${empleo.vacantes} + ' vacantes'" class="dc-mono" style="color:var(--muted);">
                                 vacantes</span>
