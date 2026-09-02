@@ -320,8 +320,9 @@ public class PageController {
     }
 
     @GetMapping("/register-options")
-    public String registerOptions() {
-        return "Register-options";
+    public String registerOptions(Model model) {
+        model.addAttribute("tipoPreset", null);
+        return "register";
     }
 
     @GetMapping("/about-us")

@@ -53,7 +53,8 @@ public class RegistroController {
         model.addAttribute("fTelefono", "");
         model.addAttribute("fPortfolioUrl", "");
         model.addAttribute("fLinkedinUrl", "");
-        return "register-talento";
+        model.addAttribute("tipoPreset", "talento");
+        return "register";
     }
 
     @GetMapping("/register/empresa")
@@ -67,7 +68,8 @@ public class RegistroController {
         model.addAttribute("fCorreo", "");
         model.addAttribute("fTelefono", "");
         model.addAttribute("fDescripcion", "");
-        return "register-empresa";
+        model.addAttribute("tipoPreset", "empresa");
+        return "register";
     }
 
     @PostMapping("/register/talento")
