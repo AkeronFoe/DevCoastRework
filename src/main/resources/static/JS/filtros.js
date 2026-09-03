@@ -6,6 +6,15 @@ const seniorities = new Set(['Senior', 'Junior'])
 const contratos = new Set(['Tiempo completo', 'Medio tiempo', 'Freelance'])
 const regiones = new Set(['Latam', 'Europa'])
 
+// el backend solo acepta UN valor para categoria/modalidad/seniority — estos
+// tres grupos son mutuamente excluyentes entre sí (elegir uno desactiva
+// cualquier otro del mismo grupo). contrato/región sí se combinan libremente
+// como "extras", por eso no entran aquí.
+const gruposExclusivos = [categorias, modalidades, seniorities]
+function grupoDe(filtro) {
+    return gruposExclusivos.find(g => g.has(filtro))
+}
+
 function buildParamsFromActive() {
     const params = new URLSearchParams()
     const searchInput = document.getElementById('global-search-input')
@@ -21,6 +30,9 @@ function buildParamsFromActive() {
     }
 
     if (extras.length) params.set('extras', extras.join(','))
+
+    const favToggle = document.getElementById('fav-only-toggle')
+    if (favToggle && favToggle.classList.contains('active')) params.set('favoritos', 'true')
 
     params.set('page', '0')
     const sizeSelect = document.getElementById('page-size')
@@ -109,6 +121,20 @@ window.addEventListener('DOMContentLoaded', () => {
                     filtrosActivos.delete(filtro)
                     chip.classList.remove('active')
                 } else {
+                    // dentro del mismo grupo (categoria/modalidad/seniority) solo uno
+                    // puede estar activo a la vez — si no, el segundo que elijas se
+                    // manda como "extras" al servidor y no filtra nada, dando la
+                    // sensación de que "a veces los filtros no funcionan"
+                    const grupo = grupoDe(filtro)
+                    if (grupo) {
+                        grupo.forEach(otro => {
+                            if (otro !== filtro && filtrosActivos.has(otro)) {
+                                filtrosActivos.delete(otro)
+                                document.querySelectorAll(`.chip[data-filter="${otro}"]`)
+                                    .forEach(c => c.classList.remove('active'))
+                            }
+                        })
+                    }
                     filtrosActivos.add(filtro)
                     chip.classList.add('active')
                 }

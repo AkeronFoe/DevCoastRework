@@ -47,7 +47,10 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class EmpleoController {
 
-    private static final int EMPLEOS_POR_PAGINA_DEFAULT = 25;
+    // 11 = 1 card destacada/mejor-match a ancho completo + 10 en pares de 2
+    // columnas — así la grilla siempre cierra en filas completas en vez de
+    // dejar una card sola con un hueco vacío al lado
+    private static final int EMPLEOS_POR_PAGINA_DEFAULT = 11;
 
     private final EmpleoRepository empleoRepository;
     private final MongoTemplate mongoTemplate;
@@ -74,13 +77,14 @@ public class EmpleoController {
     public String listarEmpleos(
             Model model, HttpSession session,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "25") int size,
+            @RequestParam(defaultValue = "11") int size,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String modalidad,
             @RequestParam(required = false) String seniority,
             @RequestParam(required = false) String extras,
-            @RequestParam(defaultValue = "recent") String sort) {
+            @RequestParam(defaultValue = "match") String sort,
+            @RequestParam(defaultValue = "false") boolean favoritos) {
 
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
@@ -88,6 +92,13 @@ public class EmpleoController {
         page = Math.max(0, page);
         int pageSize = size > 0 ? Math.min(size, 100) : EMPLEOS_POR_PAGINA_DEFAULT;
         List<Criteria> criteriaList = new ArrayList<>();
+
+        // se busca antes de armar el resto de los criterios porque "solo
+        // favoritos" necesita saber contra qué lista de ids filtrar — antes
+        // este toggle escondía cards con display:none en el cliente, lo que
+        // rompía la paginación (favoritos en la página 2 no aparecían nunca
+        // parado en la página 1)
+        Usuario usuarioTalento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
 
         // tokenizo por espacios y busco en varios campos a la vez
         if (q != null && !q.isBlank()) {
@@ -130,21 +141,70 @@ public class EmpleoController {
             }
         }
 
+        if (favoritos) {
+            List<String> favIds = (usuarioTalento != null && usuarioTalento.getEmpleosFavoritos() != null)
+                    ? usuarioTalento.getEmpleosFavoritos() : List.of();
+            criteriaList.add(Criteria.where("id").in(favIds));
+        }
+
         criteriaList.add(new Criteria().orOperator(
                 Criteria.where("estado").is("ACTIVO"),
                 Criteria.where("estado").exists(false)));
 
+        Criteria filtroCriteria = new Criteria().andOperator(criteriaList.toArray(Criteria[]::new));
         Sort.Direction dir = "oldest".equals(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Query query = new Query();
-        query.addCriteria(new Criteria().andOperator(criteriaList.toArray(Criteria[]::new)));
-        query.with(Sort.by(dir, "_id"));
 
-        long total = mongoTemplate.count(query, Empleo.class);
-        query.skip((long) page * pageSize).limit(pageSize);
-        List<Empleo> items = mongoTemplate.find(query, Empleo.class);
+        boolean tieneStack = usuarioTalento != null && usuarioTalento.getStack() != null
+                && !usuarioTalento.getStack().isEmpty();
+        // "match" solo es un orden real si hay contra qué puntuar — si una empresa
+        // o un talento sin stack lo pide, caemos silenciosamente a "recent"
+        boolean ordenarPorMatch = "match".equals(sort) && tieneStack;
 
-        Page<Empleo> empleos = new PageImpl<>(items,
-                PageRequest.of(page, pageSize, Sort.by(dir, "_id")), total);
+        Page<Empleo> empleos;
+        List<Empleo> items;
+        Map<String, Integer> scores = new HashMap<>();
+
+        if (ordenarPorMatch) {
+            // Mongo no tiene el score guardado para ordenar a nivel de base de datos
+            // (se calcula en Java contra el stack del talento), así que traemos un
+            // lote acotado de los más recientes que ya cumplen el filtro, los
+            // puntuamos y paginamos ese resultado ya ordenado por match. Acotado a
+            // propósito: sin límite, con miles de empleos sembrados, esto es
+            // exactamente lo que dejaba /empleos colgado la primera vez.
+            int candidatosLimite = 600;
+            Query matchQuery = new Query(filtroCriteria);
+            matchQuery.with(Sort.by(Sort.Direction.DESC, "_id")).limit(candidatosLimite);
+            List<Empleo> candidatos = mongoTemplate.find(matchQuery, Empleo.class);
+
+            Map<String, Integer> scoresCandidatos = new HashMap<>();
+            for (Empleo e : candidatos)
+                scoresCandidatos.put(e.getId(), calcularScore(usuarioTalento, e));
+
+            List<Empleo> ordenados = candidatos.stream()
+                    .sorted((a, b) -> scoresCandidatos.get(b.getId()) - scoresCandidatos.get(a.getId()))
+                    .toList();
+
+            int total = ordenados.size();
+            int desde = Math.min(page * pageSize, total);
+            int hasta = Math.min(desde + pageSize, total);
+            items = ordenados.subList(desde, hasta);
+            for (Empleo e : items)
+                scores.put(e.getId(), scoresCandidatos.get(e.getId()));
+
+            empleos = new PageImpl<>(items, PageRequest.of(page, pageSize), total);
+        } else {
+            Query query = new Query(filtroCriteria);
+            query.with(Sort.by(dir, "_id"));
+            long total = mongoTemplate.count(query, Empleo.class);
+            query.skip((long) page * pageSize).limit(pageSize);
+            items = mongoTemplate.find(query, Empleo.class);
+            empleos = new PageImpl<>(items, PageRequest.of(page, pageSize, Sort.by(dir, "_id")), total);
+
+            if (tieneStack) {
+                for (Empleo e : items)
+                    scores.put(e.getId(), calcularScore(usuarioTalento, e));
+            }
+        }
 
         int totalPages = empleos.getTotalPages();
         int currentPage = empleos.getNumber();
@@ -153,14 +213,14 @@ public class EmpleoController {
         if (endPage - startPage < 9)
             startPage = Math.max(0, endPage - 9);
 
-        Map<String, Integer> scores = new HashMap<>();
+        Integer avgScore = null;
+        if (!scores.isEmpty()) {
+            avgScore = (int) Math.round(
+                    scores.values().stream().mapToInt(Integer::intValue).average().orElse(0));
+        }
+
         Map<String, Boolean> yaAplico = new HashMap<>();
         if (RoleGuard.esTalento(session)) {
-            Usuario usu = obtenerUsuario(session);
-            if (usu != null && usu.getStack() != null && !usu.getStack().isEmpty()) {
-                for (Empleo e : items)
-                    scores.put(e.getId(), calcularScore(usu, e));
-            }
             String userId = RoleGuard.getId(session);
             List<String> idsPagina = items.stream().map(Empleo::getId).toList();
             Set<String> empleosAplicados = solicitudRepository
@@ -176,7 +236,42 @@ public class EmpleoController {
                 yaAplico.put(e.getId(), false);
         }
 
+        // empresas contratando esta semana: última publicación activa por empresa,
+        // más recientes primero — mismo dispositivo de avatares que el dashboard,
+        // pero con datos reales en vez de nombres inventados. Distinct se calcula
+        // en Java sobre una muestra acotada de documentos ya traídos, no con el
+        // comando distinct de Mongo (documentos viejos/sembrados a mano pueden
+        // traer empresaId con tipos mixtos y ese comando revienta ante eso) ni
+        // sobre la colección entera (una consulta sin límite contra Atlas en
+        // cada carga de /empleos es lo que dejaba la página colgada).
+        List<Empleo> empresasContratando = List.of();
+        long extraEmpresas = 0;
+        try {
+            Query empresasQuery = new Query(new Criteria().orOperator(
+                    Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false)));
+            empresasQuery.fields().include("empresaId").include("empresaNombre").include("colorIcono");
+            empresasQuery.with(Sort.by(Sort.Direction.DESC, "_id")).limit(200);
+            List<Empleo> muestraActivos = mongoTemplate.find(empresasQuery, Empleo.class);
+
+            Map<String, Empleo> porEmpresa = new LinkedHashMap<>();
+            for (Empleo e : muestraActivos) {
+                String clave = e.getEmpresaId() != null ? e.getEmpresaId() : e.getEmpresaNombre();
+                if (clave != null)
+                    porEmpresa.putIfAbsent(clave, e);
+            }
+            empresasContratando = porEmpresa.values().stream().limit(6).toList();
+            extraEmpresas = Math.max(0, porEmpresa.size() - empresasContratando.size());
+        } catch (Exception ex) {
+            // no dejamos que el listado de empleos entero se caiga por este dato
+            // decorativo — sin avatares de "contratando esta semana" es aceptable
+        }
+
         model.addAttribute("empleos", empleos);
+        model.addAttribute("ordenarPorMatch", ordenarPorMatch);
+        model.addAttribute("matchDisponible", tieneStack);
+        model.addAttribute("avgScore", avgScore);
+        model.addAttribute("empresasContratando", empresasContratando);
+        model.addAttribute("extraEmpresas", extraEmpresas);
         model.addAttribute("yaAplico", yaAplico);
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
@@ -191,6 +286,11 @@ public class EmpleoController {
         model.addAttribute("seniority", seniority);
         model.addAttribute("extras", extras);
         model.addAttribute("sort", sort);
+        model.addAttribute("favoritos", favoritos);
+        model.addAttribute("hayFiltros",
+                (q != null && !q.isBlank()) || (categoria != null && !categoria.isBlank())
+                        || (modalidad != null && !modalidad.isBlank()) || (seniority != null && !seniority.isBlank())
+                        || (extras != null && !extras.isBlank()) || favoritos);
         model.addAttribute("scores", scores);
         agregarSesion(session, model);
         return "empleos";
