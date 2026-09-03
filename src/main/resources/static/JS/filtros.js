@@ -48,7 +48,26 @@ function applyFiltersToUrl() {
     const params = buildParamsFromActive()
     const qs = params.toString()
     const url = qs ? ('/empleos?' + qs) : '/empleos'
-    window.location = url
+
+    // el dropdown de "más filtros" queda abierto tapando parte de la
+    // grilla si no se cierra a mano — con el reload completo de antes
+    // esto no hacía falta, se resolvía gratis
+    document.getElementById('dropdown')?.classList.remove('open')
+    document.getElementById('btn-more')?.classList.remove('open')
+
+    // "limpiar filtros" vive fuera del fragmento que trae dcLoadResultados,
+    // así que no se re-renderiza solo — pero el cliente ya sabe si hay
+    // algún filtro activo (es lo mismo que acaba de calcular arriba), no
+    // hace falta esperar la respuesta del servidor para decidir esto
+    const hayFiltros = ['q', 'categoria', 'modalidad', 'seniority', 'extras', 'favoritos']
+        .some(k => params.has(k))
+    document.querySelector('.ws-clear-filters')?.classList.toggle('is-hidden', !hayFiltros)
+
+    if (typeof window.dcLoadResultados === 'function') {
+        window.dcLoadResultados(url, { pushState: true })
+    } else {
+        window.location = url
+    }
 }
 
 function actualizarContadorDropdown() {
@@ -89,6 +108,69 @@ function actualizarFiltrosActivos() {
 
     actualizarContadorDropdown()
 }
+
+// Reconstruye el estado de chips/búsqueda/page-size/favoritos a partir de
+// location.search — se usa en la carga inicial Y en cada `popstate` (atrás/
+// adelante del navegador tras navegar por fetch). Idempotente: limpia todo
+// antes de reconstruir, así se puede llamar más de una vez por carga de
+// página. El sort-select NO se toca acá: vive dentro del fragmento que trae
+// dcLoadResultados y llega siempre con el th:selected correcto del server.
+function restoreFiltersUI() {
+    filtrosActivos.clear()
+    document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'))
+
+    const params = new URLSearchParams(window.location.search)
+    const q = params.get('q')
+    const categoria = params.get('categoria')
+    const modalidad = params.get('modalidad')
+    const seniority = params.get('seniority')
+    const extras = params.get('extras')
+
+    const input = document.getElementById('global-search-input')
+    if (input) input.value = q || ''
+
+    if (categoria) {
+        const el = document.querySelector(`.chip[data-filter="${categoria}"]`)
+        if (el) { el.classList.add('active'); filtrosActivos.add(categoria) }
+    }
+    if (modalidad) {
+        const el = document.querySelector(`.chip[data-filter="${modalidad}"]`)
+        if (el) { el.classList.add('active'); filtrosActivos.add(modalidad) }
+    }
+    if (seniority) {
+        const el = document.querySelector(`.chip[data-filter="${seniority}"]`)
+        if (el) { el.classList.add('active'); filtrosActivos.add(seniority) }
+    }
+    if (extras) {
+        extras.split(',').forEach(x => {
+            const el = document.querySelector(`.chip[data-filter="${x}"]`)
+            if (el) { el.classList.add('active'); filtrosActivos.add(x) }
+        })
+    }
+
+    document.querySelector('.chip[data-filter="todos"]')?.classList.toggle('active', filtrosActivos.size === 0)
+    actualizarFiltrosActivos()
+
+    // page-size y favoritos-toggle hoy dependen 100% de SSR (th:selected /
+    // th:classappend) — en un popstate no hay render fresco del server para
+    // el chrome de filtros (solo para el fragmento de resultados), así que
+    // acá sí hace falta restaurarlos a mano
+    const sizeEl = document.getElementById('page-size')
+    const sizeParam = params.get('size')
+    if (sizeEl && sizeParam) sizeEl.value = sizeParam
+
+    const favToggle = document.getElementById('fav-only-toggle')
+    if (favToggle) {
+        const isFav = params.get('favoritos') === 'true'
+        favToggle.classList.toggle('active', isFav)
+        favToggle.setAttribute('aria-pressed', isFav ? 'true' : 'false')
+    }
+
+    const hayFiltros = ['q', 'categoria', 'modalidad', 'seniority', 'extras', 'favoritos']
+        .some(k => params.has(k) && params.get(k))
+    document.querySelector('.ws-clear-filters')?.classList.toggle('is-hidden', !hayFiltros)
+}
+window.restoreFiltersUI = restoreFiltersUI
 
 window.addEventListener('DOMContentLoaded', () => {
     const filtrosActivosRow = document.getElementById('filtros-activos-row')
@@ -171,47 +253,16 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    const params = new URLSearchParams(window.location.search)
-    const q = params.get('q')
-    const categoria = params.get('categoria')
-    const modalidad = params.get('modalidad')
-    const seniority = params.get('seniority')
-    const extras = params.get('extras')
+    restoreFiltersUI()
 
-    if (q) {
-        const input = document.getElementById('global-search-input')
-        if (input) input.value = q
-    }
-
-    if (categoria) {
-        const el = document.querySelector(`.chip[data-filter="${categoria}"]`)
-        if (el) { el.classList.add('active'); filtrosActivos.add(categoria) }
-    }
-    if (modalidad) {
-        const el = document.querySelector(`.chip[data-filter="${modalidad}"]`)
-        if (el) { el.classList.add('active'); filtrosActivos.add(modalidad) }
-    }
-    if (seniority) {
-        const el = document.querySelector(`.chip[data-filter="${seniority}"]`)
-        if (el) { el.classList.add('active'); filtrosActivos.add(seniority) }
-    }
-    if (extras) {
-        extras.split(',').forEach(x => {
-            const el = document.querySelector(`.chip[data-filter="${x}"]`)
-            if (el) { el.classList.add('active'); filtrosActivos.add(x) }
-        })
-    }
-
-    if (filtrosActivos.size > 0) {
-        document.querySelector('.chip[data-filter="todos"]')?.classList.remove('active')
-    }
-
-    actualizarFiltrosActivos()
-
-    const sortEl = document.getElementById('empleo-sort-select')
-    const sortParam = params.get('sort')
-    if (sortEl && sortParam) sortEl.value = sortParam
-    if (sortEl) sortEl.addEventListener('change', applyFiltersToUrl)
+    // el sort-select vive DENTRO del fragmento que reemplaza dcLoadResultados
+    // (innerHTML completo) — un bind directo sobre el nodo capturado acá
+    // se pierde en cuanto se pagina o filtra una vez. Delegado en document,
+    // sobrevive cualquier cantidad de swaps sin tener que re-invocar nada
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'empleo-sort-select') applyFiltersToUrl()
+    })
+    document.getElementById('page-size')?.addEventListener('change', applyFiltersToUrl)
 
     const globalSearch = document.getElementById('global-search-input')
     if (globalSearch) {

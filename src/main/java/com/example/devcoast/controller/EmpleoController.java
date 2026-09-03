@@ -42,6 +42,7 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -75,7 +76,7 @@ public class EmpleoController {
 
     @GetMapping("/empleos")
     public String listarEmpleos(
-            Model model, HttpSession session,
+            Model model, HttpSession session, HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "11") int size,
             @RequestParam(required = false) String q,
@@ -293,7 +294,13 @@ public class EmpleoController {
                         || (extras != null && !extras.isBlank()) || favoritos);
         model.addAttribute("scores", scores);
         agregarSesion(session, model);
-        return "empleos";
+
+        // la paginación de /empleos pide el fragmento por fetch en vez de
+        // navegar completo — el header lo controla el propio fetch() del
+        // cliente, así que a diferencia de un query param no se puede
+        // falsificar compartiendo/pegando la URL
+        boolean esAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        return esAjax ? "empleos :: resultadosEmpleos" : "empleos";
     }
 
     @GetMapping("/empleos/guardados")

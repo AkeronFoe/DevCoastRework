@@ -332,6 +332,11 @@ body.wsjobs.is-empresa {
 .ws-mini-stamp span { font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; max-width: 13ch; line-height: 1.25; }
 .ws-mini-card-foot { font-size: .68rem; color: #5c503a; border-top: 1px dashed rgba(34,27,16,.22); padding-top: 10px; }
 
+/* toggle de visibilidad sin crear/destruir nodos — usado por JS para
+   sincronizar elementos fuera de #empleos-resultados (mini-stamp,
+   limpiar-filtros) contra el fragmento que llega por fetch */
+.wsjobs .is-hidden { display: none; }
+
 /* ============================= empresa note + toasts ============================= */
 .wsjobs .info-banner.ws-empresa-note {
   display: flex; align-items: center; gap: 10px; background: var(--ws-accent-dim); border: 1px solid var(--ws-accent);

@@ -250,14 +250,14 @@
                             </span>
                         </div>
 
-                        <div class="ws-mini-stamp" th:if="${avgScore != null}">
+                        <div class="ws-mini-stamp" th:classappend="${avgScore == null} ? ' is-hidden' : ''">
                             <b th:text="${avgScore} + '%'">0%</b>
                             <span>match prom. con vacantes activas</span>
                         </div>
 
                         <div class="ws-mini-card-foot">
-                            página <span th:text="${currentPage + 1}">1</span> de <span th:text="${totalPages > 0} ? ${totalPages} : 1">1</span>
-                            · <span th:text="${pageSize}">25</span> por página
+                            página <span id="mini-current-page" th:text="${currentPage + 1}">1</span> de <span id="mini-total-pages" th:text="${totalPages > 0} ? ${totalPages} : 1">1</span>
+                            · <span id="mini-page-size" th:text="${pageSize}">25</span> por página
                         </div>
                     </div>
                 </div>
@@ -284,7 +284,7 @@
                 </div>
                 <div class="ws-cmdbar-hint-row">
                     <p class="ws-cmdbar-hint">// escribe y presiona Enter para buscar — quita un filtro con la × o elígelos abajo</p>
-                    <a th:if="${hayFiltros}" th:href="@{/empleos}" class="ws-clear-filters">✕ limpiar filtros</a>
+                    <a th:href="@{/empleos}" class="ws-clear-filters" th:classappend="${!hayFiltros} ? ' is-hidden' : ''">✕ limpiar filtros</a>
                 </div>
 
                 <section class="card">
@@ -329,7 +329,7 @@
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px;">
                         <form class="page-size-form" method="get" th:action="@{/empleos}">
                             <label for="page-size">Por página</label>
-                            <select id="page-size" name="size" class="select" onchange="this.form.submit()">
+                            <select id="page-size" name="size" class="select">
                                 <option value="11" th:selected="${pageSize == 11}">11</option>
                                 <option value="25" th:selected="${pageSize == 25}">25</option>
                                 <option value="50" th:selected="${pageSize == 50}">50</option>
@@ -357,6 +357,8 @@
                     </div>
                 </div>
 
+                <div id="empleos-resultados" th:fragment="resultadosEmpleos"
+                    th:attr="data-current-page=${currentPage}, data-total-pages=${totalPages}, data-page-size=${pageSize}, data-total-elements=${empleos.totalElements}, data-avg-score=${avgScore != null} ? ${avgScore} : ''">
                 <div class="ws-results-head">
                     <span class="comment">// <b th:text="${empleos.totalElements} + ' resultados'">0 resultados</b>,
                         ordenados por
@@ -493,26 +495,27 @@
                 </div>
 
                 <nav class="pagination-tabs" th:if="${totalPages > 1}">
-                    <a class="pagination-tab pagination-arrow" th:classappend="${currentPage == 0} ? ' is-disabled' : ''"
+                    <a class="pagination-tab pagination-arrow" data-no-skeleton th:classappend="${currentPage == 0} ? ' is-disabled' : ''"
                         th:href="@{/empleos(page=${currentPage - 1},size=${pageSize},q=${q},categoria=${categoria},modalidad=${modalidad},seniority=${seniority},extras=${extras},sort=${sort},favoritos=${favoritos})}">Anterior</a>
 
-                    <a class="pagination-tab" th:if="${showStartEllipsis}"
+                    <a class="pagination-tab" data-no-skeleton th:if="${showStartEllipsis}"
                         th:href="@{/empleos(page=0,size=${pageSize},q=${q},categoria=${categoria},modalidad=${modalidad},seniority=${seniority},extras=${extras},sort=${sort},favoritos=${favoritos})}">1</a>
                     <span class="pagination-ellipsis" th:if="${showStartEllipsis}">…</span>
 
-                    <a class="pagination-tab" th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    <a class="pagination-tab" data-no-skeleton th:each="i : ${#numbers.sequence(startPage, endPage)}"
                         th:href="@{/empleos(page=${i},size=${pageSize},q=${q},categoria=${categoria},modalidad=${modalidad},seniority=${seniority},extras=${extras},sort=${sort},favoritos=${favoritos})}"
                         th:text="${i + 1}" th:classappend="${i == currentPage} ? ' active' : ''">1</a>
 
                     <span class="pagination-ellipsis" th:if="${showEndEllipsis}">…</span>
-                    <a class="pagination-tab" th:if="${showEndEllipsis}"
+                    <a class="pagination-tab" data-no-skeleton th:if="${showEndEllipsis}"
                         th:href="@{/empleos(page=${totalPages - 1},size=${pageSize},q=${q},categoria=${categoria},modalidad=${modalidad},seniority=${seniority},extras=${extras},sort=${sort},favoritos=${favoritos})}"
                         th:text="${totalPages}">1</a>
 
-                    <a class="pagination-tab pagination-arrow"
+                    <a class="pagination-tab pagination-arrow" data-no-skeleton
                         th:classappend="${currentPage + 1 >= totalPages} ? ' is-disabled' : ''"
                         th:href="@{/empleos(page=${currentPage + 1},size=${pageSize},q=${q},categoria=${categoria},modalidad=${modalidad},seniority=${seniority},extras=${extras},sort=${sort},favoritos=${favoritos})}">Siguiente</a>
                 </nav>
+                </div>
             </div>
         </main>
     </div>

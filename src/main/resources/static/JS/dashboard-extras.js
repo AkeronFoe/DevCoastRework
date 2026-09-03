@@ -17,8 +17,8 @@
         });
     }
 
-    function initFavoritos() {
-        document.querySelectorAll('[data-favorito-id]').forEach(function (btn) {
+    function initFavoritos(root) {
+        (root || document).querySelectorAll('[data-favorito-id]').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 var empleoId = btn.getAttribute('data-favorito-id');
@@ -58,6 +58,12 @@
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', fn); }
         else { fn(); }
     }
+
+    // re-invocable desde empleos.js tras reemplazar la grilla por fetch
+    // (paginación de /empleos): un botón "guardar empleo" insertado por
+    // innerHTML no trae el listener de initFavoritos hasta que se lo
+    // vuelve a correr sobre el contenedor nuevo
+    window.initFavoritos = initFavoritos;
 
     ready(function () {
         initCharCounters();

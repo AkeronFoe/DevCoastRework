@@ -94,53 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return luminance > 0.55 ? '#0a1826' : '#f2f5f8'
     }
 
-    const cards = Array.from(document.querySelectorAll('.job-card[data-empleo-id]'))
-
-    cards.forEach((card, i) => {
-        card.style.animationDelay = `${Math.min(i * 0.04, 0.22)}s`
-
-        const dateEl = card.querySelector('.job-date')
-        const rel = idToRelDate(card.dataset.empleoId)
-        if (dateEl) dateEl.textContent = rel.text
-        if (rel.ageMs < 48 * 3600000 && !card.querySelector('.job-featured-tag')) {
-            const tag = document.createElement('span')
-            tag.className = 'job-new-tag'
-            tag.textContent = 'nuevo'
-            card.insertBefore(tag, card.firstChild)
-        }
-
-        let bg = (card.querySelector('.job-band') || {}).dataset?.color
-        if (!bg || bg === 'null' || bg === 'undefined') {
-            const name = card.querySelector('.job-title')?.textContent || 'DC'
-            bg = strToHsl(name)
-        }
-        card.style.setProperty('--card-accent', bg)
-        card.style.setProperty('--card-ink', inkColorFor(bg))
-    })
-
-    /* ── Mismo cálculo de contraste para los avatares de "empresas
-       contratando esta semana" — traen su color por style inline desde
-       el servidor, no por --card-accent ── */
-    document.querySelectorAll('.ws-hiring-avatars span[style]').forEach(span => {
-        const m = (span.getAttribute('style') || '').match(/background-color:\s*([^;]+)/i)
-        span.style.color = inkColorFor(m ? m[1].trim() : null)
-    })
-
-    /* ── Anillo de match: relleno con leve overshoot, como una aguja que
-       pasa de largo y se asienta, no un fill lineal plano. Cuando hay GSAP
-       la animación de scroll de más abajo se encarga del relleno — este
-       bloque solo cubre el caso sin JS de animación (reduced-motion o sin
-       GSAP), fijando el offset final de una vez ── */
-    if (!hasGsap || reduce) {
-        document.querySelectorAll('.job-ring .prog').forEach(circle => {
-            const pct = parseFloat(circle.dataset.pct)
-            const full = 100.5
-            const target = full * (1 - pct / 100)
-            circle.style.strokeDasharray = String(full)
-            circle.style.strokeDashoffset = String(target)
-        })
-    }
-
     /* ── Copiar enlace de empleo ── */
     async function copyText(text) {
         if (navigator?.clipboard?.writeText) {
@@ -154,23 +107,173 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(ta); return ok
     }
 
-    document.querySelectorAll('.btn-copy-empleo[data-copy-url]').forEach(btn => {
-        const label = btn.querySelector('.copy-label')
-        const orig = label?.textContent || 'Copiar'
-        btn.addEventListener('click', async e => {
-            e.preventDefault(); e.stopPropagation()
-            const path = btn.dataset.copyUrl
-            if (!path) return
-            const url = path.startsWith('http') ? path : location.origin + path
-            if (await copyText(url)) {
-                btn.classList.add('is-copied')
-                if (label) label.textContent = '¡Copiado!'
-                setTimeout(() => {
-                    btn.classList.remove('is-copied')
-                    if (label) label.textContent = orig
-                }, 1400)
+    /* ── Setup de las job-cards: fecha relativa + tag "nuevo", color de
+       marca, fallback/animación del ring de match, copiar enlace, aplastón
+       de favorito, entrada GSAP + hover tilt, y "última card sola en su
+       fila". Se corre una vez sobre `document` en la carga inicial, y de
+       nuevo sobre el fragmento nuevo cada vez que la paginación trae una
+       página por fetch (ver el handler de `.pagination-tab` más abajo) —
+       por eso todo acá adentro escanea `root`, nunca `document` a secas.
+       `viaFetch` decide la entrada de cards/rings: en la carga inicial se
+       usa ScrollTrigger.batch (las cards de abajo entran al hacer scroll);
+       en un swap por fetch el usuario ya está mirando el área de
+       resultados, así que entran con un fade instantáneo en vez de esperar
+       un scroll que no va a pasar ── */
+    let cardsBatchST = []
+    let ringsBatchST = []
+
+    function initJobCards(root, viaFetch) {
+        const cards = Array.from(root.querySelectorAll('.job-card[data-empleo-id]'))
+
+        cards.forEach((card, i) => {
+            card.style.animationDelay = `${Math.min(i * 0.04, 0.22)}s`
+
+            const dateEl = card.querySelector('.job-date')
+            const rel = idToRelDate(card.dataset.empleoId)
+            if (dateEl) dateEl.textContent = rel.text
+            if (rel.ageMs < 48 * 3600000 && !card.querySelector('.job-featured-tag')) {
+                const tag = document.createElement('span')
+                tag.className = 'job-new-tag'
+                tag.textContent = 'nuevo'
+                card.insertBefore(tag, card.firstChild)
             }
+
+            let bg = (card.querySelector('.job-band') || {}).dataset?.color
+            if (!bg || bg === 'null' || bg === 'undefined') {
+                const name = card.querySelector('.job-title')?.textContent || 'DC'
+                bg = strToHsl(name)
+            }
+            card.style.setProperty('--card-accent', bg)
+            card.style.setProperty('--card-ink', inkColorFor(bg))
         })
+
+        const rings = Array.from(root.querySelectorAll('.job-ring .prog'))
+
+        /* Anillo de match: relleno con leve overshoot, como una aguja que
+           pasa de largo y se asienta, no un fill lineal plano. Sin GSAP o
+           con reduced-motion, se fija el offset final de una */
+        if (!hasGsap || reduce) {
+            rings.forEach(circle => {
+                const pct = parseFloat(circle.dataset.pct)
+                const full = 100.5
+                const target = full * (1 - pct / 100)
+                circle.style.strokeDasharray = String(full)
+                circle.style.strokeDashoffset = String(target)
+            })
+        }
+
+        root.querySelectorAll('.btn-copy-empleo[data-copy-url]').forEach(btn => {
+            const label = btn.querySelector('.copy-label')
+            const orig = label?.textContent || 'Copiar'
+            btn.addEventListener('click', async e => {
+                e.preventDefault(); e.stopPropagation()
+                const path = btn.dataset.copyUrl
+                if (!path) return
+                const url = path.startsWith('http') ? path : location.origin + path
+                if (await copyText(url)) {
+                    btn.classList.add('is-copied')
+                    if (label) label.textContent = '¡Copiado!'
+                    setTimeout(() => {
+                        btn.classList.remove('is-copied')
+                        if (label) label.textContent = orig
+                    }, 1400)
+                }
+            })
+        })
+
+        if (hasGsap && !reduce) {
+            /* Guardar empleo: un pequeño aplastón, como una pestaña física
+               que cede al presionarla, en vez de un cambio de color plano */
+            root.querySelectorAll('.btn-favorito').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    gsap.timeline()
+                        .to(btn, { scaleX: 1.25, scaleY: .8, duration: .09, ease: 'power1.out' })
+                        .to(btn, { scaleX: .92, scaleY: 1.08, duration: .1, ease: 'power1.inOut' })
+                        .to(btn, { scaleX: 1, scaleY: 1, duration: .18, ease: 'power2.out' })
+                })
+            })
+
+            rings.forEach(circle => {
+                const pct = parseFloat(circle.dataset.pct)
+                const full = 100.5
+                const target = full * (1 - pct / 100)
+                gsap.set(circle, { strokeDashoffset: full })
+                circle._matchTarget = target
+            })
+            if (rings.length) {
+                if (viaFetch || !window.ScrollTrigger) {
+                    rings.forEach(c => gsap.to(c, { strokeDashoffset: c._matchTarget, duration: 1.1, ease: 'back.out(1.5)' }))
+                } else {
+                    // un ScrollTrigger.batch en vez de un ScrollTrigger.create por
+                    // anillo — con una página llena de cards, decenas de triggers
+                    // individuales es justo el tipo de cosa que hace lento el scroll
+                    ringsBatchST = ringsBatchST.concat(ScrollTrigger.batch(rings, {
+                        start: 'top 92%', once: true,
+                        onEnter: batch => batch.forEach(c => gsap.to(c, { strokeDashoffset: c._matchTarget, duration: 1.1, ease: 'back.out(1.5)' }))
+                    }))
+                }
+            }
+        }
+
+        /* Entrada de las job cards: stagger de traslación + opacity (sin
+           rotación — más barato de componer que la matriz de transform 2D
+           que pediría rotarlas), y una inclinación al pasar el mouse en vez
+           de un lift plano en CSS */
+        try {
+            if (hasGsap && !reduce && cards.length) {
+                cards.forEach(card => { card.style.animation = 'none' })
+                gsap.set(cards, { y: 22, autoAlpha: 0 })
+                if (viaFetch || !window.ScrollTrigger) {
+                    gsap.to(cards, { y: 0, autoAlpha: 1, duration: .5, ease: 'power3.out', stagger: .06 })
+                } else {
+                    cardsBatchST = cardsBatchST.concat(ScrollTrigger.batch(cards, {
+                        start: 'top 92%', once: true,
+                        onEnter: batch => gsap.to(batch, { y: 0, autoAlpha: 1, duration: .5, ease: 'power3.out', stagger: .08 })
+                    }))
+                }
+                // will-change acotado a la card puntual y solo mientras dura el
+                // hover — promoverla a su propia capa de composición justo
+                // cuando se anima, sin pagar memoria de GPU en las otras diez
+                cards.forEach(card => {
+                    card.addEventListener('mouseenter', () => {
+                        card.style.willChange = 'transform'
+                        gsap.to(card, { y: -4, rotation: .35, duration: .25, ease: 'power2.out' })
+                    })
+                    card.addEventListener('mouseleave', () => {
+                        gsap.to(card, { y: 0, rotation: 0, duration: .3, ease: 'power2.out', onComplete: () => { card.style.willChange = 'auto' } })
+                    })
+                })
+            }
+        } catch (err) { console.error('job card entrance failed', err) }
+
+        /* Última card de la grilla, si queda sola en su fila: se estira a
+           ancho completo en vez de dejar un hueco vacío al lado. No se puede
+           resolver con nth-child a ciegas porque la card destacada (que
+           ocupa las 2 columnas) solo aparece en la página 1 y cambia la
+           paridad — medir el layout real es lo único que funciona */
+        try {
+            const grid = root.querySelector('.ws-job-grid')
+            const gridCards = grid ? Array.from(grid.querySelectorAll('.job-card')) : []
+            if (gridCards.length > 1) {
+                const last = gridCards[gridCards.length - 1]
+                const prev = gridCards[gridCards.length - 2]
+                if (last.offsetTop !== prev.offsetTop) last.classList.add('is-solo')
+            }
+        } catch (err) { console.error('solo card layout check failed', err) }
+
+        return cards
+    }
+
+    initJobCards(document, false)
+
+    /* ── Mismo cálculo de contraste para los avatares de "empresas
+       contratando esta semana" — traen su color por style inline desde
+       el servidor, no por --card-accent. Independiente de la paginación
+       (no vive dentro de #empleos-resultados), no hace falta re-correrlo
+       tras un swap ── */
+    document.querySelectorAll('.ws-hiring-avatars span[style]').forEach(span => {
+        const m = (span.getAttribute('style') || '').match(/background-color:\s*([^;]+)/i)
+        span.style.color = inkColorFor(m ? m[1].trim() : null)
     })
 
     /* ── Botón volver arriba ── */
@@ -295,16 +398,17 @@ document.addEventListener('DOMContentLoaded', () => {
        (el sello de match, los avatares de contratación) tiene que esperar
        al menos eso o termina de jugarse detrás de la cortina, ya en reposo
        cuando esta se levanta, como si no hubiera pasado nada.
-       Solo se reproduce una vez por sesión de navegador: cada filtro/orden
-       navega a una URL nueva (recarga completa), así que sin esto la
-       cortina de "arranque" se repetía en cada clic de filtro ── */
+       Se reproduce en cada recarga real de la página (F5, entrar desde otra
+       sección, primera visita) — ya no hace falta el gate de sessionStorage
+       de antes: filtros/búsqueda/orden/paginación/favoritos navegan por
+       fetch (ver dcLoadResultados más abajo) y nunca vuelven a disparar
+       DOMContentLoaded, así que no hay riesgo de que la cortina se repita
+       en cada clic como pasaba cuando cada uno de esos era una recarga
+       completa ── */
     let bootExtra = 0
     const boot = document.getElementById('wsBoot')
     if (boot) {
-        let yaArranco = false
-        try { yaArranco = sessionStorage.getItem('wsBootPlayed') === '1' } catch { /* storage bloqueado, se trata como primera vez */ }
-
-        if (reduce || !hasGsap || yaArranco) {
+        if (reduce || !hasGsap) {
             boot.classList.add('is-done')
             boot.style.opacity = '0'; boot.style.visibility = 'hidden'
         } else {
@@ -319,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     onComplete: () => boot.classList.add('is-done')
                 })
         }
-        try { sessionStorage.setItem('wsBootPlayed', '1') } catch { /* no-op */ }
     }
 
     /* ── Paleta de comandos (⌘K) — lee los propios enlaces del sidebar
@@ -417,81 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
        lograba un parpadeo a medio jugar antes de que la página se
        descargara — se quitó esa animación por eso */
 
-    /* ── Guardar empleo: un pequeño aplastón, como una pestaña física que
-       cede al presionarla, en vez de un cambio de color plano ── */
-    if (hasGsap && !reduce) {
-        document.querySelectorAll('.btn-favorito').forEach(btn => {
-            btn.addEventListener('click', () => {
-                gsap.timeline()
-                    .to(btn, { scaleX: 1.25, scaleY: .8, duration: .09, ease: 'power1.out' })
-                    .to(btn, { scaleX: .92, scaleY: 1.08, duration: .1, ease: 'power1.inOut' })
-                    .to(btn, { scaleX: 1, scaleY: 1, duration: .18, ease: 'power2.out' })
-            })
-        })
-    }
-
-    /* ── Anillos de match: relleno con leve sobregiro al entrar en
-       viewport — la aguja pasa de largo y se asienta ── */
-    if (hasGsap && !reduce) {
-        document.querySelectorAll('.job-ring .prog').forEach(circle => {
-            const pct = parseFloat(circle.dataset.pct)
-            const full = 100.5
-            const target = full * (1 - pct / 100)
-            gsap.set(circle, { strokeDashoffset: full })
-            circle._matchTarget = target
-        })
-        const rings = Array.from(document.querySelectorAll('.job-ring .prog'))
-        if (rings.length) {
-            // un ScrollTrigger.batch en vez de un ScrollTrigger.create por
-            // anillo — con una página llena de cards, decenas de triggers
-            // individuales es justo el tipo de cosa que hace lento el scroll
-            if (window.ScrollTrigger) {
-                ScrollTrigger.batch(rings, {
-                    start: 'top 92%', once: true,
-                    onEnter: batch => batch.forEach(c => gsap.to(c, { strokeDashoffset: c._matchTarget, duration: 1.1, ease: 'back.out(1.5)' }))
-                })
-            } else {
-                rings.forEach(c => gsap.to(c, { strokeDashoffset: c._matchTarget, duration: 1.1, ease: 'back.out(1.5)' }))
-            }
-        }
-    }
-
-    /* ── Entrada de las job cards: stagger de traslación + opacity (sin
-       rotación — ver nota de costo de composición más abajo), y una
-       inclinación al pasar el mouse en vez de un lift plano en CSS. Cada
-       bloque va en su propio try/catch — que uno falle no debe apagar los
-       de más abajo ── */
-    try {
-        if (hasGsap && !reduce && cards.length) {
-            cards.forEach(card => { card.style.animation = 'none' })
-            // sin rotation en la entrada: y + opacity arma solo una traslación
-            // simple para componer, en vez de la matriz de transform 2D que
-            // pide una rotación — con todas las cards animando en el mismo
-            // batch de scroll es la diferencia entre barato y caro
-            gsap.set(cards, { y: 22, autoAlpha: 0 })
-            if (window.ScrollTrigger) {
-                ScrollTrigger.batch(cards, {
-                    start: 'top 92%', once: true,
-                    onEnter: batch => gsap.to(batch, { y: 0, autoAlpha: 1, duration: .5, ease: 'power3.out', stagger: .08 })
-                })
-            } else {
-                gsap.to(cards, { y: 0, autoAlpha: 1, duration: .5, ease: 'power3.out', stagger: .08 })
-            }
-            // will-change acotado a la card puntual y solo mientras dura el
-            // hover — promoverla a su propia capa de composición justo
-            // cuando se anima, sin pagar memoria de GPU en las otras diez
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', () => {
-                    card.style.willChange = 'transform'
-                    gsap.to(card, { y: -4, rotation: .35, duration: .25, ease: 'power2.out' })
-                })
-                card.addEventListener('mouseleave', () => {
-                    gsap.to(card, { y: 0, rotation: 0, duration: .3, ease: 'power2.out', onComplete: () => { card.style.willChange = 'auto' } })
-                })
-            })
-        }
-    } catch (err) { console.error('job card entrance failed', err) }
-
     /* ── Avatares de "empresas contratando" se despliegan con el mismo
        ritmo, esperando a que la cortina de arranque termine de subir ── */
     try {
@@ -523,21 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
        toda la altura del documento es justo el tipo de trabajo que hacía
        lag el scroll en páginas largas, por un efecto puramente decorativo */
 
-    /* ── Última card de la grilla, si queda sola en su fila: se estira a
-       ancho completo en vez de dejar un hueco vacío al lado. No se puede
-       resolver con nth-child a ciegas porque la card destacada (que ocupa
-       las 2 columnas) solo aparece en la página 1 y cambia la paridad —
-       medir el layout real es lo único que funciona en cualquier página ── */
-    try {
-        const grid = document.querySelector('.ws-job-grid')
-        const gridCards = grid ? Array.from(grid.querySelectorAll('.job-card')) : []
-        if (gridCards.length > 1) {
-            const last = gridCards[gridCards.length - 1]
-            const prev = gridCards[gridCards.length - 2]
-            if (last.offsetTop !== prev.offsetTop) last.classList.add('is-solo')
-        }
-    } catch (err) { console.error('solo card layout check failed', err) }
-
     /* ── Reloj en vivo de la barra de estado ── */
     const clockEl = document.getElementById('clock')
     if (clockEl) {
@@ -548,4 +561,136 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         tick(); setInterval(tick, 1000)
     }
+
+    /* ── Navegación de /empleos por fetch, sin recargar el documento
+       completo: paginación, chips de filtro, búsqueda, sort, tamaño de
+       página y el toggle de favoritos pasan todos por acá (filtros.js llama
+       a `window.dcLoadResultados` desde `applyFiltersToUrl`). Un contador de
+       generación en vez de un `AbortController` suelto: abortar no evita
+       que el `.then`/`.catch` de la request vieja se siga ejecutando, así
+       que cada callback chequea si sigue siendo la request más reciente
+       antes de tocar el DOM o disparar un fallback — si no, una respuesta
+       vieja que llega tarde podría pisar el resultado de una más nueva, o
+       peor, forzar un reload de página por el fallo de una request que el
+       usuario ya abandonó clickeando otra cosa ── */
+    let peticionActual = 0
+    let abortActual = null
+
+    function dcLoadResultados(url, opts) {
+        opts = opts || {}
+        const miId = ++peticionActual
+        if (abortActual) abortActual.abort()
+        abortActual = new AbortController()
+
+        if (navBar) {
+            navBar.style.transition = 'none'
+            navBar.style.width = '0'
+            navBar.style.opacity = '1'
+            requestAnimationFrame(() => {
+                navBar.style.transition = 'width .5s cubic-bezier(.4,0,.2,1)'
+                navBar.style.width = '80%'
+            })
+        }
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+            signal: abortActual.signal
+        })
+            .then(r => {
+                if (!r.ok || r.redirected) throw new Error('respuesta inesperada')
+                return r.text()
+            })
+            .then(html => {
+                if (miId !== peticionActual) return // una request más nueva ya ganó
+
+                const tpl = document.createElement('template')
+                tpl.innerHTML = html.trim()
+                const nuevo = tpl.content.querySelector('#empleos-resultados')
+                const actual = document.getElementById('empleos-resultados')
+                if (!nuevo || !actual) throw new Error('fragmento de resultados no encontrado')
+
+                if (cardsBatchST.length) { cardsBatchST.forEach(st => st.kill()); cardsBatchST = [] }
+                if (ringsBatchST.length) { ringsBatchST.forEach(st => st.kill()); ringsBatchST = [] }
+
+                actual.dataset.currentPage = nuevo.dataset.currentPage
+                actual.dataset.totalPages = nuevo.dataset.totalPages
+                actual.dataset.pageSize = nuevo.dataset.pageSize
+                actual.dataset.totalElements = nuevo.dataset.totalElements
+                if (nuevo.dataset.avgScore) actual.dataset.avgScore = nuevo.dataset.avgScore
+                else delete actual.dataset.avgScore
+                actual.innerHTML = nuevo.innerHTML
+
+                const miniCur = document.getElementById('mini-current-page')
+                const miniTot = document.getElementById('mini-total-pages')
+                const miniSize = document.getElementById('mini-page-size')
+                const totalPages = Number(actual.dataset.totalPages)
+                if (miniCur) miniCur.textContent = String(Number(actual.dataset.currentPage) + 1)
+                if (miniTot) miniTot.textContent = String(totalPages > 0 ? totalPages : 1)
+                if (miniSize) miniSize.textContent = actual.dataset.pageSize
+
+                // contador grande y "match prom." viven fuera del fragmento
+                // (cabecera de la página) — Thymeleaf omite el atributo por
+                // completo cuando avgScore es null, por eso el chequeo con
+                // `in` en vez de comparar contra string vacío
+                const bigCounter = document.querySelector('.ws-big-num.dc-counter')
+                if (bigCounter) bigCounter.textContent = actual.dataset.totalElements
+                const stamp = document.querySelector('.ws-mini-stamp')
+                if (stamp) {
+                    const hasScore = 'avgScore' in actual.dataset
+                    stamp.classList.toggle('is-hidden', !hasScore)
+                    if (hasScore) {
+                        const b = stamp.querySelector('b')
+                        if (b) b.textContent = actual.dataset.avgScore + '%'
+                    }
+                }
+
+                initJobCards(actual, true)
+                if (typeof window.initFavoritos === 'function') window.initFavoritos(actual)
+
+                if (opts.pushState) history.pushState({}, '', url)
+
+                if (navBar) {
+                    navBar.style.transition = 'width .2s ease'
+                    navBar.style.width = '100%'
+                    setTimeout(() => { navBar.style.opacity = '0' }, 250)
+                }
+                // solo paginación scrollea — ahí tiene sentido porque el click
+                // pasa casi siempre al fondo de la página. Cambiar un filtro,
+                // buscar, ordenar o tocar favoritos no debe mover al usuario
+                // de donde esté parado
+                if (opts.scrollToResults) actual.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return // una request más nueva la reemplazó
+                if (miId === peticionActual) window.location = url
+            })
+    }
+    window.dcLoadResultados = dcLoadResultados
+
+    /* Paginación: Anterior/Siguiente/números dentro de .pagination-tabs */
+    document.addEventListener('click', e => {
+        const tab = e.target.closest('.pagination-tab')
+        if (!tab) return
+        // is-disabled ya tiene pointer-events:none en CSS (bloquea el click de
+        // mouse), pero un Enter por teclado sobre el link igual dispara el
+        // evento — sin este preventDefault, clickear la página activa o una
+        // flecha "deshabilitada" dejaba pasar una navegación completa inútil
+        // en vez de quedar inerte
+        if (tab.classList.contains('is-disabled') || tab.classList.contains('active')) {
+            e.preventDefault()
+            return
+        }
+        e.preventDefault()
+        dcLoadResultados(tab.href, { pushState: true, scrollToResults: true })
+    })
+
+    /* Atrás/adelante del navegador: primero se reconstruye el chrome de
+       filtros (síncrono, instantáneo) y recién después se pide el fragmento
+       nuevo — evita el instante en que los chips dicen una cosa y los
+       resultados todavía muestran otra */
+    window.addEventListener('popstate', () => {
+        if (typeof window.restoreFiltersUI === 'function') window.restoreFiltersUI()
+        dcLoadResultados(location.href, { pushState: false })
+    })
 })
