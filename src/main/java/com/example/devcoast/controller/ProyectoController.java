@@ -1,11 +1,20 @@
 package com.example.devcoast.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +32,110 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class ProyectoController {
 
-    private static final String BANNER_DEFAULT = "cover-ocean";
+    private static final String BANNER_DEFAULT = "cover-terminal";
     private static final String ICONO_DEFAULT = "layers";
     private static final String COLOR_ICONO_DEFAULT = "#1f8f8f";
+    // 8 = grilla de 2 columnas en 4 filas parejas, mismo criterio que el
+    // tamaño de página default de empleos (cerrar filas completas)
+    private static final int PROYECTOS_POR_PAGINA_DEFAULT = 8;
 
     private final ProyectoRepository proyectoRepository;
+    private final MongoTemplate mongoTemplate;
 
-    public ProyectoController(ProyectoRepository proyectoRepository) {
+    public ProyectoController(ProyectoRepository proyectoRepository, MongoTemplate mongoTemplate) {
         this.proyectoRepository = proyectoRepository;
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    // vitrina de PROYECTOS PROPIOS — misma data que /misProyectos (solo lo del
+    // usuario logueado, publicado o borrador), con el tablero código/diseño en
+    // vez de la lista simple. Una vitrina cruzando lo público de todos los
+    // usuarios queda pendiente como una sección separada a futuro.
+    @GetMapping("/proyectos")
+    public String vitrinaProyectos(
+            Model model, HttpSession session, RedirectAttributes ra,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(defaultValue = "false") boolean destacados,
+            @RequestParam(defaultValue = "recent") String sort) {
+
+        if (RoleGuard.soloTalento(session)) {
+            if (RoleGuard.sinSesion(session))
+                return "redirect:/login";
+            ra.addFlashAttribute("flashMessage",
+                    "Las empresas no tienen proyectos. ¿Querías ver tus empleos publicados?");
+            ra.addFlashAttribute("flashType", "info");
+            return "redirect:/misEmpleos";
+        }
+
+        page = Math.max(0, page);
+        int pageSize = size > 0 ? Math.min(size, 50) : PROYECTOS_POR_PAGINA_DEFAULT;
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(Criteria.where("usuarioId").is(RoleGuard.getId(session)));
+
+        if (q != null && !q.isBlank()) {
+            for (String token : q.trim().split("\\s+")) {
+                if (token.length() < 2)
+                    continue;
+                String rx = ".*" + Pattern.quote(token) + ".*";
+                criteriaList.add(new Criteria().orOperator(
+                        Criteria.where("nombre").regex(rx, "i"),
+                        Criteria.where("categoria").regex(rx, "i"),
+                        Criteria.where("tipo").regex(rx, "i"),
+                        Criteria.where("descripcionCorta").regex(rx, "i"),
+                        Criteria.where("rol").regex(rx, "i"),
+                        Criteria.where("stack").regex(rx, "i"),
+                        Criteria.where("etiquetas").regex(rx, "i")));
+            }
+        }
+        if (categoria != null && !categoria.isBlank())
+            criteriaList.add(Criteria.where("categoria").regex("^" + Pattern.quote(categoria) + "$", "i"));
+        if (tipo != null && !tipo.isBlank())
+            criteriaList.add(Criteria.where("tipo").regex("^" + Pattern.quote(tipo) + "$", "i"));
+        if (destacados)
+            criteriaList.add(Criteria.where("destacar").is(true));
+
+        Criteria filtroCriteria = new Criteria().andOperator(criteriaList.toArray(Criteria[]::new));
+        Sort.Direction dir = "oldest".equals(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Query query = new Query(filtroCriteria);
+        query.with(Sort.by(dir, "creadoEn"));
+        long total = mongoTemplate.count(query, Proyecto.class);
+        query.skip((long) page * pageSize).limit(pageSize);
+        List<Proyecto> items = mongoTemplate.find(query, Proyecto.class);
+        Page<Proyecto> proyectos = new PageImpl<>(items, PageRequest.of(page, pageSize, Sort.by(dir, "creadoEn")),
+                total);
+
+        int totalPages = proyectos.getTotalPages();
+        int currentPage = proyectos.getNumber();
+        int startPage = Math.max(0, currentPage - 5);
+        int endPage = Math.min(Math.max(totalPages - 1, 0), startPage + 9);
+        if (endPage - startPage < 9)
+            startPage = Math.max(0, endPage - 9);
+
+        boolean hayFiltros = (q != null && !q.isBlank()) || (categoria != null && !categoria.isBlank())
+                || (tipo != null && !tipo.isBlank()) || destacados;
+
+        model.addAttribute("proyectos", proyectos);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("showStartEllipsis", startPage > 0);
+        model.addAttribute("showEndEllipsis", endPage < totalPages - 1);
+        model.addAttribute("q", q);
+        model.addAttribute("categoria", categoria);
+        model.addAttribute("tipo", tipo);
+        model.addAttribute("destacados", destacados);
+        model.addAttribute("sort", sort);
+        model.addAttribute("hayFiltros", hayFiltros);
+
+        agregarSesion(session, model);
+        return "proyectos";
     }
 
     @GetMapping("/misProyectos")

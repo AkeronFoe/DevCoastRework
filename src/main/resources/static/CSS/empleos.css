@@ -117,13 +117,16 @@ body.wsjobs.is-empresa {
   display: none; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 5px;
   color: var(--ws-dim); border: 1px solid var(--ws-line); flex-shrink: 0;
 }
-.ws-brand { display: flex; align-items: center; gap: 8px; font-family: var(--ws-mono-disp); font-weight: 800; font-size: .86rem; flex-shrink: 0; }
-.ws-brand-mark { width: 9px; height: 9px; border-radius: 2px; background: var(--ws-accent); flex-shrink: 0; }
+.ws-brand { display: flex; align-items: center; gap: 9px; font-family: var(--ws-mono-disp); font-weight: 800; font-size: .86rem; flex-shrink: 0; }
+.ws-brand-mark { width: 22px; height: 22px; flex-shrink: 0; display: block; }
+.ws-brand-name { color: var(--ws-ink); }
 .ws-brand-sep { color: var(--ws-dim-2); font-weight: 500; margin: 0 1px; }
+.ws-brand-path { color: var(--ws-dim); font-weight: 600; }
 .ws-role-pill {
   font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700; letter-spacing: .04em;
   color: var(--ws-accent); background: var(--ws-accent-dim); border-radius: 20px; padding: 4px 11px; flex-shrink: 0;
 }
+.ws-role-pill.is-editing { color: var(--ws-amber); background: var(--ws-amber-dim); }
 @media (max-width: 760px) { .ws-role-pill { display: none; } }
 
 .ws-search {

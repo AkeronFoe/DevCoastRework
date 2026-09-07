@@ -2734,6 +2734,51 @@ textarea {
     --project-banner-bg: linear-gradient(135deg, #15803d 0%, #047857 100%);
 }
 
+/* set nuevo, pensado a propósito para la estética workspace del resto del
+   sitio (canvas oscuro + acentos cian/magenta/menta/ámbar) en vez de los
+   degradados arcoíris genéricos de arriba — son los que ofrece el picker
+   de "Banner" de subirProyecto.html; los de arriba se mantienen solo por
+   compatibilidad con proyectos ya guardados */
+.cover-terminal {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #123449 100%);
+}
+
+.cover-artboard {
+    --project-banner-bg: linear-gradient(135deg, #f3ede2 0%, #e2d8c8 100%);
+}
+
+.cover-signal {
+    --project-banner-bg: linear-gradient(120deg, #1f5c86 0%, #0d0f13 50%, #7a2f5e 100%);
+}
+
+.cover-void {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #1a1e25 100%);
+}
+
+.cover-mint-glow {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #123328 55%, #1f6b4f 100%);
+}
+
+.cover-amber-glow {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #3a2a12 55%, #a56a1f 100%);
+}
+
+.cover-mesh {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #16283f 55%, #2d5a8f 100%);
+}
+
+.cover-sketch {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #3a1420 55%, #8a2846 100%);
+}
+
+.cover-pixel {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #241b3a 55%, #6b4f9e 100%);
+}
+
+.cover-orbit {
+    --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #1c1633 55%, #4a3f9e 100%);
+}
+
 /* ===================================
               DETAILS
 ======================================*/

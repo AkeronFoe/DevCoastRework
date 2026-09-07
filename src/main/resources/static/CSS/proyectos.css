@@ -1,0 +1,355 @@
+/* DevCoast — proyectos (vitrina). Extiende el lienzo de empleos.css
+   (misma familia "workspace": editor de código oscuro + ficha de papel
+   editorial) en vez de duplicarlo — este archivo solo agrega lo que es
+   propio de una vitrina de portafolio.
+
+   El canvas de cada card tiene dos "modos" reales, no solo un color de
+   fondo distinto — .mode-code muestra una barra de traffic-lights +
+   un recorte de código de ese proyecto sobre una textura de scanlines;
+   .mode-design muestra una cruz de registro + una mini composición de
+   formas (moodboard) sobre una trama de medio-tono (halftone), como
+   una prueba de imprenta. Así un proyecto de software se lee como
+   software incluso antes de leer el texto. Requiere que la página
+   cargue empleos.css primero y use body.wsjobs.wsprojects. */
+
+body.wsjobs.wsprojects {
+  --wp-magenta: #e8659f; --wp-magenta-dim: rgba(232, 101, 159, .14);
+  --wp-yellow: #e8c34f;
+}
+
+/* ============================= grid + card shell ============================= */
+.wsprojects .proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 4px; }
+@media (max-width: 820px) { .wsprojects .proj-grid { grid-template-columns: 1fr; } }
+.wsprojects .proj-card.is-solo { grid-column: 1 / -1; }
+@media (max-width: 820px) { .wsprojects .proj-card.is-solo { grid-column: auto; } }
+
+.wsprojects .proj-card {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden;
+  position: relative; display: flex; flex-direction: column; cursor: pointer;
+  transition: border-color .15s; animation: wsJobFadeUp .3s ease both;
+}
+.wsprojects .proj-card:hover { border-color: var(--ws-dim-2); }
+.wsprojects .proj-card.is-hidden-filter { display: none; }
+
+.wsprojects .proj-card.featured { grid-column: 1 / -1; background-image: linear-gradient(115deg, color-mix(in srgb, var(--card-accent, var(--ws-cyan)) 13%, transparent) 0%, transparent 55%); }
+.wsprojects .proj-card.featured .proj-body { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; }
+.wsprojects .proj-card.featured .proj-foot { margin-top: 0; padding-top: 0; padding-left: 22px; border-top: none; flex-direction: column; align-items: flex-end; }
+
+/* ============================= canvas: barra + escenario ============================= */
+.wsprojects .proj-canvas { height: 118px; position: relative; overflow: hidden; flex-shrink: 0; background: var(--card-accent, var(--ws-cyan)); display: flex; flex-direction: column; }
+.wsprojects .proj-card.featured .proj-canvas { height: 132px; }
+
+/* barra superior tipo chrome de ventana — un solo carril horizontal para
+   el indicador de modo + la extensión, en vez de elementos flotando cada
+   uno en una esquina distinta (eso era lo que se tapaba antes) */
+.wsprojects .proj-canvas-bar {
+  position: relative; z-index: 2; flex-shrink: 0; height: 27px; display: flex; align-items: center;
+  justify-content: space-between; gap: 8px; padding: 0 10px; background: rgba(0,0,0,.22);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.wsprojects .bar-left { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.wsprojects .bar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.wsprojects .proj-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.wsprojects .proj-dot.r { background: #ff5f57; } .wsprojects .proj-dot.y { background: #febc2e; } .wsprojects .proj-dot.g { background: #28c840; }
+.wsprojects .mode-icon { width: 13px; height: 13px; color: rgba(255,255,255,.8); flex-shrink: 0; }
+.wsprojects .proj-dims-inline { font-family: var(--ws-mono-disp); font-size: .58rem; font-weight: 700; color: rgba(255,255,255,.65); white-space: nowrap; }
+.wsprojects .proj-ext {
+  font-family: var(--ws-mono-disp); font-size: .6rem; font-weight: 800; color: rgba(255,255,255,.92);
+  background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); border-radius: 4px; padding: 2px 7px;
+  white-space: nowrap;
+}
+
+/* escenario: lo que queda del canvas debajo de la barra */
+.wsprojects .proj-canvas-stage { position: relative; flex: 1; overflow: hidden; }
+.wsprojects .proj-canvas-stage::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(135deg, rgba(255,255,255,.14), transparent 60%); pointer-events: none; }
+/* leve degradado diagonal sobre todo el canvas en modo diseño — el color
+   plano del acento se sentía chato apenas los orbes se volvieron más
+   discretos; esto le da algo de volumen sin depender de más formas */
+.wsprojects .proj-canvas.mode-design {
+  background-image: linear-gradient(155deg, rgba(255,255,255,.18) 0%, transparent 38%, rgba(0,0,0,.3) 100%);
+}
+/* guías de alineación tipo Figma/Illustrator cruzando el escenario —
+   retoma el mismo cian/magenta del ícono de modo en la barra, y de paso
+   llena el espacio vacío del canvas con algo que tiene sentido de diseño
+   en vez de dejarlo en blanco */
+.wsprojects .mode-design .proj-canvas-stage::after {
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,.14), transparent 60%),
+    linear-gradient(rgba(79,160,232,.4), rgba(79,160,232,.4)),
+    linear-gradient(rgba(232,101,159,.4), rgba(232,101,159,.4));
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 1px 100%, 100% 1px;
+  background-position: 0 0, 64% 0, 0 40%;
+}
+
+/* modo código: scanlines finas, como un monitor CRT sutil — sin
+   mix-blend-mode: ese modo de mezcla obliga a recomponer pixel a pixel
+   en cada frame cuando la card se anima (el tilt del hover), y era la
+   causa real del lag general de la vitrina, no solo del modal */
+.wsprojects .mode-code .proj-canvas-stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(180deg, rgba(0,0,0,.16) 0 1px, transparent 1px 4px);
+}
+/* modo diseño: trama de medio-tono muy suave, como una prueba de
+   imprenta — antes era demasiado marcada y competía con las formas del
+   moodboard, ahora es casi subliminal (grano de papel, no lunares) */
+.wsprojects .mode-design .proj-canvas-stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .14;
+  background-image: radial-gradient(rgba(0,0,0,.6) 1px, transparent 1.4px);
+  background-size: 10px 10px;
+}
+
+/* recorte de código flotando sobre el escenario — antes llevaba
+   backdrop-filter, pero eso combinado con el scale/transform de apertura
+   del modal (que clona este mismo bloque más grande) forzaba recalcular
+   el blur en cada frame de la animación → el lag que se sentía al abrir
+   la vista rápida. Un fondo sólido semi-opaco se ve casi igual y es gratis */
+.wsprojects .proj-code-block {
+  position: absolute; top: 10px; left: 16px; right: 66px; z-index: 1;
+  display: grid; grid-template-columns: 15px 1fr; gap: 2px 10px;
+  background: rgba(7, 9, 12, .78); border: 1px solid rgba(255,255,255,.14); border-radius: 7px;
+  padding: 8px 10px; font-family: var(--ws-mono-body); font-size: .66rem; line-height: 1.65;
+}
+.wsprojects .proj-code-block .ln { color: rgba(255,255,255,.28); text-align: right; user-select: none; }
+.wsprojects .proj-code-block .cl { color: rgba(255,255,255,.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wsprojects .proj-code-block .kw { color: #ffd479; }
+.wsprojects .proj-code-block .fn { color: #8fd6f0; }
+.wsprojects .proj-code-block .str { color: #a3e6a1; }
+.wsprojects .proj-code-block .cm { color: rgba(255,255,255,.32); font-style: italic; }
+
+/* marca de agua temática al fondo del escenario de código — llena el
+   espacio a la derecha del bloque con algo que habla del proyecto en vez
+   de dejarlo en un color plano; opacidad baja para no competir con el
+   código, que sigue siendo el foco */
+.wsprojects .proj-watermark { position: absolute; right: 10px; bottom: 6px; width: 50px; height: 50px; color: rgba(255,255,255,.22); z-index: 0; pointer-events: none; }
+.wsprojects .proj-watermark svg { width: 100%; height: 100%; }
+.wsprojects .qv-canvas-col .proj-watermark { width: 84px; height: 84px; }
+.wsprojects .qv-canvas-col .proj-code-block { right: 96px; font-size: .74rem; }
+
+/* trazo vectorial — el gesto que cualquiera que haya abierto Illustrator
+   o Figma reconoce al toque: un path curvo con sus nodos de ancla y el
+   manejador de curva asomando. Es la contraparte real del recorte de
+   código del otro modo (un programador reconoce código, un diseñador
+   reconoce un bezier con anclas) y, a diferencia de los orbes de brillo
+   de antes, no es un cliché genérico de "blobs de gradiente" que se ve
+   en cualquier landing — ni depende del tema del proyecto (sirve para
+   café, revista o lo que sea), así que no hay riesgo de que termine
+   pareciéndose por accidente a un control de UI */
+.wsprojects .proj-vector { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; }
+.wsprojects .proj-vector .pv-path { fill: none; stroke-width: 2; stroke-linecap: round; }
+.wsprojects .proj-vector .pv-handle { stroke-width: 1.4; stroke-dasharray: 3 3; opacity: .8; }
+.wsprojects .proj-vector .pv-anchor { stroke-width: 1.6; }
+.wsprojects .proj-vector .pv-anchor.is-square { rx: 1.5; }
+
+/* señal — pulsos concéntricos emitiendo desde un punto, la única de las
+   seis con movimiento real */
+.wsprojects .proj-signal-dot { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; z-index: 1; }
+.wsprojects .proj-signal-ring {
+  position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%;
+  border-width: 1.5px; border-style: solid; z-index: 1; animation: projSignalPing 2.4s ease-out infinite;
+}
+@keyframes projSignalPing { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(9); opacity: 0; } }
+
+/* vacío — starfield disperso, casi todo quieto salvo un titileo lento */
+.wsprojects .proj-void-dot { position: absolute; border-radius: 50%; z-index: 1; }
+.wsprojects .proj-void-twinkle { animation: projVoidTwinkle 3s ease-in-out infinite; }
+@keyframes projVoidTwinkle { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
+
+/* onda — ecualizador; .proj-eq/.proj-eq-bar ya existían para un caso
+   propio anterior, acá se generaliza con posición absoluta propia */
+.wsprojects .proj-canvas-stage .proj-eq { position: absolute; inset: 14px 14px 10px; }
+
+/* grafo — nodos conectados, sin animación (el trazo ya es el foco) */
+
+/* boceto — barras de ancho variable apiladas, tipo wireframe de contenido */
+.wsprojects .proj-canvas-stage .proj-sketch { position: absolute; inset: 16px 16px 12px; display: flex; flex-direction: column; justify-content: center; gap: 9px; z-index: 1; }
+.wsprojects .proj-sketch-bar { height: 6px; border-radius: 3px; }
+
+/* mosaico — celdas rellenas con opacidad al azar, tipo heatmap */
+.wsprojects .proj-pixel-grid { position: absolute; inset: 12px; display: grid; gap: 3px; z-index: 1; }
+.wsprojects .proj-pixel-cell { border-radius: 2px; }
+
+/* órbita — SVG puro, no necesita reglas propias */
+
+/* mesa — grilla + marcas de esquina tipo Figma/Illustrator */
+.wsprojects .proj-artboard-grid { position: absolute; inset: 0; z-index: 1; }
+.wsprojects .proj-artboard-corner { position: absolute; width: 14px; height: 14px; border-style: solid; border-width: 0; z-index: 2; }
+.wsprojects .proj-artboard-corner.tl { top: 8px; left: 8px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.wsprojects .proj-artboard-corner.tr { top: 8px; right: 8px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.wsprojects .proj-artboard-corner.bl { bottom: 8px; left: 8px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.wsprojects .proj-artboard-corner.br { bottom: 8px; right: 8px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+/* Lucérnaga usa un fotograma oscuro en vez del acento plano — el único
+   proyecto donde ese contraste (canvas oscuro tipo pantalla) tiene
+   sentido real, así que se queda como caso propio, no como plantilla */
+.wsprojects .proj-print { position: absolute; top: 9px; right: 14px; bottom: 9px; width: 60%; z-index: 1; }
+.wsprojects .proj-print-sheet {
+  position: relative; width: 100%; height: 100%; border-radius: 6px; overflow: hidden;
+  box-shadow: 0 14px 28px -10px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.12);
+}
+.wsprojects .proj-print-mark { position: absolute; }
+.wsprojects .proj-print-play {
+  position: absolute; top: 50%; left: 50%; transform: translate(-45%, -50%);
+  width: 0; height: 0; border-style: solid; border-width: 11px 0 11px 17px;
+  border-color: transparent transparent transparent rgba(255,255,255,.22);
+}
+.wsprojects .qv-canvas-col .proj-print { width: 64%; }
+
+/* ecualizador — solo para Museo Sonoro, anidado dentro de su hoja como
+   el panel de un altavoz */
+.wsprojects .proj-eq { display: flex; align-items: flex-end; justify-content: flex-end; gap: 5px; z-index: 1; }
+.wsprojects .proj-eq-bar { width: 6px; border-radius: 3px 3px 0 0; }
+
+.wsprojects .proj-avatar {
+  position: absolute; left: 16px; top: 92px; width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-weight: 800;
+  font-size: 1.05rem; color: var(--card-ink, #0a1826); z-index: 3; background-color: var(--card-accent, var(--ws-cyan));
+  background-image: linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
+  box-shadow: 0 0 0 3px var(--ws-panel), 0 0 0 4.5px rgba(255,255,255,.28); overflow: hidden;
+}
+.wsprojects .proj-card.featured .proj-avatar { top: 106px; }
+/* modo código: avatar cuadrado tipo ícono de app; modo diseño se queda
+   circular, como un sello — la forma sola ya distingue el tipo de card
+   antes de leer una sola palabra */
+.wsprojects .proj-avatar.shape-square { border-radius: 13px; }
+.wsprojects .proj-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.wsprojects .proj-featured-tag {
+  position: absolute; top: 8px; left: 14px; font-family: var(--ws-mono-disp); font-size: .6rem; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase; border-radius: 4px; padding: 3px 7px; z-index: 3;
+  color: var(--ws-void); background: var(--ws-mint);
+}
+.wsprojects .proj-card.featured .proj-canvas-bar { padding-left: 96px; }
+
+/* ============================= body / content ============================= */
+.wsprojects .proj-body { padding: 30px 16px 16px 74px; position: relative; display: flex; flex-direction: column; flex: 1; }
+.wsprojects .proj-content { flex: 1; }
+.wsprojects .proj-title { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.22rem; color: var(--ws-ink); display: block; letter-spacing: -.01em; }
+.wsprojects .proj-title-disc {
+  display: inline-flex; align-items: center; gap: 5px; margin-left: 9px; vertical-align: middle;
+  font-family: var(--ws-mono-disp); font-size: .58rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px; color: var(--ws-dim-2); background: var(--ws-panel-3);
+}
+.wsprojects .proj-title-disc.is-code { color: var(--ws-cyan-soft); background: var(--ws-cyan-dim); }
+.wsprojects .proj-title-disc.is-design { color: var(--wp-magenta); background: var(--wp-magenta-dim); }
+.wsprojects .proj-title-disc.is-signal { color: var(--ws-violet-soft); background: var(--ws-violet-dim); }
+.wsprojects .proj-title-disc.is-void { color: #b7bfcf; background: rgba(139, 147, 167, .16); }
+.wsprojects .proj-title-disc.is-wave { color: var(--ws-amber); background: var(--ws-amber-dim); }
+.wsprojects .proj-title-disc.is-artboard { color: var(--ws-mint); background: var(--ws-mint-dim); }
+.wsprojects .proj-title-disc.is-mesh { color: #9fc6e8; background: rgba(159, 198, 232, .16); }
+.wsprojects .proj-title-disc.is-sketch { color: var(--ws-rose); background: var(--ws-rose-dim); }
+.wsprojects .proj-title-disc.is-pixel { color: #d9c26a; background: rgba(217, 194, 106, .16); }
+.wsprojects .proj-title-disc.is-orbit { color: #a9b4e8; background: rgba(169, 180, 232, .16); }
+.wsprojects .proj-title-disc.is-draft { color: var(--ws-amber); background: var(--ws-amber-dim); }
+.wsprojects .proj-meta-line { font-size: .76rem; color: var(--ws-dim-2); margin-top: 5px; }
+.wsprojects .proj-meta-line b { color: var(--ws-dim); font-weight: 700; }
+.wsprojects .proj-tagline { position: relative; font-size: .86rem; color: var(--ws-ink); opacity: .92; line-height: 1.6; margin: 12px 0 0; padding-left: 16px; max-width: 62ch; }
+.wsprojects .proj-tagline::before { content: "\201C"; position: absolute; left: -2px; top: -7px; font-family: var(--ws-editorial); font-size: 1.6rem; font-weight: 600; color: var(--card-accent, var(--ws-accent)); opacity: .7; line-height: 1; }
+
+/* swatches: chips de paleta, como muestras Pantone recortadas */
+.wsprojects .proj-swatches { display: flex; gap: 5px; margin-top: 13px; align-items: center; }
+.wsprojects .proj-swatch { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,.14); flex-shrink: 0; }
+.wsprojects .proj-swatch-label { font-family: var(--ws-mono-disp); font-size: .62rem; color: var(--ws-dim-2); margin-left: 4px; }
+
+.wsprojects .proj-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+.wsprojects .tag-code { font-family: var(--ws-mono-disp); font-size: .68rem; color: var(--ws-dim-2); background: var(--ws-panel-3); border-radius: 4px; padding: 3px 8px; }
+.wsprojects .tag-tool { display: inline-flex; align-items: center; gap: 5px; font-family: var(--ws-mono-body); font-size: .68rem; color: var(--wp-magenta); background: var(--wp-magenta-dim); border-radius: 4px; padding: 3px 8px 3px 6px; }
+.wsprojects .tag-tool::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.wsprojects .proj-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ws-line-soft); gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+.wsprojects .proj-foot-l { display: flex; align-items: center; gap: 14px; color: var(--ws-dim-2); font-size: .74rem; font-family: var(--ws-mono-disp); }
+.wsprojects .proj-stat { display: inline-flex; align-items: center; gap: 5px; }
+.wsprojects .proj-stat svg { width: 13px; height: 13px; }
+.wsprojects .proj-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.wsprojects .proj-icon-action {
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ws-dim-2);
+  transition: color .15s, background .15s; flex-shrink: 0; background: none; border: none;
+  padding: 5px; border-radius: 6px; cursor: pointer;
+}
+.wsprojects .proj-icon-action svg { width: 16px; height: 16px; }
+.wsprojects .proj-icon-action:hover { color: var(--ws-accent); background: var(--ws-accent-dim); }
+.wsprojects .proj-icon-action.is-danger:hover { color: var(--ws-rose); background: var(--ws-rose-dim); }
+.wsprojects .proj-foot-l form { display: inline-flex; }
+
+/* ============================= disciplina / tipo tags de página ============================= */
+.wsprojects .disc-pill { font-family: var(--ws-mono-disp); font-size: .6rem; font-weight: 700; letter-spacing: .04em; }
+
+/* ============================= panel de vista rápida ============================= */
+.wsprojects .qv-scrim {
+  position: fixed; inset: 0; background: rgba(6, 7, 10, .86); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 5vh 16px;
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+.wsprojects .qv-scrim.is-open { pointer-events: auto; }
+.wsprojects .qv-panel {
+  position: relative; width: min(860px, 100%); max-height: 90vh; overflow-y: auto; background: var(--ws-panel);
+  border: 1px solid var(--ws-line); border-top: 3px solid var(--card-accent, var(--ws-accent)); border-radius: 12px;
+  box-shadow: 0 40px 90px -24px rgba(0,0,0,.75);
+}
+/* el cierre vive a nivel del panel, no del canvas — así nunca compite con
+   la barra de traffic-lights/extensión que trae el canvas clonado */
+.wsprojects .qv-close {
+  position: absolute; top: 14px; right: 14px; z-index: 5; width: 30px; height: 30px; border-radius: 7px;
+  background: rgba(20,22,27,.9); border: 1px solid rgba(255,255,255,.25); color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.wsprojects .qv-close svg { width: 15px; height: 15px; }
+
+.wsprojects .qv-layout { display: grid; grid-template-columns: 280px 1fr; align-items: stretch; }
+@media (max-width: 680px) { .wsprojects .qv-layout { grid-template-columns: 1fr; } }
+.wsprojects .qv-canvas-col { position: relative; min-height: 320px; }
+@media (max-width: 680px) { .wsprojects .qv-canvas-col { min-height: 200px; } }
+.wsprojects .qv-canvas-col .proj-canvas { height: 100%; position: absolute; inset: 0; }
+
+.wsprojects .qv-body { padding: 24px 26px 26px; }
+.wsprojects .qv-eyebrow { font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ws-dim-2); margin: 0 0 6px; }
+.wsprojects .qv-title { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.7rem; color: var(--ws-ink); margin: 0 0 6px; letter-spacing: -.01em; }
+.wsprojects .qv-title .proj-title-disc { font-size: .56rem; vertical-align: 4px; margin-left: 10px; }
+.wsprojects .qv-meta { font-size: .82rem; color: var(--ws-dim-2); margin-bottom: 14px; }
+.wsprojects .qv-meta b { color: var(--ws-dim); font-weight: 700; }
+
+/* ficha técnica — cuatro datos rápidos (disciplina, tipo, vistas,
+   guardados) que antes solo vivían en los chips de filtro o ni siquiera
+   se mostraban acá. Nada de sintaxis para leer (ni JSON ni íconos
+   redondos de dashboard) — un talón de boleto: el dato grande arriba,
+   la etiqueta chica abajo, separados por una perforación punteada. Es
+   el mismo gesto de "ficha de papel" que la tarjeta de sesión del
+   sidebar, solo que en la paleta oscura del panel */
+.wsprojects .qv-specs {
+  display: flex; margin-bottom: 20px; background: var(--ws-panel-2); border: 1px solid var(--ws-line);
+  border-radius: 10px; overflow: hidden;
+}
+@media (max-width: 460px) { .wsprojects .qv-specs { flex-wrap: wrap; } }
+.wsprojects .qv-spec-item {
+  flex: 1 1 0; min-width: 0; padding: 12px 8px; text-align: center;
+  border-right: 1px dashed var(--ws-line); position: relative;
+}
+.wsprojects .qv-spec-item:last-child { border-right: none; }
+@media (max-width: 460px) {
+  .wsprojects .qv-spec-item { flex: 1 1 50%; border-right: 1px dashed var(--ws-line); border-bottom: 1px dashed var(--ws-line); }
+  .wsprojects .qv-spec-item:nth-child(2n) { border-right: none; }
+  .wsprojects .qv-spec-item:nth-last-child(-n+2) { border-bottom: none; }
+}
+.wsprojects .qv-spec-value {
+  display: block; font-family: var(--ws-mono-disp); font-size: 1.02rem; font-weight: 800;
+  color: var(--card-accent, var(--ws-accent)); margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wsprojects .qv-spec-label {
+  display: block; font-family: var(--ws-mono-disp); font-size: .58rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ws-dim-2);
+}
+
+.wsprojects .qv-desc { font-size: .92rem; color: var(--ws-ink); opacity: .92; line-height: 1.7; margin-bottom: 18px; }
+.wsprojects .qv-section-label { font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ws-dim-2); margin: 0 0 8px; }
+.wsprojects .qv-swatches { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.wsprojects .qv-swatch { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.wsprojects .qv-swatch-chip { width: 34px; height: 34px; border-radius: 7px; border: 1px solid rgba(255,255,255,.14); }
+.wsprojects .qv-swatch-hex { font-family: var(--ws-mono-disp); font-size: .58rem; color: var(--ws-dim-2); }
+.wsprojects .qv-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.wsprojects .qv-note { display: flex; align-items: center; gap: 9px; background: var(--ws-accent-dim); border: 1px solid var(--ws-accent); border-radius: 8px; padding: 11px 13px; font-size: .78rem; color: var(--ws-ink); }
+.wsprojects .qv-note svg { width: 15px; height: 15px; color: var(--ws-accent); flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wsprojects .proj-card { animation: none; }
+}

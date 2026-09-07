@@ -1,7 +1,13 @@
 let paso = 0;
-let coverActual = 'cover-ocean';
-let iconSVGHtml = document.querySelector('.icon-opt.sel svg').outerHTML;
-let iconKey = document.querySelector('.icon-opt.sel').dataset.key;
+// el banner sí tiene selector (.banner-opt) y define qué dibujito se
+// pinta en la card (ver pintarCard/STYLE_BUILDERS en proyectos-render.js)
+// — el color de acento sigue siendo aparte; el ícono clásico (forma SVG)
+// ya no tiene selector — se sacó por completo, así que queda fijo en su
+// valor por defecto; el guardado real preserva el que ya tenía el
+// proyecto vía la precarga de edición más abajo
+let coverActual = 'cover-terminal';
+let iconSVGHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>';
+let iconKey = 'layers';
 let iconColor = '#1f8f8f';
 let logoSubido = false;
 let bannerSubido = false;
@@ -38,9 +44,16 @@ function irAPaso(n) {
     stepItems.forEach((item, i) => item.classList.toggle('clickable', i < paso));
 
     document.getElementById('side-preview').style.display = paso === 3 ? 'none' : '';
-    if (paso === 3) construirResumen();
 
-    actualizarPreviewLateral();
+    // la vista previa (canvas código/diseño, resumen) es cosmética — si algo
+    // ahí revienta, no puede impedir que el paso realmente cambie de página
+    try {
+        if (paso === 3) construirResumen();
+        actualizarPreviewLateral();
+    } catch (err) {
+        console.error('Error pintando la vista previa en el paso ' + paso + ':', err);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -103,6 +116,8 @@ document.querySelectorAll('.banner-opt').forEach(opt => {
         bannerSubido = false;
         document.getElementById('btn-quitar-banner').style.display = 'none';
         document.getElementById('banner-upload-label').textContent = 'Subir imagen de banner (opcional)';
+        // el banner elegido define qué dibujito se pinta en la card
+        // (y su mini vista previa acá) — ver pintarCard()
         actualizarPreviewLateral();
     });
 });
@@ -111,19 +126,15 @@ document.getElementById('banner-img-input').addEventListener('change', function 
     if (!this.files[0]) return;
     const reader = new FileReader();
     reader.onload = e => {
-        const sideBanner = document.getElementById('side-banner');
-        const pvBanner = document.getElementById('pv-banner');
-        sideBanner.style.backgroundImage = `url('${e.target.result}')`;
-        sideBanner.style.backgroundSize = 'cover';
-        sideBanner.style.backgroundPosition = 'center';
-        pvBanner.style.backgroundImage = `url('${e.target.result}')`;
-        pvBanner.style.backgroundSize = 'cover';
-        pvBanner.style.backgroundPosition = 'center';
+        // la imagen subida solo se ve en la mini vista previa y en "Mis
+        // proyectos" — el dibujito de la card sigue siendo el del último
+        // banner de degradado elegido (coverActual no cambia acá)
         bannerDataUrl = e.target.result;
         document.querySelectorAll('.banner-opt').forEach(o => o.classList.remove('sel'));
         document.getElementById('banner-upload-label').textContent = this.files[0].name;
         document.getElementById('btn-quitar-banner').style.display = 'block';
         bannerSubido = true;
+        actualizarPreviewLateral();
     };
     reader.readAsDataURL(this.files[0]);
 });
@@ -140,16 +151,6 @@ document.getElementById('btn-quitar-banner').addEventListener('click', () => {
     actualizarPreviewLateral();
 });
 
-document.querySelectorAll('.icon-opt').forEach(opt => {
-    opt.addEventListener('click', () => {
-        document.querySelectorAll('.icon-opt').forEach(o => o.classList.remove('sel'));
-        opt.classList.add('sel');
-        iconKey = opt.dataset.key;
-        iconSVGHtml = opt.querySelector('svg').outerHTML;
-        if (!logoSubido) actualizarIconPreview();
-    });
-});
-
 document.querySelectorAll('.color-dot').forEach(dot => {
     dot.addEventListener('click', () => {
         document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('sel'));
@@ -164,6 +165,7 @@ function actualizarIconPreview() {
     prev.style.background = iconColor;
     prev.innerHTML = iconSVGHtml;
     actualizarPreviewLateral();
+    pintarEstiloTiles();
 }
 
 document.getElementById('logo-input').addEventListener('change', async function () {
@@ -195,17 +197,17 @@ document.getElementById('logo-input').addEventListener('change', async function 
             showProjectToast('Logo subido correctamente', 'success');
         } else {
             showProjectToast('Error al subir el logo', 'error');
-            document.getElementById('logo-upload-label').textContent = 'Subir logo propio (opcional)';
+            document.getElementById('logo-upload-label').textContent = 'Subir ícono personalizado (opcional)';
         }
     } catch {
         showProjectToast('Error de conexión', 'error');
-        document.getElementById('logo-upload-label').textContent = 'Subir logo propio (opcional)';
+        document.getElementById('logo-upload-label').textContent = 'Subir ícono personalizado (opcional)';
     }
 });
 
 document.getElementById('btn-quitar-logo').addEventListener('click', () => {
     document.getElementById('logo-input').value = '';
-    document.getElementById('logo-upload-label').textContent = 'Subir logo propio (opcional)';
+    document.getElementById('logo-upload-label').textContent = 'Subir ícono personalizado (opcional)';
     document.getElementById('btn-quitar-logo').style.display = 'none';
     logoSubido = false;
     logoDataUrl = '';
@@ -261,48 +263,94 @@ function setupTags(inputId, fieldId, array) {
 setupTags('stack-input', 'stack-field', stackTags);
 setupTags('tags-input', 'tags-field', extraTags);
 
+// pinta el mismo componente .proj-card que usa la vitrina real (canvas
+// del Estilo elegido, avatar, swatches, tags) — comparte el motor con
+// proyectos-vitrina.js vía window.ProyectosRender en vez de tener acá una
+// vista previa "aparte" que pueda desincronizarse de cómo se ve de verdad
+function pintarCard(prefix) {
+  try {
+    const PR = window.ProyectosRender;
+    const card = document.getElementById(prefix + '-card');
+    if (!PR || !card) return;
+
+    const nombre = v('f-nombre') || 'Nombre del proyecto';
+    const cat = v('f-categoria');
+    const tipo = v('f-tipo');
+    // el color de acento tiñe tanto el dibujito código/diseño como el
+    // avatar de la card — el Estilo (banner) define el patrón/dibujo, no
+    // el color
+    const accent = iconColor || '#1f8f8f';
+    const ink = PR.inkFor(accent);
+    const seed = PR.hashStr(nombre || 'preview');
+
+    card.style.setProperty('--card-accent', accent);
+    card.style.setProperty('--card-ink', ink);
+
+    const built = PR.buildCanvas({ nombre, categoria: cat, tipo, stack: stackTags, accent, seed, estilo: coverActual });
+    const canvas = document.getElementById(prefix + '-canvas');
+    if (canvas) {
+        canvas.className = 'proj-canvas ' + built.modeClass;
+        canvas.innerHTML = built.bar + built.stage;
+    }
+
+    const avatar = document.getElementById(prefix + '-avatar');
+    if (avatar) {
+        avatar.className = 'proj-avatar' + (built.shapeClass ? ' ' + built.shapeClass : '');
+        if (logoSubido) {
+            const img = document.querySelector('#icon-preview img');
+            avatar.innerHTML = img ? `<img src="${img.src}" alt="">` : '<span>D</span>';
+        } else {
+            const inicial = nombre.trim().charAt(0).toUpperCase() || 'D';
+            avatar.innerHTML = `<span>${inicial}</span>`;
+        }
+    }
+
+    const swatches = document.getElementById(prefix + '-swatches');
+    if (swatches) swatches.innerHTML = PR.buildSwatchesHTML(accent);
+
+    const tags = document.getElementById(prefix + '-tags') || document.getElementById(prefix + '-stack');
+    if (tags) tags.innerHTML = PR.buildTagsHTML(stackTags, extraTags);
+
+    const modeBadge = document.getElementById(prefix + '-mode-badge');
+    if (modeBadge) {
+        modeBadge.className = 'proj-title-disc ' + built.modeClass.replace('mode-', 'is-');
+        modeBadge.textContent = built.discLabel;
+    }
+  } catch (err) {
+    // la vista previa es cosmética — un error acá nunca debe trabar el
+    // wizard (guardar/avanzar/atrás tienen que seguir funcionando siempre)
+    console.error('pintarCard(' + prefix + ') falló:', err);
+  }
+}
+
+// pinta una miniatura real de cada Estilo del picker (con PR.buildCanvas,
+// semilla fija por estilo — no por nombre, para que el tile no cambie de
+// forma mientras escribís) en vez de mostrar solo un chip de color plano
+function pintarEstiloTiles() {
+    const PR = window.ProyectosRender;
+    if (!PR) return;
+    const accent = iconColor || '#1f8f8f';
+    document.querySelectorAll('.banner-opt').forEach(opt => {
+        const preview = opt.querySelector('.banner-opt-preview');
+        if (!preview) return;
+        const estilo = opt.dataset.cover;
+        const built = PR.buildCanvas({ nombre: 'preview', categoria: '', tipo: '', stack: [], accent, seed: PR.hashStr(estilo), estilo });
+        preview.className = 'banner-opt-preview ' + built.modeClass;
+        preview.innerHTML = built.stage;
+    });
+}
+
 function actualizarPreviewLateral() {
     const nombre = v('f-nombre') || 'Nombre del proyecto';
     const cat = v('f-categoria') || 'Categoria';
-    const tipo = v('f-tipo') || 'Tipo';
     const desc = v('f-desc') || 'La descripcion aparecera aqui.';
     const anio = v('f-anio') || '2026';
 
-    const sideBanner = document.getElementById('side-banner');
-    if (!bannerSubido) {
-        sideBanner.className = 'project-banner ' + coverActual;
-        sideBanner.style.backgroundImage = '';
-    }
-    document.getElementById('side-titulo').textContent = nombre;
-    document.getElementById('side-cat').textContent = cat;
-    document.getElementById('side-tipo').textContent = tipo;
-    document.getElementById('side-nombre').textContent = nombre;
-    document.getElementById('side-meta').textContent = cat + ' · ' + anio;
-    document.getElementById('side-desc').textContent = desc.slice(0, 100) + (desc.length > 100 ? '...' : '');
+    document.getElementById('lp-title').textContent = nombre;
+    document.getElementById('lp-meta').textContent = [cat, anio].filter(Boolean).join(' · ');
+    document.getElementById('lp-desc').textContent = desc.slice(0, 100) + (desc.length > 100 ? '...' : '');
 
-    const sideLogo = document.getElementById('side-logo');
-    if (logoSubido) {
-        const img = document.querySelector('#icon-preview img');
-        if (img) {
-            sideLogo.innerHTML = `<img src="${img.src}" style="width:30px;height:30px;object-fit:cover;border-radius:8px;">`;
-            sideLogo.style.background = 'transparent';
-        }
-    } else {
-        sideLogo.style.background = iconColor;
-        sideLogo.style.color = '#fff';
-        sideLogo.innerHTML = iconSVGHtml;
-        const svgEl = sideLogo.querySelector('svg');
-        if (svgEl) { svgEl.style.width = '18px'; svgEl.style.height = '18px'; }
-    }
-
-    const sideStack = document.getElementById('side-stack');
-    sideStack.innerHTML = '';
-    stackTags.slice(0, 4).forEach(t => {
-        const s = document.createElement('span');
-        s.className = 'chip';
-        s.textContent = t;
-        sideStack.appendChild(s);
-    });
+    pintarCard('lp');
 }
 
 function construirResumen() {
@@ -337,51 +385,20 @@ function construirResumen() {
         rvStack.innerHTML = '<span class="muted">—</span>';
     }
 
-    const pvBanner = document.getElementById('pv-banner');
-    if (!bannerSubido) {
-        pvBanner.className = 'project-banner ' + coverActual;
-        pvBanner.style.backgroundImage = '';
-    }
-    document.getElementById('pv-banner-titulo').textContent = nombre;
-    document.getElementById('pv-cat-tag').textContent = cat || 'Categoria';
-    document.getElementById('pv-tipo-tag').textContent = tipo || 'Tipo';
-    document.getElementById('pv-anio').textContent = anio;
     document.getElementById('pv-titulo').textContent = nombre;
     document.getElementById('pv-meta').textContent = [cat, tipo, anio].filter(Boolean).join(' · ');
     document.getElementById('pv-desc').textContent = desc;
-    document.getElementById('pv-estado').textContent = pub ? 'Publicado' : 'Borrador';
-    document.getElementById('pv-estado').className = 'status-pill ' + (pub ? 'status-live' : 'status-draft');
+    document.getElementById('pv-draft-badge').hidden = pub;
 
-    const pvLogo = document.getElementById('pv-logo');
-    if (logoSubido) {
-        const img = document.querySelector('#icon-preview img');
-        if (img) {
-            pvLogo.innerHTML = `<img src="${img.src}" style="width:38px;height:38px;object-fit:cover;border-radius:10px;">`;
-            pvLogo.style.background = 'transparent';
-        }
-    } else {
-        pvLogo.style.background = iconColor;
-        pvLogo.style.color = '#fff';
-        pvLogo.innerHTML = iconSVGHtml;
-        const svgEl = pvLogo.querySelector('svg');
-        if (svgEl) { svgEl.style.width = '22px'; svgEl.style.height = '22px'; }
-    }
-
-    const pvStack = document.getElementById('pv-stack');
-    pvStack.innerHTML = '';
-    stackTags.slice(0, 5).forEach(t => {
-        const s = document.createElement('span');
-        s.className = 'chip';
-        s.textContent = t;
-        pvStack.appendChild(s);
-    });
+    pintarCard('pv');
 
     const scores = [
         { label: 'Nombre y categoria', val: (nombre !== '—' && cat) ? 100 : (nombre !== '—' ? 50 : 0) },
         { label: 'Descripcion corta', val: v('f-desc').length > 30 ? 100 : v('f-desc').length > 0 ? 50 : 0 },
         { label: 'Stack definido', val: stackTags.length > 0 ? 100 : 0 },
         { label: 'Descripcion extendida', val: v('f-desc2').length > 30 ? 100 : 0 },
-        { label: 'Banner personalizado', val: (bannerSubido || coverActual !== 'cover-ocean') ? 100 : 50 },
+        { label: 'Estilo personalizado', val: (bannerSubido || coverActual !== 'cover-terminal') ? 100 : 50 },
+        { label: 'Ícono personalizado', val: logoSubido ? 100 : 50 },
     ];
 
     const scoreWrap = document.getElementById('score-wrap');

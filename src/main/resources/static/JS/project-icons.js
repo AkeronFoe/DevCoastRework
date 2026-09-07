@@ -44,7 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
     'cover-ash',
     'cover-sunset',
     'cover-dawn',
-    'cover-forest'
+    'cover-forest',
+    'cover-terminal',
+    'cover-artboard',
+    'cover-signal',
+    'cover-void',
+    'cover-mint-glow',
+    'cover-amber-glow',
+    'cover-mesh',
+    'cover-sketch',
+    'cover-pixel',
+    'cover-orbit'
   ];
 
   const isGradient = (value) => /gradient\(/i.test(value || '');

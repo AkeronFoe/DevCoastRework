@@ -56,7 +56,8 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
         </button>
         <a class="ws-brand" th:href="@{/dashboard}">
-            <span class="ws-brand-mark" aria-hidden="true"></span>DevCoast<span class="ws-brand-sep">/</span>empleos
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">empleos</span>
         </a>
         <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
 
@@ -153,13 +154,17 @@
                         <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                         <span class="name">Talentos</span> <span class="ext">.json</span>
                     </a>
+                    <a class="ws-side-link" th:href="@{/proyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
+                    </a>
                     <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
                         <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
                         <span class="name">Guardados</span> <span class="ext">.json</span>
                     </a>
                     <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
                         <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
-                        <span class="name">Proyectos</span> <span class="ext">/</span>
+                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
                     </a>
                     <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
                         <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
