@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empleo;
 import com.example.devcoast.model.Empresa;
+import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.EmpleoRepository;
@@ -183,20 +184,43 @@ public class PageController {
         cargarUsuario(session, model);
         String id = RoleGuard.getId(session);
         if (id != null && !RoleGuard.esEmpresa(session)) {
-            long proyectos  = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id).size();
+            List<Proyecto> proyectosUsuario = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
             long invPend    = invitacionRepository.countByTalentoIdAndEstado(id, "pendiente");
             long invTotal   = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id).size();
             long solActivas = solicitudRepository.countByUsuarioIdAndEstado(id, "revision");
             long solTotal   = solicitudRepository.countByUsuarioId(id);
             long solAcept   = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
-            model.addAttribute("statProyectos",            proyectos);
+            model.addAttribute("statProyectos",            proyectosUsuario.size());
             model.addAttribute("statInvitacionesPendientes", invPend);
             model.addAttribute("statInvitacionesTotal",    invTotal);
             model.addAttribute("statSolicitudesActivas",   solActivas);
             model.addAttribute("statSolicitudesTotal",     solTotal);
             model.addAttribute("statSolicitudesAceptadas", solAcept);
+
+            // vista previa "así te ven en Talentos" — mismo acento determinista
+            // que usa el directorio, y los colores reales de hasta 4 proyectos
+            // publicados, para que la ficha de acá y la card real nunca difieran
+            model.addAttribute("previewAccent", colorParaId(id));
+            List<String> previewColores = proyectosUsuario.stream()
+                    .filter(Proyecto::isPublicado)
+                    .map(Proyecto::getColorIcono)
+                    .filter(c -> c != null && !c.isBlank())
+                    .distinct()
+                    .limit(4)
+                    .collect(Collectors.toList());
+            model.addAttribute("previewColores", previewColores);
         }
         return "perfil";
+    }
+
+    // Usuario no tiene colorIcono propio — mismo hash determinista que usa
+    // TalentoController para que la vista previa de Perfil combine con la
+    // card real del directorio de Talentos
+    private static final String[] PALETA_ACENTOS = { "#4fa0e8", "#a78bfa", "#f2ab5c", "#ef7b92", "#7bd8ae" };
+
+    private static String colorParaId(String id) {
+        int idx = Math.floorMod(id == null ? 0 : id.hashCode(), PALETA_ACENTOS.length);
+        return PALETA_ACENTOS[idx];
     }
 
     @GetMapping("/curriculum")

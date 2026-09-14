@@ -343,7 +343,7 @@
                            class="dc-job-row">
                             <div class="dc-mono dc-avatar-badge"
                                  th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
-                                 th:text="${emp.empresaNombre != null ? emp.empresaNombre.substring(0,1).toUpperCase() : 'E'}">E</div>
+                                 th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
                             <div style="flex:1;min-width:0;">
                                 <span class="dc-job-row-title" th:text="${emp.titulo}">Título</span>
                                 <div class="dc-job-row-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>
@@ -379,7 +379,7 @@
                             class="dc-job-row">
                             <div class="dc-mono dc-avatar-badge"
                                 th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
-                                th:text="${emp.empresaNombre != null ? emp.empresaNombre.substring(0,1).toUpperCase() : 'E'}">E</div>
+                                th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
                             <div style="flex:1;min-width:0;">
                                 <span class="dc-job-row-title" th:text="${emp.titulo}">Título</span>
                                 <div class="dc-job-row-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>

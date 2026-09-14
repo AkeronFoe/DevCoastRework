@@ -1,8 +1,5 @@
-/* DevCoast — empleos. "Lienzo de workspace": la misma familia visual del
-   login (editor de código / herramienta de diseño oscura), llevada a un
-   listado real de vacantes. Self-contenido como login.css: todos los
-   tokens viven bajo body.wsjobs para que el theme claro/oscuro global
-   (styles.css / themes.js) no se filtre ni lo pise. */
+/* empleos, con la misma estética "workspace oscuro" del login.
+   Todo bajo body.wsjobs para no chocar con el theme claro/oscuro global */
 
 body.wsjobs {
   --ws-void: #0d0f13; --ws-panel: #15181e; --ws-panel-2: #1a1e25; --ws-panel-3: #20242c;
@@ -24,8 +21,7 @@ body.wsjobs {
   min-height: 100vh; line-height: 1.55; -webkit-font-smoothing: antialiased;
   position: relative; isolation: isolate;
 }
-/* rol empresa: mismo layout, otro acento — igual que el resto del sitio
-   re-tiñe segun usuarioActualTipo, pero fijo por sesion, no un toggle JS */
+/* si sos empresa, mismo layout pero con otro color de acento */
 body.wsjobs.is-empresa {
   --ws-accent: var(--ws-violet); --ws-accent-soft: var(--ws-violet-soft); --ws-accent-dim: var(--ws-violet-dim); --ws-accent-on: #150f28;
 }
@@ -43,6 +39,64 @@ body.wsjobs.is-empresa {
 .wsjobs ::-webkit-scrollbar-track { background: var(--ws-void); }
 .wsjobs ::-webkit-scrollbar-thumb { background: var(--ws-line); border-radius: 6px; border: 2px solid var(--ws-void); }
 .wsjobs ::-webkit-scrollbar-thumb:hover { background: var(--ws-dim-2); }
+
+/* clases de color reutilizables, para no repetir style="color:..." en cada página */
+.wsjobs .text-accent { color: var(--ws-accent); }
+.wsjobs .text-amber  { color: var(--ws-amber); }
+.wsjobs .text-mint   { color: var(--ws-mint); }
+.wsjobs .text-rose   { color: var(--ws-rose); }
+.wsjobs .dc-status-pill--amber { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .ws-notif-link { display: flex; gap: 9px; align-items: flex-start; flex: 1; min-width: 0; }
+.wsjobs .btn-solid-rose  { background: var(--ws-rose); border-color: var(--ws-rose); color: #1a0a0d; }
+.wsjobs .btn-outline-rose { border-color: var(--ws-rose); color: var(--ws-rose); }
+
+/* ============================= toast + confirm (reskin) ============================= */
+/* los toasts y el confirm() son componentes globales con colores de tema claro
+   a fuego. Acá los repintamos para que no aparezcan como tarjetas blancas
+   sueltas encima del fondo oscuro. Va a ganarle al <style> que inyecta
+   ui-feedback.js porque el selector de acá es más específico */
+.wsjobs .ts-item {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 9px;
+  box-shadow: 0 20px 44px rgba(0,0,0,.55); font-family: var(--ws-mono-body);
+}
+.wsjobs .ts-item::before { width: 3px; border-radius: 0 3px 3px 0; background: var(--ws-cyan); }
+.wsjobs .ts-item.success::before { background: var(--ws-mint); }
+.wsjobs .ts-item.error::before   { background: var(--ws-rose); }
+.wsjobs .ts-item.warning::before { background: var(--ws-amber); }
+.wsjobs .ts-item.info::before    { background: var(--ws-cyan); }
+.wsjobs .ts-iw { background: var(--ws-cyan-dim); color: var(--ws-cyan); border-radius: 8px; }
+.wsjobs .ts-iw.success { background: var(--ws-mint-dim); color: var(--ws-mint); }
+.wsjobs .ts-iw.error   { background: var(--ws-rose-dim); color: var(--ws-rose); }
+.wsjobs .ts-iw.warning { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .ts-ttl { color: var(--ws-ink); font-weight: 600; }
+.wsjobs .ts-tag {
+  font-family: var(--ws-mono-disp); font-weight: 800; font-size: .66rem; letter-spacing: .02em;
+  border-radius: 3px; padding: 2px 5px; background: var(--ws-cyan-dim); color: var(--ws-cyan);
+}
+.wsjobs .ts-item.success .ts-tag { color: var(--ws-mint); background: var(--ws-mint-dim); }
+.wsjobs .ts-item.error   .ts-tag { color: var(--ws-rose); background: var(--ws-rose-dim); }
+.wsjobs .ts-item.warning .ts-tag { color: var(--ws-amber); background: var(--ws-amber-dim); }
+.wsjobs .ts-msg { color: var(--ws-dim-2); }
+.wsjobs .ts-cls { color: var(--ws-dim-2); }
+.wsjobs .ts-cls:hover { color: var(--ws-ink); }
+.wsjobs .ts-prog { background: var(--ws-line-soft); }
+.wsjobs .ts-item.success .ts-fill { background: var(--ws-mint); }
+.wsjobs .ts-item.error   .ts-fill { background: var(--ws-rose); }
+.wsjobs .ts-item.warning .ts-fill { background: var(--ws-amber); }
+.wsjobs .ts-item.info    .ts-fill { background: var(--ws-cyan); }
+
+.wsjobs .confirm-modal {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 12px;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,.7);
+}
+.wsjobs .confirm-modal::before { content: none; } /* .ws-modal-box no usa barra lateral de acento */
+.wsjobs .confirm-title { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; color: var(--ws-ink); }
+.wsjobs .confirm-message { font-family: var(--ws-mono-body); color: var(--ws-dim-2); }
+
+/* el contador de caracteres (dashboard-extras.js) también viene con
+   colores de tema claro por defecto, mismo arreglo que arriba */
+.wsjobs .char-counter { color: var(--ws-dim-2); }
+.wsjobs .char-counter.is-near-limit { color: var(--ws-amber); }
 
 .ws-grain { position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image: radial-gradient(var(--ws-line) 1px, transparent 1px);
@@ -186,11 +240,15 @@ body.wsjobs.is-empresa {
 
 .ws-btn {
   display: inline-flex; align-items: center; gap: 7px; font-family: var(--ws-mono-disp); font-weight: 700;
-  font-size: .76rem; padding: 8px 13px; border-radius: 6px; border: 1px solid transparent; flex-shrink: 0;
+  font-size: .76rem; padding: 8px 13px; border-radius: 6px; border: 1px solid var(--ws-line); flex-shrink: 0;
   transition: background .15s, border-color .15s, color .15s, transform .1s;
+  /* ojo: sin este fondo/color, un <button> real con solo esta clase se ve
+     con el estilo nativo del navegador (blanco) en vez del tema oscuro */
+  background: var(--ws-panel-2); color: var(--ws-dim);
 }
+.ws-btn:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); background: var(--ws-panel-3); }
 .ws-btn svg { width: 13px; height: 13px; }
-.ws-btn-primary { background: var(--ws-accent); color: var(--ws-accent-on); box-shadow: 0 4px 14px -6px var(--ws-accent-dim); }
+.ws-btn-primary { background: var(--ws-accent); color: var(--ws-accent-on); border-color: var(--ws-accent); box-shadow: 0 4px 14px -6px var(--ws-accent-dim); }
 .ws-btn-primary:hover { background: var(--ws-accent-soft); transform: translateY(-1px); }
 @media (max-width: 900px) { .ws-btn-primary .lbl { display: none; } }
 
@@ -299,9 +357,7 @@ body.wsjobs.is-empresa {
 .ws-big-head-sub { font-family: var(--ws-mono-disp); font-weight: 700; font-size: 1.25rem; color: var(--ws-ink); line-height: 1.15; }
 .ws-page-sub { margin: 12px 0 0; color: var(--ws-dim); font-size: .86rem; max-width: 58ch; }
 
-/* ficha de sesión — el mismo dispositivo "tarjeta de catálogo" del login:
-   perforación, tipografía editorial para el nombre, dato real (paginación)
-   en vez de una estadística inventada */
+/* la "ficha de catálogo" con la pinta de tarjeta perforada, como en el login */
 .ws-mini-card {
   position: relative; background: var(--ws-paper); color: #241d12; border-radius: 1px; padding: 18px 20px 16px 38px;
   transform: rotate(-1.4deg); font-family: var(--ws-mono-body);
@@ -319,13 +375,9 @@ body.wsjobs.is-empresa {
 .ws-mini-card-head .ficha { text-transform: uppercase; }
 .ws-mini-card-name { font-family: var(--ws-editorial); font-weight: 600; font-size: 1.4rem; color: #221b10; margin-bottom: 3px; letter-spacing: -.01em; }
 .ws-mini-card-role { font-size: .74rem; color: #5c503a; margin-bottom: 13px; word-break: break-all; }
-/* checklist real contra el perfil del talento (disponibilidad, modalidad
-   buscada, rol buscado) — no decoración, cada línea es un dato propio */
 .ws-mini-card-badges { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; font-size: .74rem; color: #3a3122; }
 .ws-mini-badge { display: flex; align-items: center; gap: 8px; }
 .ws-mini-badge b { color: #1c6b46; font-weight: 800; flex-shrink: 0; }
-/* el sello de match promedio — misma tinta de sello (doble filo, leve
-   rotación) que el resto de la línea "ficha de catálogo" de esta tarjeta */
 .ws-mini-stamp {
   display: inline-flex; align-items: baseline; gap: 9px; width: fit-content; margin: 2px 0 14px;
   padding: 7px 12px; border: 2px solid #a5432f; border-radius: 3px; color: #a5432f;
@@ -335,9 +387,8 @@ body.wsjobs.is-empresa {
 .ws-mini-stamp span { font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; max-width: 13ch; line-height: 1.25; }
 .ws-mini-card-foot { font-size: .68rem; color: #5c503a; border-top: 1px dashed rgba(34,27,16,.22); padding-top: 10px; }
 
-/* toggle de visibilidad sin crear/destruir nodos — usado por JS para
-   sincronizar elementos fuera de #empleos-resultados (mini-stamp,
-   limpiar-filtros) contra el fragmento que llega por fetch */
+/* el JS usa esto para mostrar/ocultar cosas (mini-stamp, limpiar-filtros)
+   sin tener que tocar el fragmento que llega por fetch */
 .wsjobs .is-hidden { display: none; }
 
 /* ============================= empresa note + toasts ============================= */
@@ -356,9 +407,8 @@ body.wsjobs.is-empresa {
   font-size: .84rem; color: var(--ws-ink);
 }
 .wsjobs .flash-banner::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--ws-accent); border-radius: 3px 0 0 3px; }
-/* especificidad (0,3,0) a propósito: le gana tanto a ".flash-banner.error"
-   de styles.css como a nuestra propia regla genérica de arriba (ambas
-   (0,2,0)), que si no neutralizaba el tinte semántico de cada tipo */
+/* la especificidad de acá es a propósito más alta, si no le gana el
+   estilo genérico de arriba y se pierde el color de cada tipo */
 .wsjobs .flash-banner.success { background: var(--ws-mint-dim); border-color: rgba(123,216,174,.35); color: var(--ws-mint); }
 .wsjobs .flash-banner.error { background: var(--ws-rose-dim); border-color: rgba(239,123,146,.35); color: var(--ws-rose); }
 .wsjobs .flash-banner.warning { background: var(--ws-amber-dim); border-color: rgba(242,171,92,.35); color: var(--ws-amber); }
@@ -370,8 +420,7 @@ body.wsjobs.is-empresa {
 .wsjobs .flash-close { margin-left: auto; background: none; border: none; color: var(--ws-dim); font-size: 1.1rem; cursor: pointer; line-height: 1; }
 .wsjobs .flash-close:hover { color: var(--ws-ink); }
 
-/* reskin del sistema de toasts global (ui-feedback.js) para que combine
-   con el lienzo oscuro en vez de aparecer como una tarjeta blanca suelta */
+/* mismo repintado de toasts que arriba, pero para el toast-system global */
 .wsjobs #toast-system .ts-item { background: var(--ws-panel) !important; border-color: var(--ws-line) !important; box-shadow: 0 20px 45px -20px rgba(0,0,0,.7) !important; }
 .wsjobs #toast-system .ts-ttl { color: var(--ws-ink) !important; }
 .wsjobs #toast-system .ts-msg { color: var(--ws-dim) !important; }
@@ -389,9 +438,6 @@ body.wsjobs.is-empresa {
   transition: background .15s, color .15s, border-color .15s; display: inline-flex; align-items: center; gap: 4px;
   -webkit-tap-highlight-color: transparent;
 }
-/* las píldoras de filtro real ("--todos", "--remoto"...) llevan el mismo
-   prefijo de flag de terminal que el cmdbar — "Solo favoritos" y "+ más
-   filtros" no son filtros de datos en ese sentido, se quedan tal cual */
 .wsjobs .chip[data-filter] { text-transform: lowercase; }
 .wsjobs .chip[data-filter]::before { content: "--"; opacity: .55; }
 .wsjobs .chip:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
@@ -418,10 +464,8 @@ body.wsjobs.is-empresa {
 .wsjobs .page-size-form { display: flex; align-items: center; gap: 8px; font-size: .74rem; color: var(--ws-dim-2); flex-shrink: 0; }
 #filtros-activos-row .chip.active { padding-right: 8px; }
 
-/* separador entre grupos de chips mutuamente excluyentes (categoría /
-   seniority) y el resto — la exclusividad ya la aplica filtros.js
-   (elegir "Senior" apaga "Junior"), esta línea es la única señal visual
-   de que no son todos checkboxes independientes */
+/* esta línea marca dónde empiezan los chips que se excluyen entre sí
+   (categoría/seniority) — la lógica de apagar uno al otro va en filtros.js */
 .wsjobs .chip-sep { width: 1px; align-self: stretch; min-height: 20px; background: var(--ws-line); flex-shrink: 0; margin: 0 2px; }
 .wsjobs .chip-dropdown-sep { width: 100%; height: 1px; background: var(--ws-line); margin: 2px 0; }
 
@@ -438,10 +482,10 @@ body.wsjobs.is-empresa {
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 60px 24px;
   background: var(--ws-panel); border: 1px dashed var(--ws-line); border-radius: 12px; color: var(--ws-dim); margin-bottom: 20px;
 }
-/* antes un ícono de carpeta genérico — acá "empleos.json" ya es el archivo
-   que la miga de pan y el gutter dicen que estás mirando, así que un array
-   vacío con el cursor del editor parpadeando adentro es el mismo chiste
-   visual que el resto de la página, no una ilustración de stock aparte */
+/* el !important es necesario: [hidden] solo no le gana a una clase con
+   su propio display (como el flex de arriba), y JS usa [hidden] para
+   ocultar el empty-state */
+.wsjobs [hidden] { display: none !important; }
 .wsjobs .empty-state-code {
   font-family: var(--ws-mono-disp); font-size: 1.1rem; font-weight: 700; color: var(--ws-dim-2);
   margin-bottom: 10px; letter-spacing: -.01em;
@@ -454,14 +498,10 @@ body.wsjobs.is-empresa {
 .wsjobs .empty-state-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 
 /* ============================= job cards ============================= */
-/* mismo dispositivo que el mockup: color real del empleador (colorIcono)
-   como banda gráfica con textura, medallón superpuesto, franja de reqs
-   escaneable, tags con el stack propio resaltado, y el footer con anillo
-   de match + guardar a la izquierda / acción principal a la derecha */
 .ws-job-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 4px; }
 @media (max-width: 820px) { .ws-job-grid { grid-template-columns: 1fr; } }
-/* última card sola en su fila (medido en JS, ver empleos.js) — se estira
-   en vez de dejar la mitad de la fila vacía al lado */
+/* empleos.js le pone esta clase a la última card cuando queda sola en su
+   fila, para que ocupe todo el ancho en vez de dejar un hueco al lado */
 .wsjobs .job-card.is-solo { grid-column: 1 / -1; }
 @media (max-width: 820px) { .wsjobs .job-card.is-solo { grid-column: auto; } }
 
@@ -469,23 +509,13 @@ body.wsjobs.is-empresa {
   background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; overflow: hidden; position: relative;
   transition: border-color .15s; display: flex; flex-direction: column; cursor: pointer;
   animation: wsJobFadeUp .3s ease both;
-  /* nota: hubo un content-visibility:auto acá para saltar el paint de las
-     cards fuera de pantalla. Medido con un trace real: combinado con GSAP
-     manteniendo las cards en opacity:0 hasta que su ScrollTrigger dispara,
-     el navegador dejaba de contar ese texto como "pintado" durante mucho
-     más tiempo del esperado — el LCP de la página pasó de ~1.4s a ~9s con
-     un texto de card cargando 7.7s tarde. El ahorro teórico en scroll no
-     vale ese costo, se revirtió */
+  /* probamos content-visibility:auto acá para las cards fuera de pantalla,
+     pero mezclado con el fade-in de GSAP el LCP se disparó de ~1.4s a ~9s.
+     Lo sacamos, no vale la pena */
 }
 @keyframes wsJobFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-/* el hover real lo hace GSAP (empleos.js) con un leve tilt — acá solo el
-   borde, que sí es barato de animar por CSS y no compite con esa transform */
+/* el tilt del hover lo pone GSAP (empleos.js), acá solo el borde */
 .wsjobs .job-card:hover { border-color: var(--ws-dim-2); }
-/* la hero card antes solo se distinguía por ser más ancha — el wash del
-   color real de la empresa (mismo --card-accent que la banda y el
-   medallón) hace que se sienta la vacante destacada del momento, no
-   "una card más ancha". Una sola card por página lleva esto, así que el
-   color-mix()/gradiente no pesa nada en el presupuesto de paint */
 .wsjobs .job-card.featured {
   grid-column: 1 / -1;
   background-image: linear-gradient(115deg, color-mix(in srgb, var(--card-accent, var(--ws-cyan)) 13%, transparent) 0%, transparent 55%);
@@ -493,13 +523,9 @@ body.wsjobs.is-empresa {
 .wsjobs .job-card.featured .job-body { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; }
 
 .job-band { height: 50px; position: relative; overflow: hidden; flex-shrink: 0; background: var(--card-accent, var(--ws-cyan)); }
-/* franja diagonal y perforación: antes eran repeating-linear-gradient() y
-   radial-gradient() en vivo, recalculados por card en cada composición
-   (con 11+ cards en pantalla, ese costo se repite en cada frame relevante).
-   Ahora son un tile SVG chico embebido en base64 — el navegador lo
-   rasteriza una sola vez y de ahí en más solo lo repite/estira, mismo
-   resultado visual (el color de --ws-panel de la perforación es fijo en
-   este tema, así que hornearlo en el tile no lo desincroniza de nada) */
+/* la franja diagonal y la perforación eran gradientes en vivo, recalculados
+   en cada card — con muchas cards en pantalla eso pesa. Las cambiamos por
+   un tile SVG chico en base64 que el navegador solo rasteriza una vez */
 .job-band::after {
   content: ""; position: absolute; inset: 0 0 5px 0;
   background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMTUiIHkyPSIxNSIgc3ByZWFkTWV0aG9kPSJyZXBlYXQiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0icmdiYSgyNTUsMjU1LDI1NSwuMTQpIi8+PHN0b3Agb2Zmc2V0PSIwLjQ2NjciIHN0b3AtY29sb3I9InJnYmEoMjU1LDI1NSwyNTUsLjE0KSIvPjxzdG9wIG9mZnNldD0iMC40NjY3IiBzdG9wLWNvbG9yPSJ0cmFuc3BhcmVudCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0idHJhbnNwYXJlbnQiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9InVybCgjZCkiLz48L3N2Zz4=");
@@ -521,10 +547,8 @@ body.wsjobs.is-empresa {
   position: absolute; left: 16px; top: 24px; width: 48px; height: 48px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-weight: 800;
   font-size: 1.05rem; color: var(--card-ink, #0a1826); z-index: 1; background-color: var(--card-accent, var(--ws-cyan));
-  /* antes: background-blend-mode: overlay — de los modos de mezcla más caros
-     de componer (obliga a mezclar píxel por píxel en vez de apilar capas).
-     Con ~12 avatares en pantalla es costo real. El gradiente se apila ahora
-     con alpha normal, sin blend-mode: mismo brillo diagonal, sin el costo */
+  /* usábamos background-blend-mode: overlay para el brillo, pero es caro
+     con varios avatares en pantalla. Con alpha normal se ve casi igual */
   background-image: linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,0) 55%);
   box-shadow: 0 0 0 3px var(--ws-panel), 0 0 0 4.5px rgba(255,255,255,.28);
   overflow: hidden;
@@ -566,10 +590,8 @@ body.wsjobs.is-empresa {
 .job-ring .track { fill: none; stroke: var(--ws-line-soft); stroke-width: 3; }
 .job-ring .prog { fill: none; stroke: var(--ws-accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 100.5; }
 .job-ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-size: .6rem; font-weight: 800; color: var(--ws-ink); }
-/* un 15% de match no debería pesar lo mismo que un 90% a simple vista —
-   el color del aro (no solo el número) marca el umbral de un vistazo,
-   sin tener que leer cada card. Los cortes (40/70) calzan con
-   calcularScore() del backend, no son un capricho de diseño */
+/* el color del aro marca el nivel de match de un vistazo. Los cortes
+   (40/70) tienen que coincidir con calcularScore() del backend */
 .job-ring.is-low .prog { stroke: var(--ws-dim-2); }
 .job-ring.is-mid .prog { stroke: var(--ws-amber); }
 .job-ring.is-high .prog { stroke: var(--ws-mint); }
@@ -588,6 +610,10 @@ body.wsjobs.is-empresa {
 .wsjobs .btn-applied { background: var(--ws-mint-dim); border-color: transparent; color: var(--ws-mint); cursor: default; }
 .wsjobs .btn-ghost { border-color: var(--ws-line); color: var(--ws-dim); background: var(--ws-panel-2); }
 .wsjobs .btn-ghost:hover { border-color: var(--ws-dim-2); background: var(--ws-panel-3); color: var(--ws-ink); }
+.wsjobs .btn-danger { background: var(--ws-rose-dim); border-color: transparent; color: var(--ws-rose); }
+.wsjobs .btn-danger:hover { background: var(--ws-rose); color: #2a0810; }
+.wsjobs .btn-outline { border-color: var(--ws-line); color: var(--ws-ink); background: transparent; }
+.wsjobs .btn-outline:hover { border-color: var(--ws-dim-2); background: var(--ws-panel-2); }
 .wsjobs .btn-icon:not(.btn-primary):not(.btn-applied) svg { width: 15px; height: 15px; }
 .wsjobs .job-save,
 .wsjobs .btn-favorito { color: var(--ws-dim-2); transition: color .15s; flex-shrink: 0; background: none; border: none; padding: 2px; }
@@ -615,10 +641,8 @@ body.wsjobs.is-empresa {
 .ws-cmdbar input::placeholder { color: var(--ws-dim-2); }
 .ws-cmdbar-hint { font-size: .7rem; color: var(--ws-dim-2); margin: 0 0 16px; }
 
-/* filtros-activos-row ya existe y funciona (filtros.js la llena/vacía) —
-   aquí se limita a vivir dentro de la fila flex del cmdbar (display:contents
-   para que sus hijos sean items del propio flex) y a leer como flags de
-   terminal en vez de las píldoras planas que usa en el resto del sitio */
+/* display:contents para que los chips que llena filtros.js entren como
+   items sueltos de este flex, en vez de quedar en su propio contenedor */
 .ws-cmdbar #filtros-activos-row { display: contents; }
 .ws-cmdbar #filtros-activos-row .chip.active {
   display: inline-flex; align-items: center; gap: 4px; background: var(--ws-accent-dim); color: var(--ws-accent);
@@ -630,8 +654,6 @@ body.wsjobs.is-empresa {
 }
 .ws-cmdbar #filtros-activos-row .chip.active [data-quitar]:hover { opacity: 1; }
 
-/* empresas contratando esta semana — mismo dispositivo de avatares
-   superpuestos que el dashboard, con datos reales de EmpleoController */
 .ws-hiring { display: flex; align-items: center; gap: 14px; margin: 4px 0 20px; flex-wrap: wrap; }
 .ws-hiring-label { font-size: .76rem; color: var(--ws-dim-2); }
 .ws-hiring-avatars { display: flex; }

@@ -124,7 +124,7 @@
                                            ? 'background-image: url(' + ${talento.fotoUrl} + '); background-size: cover; background-position: center; color: transparent;'
                                            : ''">
                             <span th:if="${talento.fotoUrl == null}"
-                                th:text="${talento.nombre != null ? talento.nombre.substring(0,1).toUpperCase() : 'D'}">D</span>
+                                th:text="${talento.nombre != null and !#strings.isEmpty(talento.nombre)} ? ${#strings.toUpperCase(#strings.substring(talento.nombre,0,1))} : 'D'">D</span>
                         </div>
                         <div>
                             <h2 class="resume-name" th:text="${talento.nombre}">Nombre</h2>

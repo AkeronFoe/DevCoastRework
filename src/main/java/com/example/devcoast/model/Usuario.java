@@ -95,6 +95,8 @@ public class Usuario {
     @Field("onboarding_completo")
     private boolean onboardingCompleto = false;
 
+    private boolean destacar = false;
+
     public Usuario() {}
 
     public String getId()                          { return id; }
@@ -131,6 +133,7 @@ public class Usuario {
     public Boolean getPermitirMensajes()           { return permitirMensajes; }
     public List<String> getEmpleosFavoritos()      { return empleosFavoritos; }
     public boolean isOnboardingCompleto()          { return onboardingCompleto; }
+    public boolean isDestacar()                    { return destacar; }
 
     public void setId(String id)                                      { this.id = id; }
     public void setTipo(String tipo)                                  { this.tipo = tipo; }
@@ -166,6 +169,7 @@ public class Usuario {
     public void setPermitirMensajes(Boolean permitirMensajes)         { this.permitirMensajes = permitirMensajes; }
     public void setEmpleosFavoritos(List<String> empleosFavoritos)    { this.empleosFavoritos = empleosFavoritos; }
     public void setOnboardingCompleto(boolean onboardingCompleto)     { this.onboardingCompleto = onboardingCompleto; }
+    public void setDestacar(boolean destacar)                         { this.destacar = destacar; }
 
     public int getCompletitudPerfil() {
         int puntos = 0;

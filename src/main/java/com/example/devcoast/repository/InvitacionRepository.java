@@ -16,5 +16,7 @@ public interface InvitacionRepository extends MongoRepository<Invitacion, String
 
     boolean existsByEmpresaIdAndTalentoIdAndEmpleoIdIsNull(String empresaId, String talentoId);
 
+    List<Invitacion> findByEmpresaIdAndTalentoIdInAndEmpleoIdIsNull(String empresaId, List<String> talentoIds);
+
     long countByTalentoIdAndEstado(String talentoId, String estado);
 }

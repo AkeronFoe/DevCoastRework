@@ -428,7 +428,7 @@
                         th:style="${usuario != null and usuario.fotoUrl != null}
                         ? 'width:48px;height:48px;border-radius:50%;flex-shrink:0;background-image:url(' + ${usuario.fotoUrl} + ');background-size:cover;background-position:center;'
                         : 'width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.15rem;color:var(--accent);background:var(--accent-soft,rgba(99,210,210,.15));'"
-                        th:text="${usuario != null and usuario.fotoUrl == null ? (usuario.nombre != null ? usuario.nombre.substring(0,1).toUpperCase() : 'D') : ''}">
+                        th:text="${usuario != null and usuario.fotoUrl == null ? (usuario.nombre != null and !#strings.isEmpty(usuario.nombre) ? #strings.toUpperCase(#strings.substring(usuario.nombre,0,1)) : 'D') : ''}">
                         D</div>
                     <div style="flex:1;min-width:0;">
                         <strong th:text="${usuario != null ? usuario.nombre : 'Usuario'}">Usuario</strong>

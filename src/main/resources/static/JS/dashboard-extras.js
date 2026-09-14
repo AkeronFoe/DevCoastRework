@@ -5,11 +5,19 @@
             if (!max) return;
             var counter = document.createElement('span');
             counter.className = 'char-counter';
-            counter.style.cssText = 'display:block;text-align:right;font-size:.72rem;color:var(--muted);margin-top:3px;';
+            counter.style.cssText = 'display:block;text-align:right;font-size:.72rem;margin-top:3px;';
+            // en el workspace oscuro el color lo pone la clase CSS, no un
+            // inline style (si no, gana siempre y queda gris claro sobre fondo oscuro)
+            var enWorkspaceOscuro = !!el.closest('.wsjobs');
             function update() {
                 var len = el.value ? el.value.length : 0;
+                var cercaDelLimite = len > max * 0.9;
                 counter.textContent = len + ' / ' + max;
-                counter.style.color = len > max * 0.9 ? 'var(--accent)' : 'var(--muted)';
+                if (enWorkspaceOscuro) {
+                    counter.classList.toggle('is-near-limit', cercaDelLimite);
+                } else {
+                    counter.style.color = cercaDelLimite ? 'var(--accent)' : 'var(--muted)';
+                }
             }
             update();
             el.addEventListener('input', update);
@@ -59,10 +67,8 @@
         else { fn(); }
     }
 
-    // re-invocable desde empleos.js tras reemplazar la grilla por fetch
-    // (paginación de /empleos): un botón "guardar empleo" insertado por
-    // innerHTML no trae el listener de initFavoritos hasta que se lo
-    // vuelve a correr sobre el contenedor nuevo
+    // la expongo para que empleos.js la vuelva a llamar después de traer
+    // la grilla por fetch, si no los botones nuevos quedan sin listener
     window.initFavoritos = initFavoritos;
 
     ready(function () {

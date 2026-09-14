@@ -58,13 +58,14 @@ document.getElementById('soft-chips-wrapper').addEventListener('click', () =>
     document.getElementById('soft-chip-input').focus());
 
 /* ─── Tabs del modal ───────────────────────────────────────── */
+function activarPanel(tab) {
+    document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.edit-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+}
 document.querySelectorAll('.edit-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.edit-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    });
+    tab.addEventListener('click', () => activarPanel(tab));
 });
 
 /* ─── Preferencias chips ───────────────────────────────────── */
@@ -139,18 +140,21 @@ document.getElementById('btn-add-edu').addEventListener('click', () => {
 });
 
 /* ─── Modal open/close ─────────────────────────────────────── */
+/* bloqueamos el scroll en <html> también, no solo en <body> — acá el que
+   scrollea de verdad es <html> por el sticky del sidebar, así que si no
+   el fondo se seguía moviendo con el modal abierto */
 function openModal(tabName) {
     document.getElementById('edit-overlay').classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('dc-scroll-lock');
     if (tabName) {
-        document.querySelectorAll('.edit-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
-        document.querySelectorAll('.edit-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabName));
+        const tab = document.querySelector('.edit-tab[data-tab="' + tabName + '"]');
+        if (tab) activarPanel(tab);
     }
     renderSoftChips();
 }
 function closeModal() {
     document.getElementById('edit-overlay').classList.remove('is-open');
-    document.body.style.overflow = '';
+    document.documentElement.classList.remove('dc-scroll-lock');
 }
 
 document.getElementById('btn-editar-secciones').addEventListener('click', () => openModal('perfil'));
@@ -309,7 +313,7 @@ function actualizarVistaCv(p) {
     if (bulletsList) {
         bulletsList.innerHTML = p.cvBullets?.length
             ? p.cvBullets.map(b => `<li>${b}</li>`).join('')
-            : '<li>Agrega tus logros principales en Editar secciones.</li>';
+            : '<li>Agrega tus logros principales en <a href="#" class="cv-inline-link" onclick="openModal(\'perfil\');return false;">Editar secciones</a>.</li>';
     }
 
     // Experiencias
@@ -320,7 +324,7 @@ function actualizarVistaCv(p) {
                 <div class="cv-timeline-item">
                     <span class="cv-timeline-dot ${i === 0 ? 'is-active' : ''}"></span>
                     <div>
-                        <strong>${exp.cargo || '—'}</strong><span style="color:var(--accent);font-weight:600;"> · ${exp.empresa || '—'}</span>
+                        <strong>${exp.cargo || '—'}</strong><span class="text-accent" style="font-weight:600;"> · ${exp.empresa || '—'}</span>
                         <div class="chip-row" style="margin:6px 0;">
                             ${i === 0 ? '<span class="badge-open">Actual</span>' : ''}
                             ${exp.periodo   ? `<span class="chip">${exp.periodo}</span>`   : ''}
@@ -329,7 +333,7 @@ function actualizarVistaCv(p) {
                         ${exp.descripcion ? `<p class="muted" style="font-size:.85rem;">${exp.descripcion}</p>` : ''}
                     </div>
                 </div>`).join('')
-            : '<p class="muted" style="font-size:.85rem;">Agrega tu experiencia en Editar secciones.</p>';
+            : '<p class="muted" style="font-size:.85rem;">Agrega tu experiencia en <a href="#" class="cv-inline-link" onclick="openModal(\'experiencia\');return false;">Editar secciones</a>.</p>';
     }
 
     // Educaciones
@@ -339,11 +343,11 @@ function actualizarVistaCv(p) {
             ? p.cvEducaciones.map(edu => `
                 <div class="resume-row">
                     <strong>${edu.institucion || '—'}</strong>
-                    <span style="color:var(--accent);font-weight:600;">${edu.titulo || '—'}</span>
+                    <span class="text-accent" style="font-weight:600;">${edu.titulo || '—'}</span>
                     ${edu.periodo    ? `<span class="muted">${edu.periodo}</span>` : ''}
                     ${edu.descripcion? `<p class="muted" style="font-size:.82rem;margin:2px 0 0;">${edu.descripcion}</p>` : ''}
                 </div>`).join('')
-            : '<p class="muted" style="font-size:.85rem;">Agrega tu educación en Editar secciones.</p>';
+            : '<p class="muted" style="font-size:.85rem;">Agrega tu educación en <a href="#" class="cv-inline-link" onclick="openModal(\'educacion\');return false;">Editar secciones</a>.</p>';
     }
 
     // Especialidad y salario
@@ -359,6 +363,10 @@ function actualizarVistaCv(p) {
     }
     if (salPill) {
         salPill.style.display = p.salarioEsperado?.trim() ? 'inline-flex' : 'none';
+    }
+    const espSalHint = document.getElementById('cv-especialidad-salario-hint');
+    if (espSalHint) {
+        espSalHint.style.display = (p.especialidad?.trim() || p.salarioEsperado?.trim()) ? 'none' : '';
     }
 
     // Soft skills

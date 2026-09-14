@@ -310,6 +310,8 @@ public class UsuarioController {
             Object val = datos.get("permitirMensajes");
             usuario.setPermitirMensajes(Boolean.TRUE.equals(val) || "true".equalsIgnoreCase(String.valueOf(val)));
         }
+        if (datos.containsKey("destacar"))
+            usuario.setDestacar(toBool(datos.get("destacar")));
 
         usuario.setActualizadoEn(new Date());
         repository.save(usuario);
@@ -366,6 +368,10 @@ public class UsuarioController {
     private String str(Map<String, Object> m, String key) {
         Object v = m.get(key);
         return v == null ? "" : v.toString().trim();
+    }
+
+    private boolean toBool(Object v) {
+        return v instanceof Boolean b ? b : Boolean.parseBoolean(String.valueOf(v));
     }
 
     private int toInt(Object v) {
