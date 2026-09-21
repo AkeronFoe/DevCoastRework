@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
             qvTags.innerHTML = card.querySelector('.proj-tags')?.innerHTML || ''
             qvDesc.textContent = card.dataset.descExt || card.querySelector('.proj-tagline')?.textContent || ''
 
-            const tones = [shade(accent, -0.3), accent, shade(accent, 0.35)]
+            const tones = [PR.shade(accent, -0.3), accent, PR.shade(accent, 0.35)]
             qvSwatches.innerHTML = tones.map(hex =>
                 `<div class="qv-swatch"><div class="qv-swatch-chip" style="background:${hex}"></div><span class="qv-swatch-hex">${hex}</span></div>`
             ).join('')
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 [card.dataset.duracion || '—', 'Duración']
             ]
             qvSpecs.innerHTML = specs.map(([value, label]) =>
-                `<div class="qv-spec-item"><span class="qv-spec-value">${escapeHtml(value)}</span><span class="qv-spec-label">${label}</span></div>`
+                `<div class="qv-spec-item"><span class="qv-spec-value">${PR.escapeHtml(value)}</span><span class="qv-spec-label">${label}</span></div>`
             ).join('')
 
             // el link, si existe, se copia del <a> real que ya renderizó y

@@ -1,330 +1,377 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title>DevCoast | Empleos guardados</title>
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/guardados.css}">
     <script th:src="@{/JS/ui-feedback.js}"></script>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
     <script th:src="@{/JS/polish.js}" defer></script>
-    <style>
-        @keyframes guardadoFadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        .guardado-card { animation: guardadoFadeUp .28s ease both; }
-        .guardado-card.is-hidden { display:none; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/ws-shell.js}" defer></script>
+    <script th:src="@{/JS/guardados.js}" defer></script>
 </head>
-<body data-theme="light">
-<div class="app-shell">
 
-    <th:block th:replace="~{fragments/sidebar :: sidebar('guardados')}" />
+<body class="wsjobs">
 
-    <main class="main">
-
-        <header class="topbar">
-            <div class="topbar-title">
-                <h1>Empleos guardados</h1>
-                <p th:if="${guardados != null}" id="guardados-count-label"
-                   th:text="${#lists.size(guardados)} + ' empleo' + (${#lists.size(guardados)} == 1 ? '' : 's') + ' en tu lista'">
-                    0 empleos en tu lista
-                </p>
-            </div>
-            <div class="topbar-actions">
-                <a th:href="@{/empleos}" class="btn btn-ghost" style="font-size:.84rem;padding:7px 14px;">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="7" width="20" height="14" rx="2"/>
-                        <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/>
-                    </svg>
-                    Ver todos los empleos
-                </a>
-                <div class="theme-toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Cambiar tema">
-                    <span id="theme-icon">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/>
-                            <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
-                            <path d="M2 12h2"/><path d="M20 12h2"/>
-                            <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                    </span>
-                    <span class="theme-dot"></span>
-                    <span id="theme-label">Modo claro</span>
-                </div>
-            </div>
-        </header>
-
-        <div th:if="${guardados == null or #lists.isEmpty(guardados)}" class="empty-zone">
-            <div class="empty-icon-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            <h3>No tienes empleos guardados</h3>
-            <p>Guarda empleos que te interesen para revisarlos después.</p>
-            <a th:href="@{/empleos}" class="btn btn-primary" style="margin-top:12px;">
-                Explorar empleos
-            </a>
+    <div class="ws-boot" id="wsBoot" aria-hidden="true">
+        <div class="ws-boot-box">
+            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
+            <div class="ws-boot-line"><span class="ok">✓</span> cargando tus favoritos…</div>
+            <div class="ws-boot-line" id="bootLast">$ devcoast run guardados.json --starred</div>
+            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
         </div>
+    </div>
 
-        <section class="dc-metric-grid" th:unless="${guardados == null or #lists.isEmpty(guardados)}" style="margin-bottom:16px;">
-            <div class="dc-metric-card">
-                <div class="dc-metric-top">
-                    <div class="dc-icon-pill dc-icon-pill--dev">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="dc-metric-num dc-mono" id="guard-total-metric" th:text="${guardTotal ?: 0}">0</div>
-                <div class="dc-metric-label">Empleos guardados</div>
-            </div>
-            <div class="dc-metric-card">
-                <div class="dc-metric-top">
-                    <div class="dc-icon-pill dc-icon-pill--success">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m13 2-10 12h9l-1 8 10-12h-9l1-8z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="dc-metric-num dc-mono" id="guard-alta-metric" th:text="${guardAltaCompat ?: 0}">0</div>
-                <div class="dc-metric-label">Alta compatibilidad</div>
-            </div>
-            <div class="dc-metric-card">
-                <div class="dc-metric-top">
-                    <div class="dc-icon-pill dc-icon-pill--data">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="dc-metric-num dc-mono" id="guard-aplico-metric" th:text="${guardYaAplico ?: 0}">0</div>
-                <div class="dc-metric-label">Ya aplicaste</div>
-            </div>
-        </section>
+    <div id="nav-progress" class="ws-navprogress"></div>
+    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <div class="ws-grain" aria-hidden="true"></div>
+    <div class="ws-vignette" aria-hidden="true"></div>
+    <div class="ws-scrim" id="scrim"></div>
 
-        <div th:unless="${guardados == null or #lists.isEmpty(guardados)}"
-             style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div class="chip-row" id="guardados-filter-bar">
-                <span class="chip active" data-guardado-filter="todos">Todos</span>
-                <span class="chip" data-guardado-filter="alta">Alta compatibilidad</span>
-                <span class="chip" data-guardado-filter="sin-aplicar">Sin aplicar</span>
+    <div class="ws-palette-scrim" id="paletteScrim">
+        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+            <div class="ws-palette-input-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
+                <kbd>Esc</kbd>
             </div>
-            <div class="inv-sort">
-                <label for="guardado-sort-select">Ordenar por</label>
-                <select id="guardado-sort-select" class="select inv-sort-select">
-                    <option value="reciente">Guardado reciente</option>
-                    <option value="score">Mayor compatibilidad</option>
-                </select>
+            <div class="ws-palette-list" id="paletteList"></div>
+        </div>
+    </div>
+
+    <header class="ws-top">
+        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <a class="ws-brand" th:href="@{/dashboard}">
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">guardados</span>
+        </a>
+        <span class="ws-role-pill">talento</span>
+
+        <button class="ws-search" id="paletteOpen" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar en el workspace…
+            <kbd>⌘K</kbd>
+        </button>
+
+        <div class="ws-bell" id="bellWrap">
+            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
+            </button>
+            <div class="ws-bell-drop" id="bellDrop">
+                <div class="ws-bell-drop-head">
+                    <span class="ws-bell-drop-title">Notificaciones</span>
+                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
+                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
+                </div>
+                <div class="ws-bell-drop-list">
+                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
+                        Sin notificaciones nuevas
+                    </div>
+                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
+                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
+                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
+                            <div class="ws-notif-body">
+                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
+                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="empty-zone" id="guardados-filter-empty" style="display:none;">
-            <div class="empty-icon-wrap">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-                </svg>
+        <a th:href="@{/empleos}" class="ws-btn ws-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="lbl">Ver todos los empleos</span>
+        </a>
+
+        <div class="ws-avatar" th:title="${usuarioActualNombre}"
+            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
+            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
+    </header>
+
+    <div class="ws-body">
+        <aside class="ws-side" id="side" aria-label="Navegación">
+            <div class="ws-side-bar">
+                <span class="ws-side-bar-title">explorer</span>
+                <span class="ws-side-bar-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </span>
             </div>
-            <h3>Sin resultados con ese filtro</h3>
-            <p>Prueba con otro filtro.</p>
-            <button class="btn btn-outline" id="guardados-filter-reset" style="margin-top:8px;">Ver todos</button>
-        </div>
 
-        <div th:unless="${guardados == null or #lists.isEmpty(guardados)}"
-             class="guardados-grid" id="guardados-grid">
-
-            <div th:each="empleo, iter : ${guardados}" class="guardado-card"
-                 th:style="'animation-delay:' + (${iter.index < 8 ? iter.index * 0.04 : 0.32}) + 's'"
-                 th:attr="data-score=${scores != null and scores[empleo.id] != null ? scores[empleo.id] : 0},
-                          data-aplico=${yaAplico != null and yaAplico[empleo.id] ? 'true' : 'false'}">
-
-                <div class="guardado-card-header">
-                    <div class="guardado-icon-wrap"
-                         th:attr="style='background:' + ${empleo.colorIcono ?: '#1d7fd0'}">
-                        <svg th:if="${empleo.icono == 'code'}" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                        <svg th:if="${empleo.icono == 'layers'}" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                        <svg th:if="${empleo.icono == 'zap'}" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <svg th:if="${empleo.icono == 'rocket'}" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
-                        <svg th:unless="${empleo.icono == 'code' or empleo.icono == 'layers' or empleo.icono == 'zap' or empleo.icono == 'rocket'}"
-                             class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/>
-                        </svg>
-                    </div>
-
-                    <div th:if="${scores != null and scores[empleo.id] != null and scores[empleo.id] > 0}"
-                         class="score-badge"
-                         th:classappend="${scores[empleo.id] >= 70} ? ' score-high' : (${scores[empleo.id] >= 40} ? ' score-mid' : ' score-low')"
-                         th:title="'Compatibilidad con tu perfil: ' + ${scores[empleo.id]} + '%'">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m13 2-10 12h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <span th:text="${scores[empleo.id]} + '%'">0%</span>
-                    </div>
-
-                    <button class="guardado-remove-btn"
-                            th:attr="data-empleo-id=${empleo.id}"
-                            title="Quitar de guardados">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                             fill="currentColor" stroke="currentColor" stroke-width="1"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </button>
+            <div class="ws-side-profile">
+                <div class="ws-side-avatar"
+                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
+                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
+                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
                 </div>
+                <div>
+                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                    <div class="ws-side-profile-role">talento creativo</div>
+                </div>
+            </div>
 
-                <a th:href="@{|/empleos/${empleo.id}|}" class="guardado-card-body">
-                    <div class="guardado-empresa">
-                        <a th:href="@{|/empresa/${empleo.empresaId}|}"
-                           class="guardado-empresa-link"
-                           onclick="event.stopPropagation()"
-                           th:text="${empleo.empresaNombre}">Empresa</a>
-                    </div>
-                    <h3 class="guardado-titulo" th:text="${empleo.titulo}">Título del empleo</h3>
-                    <div class="guardado-chips">
-                        <span class="tag-pill" th:if="${empleo.modalidad != null}" th:text="${empleo.modalidad}">Remoto</span>
-                        <span class="tag-pill" th:if="${empleo.seniority != null}" th:text="${empleo.seniority}">Senior</span>
-                        <span class="tag-pill" th:if="${empleo.contrato != null}"  th:text="${empleo.contrato}">Full-time</span>
-                    </div>
-                    <div class="guardado-salario"
-                         th:if="${empleo.mostrarSalario and empleo.salarioMin != null}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                        <span th:text="${empleo.formattedSalarioMin} + ' – ' + ${empleo.formattedSalarioMax} + ' ' + ${empleo.moneda ?: ''}">
-                            Salario
-                        </span>
-                    </div>
-                </a>
-
-                <div class="guardado-card-footer">
-                    <span th:if="${yaAplico != null and yaAplico[empleo.id]}"
-                          class="tag-pill accent" style="font-size:.74rem;">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Ya aplicaste
-                    </span>
-                    <a th:unless="${yaAplico != null and yaAplico[empleo.id]}"
-                       th:href="@{|/empleos/${empleo.id}|}"
-                       class="btn btn-primary"
-                       style="font-size:.8rem;padding:6px 14px;">
-                        Ver empleo
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    general<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/dashboard}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/empleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
+                        <span class="name">Empleos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/talentos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Talentos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/proyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
+                    </a>
+                    <a class="ws-side-link is-active" th:href="@{/empleos/guardados}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Guardados</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/misProyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
+                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
                     </a>
                 </div>
             </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    cuenta<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/mensajes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Mensajes</span>
+                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
+                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/solicitudes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                        <span class="name">Solicitudes</span>
+                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
+                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/perfil}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                        <span class="name">Perfil</span> <span class="ext">.md</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/curriculum}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
+                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/ajustes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="ws-main">
+            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
+            <div class="ws-content">
+                <div class="ws-crumb">
+                    <span>~</span><span class="sep">/</span><span>talento</span>
+                    <span class="sep">/</span><span class="cur">guardados.json</span>
+                </div>
+
+                <div th:if="${flashMessage != null}" class="flash-banner" th:classappend="${flashType != null ? ' ' + flashType : ''}">
+                    <span th:text="${flashMessage}">Notificacion</span>
+                    <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
+                </div>
+
+                <div class="ws-page-head">
+                    <div>
+                        <p class="ws-eyebrow">// tus favoritos<span class="ws-cursor" aria-hidden="true">▌</span></p>
+                        <h1 class="ws-big-head">
+                            <span class="ws-big-num" id="guardados-count" th:text="${guardTotal ?: 0}">0</span>
+                            <span class="ws-big-head-sub">guardados<br>en tu lista</span>
+                        </h1>
+                        <p class="ws-page-sub">Vacantes que marcaste con ★ para revisar después — nunca se pierden entre tantas pestañas abiertas.</p>
+                    </div>
+                    <div class="ws-mini-card">
+                        <div class="ws-mini-card-head">
+                            <span class="ficha" th:text="'Lista #' + ${#strings.toUpperCase(#strings.substring(usuarioActualId ?: '000000000000', 0, 6))}">Lista</span>
+                            <span class="cat">talento</span>
+                        </div>
+                        <div class="ws-mini-card-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                        <div class="ws-mini-card-role" th:text="${usuarioActualCorreo}">correo@ejemplo.com</div>
+
+                        <div class="ws-mini-card-badges">
+                            <span class="ws-mini-badge" th:if="${guardAltaCompat != null and guardAltaCompat > 0}">
+                                <b>✓</b><span th:text="${guardAltaCompat} + ' con alta compatibilidad'">alta compat</span>
+                            </span>
+                            <span class="ws-mini-badge" th:if="${guardYaAplico != null and guardYaAplico > 0}">
+                                <b>✓</b><span th:text="'ya aplicaste a ' + ${guardYaAplico}">ya aplicaste</span>
+                            </span>
+                        </div>
+
+                        <div class="ws-mini-card-foot">
+                            <span th:text="${guardTotal ?: 0}">0</span> guardados en total
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${guardados == null or #lists.isEmpty(guardados)}" class="empty-state">
+                    <div class="empty-state-code" aria-hidden="true">
+                        <span class="k">guardados</span><span class="p">.json</span><span class="p">:</span>
+                        <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                    </div>
+                    <strong>No tienes empleos guardados</strong>
+                    <p>Guarda empleos que te interesen para revisarlos después.</p>
+                    <div class="empty-state-actions">
+                        <a th:href="@{/empleos}" class="btn btn-primary">Explorar empleos</a>
+                    </div>
+                </div>
+
+                <div th:unless="${guardados == null or #lists.isEmpty(guardados)}" class="gd-stat-row">
+                    <div class="gd-stat">
+                        <span class="gd-stat-icon gd-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="gd-stat-num" id="gd-total-metric" th:text="${guardTotal ?: 0}">0</span>
+                        <span class="gd-stat-label">Empleos guardados</span>
+                    </div>
+                    <div class="gd-stat">
+                        <span class="gd-stat-icon gd-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-10 12h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                        <span class="gd-stat-num" id="gd-alta-metric" th:text="${guardAltaCompat ?: 0}">0</span>
+                        <span class="gd-stat-label">Alta compatibilidad</span>
+                    </div>
+                    <div class="gd-stat">
+                        <span class="gd-stat-icon gd-stat-icon--amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                        <span class="gd-stat-num" id="gd-aplico-metric" th:text="${guardYaAplico ?: 0}">0</span>
+                        <span class="gd-stat-label">Ya aplicaste</span>
+                    </div>
+                </div>
+
+                <div th:unless="${guardados == null or #lists.isEmpty(guardados)}" class="gd-filter-row">
+                    <div class="chip-row" id="guardados-filter-bar">
+                        <span class="chip active" data-guardado-filter="todos">Todos</span>
+                        <span class="chip" data-guardado-filter="alta">Alta compatibilidad</span>
+                        <span class="chip" data-guardado-filter="sin-aplicar">Sin aplicar</span>
+                    </div>
+                    <div class="gd-sort">
+                        <label for="guardado-sort-select">Ordenar por</label>
+                        <select id="guardado-sort-select" class="select">
+                            <option value="reciente">Guardado reciente</option>
+                            <option value="score">Mayor compatibilidad</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="guardados-filter-empty" hidden>
+                    <div class="empty-state-code" aria-hidden="true">
+                        <span class="k">filtro</span><span class="p">.json</span><span class="p">:</span>
+                        <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                    </div>
+                    <strong>Sin resultados con ese filtro</strong>
+                    <p>Prueba con otro filtro.</p>
+                    <div class="empty-state-actions">
+                        <button class="btn btn-outline" id="guardados-filter-reset" type="button">Ver todos</button>
+                    </div>
+                </div>
+
+                <div th:unless="${guardados == null or #lists.isEmpty(guardados)}" id="guardados-grid" class="ws-job-grid">
+                    <section th:each="empleo : ${guardados}" class="job-card"
+                        th:attr="data-empleo-id=${empleo.id},
+                                 data-score=${scores != null and scores[empleo.id] != null ? scores[empleo.id] : 0},
+                                 data-aplico=${yaAplico != null and yaAplico[empleo.id] ? 'true' : 'false'}"
+                        th:onclick="|window.location='@{/empleos/{id}(id=${empleo.id})}'|">
+
+                        <div class="job-band" th:attr="data-color=${empleo.colorIcono}"></div>
+
+                        <div class="job-avatar" th:attr="data-color=${empleo.colorIcono}">
+                            <img th:if="${empleo.logoUrl != null and !#strings.isEmpty(empleo.logoUrl)}" th:src="${empleo.logoUrl}" alt="Logo">
+                            <span th:if="${empleo.logoUrl == null or #strings.isEmpty(empleo.logoUrl)}"
+                                th:text="${empleo.empresaNombre != null and !#strings.isEmpty(empleo.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(empleo.empresaNombre,0,1))} : 'D'">D</span>
+                        </div>
+
+                        <div class="job-body">
+                            <div class="job-content">
+                                <span class="job-title" th:text="${empleo.titulo}">Título</span>
+                                <div class="job-meta-line">
+                                    <b th:text="${empleo.empresaNombre}">Empresa</b> · <span th:text="${empleo.modalidad}">Modalidad</span>
+                                    <th:block th:if="${empleo.seniority}"> · <span th:text="${empleo.seniority}">Seniority</span></th:block>
+                                </div>
+                                <p class="job-tagline" th:text="${empleo.descripcionRol}">Descripción del rol</p>
+                                <div class="job-tags">
+                                    <th:block th:if="${empleo.stack}">
+                                        <span th:each="tech : ${#strings.arraySplit(empleo.stack, ',')}" class="job-tag" th:text="${tech.trim()}">tech</span>
+                                    </th:block>
+                                    <span class="job-salary" th:if="${empleo.mostrarSalario}"
+                                        th:text="${empleo.formattedSalarioMin} + '–' + ${empleo.formattedSalarioMax} + ' ' + ${empleo.moneda}">$0–0</span>
+                                </div>
+                            </div>
+
+                            <div class="job-foot">
+                                <div class="job-foot-l">
+                                    <div class="job-ring" th:if="${scores != null and scores[empleo.id] != null and scores[empleo.id] > 0}"
+                                        th:classappend="${scores[empleo.id] >= 70} ? ' is-high' : (${scores[empleo.id] >= 40} ? ' is-mid' : ' is-low')">
+                                        <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="prog" th:attr="data-pct=${scores[empleo.id]}" cx="20" cy="20" r="16"/></svg>
+                                        <span th:text="${scores[empleo.id]} + '%'">0%</span>
+                                    </div>
+                                    <button class="job-save btn-favorito is-saved" type="button" th:attr="data-empleo-id=${empleo.id}, data-is-favorito=true" title="Quitar de guardados">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                    </button>
+                                </div>
+                                <div class="job-actions">
+                                    <span th:if="${yaAplico != null and yaAplico[empleo.id]}" class="dc-status-pill dc-status-pill--success">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:3px;vertical-align:-1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Ya aplicaste
+                                    </span>
+                                    <a th:unless="${yaAplico != null and yaAplico[empleo.id]}" th:href="@{|/empleos/${empleo.id}|}"
+                                        class="btn btn-primary" onclick="event.stopPropagation()">Ver empleo</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="ws-status">
+        <div class="ws-status-l">
+            <span class="ws-status-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <span>talento</span>
+            </span>
+            <span class="sp">·</span>
+            <span>tu lista de favoritos</span>
         </div>
+        <div class="ws-status-r">
+            <span class="hide-sm">devcoast v2</span>
+            <span class="sp hide-sm">·</span>
+            <span id="clock">00:00:00</span>
+            <span class="sp">·</span>
+            <a th:href="@{/about-us}">¿Ayuda?</a>
+        </div>
+    </footer>
 
-    </main>
-</div>
-
-<script>
-// ── Quitar empleo de guardados sin recargar ──────────────────────────────
-document.querySelectorAll('.guardado-remove-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-        if (btn.disabled) return;
-        var empleoId = btn.getAttribute('data-empleo-id');
-        btn.disabled = true;
-        btn.style.opacity = '.4';
-        fetch('/empleos/favorito/' + empleoId, { method: 'POST' })
-            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-            .then(function (d) {
-                if (d.ok && !d.favorito) {
-                    var card = btn.closest('.guardado-card');
-                    var removedScore  = parseInt(card.dataset.score || '0', 10);
-                    var removedAplico = card.dataset.aplico === 'true';
-                    card.style.transition = 'opacity .25s, transform .25s';
-                    card.style.opacity    = '0';
-                    card.style.transform  = 'scale(.96)';
-                    setTimeout(function () {
-                        card.remove();
-                        updateGuardadosCount(removedScore, removedAplico);
-                    }, 260);
-                } else {
-                    throw new Error('respuesta inesperada');
-                }
-            })
-            .catch(function () {
-                btn.disabled = false;
-                btn.style.opacity = '';
-                if (window.UIFeedback && window.UIFeedback.toast) {
-                    window.UIFeedback.toast('No se pudo quitar el empleo. Intenta de nuevo.', 'error');
-                }
-            });
-    });
-});
-
-function updateGuardadosCount(removedScore, removedAplico) {
-    var grid = document.getElementById('guardados-grid');
-    var remaining = grid ? grid.querySelectorAll('.guardado-card').length : 0;
-    var counter = document.getElementById('guardados-count-label');
-    if (counter) counter.textContent = remaining + ' empleo' + (remaining === 1 ? '' : 's') + ' en tu lista';
-    var totalMetric = document.getElementById('guard-total-metric');
-    if (totalMetric) totalMetric.textContent = remaining;
-    if (removedScore >= 70) {
-        var altaMetric = document.getElementById('guard-alta-metric');
-        if (altaMetric) altaMetric.textContent = Math.max(0, parseInt(altaMetric.textContent, 10) - 1);
-    }
-    if (removedAplico) {
-        var aplicoMetric = document.getElementById('guard-aplico-metric');
-        if (aplicoMetric) aplicoMetric.textContent = Math.max(0, parseInt(aplicoMetric.textContent, 10) - 1);
-    }
-    if (remaining === 0) location.reload();
-}
-
-// ── Filtros (alta compatibilidad / sin aplicar) ──────────────────────────
-(function () {
-    var chips  = document.querySelectorAll('[data-guardado-filter]');
-    var grid   = document.getElementById('guardados-grid');
-    var empty  = document.getElementById('guardados-filter-empty');
-    var active = 'todos';
-
-    function applyFilter() {
-        if (!grid) return;
-        var cards = grid.querySelectorAll('.guardado-card');
-        var visible = 0;
-        cards.forEach(function (card) {
-            var score  = parseInt(card.dataset.score || '0', 10);
-            var aplico = card.dataset.aplico === 'true';
-            var match = active === 'todos'
-                || (active === 'alta' && score >= 70)
-                || (active === 'sin-aplicar' && !aplico);
-            card.classList.toggle('is-hidden', !match);
-            if (match) visible++;
-        });
-        if (empty) empty.style.display = (visible === 0) ? 'flex' : 'none';
-        grid.style.display = (visible === 0) ? 'none' : '';
-    }
-
-    chips.forEach(function (chip) {
-        chip.addEventListener('click', function () {
-            chips.forEach(function (c) { c.classList.remove('active'); });
-            chip.classList.add('active');
-            active = chip.dataset.guardadoFilter;
-            applyFilter();
-        });
-    });
-
-    document.getElementById('guardados-filter-reset')?.addEventListener('click', function () {
-        chips.forEach(function (c) { c.classList.remove('active'); });
-        document.querySelector('[data-guardado-filter="todos"]')?.classList.add('active');
-        active = 'todos';
-        applyFilter();
-    });
-
-    // ── Orden (guardado reciente / mayor compatibilidad) ──────────────────
-    document.getElementById('guardado-sort-select')?.addEventListener('change', function () {
-        if (!grid) return;
-        var cards = Array.from(grid.querySelectorAll('.guardado-card'));
-        if (this.value === 'score') {
-            cards.sort(function (a, b) { return (parseInt(b.dataset.score || '0', 10)) - (parseInt(a.dataset.score || '0', 10)); });
-        } else {
-            cards.sort(function (a, b) { return (a.dataset.originalOrder | 0) - (b.dataset.originalOrder | 0); });
-        }
-        cards.forEach(function (card) { grid.appendChild(card); });
-    });
-
-    // Guarda el orden original (guardado reciente) para poder volver a él
-    if (grid) {
-        Array.from(grid.querySelectorAll('.guardado-card')).forEach(function (card, i) {
-            card.dataset.originalOrder = i;
-        });
-    }
-})();
-</script>
 </body>
+
 </html>

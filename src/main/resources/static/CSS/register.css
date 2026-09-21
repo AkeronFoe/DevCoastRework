@@ -367,7 +367,11 @@
     left: 44px;
     top: 44px;
     cursor: pointer;
-    transition: border-color .15s ease, color .15s ease;
+    transition: border-color .15s ease, color .15s ease, transform .1s ease;
+}
+
+.rg-chip.color:active {
+    transform: scale(.96);
 }
 
 .rg-chip.color .swatch {
@@ -1011,7 +1015,9 @@ a.rg-tree-row {
     content: "";
     position: absolute;
     inset: 0;
-    width: 0%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
     background: var(--rg-accent);
 }
 
@@ -1020,9 +1026,9 @@ a.rg-tree-row {
 }
 
 @keyframes rgProgress {
-    0% { width: 0%; }
-    70% { width: 78%; }
-    100% { width: 88%; }
+    0% { transform: scaleX(0); }
+    70% { transform: scaleX(.78); }
+    100% { transform: scaleX(.88); }
 }
 
 .rg-fbody {
@@ -1061,10 +1067,15 @@ a.rg-tree-row {
     background: none;
     border: none;
     padding: 0;
+    transition: transform .1s ease;
 }
 
 .rg-back-link:hover {
     color: var(--rg-ink);
+}
+
+.rg-back-link:active {
+    transform: scale(.96);
 }
 
 .rg-title {
@@ -1171,7 +1182,7 @@ a.rg-tree-row {
 
 .rg-card.talento:hover { border-color: rgba(79, 160, 232, .5); }
 .rg-card.empresa:hover { border-color: rgba(199, 182, 252, .5); }
-.rg-card:active { transform: translateY(-1px) scale(.97); }
+.rg-card:active { transform: translateY(-1px) scale(.96); }
 
 .rg-card.is-selected {
     transform: translateY(-3px) scale(1.015);
@@ -1231,8 +1242,8 @@ a.rg-tree-row {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transform: scale(.5);
-    transition: opacity .16s ease, transform .16s ease;
+    transform: scale(.25);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1);
 }
 
 .rg-card.is-selected .check-badge {
@@ -1446,17 +1457,15 @@ a.rg-tree-row {
 
 .rg-loadbar-fill {
     height: 100%;
-    width: 0%;
+    width: 100%;
     background: var(--rg-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
 }
 
+/* estado de respaldo sin GSAP (CDN caído) — sin animación, solo el resultado final */
 .rg-loadbar-fill.is-filling {
-    animation: rgLoadFill 1.4s cubic-bezier(.2, .65, .3, 1) forwards;
-}
-
-@keyframes rgLoadFill {
-    from { width: 0%; }
-    to { width: 100%; }
+    transform: scaleX(1);
 }
 
 .rg-loadlabel {
@@ -1545,6 +1554,13 @@ a.rg-tree-row {
 .rg-field {
     margin-bottom: 14px;
     min-width: 0;
+}
+
+/* .rg-grid ya separa filas con su propio "gap" — sin este reset, el
+   margin-bottom de cada .rg-field se sumaba al gap y duplicaba el salto
+   vertical entre filas (28px en vez de los 14px previstos). */
+.rg-grid>.rg-field {
+    margin-bottom: 0;
 }
 
 .rg-field--full {
@@ -1656,34 +1672,53 @@ textarea.rg-textarea.is-invalid {
 }
 
 .rg-page .rg-pw-toggle {
+    position: relative;
     width: 18px;
     height: 18px;
     flex-shrink: 0;
     color: var(--rg-dim);
     display: flex;
-    transition: color .15s ease;
+    transition: color .15s ease, transform .1s ease;
 }
 
 .rg-pw-toggle:hover {
     color: var(--rg-ink);
 }
 
+.rg-pw-toggle:active {
+    transform: scale(.96);
+}
+
+/* cross-fade entre eye-on/eye-off en vez de alternar "display" — los dos
+   iconos quedan superpuestos (position:absolute) y se funden entre sí */
 .rg-pw-toggle svg {
+    position: absolute;
+    inset: 0;
     width: 18px;
     height: 18px;
     display: block;
+    opacity: 0;
+    transform: scale(.25);
+    filter: blur(4px);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1), filter .2s cubic-bezier(.2, 0, 0, 1);
 }
 
-.rg-pw-toggle .eye-off {
-    display: none;
+.rg-pw-toggle .eye-on {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
 }
 
 .rg-pw-toggle.is-showing .eye-on {
-    display: none;
+    opacity: 0;
+    transform: scale(.25);
+    filter: blur(4px);
 }
 
 .rg-pw-toggle.is-showing .eye-off {
-    display: block;
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
 }
 
 .rg-field-check {
@@ -1692,8 +1727,8 @@ textarea.rg-textarea.is-invalid {
     flex-shrink: 0;
     color: var(--rg-mint);
     opacity: 0;
-    transform: scale(.6);
-    transition: opacity .15s ease, transform .15s ease;
+    transform: scale(.25);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1);
 }
 
 .rg-field-check.is-visible {
@@ -1792,10 +1827,15 @@ textarea.rg-textarea.is-invalid {
     border: none;
     cursor: pointer;
     padding: 8px 0;
+    transition: transform .1s ease;
 }
 
 .rg-btn-ghost:hover {
     color: var(--rg-ink);
+}
+
+.rg-btn-ghost:active {
+    transform: scale(.96);
 }
 
 .rg-page .rg-btn {
@@ -1816,11 +1856,14 @@ textarea.rg-textarea.is-invalid {
 }
 
 .rg-btn:hover {
+    background: var(--rg-accent-soft);
+    border-color: var(--rg-accent-soft);
     transform: translateY(-1px);
+    box-shadow: 0 6px 20px -6px var(--rg-accent-dim);
 }
 
 .rg-btn:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(.96);
 }
 
 .rg-btn svg {
@@ -1996,6 +2039,11 @@ textarea.rg-textarea.is-invalid {
     font-family: var(--rg-disp);
     color: var(--rg-dim);
     font-size: 1rem;
+    /* el glyph "×" solo mide ~10px — este padding lleva el área de click a
+       ~24px sin mover la posición visual (el margin negativo simétrico
+       compensa el padding en los 4 lados, así el gap del flex no se corre) */
+    padding: 7px;
+    margin: -7px;
 }
 
 .rg-page .flash-banner .flash-close:hover {
@@ -2021,8 +2069,18 @@ textarea.rg-textarea.is-invalid {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .rg-btn:hover {
+    .rg-btn:hover,
+    .rg-btn:active,
+    .rg-card:active,
+    .rg-back-link:active,
+    .rg-btn-ghost:active,
+    .rg-chip.color:active,
+    .rg-pw-toggle:active {
         transform: none;
+    }
+
+    .rg-pw-toggle svg {
+        transition: none;
     }
 
     .rg-frame-tag.is-editing,
@@ -2033,7 +2091,7 @@ textarea.rg-textarea.is-invalid {
 
     .rg-frame.is-loading .rg-frame-progress::after {
         animation: none;
-        width: 60%;
+        transform: scaleX(.6);
     }
 
     .rg-card,

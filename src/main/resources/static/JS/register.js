@@ -79,6 +79,17 @@
                     { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2.5)', stagger: .05 }, '-=0.15');
         }
 
+        // Alerta de error del servidor (correo repetido, password corta):
+        // solo uno de los dos <form> la renderiza (th:if), así que como
+        // mucho hay un .rg-alert en el DOM. Sin esto aparecía en seco,
+        // sin nada que llame la atención hacia el problema.
+        var alertEl = frame.querySelector('.rg-alert');
+        if (alertEl && hasGsap && !reduce) {
+            gsap.fromTo(alertEl,
+                { opacity: 0, x: -6 },
+                { opacity: 1, x: 0, duration: .45, ease: 'back.out(2)', delay: .3 });
+        }
+
         /* =======================================================
          * Estado tipo=talento/empresa/null y máquina de estados
          * chooser -> loading -> wizard, ver register.css [data-state]
@@ -117,8 +128,8 @@
             }
         };
 
-        var ICON_PERSON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-        var ICON_BUILDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg>';
+        var ICON_PERSON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+        var ICON_BUILDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></svg>';
 
         function applyWizardCopy(tipo) {
             var c = COPY[tipo];
@@ -132,7 +143,12 @@
             if (sub) sub.textContent = c.heroSub;
             if (estaText) estaText.textContent = c.esta;
             if (kickerTipo) kickerTipo.textContent = tipo;
-            if (typeBadge) typeBadge.innerHTML = tipo === 'talento' ? ICON_PERSON : ICON_BUILDING;
+            if (typeBadge) {
+                typeBadge.innerHTML = tipo === 'talento' ? ICON_PERSON : ICON_BUILDING;
+                if (hasGsap && !reduce) {
+                    gsap.fromTo(typeBadge, { scale: .6, opacity: .4 }, { scale: 1, opacity: 1, duration: .35, ease: 'back.out(2.5)' });
+                }
+            }
             if (crumbFile) crumbFile.textContent = c.crumb;
             if (frameTagLabel) frameTagLabel.textContent = 'register-frame · paso 1/3';
             if (statusLabel) statusLabel.textContent = '2 modificados';
@@ -221,7 +237,18 @@
                 // progreso) por si el usuario ya pasó por acá antes
                 var fill = document.getElementById('rg-loadbar-fill');
                 var logItems = document.querySelectorAll('#rg-buildlog li');
-                if (fill) { fill.classList.remove('is-filling'); void fill.offsetWidth; fill.classList.add('is-filling'); }
+                if (fill) {
+                    if (hasGsap && !reduce) {
+                        // scaleX en vez de animar "width" — evita layout/reflow
+                        // en cada frame de los 1.4s que dura el relleno
+                        gsap.killTweensOf(fill);
+                        gsap.fromTo(fill, { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: 'power2.out' });
+                    } else {
+                        fill.classList.remove('is-filling');
+                        void fill.offsetWidth;
+                        fill.classList.add('is-filling');
+                    }
+                }
                 logItems.forEach(function (li) {
                     // tocar sólo animation-name (no el shorthand "animation")
                     // — el shorthand resetea TODAS las sub-propiedades,
@@ -390,6 +417,14 @@
                 if (submitBtn) {
                     submitBtn.classList.add('is-loading');
                     submitBtn.disabled = true;
+                    // el "display" del CSS ya resuelve el layout (btn-txt
+                    // afuera, btn-load adentro) — esto solo agrega un
+                    // fundido corto al texto que recién queda visible,
+                    // nunca anima el propio display/layout
+                    var loadEl = submitBtn.querySelector('.btn-load');
+                    if (loadEl && hasGsap && !reduce) {
+                        gsap.fromTo(loadEl, { opacity: 0 }, { opacity: 1, duration: .25, ease: 'power1.out' });
+                    }
                 }
                 if (frame) frame.classList.add('is-loading');
             });
@@ -414,6 +449,8 @@
             var pwHelp = form.querySelector('[data-pw-help]');
             var PW_LABELS = { 1: 'débil', 2: 'aceptable', 3: 'buena', 4: 'fuerte' };
             var pwHelpDefault = pwHelp ? pwHelp.textContent : '';
+            var pwBars = pwStrength ? Array.prototype.slice.call(pwStrength.querySelectorAll('.rg-pw-bar i')) : [];
+            var lastPwScore = 0;
             if (pwInput && pwStrength && pwLabel) {
                 pwInput.addEventListener('input', function () {
                     var v = pwInput.value;
@@ -422,6 +459,7 @@
                         pwStrength.removeAttribute('data-level');
                         pwInput.dataset.customInvalid = 'false';
                         if (pwHelp) { pwHelp.textContent = pwHelpDefault; pwHelp.classList.remove('is-error'); }
+                        lastPwScore = 0;
                         return;
                     }
                     var score = 0;
@@ -433,6 +471,17 @@
                     pwStrength.setAttribute('data-level', String(score));
                     pwStrength.classList.add('is-visible');
                     pwLabel.textContent = PW_LABELS[score];
+                    // solo anima el/los segmentos cuyo estado realmente
+                    // cambió — nunca en cada tecla si el score se mantiene
+                    if (score !== lastPwScore && hasGsap && !reduce && pwBars.length) {
+                        var lo = Math.min(lastPwScore, score), hi = Math.max(lastPwScore, score);
+                        var changed = pwBars.slice(lo, hi);
+                        if (changed.length) {
+                            gsap.killTweensOf(changed);
+                            gsap.fromTo(changed, { scaleY: .3 }, { scaleY: 1, duration: .25, ease: 'back.out(3)', stagger: .04, transformOrigin: 'center' });
+                        }
+                    }
+                    lastPwScore = score;
                     var short = v.length < 8;
                     pwInput.dataset.customInvalid = short ? 'true' : 'false';
                     if (pwHelp) {
@@ -671,9 +720,25 @@
             build();
             window.addEventListener('resize', build);
 
+            // el loop de abajo (tick) se para solo cuando ya no hace falta
+            // (mouse afuera Y los puntos ya volvieron a su reposo) — sin esto
+            // corría un rAF infinito de por vida por un fondo decorativo.
+            // ensureLoop() es el único punto que lo reinicia, y es
+            // idempotente (loopRunning) para que un mousemove disparado
+            // mientras el loop ya corre no encadene un segundo rAF en paralelo.
+            var loopRunning = false;
+            var REST_EPS = 0.05;
+
+            function ensureLoop() {
+                if (loopRunning) return;
+                loopRunning = true;
+                requestAnimationFrame(tick);
+            }
+
             canvas.addEventListener('mousemove', function (e) {
                 var r = canvas.getBoundingClientRect();
                 mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; mouse.active = true;
+                ensureLoop();
             });
             canvas.addEventListener('mouseleave', function () { mouse.active = false; });
 
@@ -686,6 +751,13 @@
                 }
             }
             if (reduce) { drawStatic(); return; }
+
+            function allSettled() {
+                for (var i = 0; i < points.length; i++) {
+                    if (Math.abs(points[i].ox) > REST_EPS || Math.abs(points[i].oy) > REST_EPS) return false;
+                }
+                return true;
+            }
 
             function tick() {
                 ctx.clearRect(0, 0, w, h);
@@ -714,9 +786,15 @@
                     ctx.arc(p.x0 + p.ox, p.y0 + p.oy, radius, 0, Math.PI * 2);
                     ctx.fill();
                 }
+                if (!mouse.active && allSettled()) {
+                    // nada más que empujar y nadie mirando — corta la cadena
+                    // de rAF acá; ensureLoop() la retoma en el próximo mousemove
+                    loopRunning = false;
+                    return;
+                }
                 requestAnimationFrame(tick);
             }
-            requestAnimationFrame(tick);
+            ensureLoop();
         })();
 
         /* =======================================================

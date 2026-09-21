@@ -5,485 +5,647 @@
     <th:block th:replace="~{fragments/head :: meta}"></th:block>
     <title>DevCoast | Dashboard</title>
     <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/dashboard.css}">
     <script th:src="@{/JS/ui-feedback.js}"></script>
-    <div id="flash-data" th:if="${flashMessage != null}"
-        th:attr="data-message=${flashMessage}, data-type=${flashType ?: 'info'}" style="display:none"></div>
     <script th:src="@{/JS/transitions.js}" defer></script>
     <script th:src="@{/JS/prefetch.js}" defer></script>
     <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/ws-shell.js}" defer></script>
+    <script th:src="@{/JS/dashboard.js}" defer></script>
 </head>
 
-<body data-theme="light">
-    <div class="app-shell">
-        <th:block th:replace="~{fragments/sidebar :: sidebar('dashboard')}" />
+<body class="wsjobs" th:classappend="${usuarioActualTipo == 'empresa'} ? ' is-empresa' : ''">
 
-        <main class="main">
-            <header class="topbar">
-                <div class="topbar-title">
-                    <h1 th:text="${usuarioActualTipo == 'empresa' ? 'Panel de empresa' : 'Dashboard'}">Dashboard</h1>
-                    <p
-                        th:text="${usuarioActualTipo == 'empresa' ? 'Gestiona tus empleos y candidatos desde aquí.' : 'Tu panorama profesional 2026 en un solo lugar.'}">
-                        Tu panorama profesional 2026 en un solo lugar.</p>
+    <div class="ws-boot" id="wsBoot" aria-hidden="true">
+        <div class="ws-boot-box">
+            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
+            <div class="ws-boot-line"><span class="ok">✓</span> compilando dashboard.tsx…</div>
+            <div class="ws-boot-line" id="bootLast">$ devcoast run dev --dashboard</div>
+            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
+        </div>
+    </div>
+
+    <div id="nav-progress" class="ws-navprogress"></div>
+    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <div class="ws-grain" aria-hidden="true"></div>
+    <div class="ws-vignette" aria-hidden="true"></div>
+    <div class="ws-scrim" id="scrim"></div>
+
+    <div class="ws-palette-scrim" id="paletteScrim">
+        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+            <div class="ws-palette-input-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
+                <kbd>Esc</kbd>
+            </div>
+            <div class="ws-palette-list" id="paletteList"></div>
+        </div>
+    </div>
+
+    <header class="ws-top">
+        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <a class="ws-brand" th:href="@{/dashboard}">
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">dashboard</span>
+        </a>
+        <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+
+        <button class="ws-search" id="paletteOpen" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar en el workspace…
+            <kbd>⌘K</kbd>
+        </button>
+
+        <div class="ws-bell" id="bellWrap">
+            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
+            </button>
+            <div class="ws-bell-drop" id="bellDrop">
+                <div class="ws-bell-drop-head">
+                    <span class="ws-bell-drop-title">Notificaciones</span>
+                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
+                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
                 </div>
-                <div class="topbar-actions">
-                    <div class="theme-toggle">
-                        <span id="theme-icon">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                aria-hidden="true">
-                                <circle cx="12" cy="12" r="4" />
-                                <path d="M12 2v2" />
-                                <path d="M12 20v2" />
-                                <path d="m4.93 4.93 1.41 1.41" />
-                                <path d="m17.66 17.66 1.41 1.41" />
-                                <path d="M2 12h2" />
-                                <path d="M20 12h2" />
-                                <path d="m6.34 17.66-1.41 1.41" />
-                                <path d="m19.07 4.93-1.41 1.41" />
-                            </svg>
-                        </span>
-                        <span class="theme-dot"></span>
-                        <span id="theme-label">Modo claro</span>
+                <div class="ws-bell-drop-list">
+                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
+                        Sin notificaciones nuevas
                     </div>
-                    <a th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}"
-                        class="btn btn-primary btn-icon" type="button">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            aria-hidden="true">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        Publicar empleo
-                    </a>
-                    <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/subirProyecto}"
-                        class="btn btn-primary btn-icon" type="button">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            aria-hidden="true">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        Subir proyecto
-                    </a>
+                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
+                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
+                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
+                            <div class="ws-notif-icon">
+                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div class="ws-notif-body">
+                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
+                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
-            </header>
+                <div th:if="${notifNoLeidas != null and notifNoLeidas > 0}" class="ws-bell-drop-foot">
+                    <button class="ws-mark-read" id="markAllRead" type="button">Marcar todas como leídas</button>
+                </div>
+            </div>
+        </div>
 
-            <div th:if="${usuarioActualTipo == 'empresa'}">
+        <a th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}" class="ws-btn ws-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <span class="lbl">Publicar empleo</span>
+        </a>
+        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/subirProyecto}" class="ws-btn ws-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="lbl">Subir proyecto</span>
+        </a>
 
-                <section class="card dashboard-card">
-                    <h3 class="section-title">Resumen de tu empresa</h3>
-                    <p class="muted">Métricas reales de tus publicaciones y candidatos.</p>
-                    <div class="dc-metric-grid" style="margin-top:14px;">
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--dev">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg>
-                                </div>
-                                <span class="dc-status-pill dc-status-pill--dev">Activos</span>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statEmpleosActivos ?: 0}">0</div>
-                            <div class="dc-metric-label">Empleos activos</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--neutral">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
-                                </div>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statSolicitudesRecibidas ?: 0}">0</div>
-                            <div class="dc-metric-label">Solicitudes recibidas</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--data">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                                </div>
-                                <span th:if="${statSolicitudesPendientes > 0}" class="dc-status-pill dc-status-pill--data">Pendientes</span>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statSolicitudesPendientes ?: 0}">0</div>
-                            <div class="dc-metric-label">Por revisar</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--neutral">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg>
-                                </div>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statInvitacionesEnviadas ?: 0}">0</div>
-                            <div class="dc-metric-label">Invitaciones enviadas</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--success">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                </div>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statEmpleosCerrados ?: 0}">0</div>
-                            <div class="dc-metric-label">Empleos cerrados</div>
-                        </div>
-                    </div>
-                </section>
+        <div class="ws-avatar" th:title="${usuarioActualNombre}"
+            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
+            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
+    </header>
 
-                <section class="card dashboard-card">
-                    <h3 class="section-title">Empleos activos</h3>
-                    <p class="muted">Tus publicaciones vigentes en este momento.</p>
-
-                    <div th:if="${empleosActivos != null and !empleosActivos.isEmpty()}">
-                        <div th:each="empleo : ${empleosActivos}" class="empleo-dashboard-row">
-                            <div class="empleo-dashboard-icon"
-                                th:style="'background:' + (${empleo.colorIcono} ?: '#1f8f8f') + '; color:white; display:flex; align-items:center; justify-content:center;'">
-                                <th:block th:replace="~{fragments/icons :: iconoEmpleo(${empleo.icono})}" />
-                            </div>
-                            <div class="empleo-dashboard-info">
-                                <div class="empleo-dashboard-title" th:text="${empleo.titulo}">Título</div>
-                                <div class="empleo-dashboard-meta"
-                                    th:text="${empleo.modalidad + ' · ' + empleo.seniority}">Remoto · Senior</div>
-                            </div>
-                            <a th:href="@{'/empleos/' + ${empleo.id}}" class="empleo-dashboard-badge">Ver →</a>
-                        </div>
-                    </div>
-
-                    <div th:if="${empleosActivos == null or empleosActivos.isEmpty()}" class="dc-empty">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="7" width="20" height="14" rx="2" />
-                            <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
-                        </svg>
-                        <p>Aún no tienes empleos activos.</p>
-                        <a th:href="@{/crearEmpleo}" class="btn btn-primary btn-icon">Publicar primer empleo</a>
-                    </div>
-                </section>
-
-                <section class="grid-2">
-                    <div class="card dashboard-card">
-                        <h3 class="section-title">Acciones rápidas</h3>
-                        <p class="muted">Gestiona tu empresa desde aquí.</p>
-                        <div class="quick-actions" style="grid-template-columns:1fr 1fr;">
-                            <div class="card quick-card dashboard-card">
-                                <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <line x1="12" y1="5" x2="12" y2="19" />
-                                        <line x1="5" y1="12" x2="19" y2="12" />
-                                    </svg></div>
-                                <strong>Nuevo empleo</strong>
-                                <p class="muted">Publica una nueva vacante.</p>
-                                <a th:href="@{/crearEmpleo}" class="btn btn-outline btn-icon">Crear</a>
-                            </div>
-                            <div class="card quick-card dashboard-card">
-                                <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg></div>
-                                <strong>Ver talentos</strong>
-                                <p class="muted">Explora el directorio.</p>
-                                <a th:href="@{/talentos}" class="btn btn-outline btn-icon">Explorar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card dashboard-card">
-                        <h3 class="section-title">Mis empleos</h3>
-                        <p class="muted">Accede al listado completo.</p>
-                        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-                            <a th:href="@{/misEmpleos}" class="btn btn-outline btn-icon"
-                                style="justify-content:center;">Ver todos mis empleos →</a>
-                            <a th:href="@{/solicitudes}" class="btn btn-outline btn-icon"
-                                style="justify-content:center;">Ver solicitudes recibidas →</a>
-                        </div>
-                    </div>
-                </section>
+    <div class="ws-body">
+        <aside class="ws-side" id="side" aria-label="Navegación">
+            <div class="ws-side-bar">
+                <span class="ws-side-bar-title">explorer</span>
+                <span class="ws-side-bar-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </span>
             </div>
 
-            <div th:if="${usuarioActualTipo != 'empresa'}">
+            <div class="ws-side-profile">
+                <div class="ws-side-avatar"
+                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
+                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
+                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                    <div class="ws-side-profile-role" th:text="${usuarioActualTipo == 'empresa'} ? 'portal empresa' : 'talento creativo'">talento creativo</div>
+                </div>
+            </div>
 
-                <section class="card dashboard-card">
-                    <h3 class="section-title">Resumen rápido</h3>
-                    <p class="muted">Insights clave con datos en tiempo real.</p>
-                    <div class="dc-metric-grid" style="margin-top:14px;">
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--dev">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                                    </svg>
-                                </div>
-                                <a th:href="@{/solicitudes}" class="dc-mini-link">Ver →</a>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statSolicitudesEnviadas ?: 0}">0</div>
-                            <div class="dc-metric-label">Solicitudes enviadas</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--data">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-                                    </svg>
-                                </div>
-                                <span th:if="${statSolicitudesEnRevision > 0}" class="dc-status-pill dc-status-pill--data">En curso</span>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statSolicitudesEnRevision ?: 0}">0</div>
-                            <div class="dc-metric-label">En revisión</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div class="dc-icon-pill dc-icon-pill--dev">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/>
-                                    </svg>
-                                </div>
-                                <a th:href="@{/misProyectos}" class="dc-mini-link">Ver →</a>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statProyectos ?: 0}">0</div>
-                            <div class="dc-metric-label">Proyectos subidos</div>
-                        </div>
-                        <div class="dc-metric-card">
-                            <div class="dc-metric-top">
-                                <div th:class="${statInvitacionesPendientes > 0} ? 'dc-icon-pill dc-icon-pill--dev' : 'dc-icon-pill dc-icon-pill--neutral'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                                    </svg>
-                                </div>
-                                <span th:if="${statInvitacionesPendientes > 0}" class="dc-status-pill dc-status-pill--dev">Nuevas</span>
-                            </div>
-                            <div class="dc-metric-num dc-mono" th:text="${statInvitacionesPendientes ?: 0}">0</div>
-                            <div class="dc-metric-label">Invitaciones pendientes</div>
-                        </div>
-                    </div>
-                </section>
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    general<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link is-active" th:href="@{/dashboard}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/empleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
+                        <span class="name">Empleos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/talentos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Talentos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/proyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Guardados</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
+                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
+                        <span class="name">Mis empleos</span>
+                        <span class="ws-side-badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}">1</span>
+                        <span class="ext" th:if="${solicitudesPendientesEmpresa == null or solicitudesPendientesEmpresa == 0}">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Candidatos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                        <span class="name">Publicar</span> <span class="ext">+</span>
+                    </a>
+                </div>
+            </div>
 
-                <section class="card dashboard-card">
-                    <div th:if="${usuario != null}" th:with="pct=${usuario.completitudPerfil}">
-                        <div class="dc-profile-hero">
-                            <div class="dc-profile-ring" th:style="'--pct:' + ${pct} + ';'">
-                                <div class="dc-profile-ring-inner dc-mono" th:text="${pct + '%'}">0%</div>
-                            </div>
-                            <div class="dc-profile-hero-info">
-                                <div class="dc-profile-hero-name"
-                                     th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre) ? usuarioActualNombre : 'Tu perfil'}">
-                                    Tu perfil</div>
-                                <div class="dc-profile-hero-msg"
-                                     th:text="${pct >= 80} ? 'Perfil destacado — sigue así' : (${pct >= 50} ? 'Vas bien, sigue completando tu perfil' : 'Completa tu perfil para destacar')">
-                                    Perfil destacado</div>
-                            </div>
-                            <a th:if="${statInvitacionesPendientes != null and statInvitacionesPendientes > 0}"
-                               th:href="@{/solicitudes}" class="dc-profile-hero-chip"
-                               th:text="${statInvitacionesPendientes} + (${statInvitacionesPendientes == 1} ? ' invitación →' : ' invitaciones →')">1
-                                invitación →</a>
-                        </div>
-                    </div>
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    cuenta<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/mensajes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Mensajes</span>
+                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
+                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                        <span class="name">Solicitudes</span>
+                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
+                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/perfil}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                        <span class="name">Perfil</span> <span class="ext">.md</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
+                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/ajustes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
 
-                    <h3 class="section-title" style="margin-top:20px;">Prioridades de hoy</h3>
-                    <p class="muted">Acciones que mejoran tu visibilidad.</p>
-                    <div class="focus-grid">
-                        <div th:if="${usuario != null}" th:with="pct=${usuario.completitudPerfil}">
-                            <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px;">
-                                <a th:if="${usuario.bio == null or #strings.isEmpty(usuario.bio)}"
-                                   th:href="@{/perfil}" class="dc-priority-item dc-priority-item--data">
-                                    <span class="dc-priority-dot dc-priority-dot--data"></span>
-                                    <span style="flex:1;"><strong>Agrega tu bio profesional</strong> — aumenta tu visibilidad</span>
-                                    <span class="dc-priority-cta">Ir →</span>
-                                </a>
-                                <a th:if="${usuario.stack == null or usuario.stack.isEmpty()}"
-                                   th:href="@{/perfil}" class="dc-priority-item dc-priority-item--error">
-                                    <span class="dc-priority-dot dc-priority-dot--error"></span>
-                                    <span style="flex:1;"><strong>Define tu stack</strong> — activa el sistema de recomendaciones</span>
-                                    <span class="dc-priority-cta">Ir →</span>
-                                </a>
-                                <a th:if="${usuario.linkedinUrl == null or #strings.isEmpty(usuario.linkedinUrl)}"
-                                   th:href="@{/perfil}" class="dc-priority-item dc-priority-item--data">
-                                    <span class="dc-priority-dot dc-priority-dot--data"></span>
-                                    <span style="flex:1;"><strong>Agrega tu LinkedIn</strong> — credibilidad profesional</span>
-                                    <span class="dc-priority-cta">Ir →</span>
-                                </a>
-                                <a th:if="${statProyectos == 0}"
-                                   th:href="@{/subirProyecto}" class="dc-priority-item dc-priority-item--error">
-                                    <span class="dc-priority-dot dc-priority-dot--error"></span>
-                                    <span style="flex:1;"><strong>Sube tu primer proyecto</strong> — lo primero que ven las empresas</span>
-                                    <span class="dc-priority-cta">Subir →</span>
-                                </a>
-                                <a th:if="${statInvitacionesPendientes != null and statInvitacionesPendientes > 0}"
-                                   th:href="@{/solicitudes}" class="dc-priority-item dc-priority-item--dev">
-                                    <span class="dc-priority-dot dc-priority-dot--dev"></span>
-                                    <span style="flex:1;"><strong th:text="'Tienes ' + ${statInvitacionesPendientes} + ' invitación(es) pendiente(s)'">Invitaciones</strong></span>
-                                    <span class="dc-priority-cta dc-priority-cta--dev">Revisar →</span>
-                                </a>
-                                <div th:if="${(usuario.bio != null and !#strings.isEmpty(usuario.bio))
-                                          and (!usuario.stack.isEmpty())
-                                          and (usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl))
-                                          and (statProyectos != null and statProyectos > 0)
-                                          and (statInvitacionesPendientes == null or statInvitacionesPendientes == 0)}"
-                                     class="dc-priority-done">
-                                    <span style="color:var(--cat-success-text);font-size:1.1rem;">✓</span>
-                                    <span><strong style="color:var(--cat-success-text);">¡Todo al día!</strong> Tu perfil está bien configurado. Sigue explorando empleos.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <div th:class="${empleosFavoritosRecientes != null and !#lists.isEmpty(empleosFavoritosRecientes)} ? 'grid-2' : ''">
-
-                <section class="card dashboard-card">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                        <div>
-                            <h3 class="section-title" style="margin-bottom:2px;">Empleos para ti</h3>
-                            <p class="muted" style="font-size:.84rem;">Basados en tu stack tecnológico.</p>
-                        </div>
-                        <a th:href="@{/empleos}" class="btn btn-ghost" style="font-size:.82rem;">Ver todos →</a>
-                    </div>
-                    <div th:if="${empleosRecomendados != null and !#lists.isEmpty(empleosRecomendados)}"
-                         style="display:flex;flex-direction:column;gap:8px;">
-                        <a th:each="emp : ${empleosRecomendados}" th:href="@{/empleos/{id}(id=${emp.id})}"
-                           class="dc-job-row">
-                            <div class="dc-mono dc-avatar-badge"
-                                 th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
-                                 th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
-                            <div style="flex:1;min-width:0;">
-                                <span class="dc-job-row-title" th:text="${emp.titulo}">Título</span>
-                                <div class="dc-job-row-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>
-                            </div>
-                            <div th:if="${scoresRecomendados != null and scoresRecomendados.containsKey(emp.id)}"
-                                 style="flex-shrink:0;text-align:center;">
-                                <div class="dc-mono" style="font-size:.72rem;font-weight:700;color:var(--accent);"
-                                     th:text="${scoresRecomendados.get(emp.id) + '%'}">0%</div>
-                                <div style="font-size:.66rem;color:var(--muted);">match</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div th:if="${empleosRecomendados == null or #lists.isEmpty(empleosRecomendados)}" class="dc-empty">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="7" width="20" height="14" rx="2" />
-                            <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
-                        </svg>
-                        <p>Todavía no tenemos empleos recomendados para tu stack.</p>
-                        <a th:href="@{/empleos}" class="btn btn-outline btn-icon">Explorar empleos</a>
-                    </div>
-                </section>
-
-                <section class="card dashboard-card" th:if="${empleosFavoritosRecientes != null and !#lists.isEmpty(empleosFavoritosRecientes)}">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                        <div>
-                            <h3 class="section-title" style="margin-bottom:2px;">Empleos guardados</h3>
-                            <p class="muted" style="font-size:.84rem;">Vacantes que marcaste como favorito.</p>
-                        </div>
-                        <a th:href="@{/empleos}" class="btn btn-ghost" style="font-size:.82rem;">Ver todos →</a>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <a th:each="emp : ${empleosFavoritosRecientes}" th:href="@{/empleos/{id}(id=${emp.id})}"
-                            class="dc-job-row">
-                            <div class="dc-mono dc-avatar-badge"
-                                th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
-                                th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
-                            <div style="flex:1;min-width:0;">
-                                <span class="dc-job-row-title" th:text="${emp.titulo}">Título</span>
-                                <div class="dc-job-row-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>
-                            </div>
-                            <span class="chip" style="font-size:.7rem;flex-shrink:0;" th:text="${emp.categoria}">Cat</span>
-                        </a>
-                    </div>
-                </section>
-
+        <main class="ws-main">
+            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
+            <div class="ws-content">
+                <div class="ws-crumb">
+                    <span>~</span><span class="sep">/</span>
+                    <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+                    <span class="sep">/</span><span class="cur">dashboard.tsx</span>
                 </div>
 
-                <section class="card dashboard-card">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                        <div>
-                            <h3 class="section-title" style="margin-bottom:2px;">Proyectos recientes</h3>
-                            <p class="muted" style="font-size:.84rem;">Tus últimas subidas al portafolio.</p>
-                        </div>
-                        <a th:href="@{/misProyectos}" class="btn btn-ghost" style="font-size:.82rem;">Ver todos →</a>
-                    </div>
-                    <div th:if="${proyectosRecientes != null and !#lists.isEmpty(proyectosRecientes)}" class="dc-project-grid">
-                        <a th:each="proy : ${proyectosRecientes}" th:href="@{/misProyectos}" class="dc-project-card">
-                            <div class="dc-project-banner"
-                                th:style="|background:${proy.colorIcono != null ? proy.colorIcono : '#1d7fd0'};|">
-                                <img th:if="${proy.bannerDataUrl}" th:src="${proy.bannerDataUrl}"
-                                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;" alt="">
-                                <img th:if="${proy.imagenUrl != null ? proy.imagenUrl : proy.logoDataUrl}"
-                                    th:src="${proy.imagenUrl != null ? proy.imagenUrl : proy.logoDataUrl}" alt="">
-                            </div>
-                            <div class="dc-project-body">
-                                <span class="dc-project-name" th:text="${proy.nombre}">Proyecto</span>
-                                <span th:if="${proy.stack != null and !#lists.isEmpty(proy.stack)}" class="dc-project-stack"
-                                    th:text="${proy.stack[0]} + (${#lists.size(proy.stack) > 1} ? ' +' + (${#lists.size(proy.stack)} - 1) : '')">Stack</span>
-                            </div>
-                        </a>
-                    </div>
-                    <div th:if="${proyectosRecientes == null or #lists.isEmpty(proyectosRecientes)}" class="dc-empty">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
-                        </svg>
-                        <p>Aún no has subido ningún proyecto a tu portafolio.</p>
-                        <a th:href="@{/subirProyecto}" class="btn btn-primary btn-icon">Subir tu primer proyecto</a>
-                    </div>
-                </section>
+                <div th:if="${flashMessage != null}" class="flash-banner" th:classappend="${flashType != null ? ' ' + flashType : ''}">
+                    <span th:text="${flashMessage}">Notificacion</span>
+                    <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
+                </div>
 
-                <section>
-                    <h3 class="section-title">Acciones rápidas</h3>
-                    <p class="muted">Atajos inteligentes para avanzar en minutos.</p>
-                    <div class="quick-actions">
-                        <div class="card quick-card dashboard-card">
-                            <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="16" x2="8" y1="13" y2="13" />
-                                    <line x1="16" x2="8" y1="17" y2="17" />
-                                    <line x1="10" x2="8" y1="9" y2="9" />
-                                </svg></div>
-                            <strong>Actualizar CV</strong>
-                            <p class="muted">Deja tu curriculum listo para aplicar.</p>
-                            <a th:href="@{/curriculum}" class="btn btn-outline btn-icon">Editar</a>
+                <div class="ws-page-head">
+                    <div class="dash-reveal">
+                        <p class="ws-eyebrow">// tu panorama<span class="ws-cursor" aria-hidden="true">▌</span></p>
+                        <h1 class="ws-big-head" th:if="${usuarioActualTipo == 'empresa'}">
+                            <span class="ws-big-num" th:text="${statSolicitudesPendientes ?: 0}" th:attr="data-value=${statSolicitudesPendientes ?: 0}">0</span>
+                            <span class="ws-big-head-sub">solicitudes<br>por revisar</span>
+                        </h1>
+                        <h1 class="ws-big-head" th:if="${usuarioActualTipo != 'empresa'}">
+                            <span class="ws-big-num" id="dashBigNum" data-source="warnings">0</span>
+                            <span class="ws-big-head-sub">pendientes<br>hoy</span>
+                        </h1>
+                        <p class="ws-page-sub"
+                            th:text="${usuarioActualTipo == 'empresa'} ? 'Gestiona tus empleos y candidatos desde aquí.' : 'Tu panorama profesional 2026 en un solo lugar.'">
+                            Tu panorama profesional 2026 en un solo lugar.</p>
+                    </div>
+                    <div class="ws-mini-card dash-reveal">
+                        <div class="ws-mini-card-head">
+                            <span class="ficha" th:text="'Sesión #' + ${#strings.toUpperCase(#strings.substring(#strings.concat(usuarioActualId ?: '', '000000'), 0, 6))}">Sesión</span>
+                            <span class="cat" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
                         </div>
-                        <div class="card quick-card dashboard-card">
-                            <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="17 8 12 3 7 8" />
-                                    <line x1="12" y1="3" x2="12" y2="15" />
-                                </svg></div>
-                            <strong>Subir proyecto</strong>
-                            <p class="muted">Muestra tu último caso de estudio.</p>
-                            <a th:href="@{/subirProyecto}" class="btn btn-outline btn-icon">Subir</a>
+                        <div class="ws-mini-card-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                        <div class="ws-mini-card-role" th:text="${usuarioActualCorreo}">correo@ejemplo.com</div>
+
+                        <div th:if="${usuarioActualTipo != 'empresa' and usuario != null}" th:with="pct=${usuario.completitudPerfil}" class="dash-mini-progress">
+                            <div class="ws-mini-card-head" style="margin-bottom:5px;">
+                                <span class="ficha">perfil</span>
+                                <span class="ficha" th:text="${pct} + '%'">0%</span>
+                            </div>
+                            <div class="dash-mini-progress-track">
+                                <div class="dash-mini-progress-fill" th:style="'width:' + ${pct} + '%'"></div>
+                            </div>
+                            <p class="dash-mini-progress-msg"
+                                th:text="${pct >= 80} ? 'Perfil destacado — sigue así' : (${pct >= 50} ? 'Vas bien, sigue completando' : 'Complétalo para destacar')">
+                                Perfil destacado</p>
                         </div>
-                        <div class="card quick-card dashboard-card">
-                            <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                                </svg></div>
-                            <strong>Invitaciones</strong>
-                            <p class="muted"
-                                th:text="${statInvitacionesPendientes != null and statInvitacionesPendientes > 0 ? statInvitacionesPendientes + ' empresa(s) esperan respuesta.' : 'Sin invitaciones pendientes.'}">
-                                Sin pendientes.</p>
-                            <a th:href="@{/solicitudes}" class="btn btn-outline btn-icon">Ver</a>
+
+                        <div class="ws-mini-card-badges" th:if="${usuarioActualTipo == 'empresa'}">
+                            <span class="ws-mini-badge"><b>✓</b><span>cuenta empresa activa</span></span>
                         </div>
-                        <div class="card quick-card dashboard-card">
-                            <div class="quick-icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                                    <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
-                                </svg></div>
-                            <strong>Explorar empleos</strong>
-                            <p class="muted">Encuentra vacantes alineadas a tu perfil.</p>
-                            <a th:href="@{/empleos}" class="btn btn-outline btn-icon">Explorar</a>
+
+                        <div class="ws-mini-card-foot" th:if="${usuarioActualTipo == 'empresa'}">
+                            <span th:text="${statEmpleosActivos ?: 0}">0</span> empleos activos ·
+                            <span th:text="${statTotalEmpleos ?: 0}">0</span> en total
+                        </div>
+                        <div class="ws-mini-card-foot" th:if="${usuarioActualTipo != 'empresa'}">
+                            <span th:text="${statProyectos ?: 0}">0</span> proyectos ·
+                            <span th:text="${statSolicitudesEnviadas ?: 0}">0</span> postulaciones
                         </div>
                     </div>
-                </section>
+                </div>
 
+                <!-- ============================= EMPRESA ============================= -->
+                <div th:if="${usuarioActualTipo == 'empresa'}">
+
+                    <section class="dash-section dash-reveal">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">resumen.log</h3>
+                                <p class="dash-section-sub">Métricas reales de tus publicaciones y candidatos.</p>
+                            </div>
+                        </div>
+                        <div class="dash-stat-row">
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
+                                    <span class="dash-stat-flag dash-stat-flag--mint">activos</span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statEmpleosActivos ?: 0}" th:attr="data-value=${statEmpleosActivos ?: 0}">0</span>
+                                <span class="dash-stat-label">Empleos activos</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statSolicitudesRecibidas ?: 0}" th:attr="data-value=${statSolicitudesRecibidas ?: 0}">0</span>
+                                <span class="dash-stat-label">Solicitudes recibidas</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+                                    <span th:if="${statSolicitudesPendientes > 0}" class="dash-stat-flag dash-stat-flag--amber">pendientes</span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statSolicitudesPendientes ?: 0}" th:attr="data-value=${statSolicitudesPendientes ?: 0}">0</span>
+                                <span class="dash-stat-label">Por revisar</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg></span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statInvitacionesEnviadas ?: 0}" th:attr="data-value=${statInvitacionesEnviadas ?: 0}">0</span>
+                                <span class="dash-stat-label">Invitaciones enviadas</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statEmpleosCerrados ?: 0}" th:attr="data-value=${statEmpleosCerrados ?: 0}">0</span>
+                                <span class="dash-stat-label">Empleos cerrados</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dash-section dash-reveal">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">empleos-activos.json</h3>
+                                <p class="dash-section-sub">Tus publicaciones vigentes en este momento.</p>
+                            </div>
+                        </div>
+
+                        <div th:if="${empleosActivos != null and !empleosActivos.isEmpty()}" class="dash-list">
+                            <a th:each="empleo : ${empleosActivos}" th:href="@{'/empleos/' + ${empleo.id}}" class="dash-list-row">
+                                <div class="dash-list-icon" th:style="'background:' + (${empleo.colorIcono} ?: '#1f8f8f') + ';'">
+                                    <th:block th:replace="~{fragments/icons :: iconoEmpleo(${empleo.icono})}" />
+                                </div>
+                                <div class="dash-list-body">
+                                    <span class="dash-list-title" th:text="${empleo.titulo}">Título</span>
+                                    <div class="dash-list-meta" th:text="${empleo.modalidad + ' · ' + empleo.seniority}">Remoto · Senior</div>
+                                </div>
+                                <span class="dash-list-cta">Ver →</span>
+                            </a>
+                        </div>
+
+                        <div th:if="${empleosActivos == null or empleosActivos.isEmpty()}" class="empty-state">
+                            <div class="empty-state-code" aria-hidden="true">
+                                <span class="k">empleos</span><span class="p">.json</span><span class="p">:</span>
+                                <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                            </div>
+                            <strong>Aún no tienes empleos activos.</strong>
+                            <div class="empty-state-actions">
+                                <a th:href="@{/crearEmpleo}" class="btn btn-primary">Publicar primer empleo</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="dash-grid-2">
+                        <section class="dash-section dash-reveal">
+                            <div class="dash-section-head">
+                                <div>
+                                    <h3 class="dash-section-title">scripts</h3>
+                                    <p class="dash-section-sub">Gestiona tu empresa desde aquí.</p>
+                                </div>
+                            </div>
+                            <div class="dash-scripts">
+                                <div class="dash-script">
+                                    <span class="dash-script-cmd"><span class="p">$</span>crear-empleo</span>
+                                    <p class="dash-script-desc">Publica una nueva vacante.</p>
+                                    <a th:href="@{/crearEmpleo}" class="btn btn-outline">Crear</a>
+                                </div>
+                                <div class="dash-script">
+                                    <span class="dash-script-cmd"><span class="p">$</span>ver-talentos</span>
+                                    <p class="dash-script-desc">Explora el directorio completo.</p>
+                                    <a th:href="@{/talentos}" class="btn btn-outline">Explorar</a>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="dash-section dash-reveal">
+                            <div class="dash-section-head">
+                                <div>
+                                    <h3 class="dash-section-title">mis-empleos</h3>
+                                    <p class="dash-section-sub">Accede al listado completo.</p>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <a th:href="@{/misEmpleos}" class="btn btn-outline" style="justify-content:center;">Ver todos mis empleos →</a>
+                                <a th:href="@{/solicitudes}" class="btn btn-outline" style="justify-content:center;">Ver solicitudes recibidas →</a>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ============================= TALENTO ============================= -->
+                <div th:if="${usuarioActualTipo != 'empresa'}">
+
+                    <section class="dash-section dash-reveal">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">resumen.log</h3>
+                                <p class="dash-section-sub">Insights clave con datos en tiempo real.</p>
+                            </div>
+                        </div>
+                        <div class="dash-stat-row">
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                                    <a th:href="@{/solicitudes}" class="dash-stat-link">Ver →</a>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statSolicitudesEnviadas ?: 0}" th:attr="data-value=${statSolicitudesEnviadas ?: 0}">0</span>
+                                <span class="dash-stat-label">Solicitudes enviadas</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+                                    <span th:if="${statSolicitudesEnRevision > 0}" class="dash-stat-flag dash-stat-flag--amber">en curso</span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statSolicitudesEnRevision ?: 0}" th:attr="data-value=${statSolicitudesEnRevision ?: 0}">0</span>
+                                <span class="dash-stat-label">En revisión</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
+                                    <a th:href="@{/misProyectos}" class="dash-stat-link">Ver →</a>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statProyectos ?: 0}" th:attr="data-value=${statProyectos ?: 0}">0</span>
+                                <span class="dash-stat-label">Proyectos subidos</span>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="dash-stat-top">
+                                    <span th:class="${statInvitacionesPendientes > 0} ? 'dash-stat-icon dash-stat-icon--cyan' : 'dash-stat-icon dash-stat-icon--dim'">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                    </span>
+                                    <span th:if="${statInvitacionesPendientes > 0}" class="dash-stat-flag dash-stat-flag--mint">nuevas</span>
+                                </div>
+                                <span class="dash-stat-num" th:text="${statInvitacionesPendientes ?: 0}" th:attr="data-value=${statInvitacionesPendientes ?: 0}">0</span>
+                                <span class="dash-stat-label">Invitaciones pendientes</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dash-section dash-reveal" th:if="${usuario != null}">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">warnings</h3>
+                                <p class="dash-section-sub">Acciones que mejoran tu visibilidad.</p>
+                            </div>
+                        </div>
+                        <div class="dash-warnings">
+                            <a th:if="${usuario.bio == null or #strings.isEmpty(usuario.bio)}" th:href="@{/perfil}" class="dash-warning">
+                                <span class="dash-warning-tag">warn</span>
+                                <span class="dash-warning-text"><strong>Agrega tu bio profesional</strong> — aumenta tu visibilidad</span>
+                                <span class="dash-warning-cta">Ir →</span>
+                            </a>
+                            <a th:if="${usuario.stack == null or usuario.stack.isEmpty()}" th:href="@{/perfil}" class="dash-warning dash-warning--error">
+                                <span class="dash-warning-tag">error</span>
+                                <span class="dash-warning-text"><strong>Define tu stack</strong> — activa el sistema de recomendaciones</span>
+                                <span class="dash-warning-cta">Ir →</span>
+                            </a>
+                            <a th:if="${usuario.linkedinUrl == null or #strings.isEmpty(usuario.linkedinUrl)}" th:href="@{/perfil}" class="dash-warning">
+                                <span class="dash-warning-tag">warn</span>
+                                <span class="dash-warning-text"><strong>Agrega tu LinkedIn</strong> — credibilidad profesional</span>
+                                <span class="dash-warning-cta">Ir →</span>
+                            </a>
+                            <a th:if="${statProyectos == 0}" th:href="@{/subirProyecto}" class="dash-warning dash-warning--error">
+                                <span class="dash-warning-tag">error</span>
+                                <span class="dash-warning-text"><strong>Sube tu primer proyecto</strong> — lo primero que ven las empresas</span>
+                                <span class="dash-warning-cta">Subir →</span>
+                            </a>
+                            <a th:if="${statInvitacionesPendientes != null and statInvitacionesPendientes > 0}" th:href="@{/solicitudes}" class="dash-warning dash-warning--info">
+                                <span class="dash-warning-tag">info</span>
+                                <span class="dash-warning-text"><strong th:text="'Tienes ' + ${statInvitacionesPendientes} + ' invitación(es) pendiente(s)'">Invitaciones</strong></span>
+                                <span class="dash-warning-cta">Revisar →</span>
+                            </a>
+                            <div th:if="${(usuario.bio != null and !#strings.isEmpty(usuario.bio))
+                                      and (!usuario.stack.isEmpty())
+                                      and (usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl))
+                                      and (statProyectos != null and statProyectos > 0)
+                                      and (statInvitacionesPendientes == null or statInvitacionesPendientes == 0)}"
+                                 class="dash-clean-build">
+                                <b>✓ 0 warnings</b>
+                                <span>Tu perfil está bien configurado. Sigue explorando empleos.</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div th:class="${empleosFavoritosRecientes != null and !#lists.isEmpty(empleosFavoritosRecientes)} ? 'dash-grid-2' : ''">
+
+                        <section class="dash-section dash-reveal">
+                            <div class="dash-section-head">
+                                <div>
+                                    <h3 class="dash-section-title">empleos-para-ti.json</h3>
+                                    <p class="dash-section-sub">Basados en tu stack tecnológico.</p>
+                                </div>
+                                <a th:href="@{/empleos}" class="btn btn-ghost">Ver todos →</a>
+                            </div>
+                            <div th:if="${empleosRecomendados != null and !#lists.isEmpty(empleosRecomendados)}" class="dash-list">
+                                <a th:each="emp : ${empleosRecomendados}" th:href="@{/empleos/{id}(id=${emp.id})}" class="dash-list-row">
+                                    <div class="dash-list-icon" th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
+                                         th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
+                                    <div class="dash-list-body">
+                                        <span class="dash-list-title" th:text="${emp.titulo}">Título</span>
+                                        <div class="dash-list-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>
+                                    </div>
+                                    <div th:if="${scoresRecomendados != null and scoresRecomendados.containsKey(emp.id)}" class="dash-list-match">
+                                        <div class="dash-list-match-pct" th:text="${scoresRecomendados.get(emp.id) + '%'}">0%</div>
+                                        <div class="dash-list-match-lbl">match</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div th:if="${empleosRecomendados == null or #lists.isEmpty(empleosRecomendados)}" class="empty-state">
+                                <div class="empty-state-code" aria-hidden="true">
+                                    <span class="k">recomendados</span><span class="p">.json</span><span class="p">:</span>
+                                    <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                                </div>
+                                <strong>Todavía no tenemos empleos recomendados para tu stack.</strong>
+                                <div class="empty-state-actions">
+                                    <a th:href="@{/empleos}" class="btn btn-outline">Explorar empleos</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="dash-section dash-reveal" th:if="${empleosFavoritosRecientes != null and !#lists.isEmpty(empleosFavoritosRecientes)}">
+                            <div class="dash-section-head">
+                                <div>
+                                    <h3 class="dash-section-title">guardados.json</h3>
+                                    <p class="dash-section-sub">Vacantes que marcaste como favorito.</p>
+                                </div>
+                                <a th:href="@{/empleos}" class="btn btn-ghost">Ver todos →</a>
+                            </div>
+                            <div class="dash-list">
+                                <a th:each="emp : ${empleosFavoritosRecientes}" th:href="@{/empleos/{id}(id=${emp.id})}" class="dash-list-row">
+                                    <div class="dash-list-icon" th:style="'background:' + (${emp.colorIcono} ?: '#1f8f8f') + ';'"
+                                         th:text="${emp.empresaNombre != null and !#strings.isEmpty(emp.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(emp.empresaNombre,0,1))} : 'E'">E</div>
+                                    <div class="dash-list-body">
+                                        <span class="dash-list-title" th:text="${emp.titulo}">Título</span>
+                                        <div class="dash-list-meta" th:text="${emp.empresaNombre} + ' · ' + ${emp.modalidad}">Empresa</div>
+                                    </div>
+                                    <span class="dash-list-chip" th:text="${emp.categoria}">Cat</span>
+                                </a>
+                            </div>
+                        </section>
+
+                    </div>
+
+                    <section class="dash-section dash-reveal">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">proyectos-recientes</h3>
+                                <p class="dash-section-sub">Tus últimas subidas al portafolio.</p>
+                            </div>
+                            <a th:href="@{/misProyectos}" class="btn btn-ghost">Ver todos →</a>
+                        </div>
+                        <div th:if="${proyectosRecientes != null and !#lists.isEmpty(proyectosRecientes)}" class="dash-project-grid">
+                            <a th:each="proy : ${proyectosRecientes}" th:href="@{/misProyectos}" class="dash-project-card">
+                                <div class="dash-project-banner" th:style="|background:${proy.colorIcono != null ? proy.colorIcono : '#1d7fd0'};|">
+                                    <img th:if="${proy.bannerDataUrl}" th:src="${proy.bannerDataUrl}" alt="">
+                                    <img th:if="${proy.imagenUrl != null ? proy.imagenUrl : proy.logoDataUrl}"
+                                        th:src="${proy.imagenUrl != null ? proy.imagenUrl : proy.logoDataUrl}" alt="">
+                                </div>
+                                <div class="dash-project-body">
+                                    <span class="dash-project-name" th:text="${proy.nombre}">Proyecto</span>
+                                    <span th:if="${proy.stack != null and !#lists.isEmpty(proy.stack)}" class="dash-project-stack"
+                                        th:text="${proy.stack[0]} + (${#lists.size(proy.stack) > 1} ? ' +' + (${#lists.size(proy.stack)} - 1) : '')">Stack</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div th:if="${proyectosRecientes == null or #lists.isEmpty(proyectosRecientes)}" class="empty-state">
+                            <div class="empty-state-code" aria-hidden="true">
+                                <span class="k">proyectos</span><span class="p">.fig</span><span class="p">:</span>
+                                <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                            </div>
+                            <strong>Aún no has subido ningún proyecto a tu portafolio.</strong>
+                            <div class="empty-state-actions">
+                                <a th:href="@{/subirProyecto}" class="btn btn-primary">Subir tu primer proyecto</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dash-section dash-reveal">
+                        <div class="dash-section-head">
+                            <div>
+                                <h3 class="dash-section-title">scripts</h3>
+                                <p class="dash-section-sub">Atajos inteligentes para avanzar en minutos.</p>
+                            </div>
+                        </div>
+                        <div class="dash-scripts">
+                            <div class="dash-script">
+                                <span class="dash-script-cmd"><span class="p">$</span>actualizar-cv</span>
+                                <p class="dash-script-desc">Deja tu curriculum listo para aplicar.</p>
+                                <a th:href="@{/curriculum}" class="btn btn-outline">Editar</a>
+                            </div>
+                            <div class="dash-script">
+                                <span class="dash-script-cmd"><span class="p">$</span>subir-proyecto</span>
+                                <p class="dash-script-desc">Muestra tu último caso de estudio.</p>
+                                <a th:href="@{/subirProyecto}" class="btn btn-outline">Subir</a>
+                            </div>
+                            <div class="dash-script">
+                                <span class="dash-script-cmd"><span class="p">$</span>invitaciones</span>
+                                <p class="dash-script-desc"
+                                    th:text="${statInvitacionesPendientes != null and statInvitacionesPendientes > 0 ? statInvitacionesPendientes + ' empresa(s) esperan respuesta.' : 'Sin invitaciones pendientes.'}">
+                                    Sin pendientes.</p>
+                                <a th:href="@{/solicitudes}" class="btn btn-outline">Ver</a>
+                            </div>
+                            <div class="dash-script">
+                                <span class="dash-script-cmd"><span class="p">$</span>explorar-empleos</span>
+                                <p class="dash-script-desc">Encuentra vacantes alineadas a tu perfil.</p>
+                                <a th:href="@{/empleos}" class="btn btn-outline">Explorar</a>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
             </div>
         </main>
     </div>
+
+    <footer class="ws-status">
+        <div class="ws-status-l">
+            <span class="ws-status-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+            </span>
+            <span class="sp">·</span>
+            <span>✓ datos actualizados</span>
+        </div>
+        <div class="ws-status-r">
+            <span class="hide-sm">devcoast v2</span>
+            <span class="sp hide-sm">·</span>
+            <span id="clock">00:00:00</span>
+            <span class="sp">·</span>
+            <a th:href="@{/about-us}">¿Ayuda?</a>
+        </div>
+    </footer>
 
     <!-- mostrarOnboarding ya viene filtrado del controller: solo aplica a talentos con el perfil recién creado y vacío -->
     <div th:if="${mostrarOnboarding}" class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-modal="true" aria-label="Bienvenida a DevCoast">
