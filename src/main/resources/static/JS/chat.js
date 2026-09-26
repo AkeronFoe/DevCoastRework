@@ -183,23 +183,38 @@
   })()
 
   const liveDot = document.getElementById('chat-live-indicator')
+  const liveLabel = liveDot ? liveDot.querySelector('.lbl') : null
   let pollTimer = null
+  let pollFails = 0
+
+  function setLiveOffline(offline) {
+    if (!liveDot) return
+    liveDot.classList.toggle('is-offline', offline)
+    if (liveLabel) liveLabel.textContent = offline ? 'Reconectando…' : 'En vivo'
+    liveDot.title = offline ? 'No se pudo actualizar la conversación, reintentando…' : 'Recibiendo mensajes nuevos automáticamente'
+  }
 
   function pollNuevos() {
     if (document.visibilityState !== 'visible') return
     fetch('/chat/' + solicitudId + '/nuevos?despues=' + encodeURIComponent(lastSeenIso))
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json() })
       .then(data => {
+        if (pollFails > 0) { pollFails = 0; setLiveOffline(false) }
         if (!data.mensajes || !data.mensajes.length) return
         data.mensajes.forEach((msg) => {
           appendMensaje(msg, msg.remitenteId !== currentUserId)
           if (msg.fechaIso && msg.fechaIso > lastSeenIso) lastSeenIso = msg.fechaIso
         })
-      }).catch(() => { /* se reintenta solo en el próximo ciclo */ })
+      }).catch(() => {
+        pollFails++
+        // recién a la 2da falla seguida (~8s) para no parpadear por un
+        // único hipo de red
+        if (pollFails >= 2) setLiveOffline(true)
+      })
   }
 
   function startPolling() { stopPolling(); pollTimer = setInterval(pollNuevos, 4000); if (liveDot) liveDot.style.opacity = '1' }
-  function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null }; if (liveDot) liveDot.style.opacity = '.4' }
+  function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null }; pollFails = 0; setLiveOffline(false); if (liveDot) liveDot.style.opacity = '.4' }
 
   if (solicitudId) {
     startPolling()

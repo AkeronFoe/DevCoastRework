@@ -204,7 +204,7 @@
                     <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
                 </div>
 
-                <section class="card jd-reveal">
+                <section class="card">
                     <div class="detail-hero">
                         <div class="detail-hero-main">
                             <div class="detail-hero-icon" th:style="'--card-accent:' + (${empleo.colorIcono} ?: '#4fa0e8') + ';'">
@@ -308,7 +308,8 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                             </button>
                             <form th:if="${usuarioActualId != null and empleo.empresaId != null and empleo.empresaId.equals(usuarioActualId)}"
-                                th:action="@{|/empleos/eliminar/${empleo.id}|}" method="post" style="display:inline;">
+                                th:action="@{|/empleos/eliminar/${empleo.id}|}" method="post" style="display:inline;"
+                                data-confirm-message="Esta vacante se eliminará junto con sus postulaciones. No se puede deshacer." data-confirm-title="Eliminar vacante" data-confirm-ok="Eliminar" data-confirm-variant="danger">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                 <button class="btn btn-outline-rose" type="submit">Eliminar</button>
                             </form>

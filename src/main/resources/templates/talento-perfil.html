@@ -214,7 +214,7 @@
                     <span>Puedes explorar este perfil, pero solo las <strong>empresas</strong> pueden enviar invitaciones.</span>
                 </div>
 
-                <div class="card cv-hero tp-reveal">
+                <div class="card cv-hero">
                     <div>
                         <div class="cv-identity">
                             <div class="cv-avatar" th:style="${talento.fotoUrl != null} ? 'background-image:url(' + ${talento.fotoUrl} + ');' : ''">
@@ -301,6 +301,18 @@
                         <span class="pill" th:each="s : ${talento.stack}" th:text="${s}">Tech</span>
                     </div>
                 </section>
+                <section class="card resume-section tp-reveal" th:if="${esPreview and (talento.stack == null or talento.stack.isEmpty())}">
+                    <div class="empty-state">
+                        <div class="empty-state-code" aria-hidden="true">
+                            <span class="k">stack</span><span class="p">.json</span><span class="p">:</span>
+                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                        </div>
+                        <strong>Todavía no agregaste tu stack.</strong>
+                        <div class="empty-state-actions">
+                            <a th:href="@{/curriculum}" class="btn btn-outline">Agregar tecnologías</a>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="card resume-section tp-reveal" th:if="${talento.cvExperiencias != null and !talento.cvExperiencias.isEmpty()}">
                     <h3 class="section-title">Experiencia</h3>
@@ -320,11 +332,35 @@
                         </div>
                     </div>
                 </section>
+                <section class="card resume-section tp-reveal" th:if="${esPreview and (talento.cvExperiencias == null or talento.cvExperiencias.isEmpty())}">
+                    <div class="empty-state">
+                        <div class="empty-state-code" aria-hidden="true">
+                            <span class="k">experiencia</span><span class="p">.json</span><span class="p">:</span>
+                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                        </div>
+                        <strong>Todavía no agregaste experiencia.</strong>
+                        <div class="empty-state-actions">
+                            <a th:href="@{/curriculum}" class="btn btn-outline">Agregar experiencia</a>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="card resume-section tp-reveal" th:if="${talento.habilidadesBlandas != null and !talento.habilidadesBlandas.isEmpty()}">
                     <h3 class="section-title">Habilidades blandas</h3>
                     <div class="chip-row">
                         <span class="pill-soft" th:each="h : ${talento.habilidadesBlandas}" th:text="${h}">Skill</span>
+                    </div>
+                </section>
+                <section class="card resume-section tp-reveal" th:if="${esPreview and (talento.habilidadesBlandas == null or talento.habilidadesBlandas.isEmpty())}">
+                    <div class="empty-state">
+                        <div class="empty-state-code" aria-hidden="true">
+                            <span class="k">soft-skills</span><span class="p">.json</span><span class="p">:</span>
+                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
+                        </div>
+                        <strong>Todavía no agregaste habilidades blandas.</strong>
+                        <div class="empty-state-actions">
+                            <a th:href="@{/curriculum}" class="btn btn-outline">Agregar habilidades</a>
+                        </div>
                     </div>
                 </section>
             </div>

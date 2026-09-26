@@ -37,9 +37,16 @@
   display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700;
   color: var(--ws-mint); background: var(--ws-mint-dim); border-radius: 20px; padding: 4px 10px 4px 8px; transition: opacity .3s;
 }
-.chat-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ws-mint); box-shadow: 0 0 0 2px rgba(123,216,174,.25); animation: chatLivePulse 2s ease-in-out infinite; }
+.chat-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ws-mint); box-shadow: 0 0 0 2px rgba(123,216,174,.25); animation: chatLivePulse 2s ease-in-out infinite; transition: background .2s, box-shadow .2s; }
 @keyframes chatLivePulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 @media (prefers-reduced-motion: reduce) { .chat-live-dot { animation: none; } }
+
+/* el polling falló 2 veces seguidas: se distingue de "en pausa por pestaña
+   oculta" (esa solo baja opacidad) con un color de estado real */
+.chat-live.is-offline { color: var(--ws-rose); background: var(--ws-rose-dim); }
+.chat-live.is-offline .chat-live-dot { background: var(--ws-rose); box-shadow: 0 0 0 2px rgba(239,123,146,.25); animation: chatLiveBlink .9s ease-in-out infinite; }
+@keyframes chatLiveBlink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .chat-live.is-offline .chat-live-dot { animation: none; } }
 @media (max-width: 640px) { .chat-top-job, .chat-live .lbl { display: none; } }
 
 /* ============================= historial ============================= */

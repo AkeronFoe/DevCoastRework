@@ -22,12 +22,17 @@
 .pe-fase-btn:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
 .pe-fase-btn:active { transform: scale(.96); }
 .pe-fase-btn.is-active { background: var(--ws-accent-dim); border-color: var(--ws-accent); color: var(--ws-accent-soft); }
+.pe-fase-btn:disabled { opacity: .5; cursor: default; }
+.pe-fase-btn.is-pending { color: var(--ws-dim-2); }
 
 /* ============================= toggle lista / kanban ============================= */
 .pe-view-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 9px; margin-bottom: 16px; }
 .pe-view-btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .72rem; font-weight: 700; color: var(--ws-dim-2); background: none; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; transition: background .15s, color .15s; }
 .pe-view-btn svg { width: 13px; height: 13px; }
 .pe-view-btn.is-active { background: var(--ws-panel-3); color: var(--ws-ink); }
+/* el drag & drop del kanban es HTML5 nativo y no responde bien a touch —
+   en pantallas angostas se deja solo la vista lista, que sí funciona */
+@media (max-width: 640px) { .pe-view-toggle { display: none; } }
 
 /* ============================= candidatos (vista lista) ============================= */
 .pe-list { display: flex; flex-direction: column; gap: 8px; }
@@ -57,6 +62,7 @@
 .pe-kan-card { position: relative; background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 8px; cursor: grab; transition: border-color .15s, opacity .15s; }
 .pe-kan-card:active { cursor: grabbing; }
 .pe-kan-card.is-dragging { opacity: .4; }
+.pe-kan-card.is-moving { opacity: .45; pointer-events: none; }
 .pe-kan-card-inner { display: flex; align-items: center; gap: 9px; padding: 9px 10px; text-decoration: none; }
 .pe-kan-avatar { width: 26px; height: 26px; border-radius: 7px; background: var(--ws-accent-dim); color: var(--ws-accent-soft); display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-weight: 800; font-size: .72rem; flex-shrink: 0; }
 .pe-kan-info { flex: 1; min-width: 0; }

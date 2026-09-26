@@ -3,6 +3,8 @@
    reskinada, y usando el toast del propio workspace en vez de uno propio. */
 (function () {
   const EMPLEO_ID = window.__PE_EMPLEO_ID__ || ''
+  const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const hasGsap = typeof window.gsap !== 'undefined'
   let draggingFrom = null
 
   function toast(msg, type) {
@@ -84,16 +86,26 @@
         const solId = e.dataTransfer.getData('solId') || e.dataTransfer.getData('text/plain')
         const fromCol = e.dataTransfer.getData('fromCol') || draggingFrom
         if (!solId || fromCol === estado) return
-        moverCandidato(solId, estado)
+        // marcarla "moviéndose" ya mismo (antes de la respuesta): sin esto,
+        // la card se queda con opacity de drag hasta que buildKanban() la
+        // reconstruye, y en conexiones lentas se siente sin respuesta
+        const draggedCard = document.querySelector(`.pe-kan-card[data-sol-id="${solId}"]`)
+        if (draggedCard) { draggedCard.classList.remove('is-dragging'); draggedCard.classList.add('is-moving') }
+        moverCandidato(solId, estado, draggedCard)
       })
     })
   }
 
-  function moverCandidato(solId, nuevoEstado) {
+  function moverCandidato(solId, nuevoEstado, draggedCard) {
+    // FLIP simple: la posición de origen se guarda antes de que buildKanban()
+    // reconstruya todo el DOM del kanban; al terminar, la card nueva "vuela"
+    // desde ahí en vez de aparecer de golpe en su nueva columna
+    const firstRect = draggedCard ? draggedCard.getBoundingClientRect() : null
+
     fetch(`/empleos/${EMPLEO_ID}/postulaciones/${solId}/estado?nuevoEstado=${nuevoEstado}`, {
       method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(r => r.json()).then(data => {
-      if (!data.ok) return
+      if (!data.ok) { if (draggedCard) draggedCard.classList.remove('is-moving'); return }
       const card = document.querySelector(`#pe-view-lista .pe-card[data-sol-id="${solId}"]`)
       if (card) {
         card.dataset.estado = nuevoEstado
@@ -103,8 +115,17 @@
         if (badge) badge.style.display = ''
       }
       buildKanban()
+      const newCard = document.querySelector(`.pe-kan-card[data-sol-id="${solId}"]`)
+      if (newCard && firstRect && hasGsap && !reduce) {
+        const lastRect = newCard.getBoundingClientRect()
+        const dx = firstRect.left - lastRect.left
+        const dy = firstRect.top - lastRect.top
+        if (dx || dy) {
+          gsap.fromTo(newCard, { x: dx, y: dy, opacity: .5 }, { x: 0, y: 0, opacity: 1, duration: .32, ease: 'power2.out' })
+        }
+      }
       toast(nuevoEstado === 'aprobada' ? '✓ Candidato aceptado' : nuevoEstado === 'rechazada' ? 'Candidato rechazado' : 'Vuelto a revisión', nuevoEstado === 'aprobada' ? 'success' : 'info')
-    }).catch(() => toast('Error al actualizar el estado', 'error'))
+    }).catch(() => { if (draggedCard) draggedCard.classList.remove('is-moving'); toast('Error al actualizar el estado', 'error') })
   }
 
   /* ── toggle lista / kanban ── */
@@ -125,7 +146,10 @@
   /* ── selector de fase del proceso ── */
   document.getElementById('pe-fase-selector')?.addEventListener('click', (e) => {
     const btn = e.target.closest('.pe-fase-btn')
-    if (!btn) return
+    if (!btn || btn.disabled) return
+    const allBtns = document.querySelectorAll('.pe-fase-btn')
+    allBtns.forEach(b => { b.disabled = true })
+    btn.classList.add('is-pending')
     fetch(`/empleos/${EMPLEO_ID}/fase?fase=${btn.dataset.fase}`, {
       method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(r => r.json()).then(data => {
@@ -134,5 +158,6 @@
       btn.classList.add('is-active')
       toast('Fase actualizada: ' + btn.textContent.trim(), 'success')
     }).catch(() => toast('Error al cambiar la fase', 'error'))
+      .finally(() => { allBtns.forEach(b => { b.disabled = false }); btn.classList.remove('is-pending') })
   })
 })()
