@@ -20,6 +20,7 @@ import com.example.devcoast.model.Usuario.CvExperiencia;
 import com.example.devcoast.repository.EmpleoRepository;
 import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -30,13 +31,15 @@ public class UsuarioController {
     private final EmpresaRepository empresaRepository;
     private final EmpleoRepository empleoRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final PlanService planService;
 
     public UsuarioController(UsuarioRepository repository, EmpresaRepository empresaRepository,
-            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder) {
+            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder, PlanService planService) {
         this.repository = repository;
         this.empresaRepository = empresaRepository;
         this.empleoRepository = empleoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.planService = planService;
     }
 
     @PostMapping("/perfil/guardar")
@@ -428,6 +431,21 @@ public class UsuarioController {
         repository.save(usuario);
 
         return ResponseEntity.ok(Map.of("ok", true));
+    }
+
+    @PostMapping("/ajustes/plan/actualizar")
+    public ResponseEntity<Map<String, Object>> actualizarPlan(HttpSession session) {
+        String id = (String) session.getAttribute("usuarioActualId");
+        String tipo = (String) session.getAttribute("usuarioActualTipo");
+        if (id == null || !"empresa".equals(tipo))
+            return ResponseEntity.status(401).body(Map.of("ok", false));
+
+        Empresa empresa = empresaRepository.findById(id).orElse(null);
+        if (empresa == null)
+            return ResponseEntity.status(404).body(Map.of("ok", false));
+
+        planService.actualizarAPro(empresa);
+        return ResponseEntity.ok(Map.of("ok", true, "plan", empresa.getPlan(), "planVenceEn", empresa.getPlanVenceEn()));
     }
 
 }

@@ -337,6 +337,26 @@
   inputPasswordEliminar?.addEventListener('input', actualizarBotonEliminar)
   modalEliminar?.addEventListener('click', (e) => { if (e.target === modalEliminar) modalEliminar.classList.remove('is-open') })
 
+  /* ── plan: actualizar a Pro ── */
+  document.getElementById('btn-actualizar-pro')?.addEventListener('click', async function () {
+    const btn = this
+    btn.textContent = 'Actualizando…'; btn.disabled = true
+    try {
+      const res = await fetch('/ajustes/plan/actualizar', { method: 'POST' })
+      const data = await res.json()
+      if (data.ok) {
+        if (window.UIFeedback?.toast) window.UIFeedback.toast('Cuenta actualizada a Pro', 'success')
+        setTimeout(() => window.location.reload(), 1000)
+      } else {
+        if (window.UIFeedback?.toast) window.UIFeedback.toast('No se pudo actualizar el plan', 'error')
+        btn.textContent = 'Actualizar a Pro'; btn.disabled = false
+      }
+    } catch {
+      if (window.UIFeedback?.toast) window.UIFeedback.toast('Error de conexión', 'error')
+      btn.textContent = 'Actualizar a Pro'; btn.disabled = false
+    }
+  })
+
   /* ── modal: cambiar correo ── */
   const modalCorreo = document.getElementById('modal-correo')
   document.getElementById('btn-cambiar-correo')?.addEventListener('click', () => {

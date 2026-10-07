@@ -14,4 +14,6 @@ public interface EmpleoRepository extends MongoRepository<Empleo, String> {
     long countByEmpresaId(String empresaId);
 
     long countByEmpresaIdAndEstado(String empresaId, String estado);
+
+    long countByEmpresaIdAndDestacarTrueAndEstado(String empresaId, String estado);
 }

@@ -51,4 +51,9 @@ public class Empresa {
 
     @Field("foto_url")
     private String fotoUrl;
+
+    private String plan = "GRATIS";
+
+    @Field("plan_vence_en")
+    private Date planVenceEn;
 }

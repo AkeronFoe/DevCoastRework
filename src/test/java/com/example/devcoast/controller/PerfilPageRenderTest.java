@@ -61,6 +61,10 @@ class PerfilPageRenderTest {
     private MensajeRepository mensajeRepository;
     @MockitoBean
     private NotificacionRepository notificacionRepository;
+    @MockitoBean
+    private com.example.devcoast.repository.CobroRepository cobroRepository;
+    @MockitoBean
+    private com.example.devcoast.service.PlanService planService;
 
     @Test
     void perfilDeTalentoConDatosCompletosRendizaSinReventar() throws Exception {

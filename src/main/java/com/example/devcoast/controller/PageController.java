@@ -24,6 +24,7 @@ import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
+import com.example.devcoast.repository.CobroRepository;
 import com.example.devcoast.repository.EmpleoRepository;
 import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.InvitacionRepository;
@@ -31,6 +32,7 @@ import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
+import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -46,8 +48,10 @@ public class PageController {
     private final EmpresaRepository empresaRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CleanupService cleanupService;
+    private final CobroRepository cobroRepository;
+    private final PlanService planService;
 
-    public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository, SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository, BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService) {
+    public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository, SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository, BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService, CobroRepository cobroRepository, PlanService planService) {
         this.usuarioRepository = usuarioRepository;
         this.empleoRepository = empleoRepository;
         this.solicitudRepository = solicitudRepository;
@@ -57,6 +61,8 @@ public class PageController {
         this.empresaRepository = empresaRepository;
         this.passwordEncoder = passwordEncoder;
         this.cleanupService = cleanupService;
+        this.cobroRepository = cobroRepository;
+        this.planService = planService;
     }
 
     @GetMapping("/")
@@ -248,7 +254,40 @@ public class PageController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
         cargarUsuario(session, model);
+
+        if (RoleGuard.esEmpresa(session)) {
+            String id = RoleGuard.getId(session);
+            Empresa empresa = empresaRepository.findById(id).orElse(null);
+            long vacantesActivas = empleoRepository.countByEmpresaIdAndEstado(id, "ACTIVO");
+            long destacadosActivos = empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(id, "ACTIVO");
+
+            model.addAttribute("plan", empresa != null ? empresa.getPlan() : "GRATIS");
+            model.addAttribute("planVenceEn", empresa != null ? empresa.getPlanVenceEn() : null);
+            model.addAttribute("vacantesActivas", vacantesActivas);
+            model.addAttribute("limiteVacantes", planService.limiteVacantesActivas(empresa));
+            model.addAttribute("destacadosActivos", destacadosActivos);
+            model.addAttribute("limiteDestacados", planService.limiteDestacados(empresa));
+        }
+
         return "ajustes";
+    }
+
+    @GetMapping("/facturacion")
+    public String facturacion(HttpSession session, Model model, RedirectAttributes ra) {
+        if (RoleGuard.soloEmpresa(session)) {
+            if (RoleGuard.sinSesion(session))
+                return "redirect:/login";
+            ra.addFlashAttribute("flashMessage", "La facturación es una función exclusiva para empresas");
+            ra.addFlashAttribute("flashType", "info");
+            return "redirect:/dashboard";
+        }
+        cargarUsuario(session, model);
+        String id = RoleGuard.getId(session);
+        List<com.example.devcoast.model.Cobro> cobros = cobroRepository.findByEmpresaIdOrderByFechaDesc(id);
+        double total = cobros.stream().mapToDouble(com.example.devcoast.model.Cobro::getMonto).sum();
+        model.addAttribute("cobros", cobros);
+        model.addAttribute("totalCobrado", total);
+        return "facturacion";
     }
 
     @GetMapping("/cambiarPassword")

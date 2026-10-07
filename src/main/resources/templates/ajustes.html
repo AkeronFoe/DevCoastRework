@@ -274,6 +274,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         <span class="lbl">cuenta</span><span class="ext">.env</span>
                     </button>
+                    <button type="button" class="set-filetab" data-section="plan" th:if="${usuarioActualTipo == 'empresa'}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                        <span class="lbl">plan</span><span class="ext">.plan</span>
+                    </button>
                     <button type="button" class="set-filetab" data-section="privacidad">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         <span class="lbl">privacidad</span><span class="ext">.lock</span>
@@ -447,6 +451,57 @@
                                     </div>
                                 </div>
                                 <div class="set-row-control"><a th:href="@{/cambiarPassword}" class="btn btn-outline">Cambiar</a></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="set-panel" id="panel-plan" th:if="${usuarioActualTipo == 'empresa'}">
+                        <div class="set-group">
+                            <div class="set-group-title">tu plan</div>
+                            <div class="set-row">
+                                <div class="set-row-main">
+                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+                                    <div class="set-row-label">
+                                        <span class="set-row-key">plan_actual<span class="colon">:</span></span>
+                                        <p class="set-row-desc" th:if="${plan == 'PRO'}" th:text="'Pro · vence el ' + ${#dates.format(planVenceEn, 'dd/MM/yyyy')}">Pro</p>
+                                        <p class="set-row-desc" th:unless="${plan == 'PRO'}">Gratis</p>
+                                    </div>
+                                </div>
+                                <div class="set-row-control">
+                                    <button class="btn btn-primary" type="button" id="btn-actualizar-pro" th:unless="${plan == 'PRO'}">Actualizar a Pro</button>
+                                    <span class="chip" th:if="${plan == 'PRO'}">activo</span>
+                                </div>
+                            </div>
+                            <div class="set-row">
+                                <div class="set-row-main">
+                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+                                    <div class="set-row-label">
+                                        <span class="set-row-key">vacantes_activas<span class="colon">:</span></span>
+                                        <p class="set-row-desc" th:text="${vacantesActivas} + ' / ' + ${limiteVacantes}">0 / 2</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="set-row">
+                                <div class="set-row-main">
+                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></span>
+                                    <div class="set-row-label">
+                                        <span class="set-row-key">destacados<span class="colon">:</span></span>
+                                        <p class="set-row-desc" th:text="${destacadosActivos} + ' / ' + ${limiteDestacados}">0 / 0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="set-group">
+                            <div class="set-group-title">facturación</div>
+                            <div class="set-row">
+                                <div class="set-row-main">
+                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14v-4a3 3 0 0 1 6 0v4"/><rect x="5" y="10" width="14" height="10" rx="2"/></svg></span>
+                                    <div class="set-row-label">
+                                        <span class="set-row-key">historial<span class="colon">:</span></span>
+                                        <p class="set-row-desc">Tarifas de colocación cobradas mientras estuviste en el plan Gratis.</p>
+                                    </div>
+                                </div>
+                                <div class="set-row-control"><a th:href="@{/facturacion}" class="btn btn-outline">Ver historial</a></div>
                             </div>
                         </div>
                     </section>

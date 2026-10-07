@@ -18,20 +18,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.devcoast.config.RoleGuard;
+import com.example.devcoast.model.Cobro;
 import com.example.devcoast.model.Empleo;
+import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.EventoEstado;
 import com.example.devcoast.model.Invitacion;
 import com.example.devcoast.model.Notificacion;
 import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
+import com.example.devcoast.repository.CobroRepository;
 import com.example.devcoast.repository.EmpleoRepository;
+import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.InvitacionRepository;
 import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
+import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +53,9 @@ public class SolicitudController {
     private final InvitacionRepository invitacionRepository;
     private final NotificacionRepository notificacionRepository;
     private final CleanupService cleanupService;
+    private final EmpresaRepository empresaRepository;
+    private final CobroRepository cobroRepository;
+    private final PlanService planService;
 
     @GetMapping("/solicitudes")
     public String listarSolicitudes(
@@ -365,6 +373,7 @@ public class SolicitudController {
         if (s.getHistorial() == null) s.setHistorial(new ArrayList<>());
         s.getHistorial().add(ev);
         solicitudRepository.save(s);
+        cobrarSiAplica(empleoOpt.get().getEmpresaId(), s, estadoAnterior, nuevoEstado);
 
         if (!nuevoEstado.equals(estadoAnterior)) {
             try {
@@ -393,12 +402,14 @@ public class SolicitudController {
             return "redirect:/empleos";
 
         solicitudRepository.findByIdAndEmpleoId(solicitudId, empleoId).ifPresent(s -> {
+            String estadoAnterior = s.getEstado();
             s.setEstado(estado);
             EventoEstado ev = new EventoEstado(estado, new Date(),
                     "aprobada".equals(estado) ? "Aceptada por la empresa" : "Rechazada por la empresa");
             if (s.getHistorial() == null) s.setHistorial(new ArrayList<>());
             s.getHistorial().add(ev);
             solicitudRepository.save(s);
+            cobrarSiAplica(empleoOpt.get().getEmpresaId(), s, estadoAnterior, estado);
 
             try {
                 boolean aprobada = "aprobada".equals(estado);
@@ -441,6 +452,24 @@ public class SolicitudController {
     public String reconsiderar(@PathVariable String empleoId, @PathVariable String solicitudId,
             HttpSession session, RedirectAttributes ra) {
         return cambiarEstado(empleoId, solicitudId, "revision", session, ra);
+    }
+
+    private void cobrarSiAplica(String empresaId, Solicitud s, String estadoAnterior, String nuevoEstado) {
+        if (!"aprobada".equals(nuevoEstado) || "aprobada".equals(estadoAnterior))
+            return;
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        if (planService.esPro(empresa))
+            return;
+
+        Cobro cobro = new Cobro();
+        cobro.setEmpresaId(empresaId);
+        cobro.setSolicitudId(s.getId());
+        cobro.setEmpleoTitulo(s.getEmpleoTitulo());
+        cobro.setMonto(PlanService.TARIFA_COLOCACION);
+        cobro.setMotivo("Tarifa de colocación exitosa");
+        cobro.setFecha(new Date());
+        cobroRepository.save(cobro);
     }
 
     // pasa si el talento tiene al menos una de las skills requeridas

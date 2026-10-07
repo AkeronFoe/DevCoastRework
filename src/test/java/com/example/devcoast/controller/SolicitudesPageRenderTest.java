@@ -55,6 +55,10 @@ class SolicitudesPageRenderTest {
     private com.example.devcoast.repository.MensajeRepository mensajeRepository;
     @MockitoBean
     private com.example.devcoast.repository.EmpresaRepository empresaRepository;
+    @MockitoBean
+    private com.example.devcoast.repository.CobroRepository cobroRepository;
+    @MockitoBean
+    private com.example.devcoast.service.PlanService planService;
 
     private MockHttpSession sesionTalento() {
         MockHttpSession session = new MockHttpSession();

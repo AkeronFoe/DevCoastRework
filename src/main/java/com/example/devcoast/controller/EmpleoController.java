@@ -41,6 +41,7 @@ import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
+import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -60,11 +61,12 @@ public class EmpleoController {
     private final UsuarioRepository usuarioRepository;
     private final EmpresaRepository empresaRepository;
     private final CleanupService cleanupService;
+    private final PlanService planService;
 
     public EmpleoController(EmpleoRepository empleoRepository, MongoTemplate mongoTemplate,
             SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository,
             UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository,
-            CleanupService cleanupService) {
+            CleanupService cleanupService, PlanService planService) {
         this.empleoRepository = empleoRepository;
         this.mongoTemplate = mongoTemplate;
         this.solicitudRepository = solicitudRepository;
@@ -72,6 +74,7 @@ public class EmpleoController {
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;
         this.cleanupService = cleanupService;
+        this.planService = planService;
     }
 
     @GetMapping("/empleos")
@@ -498,6 +501,12 @@ public class EmpleoController {
 
         model.addAttribute("empleo", empleo);
         agregarSesion(session, model);
+
+        Empresa empresa = empresaRepository.findById(RoleGuard.getId(session)).orElse(null);
+        long destacadosActivos = empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(RoleGuard.getId(session), "ACTIVO");
+        model.addAttribute("destacadosActivos", destacadosActivos);
+        model.addAttribute("limiteDestacados", planService.limiteDestacados(empresa));
+
         return "crearEmpleo";
     }
 
@@ -517,6 +526,7 @@ public class EmpleoController {
         String empresaId = RoleGuard.getId(session);
         boolean esEdicion = empleoForm.getId() != null && !empleoForm.getId().isBlank();
         Empleo empleo;
+        boolean yaEraDestacado = false;
 
         if (esEdicion) {
             Optional<Empleo> existente = empleoRepository.findById(empleoForm.getId());
@@ -526,10 +536,34 @@ public class EmpleoController {
                 return "redirect:/misEmpleos";
             }
             empleo = existente.get();
+            yaEraDestacado = empleo.isDestacar();
         } else {
             empleo = new Empleo();
             empleo.setEmpresaId(empresaId);
             empleo.setEmpresaCorreo(RoleGuard.getCorreo(session));
+        }
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+
+        if (!esEdicion) {
+            long activas = empleoRepository.countByEmpresaIdAndEstado(empresaId, "ACTIVO");
+            if (activas >= planService.limiteVacantesActivas(empresa)) {
+                ra.addFlashAttribute("flashMessage",
+                        "Alcanzaste el límite de vacantes activas de tu plan. Actualiza a Pro para publicar más.");
+                ra.addFlashAttribute("flashType", "error");
+                return "redirect:/crearEmpleo";
+            }
+        }
+
+        if (empleoForm.isDestacar() && !yaEraDestacado) {
+            long destacadosActuales = empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(empresaId, "ACTIVO");
+            if (destacadosActuales >= planService.limiteDestacados(empresa)) {
+                ra.addFlashAttribute("flashMessage",
+                        "Alcanzaste el límite de vacantes destacadas de tu plan.");
+                ra.addFlashAttribute("flashType", "error");
+                String idParaEditar = empleoForm.getId();
+                return "redirect:/crearEmpleo" + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
+            }
         }
 
         aplicarCamposFormulario(empleo, empleoForm);
@@ -611,6 +645,10 @@ public class EmpleoController {
         model.addAttribute("empleosCerrados",
                 empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO"));
         agregarSesion(session, model);
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        model.addAttribute("limiteVacantesActivas", planService.limiteVacantesActivas(empresa));
+
         return "misEmpleos";
     }
 
