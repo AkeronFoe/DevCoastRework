@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCoast | Página no encontrada</title>
+    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
+    <script th:src="@{/JS/themes.js}"></script>
+    <style>
+        .error-shell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg);
+        }
+
+        .error-card {
+            text-align: center;
+            max-width: 440px;
+            padding: 3rem 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: .5rem;
+            letter-spacing: -4px;
+        }
+
+        .error-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: .75rem;
+        }
+
+        .error-desc {
+            font-size: .95rem;
+            color: var(--muted);
+            margin-bottom: .9rem;
+            line-height: 1.6;
+        }
+
+        .error-path {
+            display: inline-block;
+            margin-bottom: 1.75rem;
+            padding: 4px 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: var(--font-mono, monospace);
+            font-size: .78rem;
+            color: var(--muted);
+            word-break: break-all;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @keyframes dcGlitch {
+            0%, 100% { text-shadow: none; transform: translate(0); }
+            20% { text-shadow: -2px 0 var(--cat-error, #ef4444), 2px 0 var(--accent); transform: translate(-1px, 1px); }
+            40% { text-shadow: 2px 0 var(--cat-error, #ef4444), -2px 0 var(--accent); transform: translate(1px, -1px); }
+            60% { text-shadow: -1px 0 var(--accent), 1px 0 var(--cat-error, #ef4444); transform: translate(-1px, 0); }
+            80% { text-shadow: none; transform: translate(0); }
+        }
+
+        .error-code.is-glitching {
+            animation: dcGlitch .6s ease-in-out 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .error-code.is-glitching { animation: none; }
+        }
+    </style>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+</head>
+
+<body data-theme="light">
+    <div class="error-shell">
+        <div class="error-card">
+            <div class="error-code">404</div>
+            <div class="error-title" id="error-title">Página no encontrada</div>
+            <p class="error-desc" id="error-desc">La página que buscas no existe o fue movida. Verifica la URL o vuelve al inicio.</p>
+            <p class="error-path" id="error-path"></p>
+            <div class="error-actions">
+                <a href="/dashboard" class="btn btn-primary">Ir al Dashboard</a>
+                <a href="/empleos" class="btn btn-outline">Ver Empleos</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // frase random para que no se sienta tan seco caer aca, la primera es la de siempre
+        // (si algun dia quieren agregar mas, solo sumen un objeto {t, d} a este arreglo)
+        var mensajes404 = [
+            { t: 'Página no encontrada', d: 'La página que buscas no existe o fue movida. Verifica la URL o vuelve al inicio.' },
+            { t: 'Esto no compila', d: 'Buscamos por todo el proyecto y no encontramos esta página. Ni el debugger la encuentra.' },
+            { t: 'Ruta no encontrada', d: 'Este enlace se fue de freelance a otra plataforma y no dejó dirección nueva.' },
+            { t: '404: sin match', d: 'Ni nuestro algoritmo de recomendación pudo encontrar esta página.' },
+            { t: 'Merge a /dev/null', d: 'Esta ruta se perdió en un merge. Mejor vuelve por donde sí hay señal.' }
+        ];
+        var pick = mensajes404[Math.floor(Math.random() * mensajes404.length)];
+        document.getElementById('error-title').textContent = pick.t;
+        document.getElementById('error-desc').textContent = pick.d;
+
+        var pathEl = document.getElementById('error-path');
+        if (pathEl && location.pathname) pathEl.textContent = 'Buscabas: ' + location.pathname;
+
+        var codeEl = document.querySelector('.error-code');
+        var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function glitchear() {
+            if (!codeEl) return;
+            codeEl.classList.remove('is-glitching');
+            void codeEl.offsetWidth;
+            codeEl.classList.add('is-glitching');
+        }
+        if (!sinMovimiento) {
+            glitchear();
+            setInterval(glitchear, 4000);
+        }
+    </script>
+</body>
+
+</html>

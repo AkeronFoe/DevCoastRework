@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.env
+!.env.example
+
+
+# Maven build output
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
+    <title>DevCoast | Publicar empleo</title>
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/crearEmpleo.css}">
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/ws-shell.js}" defer></script>
+</head>
+
+<body class="wsjobs is-empresa">
+
+    <div id="flash-data" th:if="${flashMessage != null}"
+        th:attr="data-message=${flashMessage}, data-type=${flashType ?: 'info'}" style="display:none"></div>
+
+    <div class="ws-boot" id="wsBoot" aria-hidden="true">
+        <div class="ws-boot-box">
+            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
+            <div class="ws-boot-line"><span class="ok">✓</span> preparando formulario…</div>
+            <div class="ws-boot-line" id="bootLast">$ devcoast run crearEmpleo.json</div>
+            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
+        </div>
+    </div>
+
+    <div id="nav-progress" class="ws-navprogress"></div>
+    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <div class="ws-grain" aria-hidden="true"></div>
+    <div class="ws-vignette" aria-hidden="true"></div>
+    <div class="ws-scrim" id="scrim"></div>
+
+    <div class="ws-palette-scrim" id="paletteScrim">
+        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+            <div class="ws-palette-input-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
+                <kbd>Esc</kbd>
+            </div>
+            <div class="ws-palette-list" id="paletteList"></div>
+        </div>
+    </div>
+
+    <header class="ws-top">
+        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <a class="ws-brand" th:href="@{/dashboard}">
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">crearEmpleo</span>
+        </a>
+        <span class="ws-role-pill">empresa</span>
+
+        <button class="ws-search" id="paletteOpen" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar en el workspace…
+            <kbd>⌘K</kbd>
+        </button>
+
+        <div class="ws-bell" id="bellWrap">
+            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
+            </button>
+            <div class="ws-bell-drop" id="bellDrop">
+                <div class="ws-bell-drop-head">
+                    <span class="ws-bell-drop-title">Notificaciones</span>
+                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
+                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
+                </div>
+                <div class="ws-bell-drop-list">
+                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
+                        Sin notificaciones nuevas
+                    </div>
+                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
+                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
+                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
+                            <div class="ws-notif-icon">
+                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div class="ws-notif-body">
+                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
+                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${notifNoLeidas != null and notifNoLeidas > 0}" class="ws-bell-drop-foot">
+                    <button class="ws-mark-read" id="markAllRead" type="button">Marcar todas como leídas</button>
+                </div>
+            </div>
+        </div>
+
+        <a th:href="@{/empleos}" class="ws-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span class="lbl">Cancelar</span>
+        </a>
+
+        <div class="ws-avatar" th:title="${usuarioActualNombre}"
+            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
+            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
+    </header>
+
+    <div class="ws-body">
+        <aside class="ws-side" id="side" aria-label="Navegación">
+            <div class="ws-side-bar">
+                <span class="ws-side-bar-title">explorer</span>
+                <span class="ws-side-bar-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </span>
+            </div>
+
+            <div class="ws-side-profile">
+                <div class="ws-side-avatar"
+                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
+                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
+                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                    <div class="ws-side-profile-role">portal empresa</div>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    general<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/dashboard}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/analytics}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16v5"/><path d="M16 14v7"/><path d="M20 10v11"/><path d="M8 18v3"/><path d="M4 12v9"/><path d="M4 4h16"/><path d="M4 4v3"/><path d="M8 14.66V21"/></svg></span>
+                        <span class="name">Analytics</span> <span class="ext">.chart</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/misEmpleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
+                        <span class="name">Mis empleos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/candidatos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Candidatos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link is-active" th:href="@{/crearEmpleo}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                        <span class="name">Publicar</span> <span class="ext">+</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    cuenta<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/mensajes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Mensajes</span>
+                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
+                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/perfil}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                        <span class="name">Perfil</span> <span class="ext">.md</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/facturacion}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14v-4a3 3 0 0 1 6 0v4"/><rect x="5" y="10" width="14" height="10" rx="2"/></svg></span>
+                        <span class="name">Facturación</span> <span class="ext">.inv</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/ajustes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="ws-main">
+            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
+            <div class="ws-content">
+                <div class="ws-crumb">
+                    <span>~</span><span class="sep">/</span><span>empresa</span>
+                    <span class="sep">/</span><span class="cur">crearEmpleo.json</span>
+                </div>
+
+                <form th:action="@{/empleos/guardar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="id" th:if="${empleo.id != null}" th:value="${empleo.id}">
+
+                    <div class="ws-page-head">
+                        <div>
+                            <p class="ws-eyebrow">// publicar vacante<span class="ws-cursor" aria-hidden="true">▌</span></p>
+                            <h1 class="ws-big-head" style="font-size:1.6rem;" th:text="${empleo.id != null} ? 'Editar empleo' : 'Publicar empleo'">Publicar empleo</h1>
+                            <p class="ws-page-sub">Los campos marcados con <span class="req">*</span> son obligatorios.</p>
+                        </div>
+                    </div>
+
+                    <div class="stepper">
+                        <div class="step-item" data-step="0">
+                            <div class="step-num active">1</div>
+                            <span class="step-label active">Empresa</span>
+                        </div>
+                        <div class="step-line" id="line-0"></div>
+                        <div class="step-item" data-step="1">
+                            <div class="step-num">2</div>
+                            <span class="step-label">Rol y detalles</span>
+                        </div>
+                        <div class="step-line" id="line-1"></div>
+                        <div class="step-item" data-step="2">
+                            <div class="step-num">3</div>
+                            <span class="step-label">Requisitos</span>
+                        </div>
+                        <div class="step-line" id="line-2"></div>
+                        <div class="step-item" data-step="3">
+                            <div class="step-num">4</div>
+                            <span class="step-label">Revisar y publicar</span>
+                        </div>
+                    </div>
+
+                    <div class="paso-panel" id="paso-0">
+                        <div class="card">
+                            <h2 class="section-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M10 12h4" />
+                                    <path d="M10 8h4" />
+                                    <path d="M14 21v-3a2 2 0 0 0-4 0v3" />
+                                    <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" />
+                                    <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
+                                </svg>
+                                Información de la empresa
+                            </h2>
+
+                            <div class="form-grid">
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Nombre de la empresa <span class="req">*</span></label>
+                                        <input class="form-input" id="empresa-nombre" name="empresaNombre" type="text"
+                                            placeholder="Ej. Aurora Labs" th:value="${empleo.empresaNombre}" required>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Sector / Industria <span class="req">*</span></label>
+                                        <select class="form-select" id="empresa-sector" name="empresaSector" required>
+                                            <option value="">Seleccionar sector</option>
+                                            <option th:selected="${empleo.empresaSector == 'SaaS / Software'}">SaaS / Software</option>
+                                            <option th:selected="${empleo.empresaSector == 'Fintech'}">Fintech</option>
+                                            <option th:selected="${empleo.empresaSector == 'E-commerce'}">E-commerce</option>
+                                            <option th:selected="${empleo.empresaSector == 'Agencia creativa'}">Agencia creativa</option>
+                                            <option th:selected="${empleo.empresaSector == 'Startup'}">Startup</option>
+                                            <option th:selected="${empleo.empresaSector == 'Educacion'}">Educacion</option>
+                                            <option th:selected="${empleo.empresaSector == 'Salud'}">Salud</option>
+                                            <option th:selected="${empleo.empresaSector == 'Videojuegos'}">Videojuegos</option>
+                                            <option th:selected="${empleo.empresaSector == 'Diseño'}">Diseño</option>
+                                            <option th:selected="${empleo.empresaSector == 'Marketing'}">Marketing</option>
+                                            <option th:selected="${empleo.empresaSector == 'Otro'}">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Sitio web</label>
+                                        <input class="form-input" id="empresa-web" name="empresaWeb" type="url"
+                                            placeholder="https://miempresa.com" th:value="${empleo.empresaWeb}">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Tamaño del equipo <span class="req">*</span></label>
+                                        <select class="form-select" id="empresa-tamaño" name="empresaTamano" required>
+                                            <option value="">Seleccionar</option>
+                                            <option th:selected="${empleo.empresaTamano == '1 – 10 personas'}">1 – 10 personas</option>
+                                            <option th:selected="${empleo.empresaTamano == '11 – 50 personas'}">11 – 50 personas</option>
+                                            <option th:selected="${empleo.empresaTamano == '51 – 200 personas'}">51 – 200 personas</option>
+                                            <option th:selected="${empleo.empresaTamano == '201 – 500 personas'}">201 – 500 personas</option>
+                                            <option th:selected="${empleo.empresaTamano == '500+ personas'}">500+ personas</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Descripcion de la empresa <span class="req">*</span></label>
+                                    <textarea class="form-textarea" id="empresa-desc" name="empresaDescripcion"
+                                        placeholder="Cuéntale al talento quiénes son, qué construyen y cuál es su cultura de trabajo."
+                                        th:text="${empleo.empresaDescripcion}" required></textarea>
+                                    <span class="field-hint">Maximo 300 caracteres. Una buena descripcion aumenta un 40% las
+                                        aplicaciones.</span>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Icono de la empresa</label>
+
+                                    <div class="icon-preview-wrap">
+                                        <div class="icon-preview" id="icon-preview">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="16 18 22 12 16 6" />
+                                                <polyline points="8 6 2 12 8 18" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p style="font-weight:700;font-size:.9rem;margin-bottom:4px;color:var(--ws-ink);">Icono
+                                                seleccionado
+                                            </p>
+                                            <p class="muted" style="font-size:.82rem;">Elige uno de la paleta o sube tu
+                                                logo.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="icon-palette" id="icon-palette">
+
+                                        <div class="icon-opt" th:classappend="${empleo.icono == null or empleo.icono == 'code'} ? ' active'" data-key="code">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="16 18 22 12 16 6" />
+                                                <polyline points="8 6 2 12 8 18" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'layers'} ? ' active'" data-key="layers">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                                                <polyline points="2 17 12 22 22 17" />
+                                                <polyline points="2 12 12 17 22 12" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'zap'} ? ' active'" data-key="zap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'box'} ? ' active'" data-key="box">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path
+                                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'cpu'} ? ' active'" data-key="cpu">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <rect x="4" y="4" width="16" height="16" rx="2" />
+                                                <rect x="9" y="9" width="6" height="6" />
+                                                <line x1="9" y1="1" x2="9" y2="4" />
+                                                <line x1="15" y1="1" x2="15" y2="4" />
+                                                <line x1="9" y1="20" x2="9" y2="23" />
+                                                <line x1="15" y1="20" x2="15" y2="23" />
+                                                <line x1="20" y1="9" x2="23" y2="9" />
+                                                <line x1="20" y1="14" x2="23" y2="14" />
+                                                <line x1="1" y1="9" x2="4" y2="9" />
+                                                <line x1="1" y1="14" x2="4" y2="14" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'globe'} ? ' active'" data-key="globe">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <line x1="2" y1="12" x2="22" y2="12" />
+                                                <path
+                                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'chart'} ? ' active'" data-key="chart">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <line x1="18" y1="20" x2="18" y2="10" />
+                                                <line x1="12" y1="20" x2="12" y2="4" />
+                                                <line x1="6" y1="20" x2="6" y2="14" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'pen'} ? ' active'" data-key="pen">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'rocket'} ? ' active'" data-key="rocket">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path
+                                                    d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                                                <path
+                                                    d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                                                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                                                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'star'} ? ' active'" data-key="star">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polygon
+                                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'shield'} ? ' active'" data-key="shield">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                            </svg>
+                                        </div>
+                                        <div class="icon-opt" th:classappend="${empleo.icono == 'terminal'} ? ' active'" data-key="terminal">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="4 17 10 11 4 5" />
+                                                <line x1="12" y1="19" x2="20" y2="19" />
+                                            </svg>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="icon-color-row">
+                                        <span style="font-size:.82rem;font-weight:700;color:var(--ws-dim-2);">Color del
+                                            fondo:</span>
+                                        <div class="color-opts" id="color-opts">
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == null or empleo.colorIcono == '#1f8f8f'} ? ' active'" data-color="#1f8f8f" style="background:#1f8f8f;">
+                                            </div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#1d7fd0'} ? ' active'" data-color="#1d7fd0" style="background:#1d7fd0;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#7c3aed'} ? ' active'" data-color="#7c3aed" style="background:#7c3aed;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#e11d48'} ? ' active'" data-color="#e11d48" style="background:#e11d48;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#ea580c'} ? ' active'" data-color="#ea580c" style="background:#ea580c;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#16a34a'} ? ' active'" data-color="#16a34a" style="background:#16a34a;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#0f172a'} ? ' active'" data-color="#0f172a" style="background:#0f172a;"></div>
+                                            <div class="color-opt" th:classappend="${empleo.colorIcono == '#6b7280'} ? ' active'" data-color="#6b7280" style="background:#6b7280;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="upload-area" id="upload-area"
+                                        onclick="document.getElementById('logo-input').click()">
+                                        <div class="upload-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                        </div>
+                                        <strong style="font-size:.88rem;color:var(--ws-ink);" id="upload-label">Subir logo propio
+                                            (opcional)</strong>
+                                        <span class="muted" style="font-size:.8rem;">Reemplaza el icono · PNG o SVG · Max
+                                            1MB</span>
+                                        <input type="file" id="logo-input" accept="image/*" name="logo"
+                                            style="display:none;">
+                                    </div>
+                                    <button class="btn btn-ghost" id="btn-quitar-img" type="button"
+                                        style="display:none;font-size:.82rem;min-height:36px;">
+                                        × Quitar imagen y volver al icono
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-nav">
+                            <span></span>
+                            <button class="btn btn-primary btn-icon" id="btn-siguiente" type="button">
+                                Siguiente
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14" />
+                                    <path d="m12 5 7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="paso-panel" id="paso-1" style="display:none;">
+                        <div class="card">
+                            <h2 class="section-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                                    <rect width="20" height="14" x="2" y="6" rx="2" />
+                                </svg>
+                                Rol y condiciones
+                            </h2>
+
+                            <div class="form-grid">
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Titulo del puesto <span class="req">*</span></label>
+                                        <input class="form-input" id="rol-titulo" name="titulo" type="text"
+                                            placeholder="Ej. Frontend React Senior" th:value="${empleo.titulo}" required>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Categoria <span class="req">*</span></label>
+                                        <select class="form-select" id="rol-categoria" name="categoria" required>
+                                            <option value="">Seleccionar categoria</option>
+                                            <option th:selected="${empleo.categoria == 'Programacion · Frontend'}">Programacion · Frontend</option>
+                                            <option th:selected="${empleo.categoria == 'Programacion · Backend'}">Programacion · Backend</option>
+                                            <option th:selected="${empleo.categoria == 'Programacion · Full Stack'}">Programacion · Full Stack</option>
+                                            <option th:selected="${empleo.categoria == 'Programacion · Mobile'}">Programacion · Mobile</option>
+                                            <option th:selected="${empleo.categoria == 'Diseño · UI/UX'}">Diseño · UI/UX</option>
+                                            <option th:selected="${empleo.categoria == 'Diseño · Grafico'}">Diseño · Grafico</option>
+                                            <option th:selected="${empleo.categoria == 'Diseño · Motion'}">Diseño · Motion</option>
+                                            <option th:selected="${empleo.categoria == 'Diseño · 3D'}">Diseño · 3D</option>
+                                            <option th:selected="${empleo.categoria == 'DevOps / Infraestructura'}">DevOps / Infraestructura</option>
+                                            <option th:selected="${empleo.categoria == 'Data / Analytics'}">Data / Analytics</option>
+                                            <option th:selected="${empleo.categoria == 'Producto / UX'}">Producto / UX</option>
+                                            <option th:selected="${empleo.categoria == 'Marketing digital'}">Marketing digital</option>
+                                            <option th:selected="${empleo.categoria == 'Marketing de contenido'}">Marketing de contenido</option>
+                                            <option th:selected="${empleo.categoria == 'Marketing SEO/SEM'}">Marketing SEO/SEM</option>
+                                            <option th:selected="${empleo.categoria == 'Marketing de crecimiento'}">Marketing de crecimiento</option>
+                                            <option th:selected="${empleo.categoria == 'Escritura / Contenido'}">Escritura / Contenido</option>
+                                            <option th:selected="${empleo.categoria == 'Otro'}">Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Nivel de seniority <span class="req">*</span></label>
+                                        <select class="form-select" id="rol-seniority" name="seniority" required>
+                                            <option value="">Seleccionar nivel</option>
+                                            <option th:selected="${empleo.seniority == 'Junior (0 – 2 años)'}">Junior (0 – 2 años)</option>
+                                            <option th:selected="${empleo.seniority == 'Mid (2 – 4 años)'}">Mid (2 – 4 años)</option>
+                                            <option th:selected="${empleo.seniority == 'Senior (4+ años)'}">Senior (4+ años)</option>
+                                            <option th:selected="${empleo.seniority == 'Lead / Principal'}">Lead / Principal</option>
+                                            <option th:selected="${empleo.seniority == 'Sin restriccion'}">Sin restriccion</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Modalidad <span class="req">*</span></label>
+                                        <select class="form-select" id="rol-modalidad" name="modalidad" required>
+                                            <option value="">Seleccionar</option>
+                                            <option th:selected="${empleo.modalidad == 'Remoto'}">Remoto</option>
+                                            <option th:selected="${empleo.modalidad == 'Hibrido'}">Hibrido</option>
+                                            <option th:selected="${empleo.modalidad == 'Presencial'}">Presencial</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Tipo de contrato <span class="req">*</span></label>
+                                        <select class="form-select" id="rol-contrato" name="contrato" required>
+                                            <option value="">Seleccionar</option>
+                                            <option th:selected="${empleo.contrato == 'Tiempo completo'}">Tiempo completo</option>
+                                            <option th:selected="${empleo.contrato == 'Medio tiempo'}">Medio tiempo</option>
+                                            <option th:selected="${empleo.contrato == 'Freelance / Proyecto'}">Freelance / Proyecto</option>
+                                            <option th:selected="${empleo.contrato == 'Contrato por periodo'}">Contrato por periodo</option>
+                                            <option th:selected="${empleo.contrato == 'Practicas'}">Practicas</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Vacantes disponibles <span class="req">*</span></label>
+                                        <input class="form-input" id="rol-vacantes" name="vacantes" type="number" min="1"
+                                            max="99" placeholder="Ej. 3" th:value="${empleo.vacantes}" required>
+                                    </div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Rango salarial</label>
+                                    <div style="display:grid;gap:10px;">
+                                        <div class="currency-group" id="currency-group">
+                                            <button class="currency-btn" th:classappend="${empleo.moneda == null or empleo.moneda == 'USD'} ? ' active'" data-currency="USD" type="button">USD
+                                                $</button>
+                                            <button class="currency-btn" th:classappend="${empleo.moneda == 'COP'} ? ' active'" data-currency="COP" type="button">COP $</button>
+                                            <button class="currency-btn" th:classappend="${empleo.moneda == 'EUR'} ? ' active'" data-currency="EUR" type="button">EUR €</button>
+                                        </div>
+                                        <div class="salary-inputs">
+                                            <input class="form-input" id="salario-min" name="salarioMin" type="number"
+                                                placeholder="Minimo" min="0" th:value="${empleo.salarioMin}">
+                                            <span class="salary-sep">—</span>
+                                            <input class="form-input" id="salario-max" name="salarioMax" type="number"
+                                                placeholder="Maximo" min="0" th:value="${empleo.salarioMax ?: 0}">
+                                            <select class="form-select" id="salario-periodo" name="salarioPeriodo"
+                                                style="width:130px;flex-shrink:0;">
+                                                <option value="/ mes" th:selected="${empleo.salarioPeriodo == null or empleo.salarioPeriodo == '/ mes'}">/ mes</option>
+                                                <option value="/ semana" th:selected="${empleo.salarioPeriodo == '/ semana'}">/ semana</option>
+                                                <option value="/ hora" th:selected="${empleo.salarioPeriodo == '/ hora'}">/ hora</option>
+                                                <option value="/ proyecto" th:selected="${empleo.salarioPeriodo == '/ proyecto'}">/ proyecto</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <span class="field-hint">Los empleos con salario visible reciben 2× mas aplicaciones.
+                                        Deja
+                                        en blanco si prefieres negociar.</span>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="field-group">
+                                        <label class="field-label">Zona horaria preferida</label>
+                                        <select class="form-select" id="rol-timezone" name="timezone">
+                                            <option value="">Sin restriccion</option>
+                                            <option th:selected="${empleo.timezone == 'Latam · UTC-5'}">Latam · UTC-5</option>
+                                            <option th:selected="${empleo.timezone == 'USA · EST / PST'}">USA · EST / PST</option>
+                                            <option th:selected="${empleo.timezone == 'Europa · CET'}">Europa · CET</option>
+                                            <option th:selected="${empleo.timezone == 'Flexible · +/- 3h'}">Flexible · +/- 3h</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Nivel de ingles requerido</label>
+                                        <select class="form-select" id="rol-ingles" name="ingles">
+                                            <option value="">No requerido</option>
+                                            <option th:selected="${empleo.ingles == 'Basico (A1/A2)'}">Basico (A1/A2)</option>
+                                            <option th:selected="${empleo.ingles == 'Intermedio (B1/B2)'}">Intermedio (B1/B2)</option>
+                                            <option th:selected="${empleo.ingles == 'Avanzado (C1/C2)'}">Avanzado (C1/C2)</option>
+                                            <option th:selected="${empleo.ingles == 'Nativo'}">Nativo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-nav">
+                            <button class="btn btn-ghost btn-icon" id="btn-atras-1" type="button">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m12 19-7-7 7-7" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                                Atras
+                            </button>
+                            <button class="btn btn-primary btn-icon" id="btn-siguiente-1" type="button">
+                                Siguiente
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14" />
+                                    <path d="m12 5 7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="paso-panel" id="paso-2" style="display:none;">
+                        <div class="card">
+                            <h2 class="section-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344" />
+                                    <path d="m9 11 3 3L22 4" />
+                                </svg>
+                                Descripcion y requisitos del rol
+                            </h2>
+
+                            <div class="form-grid">
+                                <div class="field-group">
+                                    <label class="field-label">Descripcion del rol <span class="req">*</span></label>
+                                    <textarea class="form-textarea" id="req-descripcion" name="descripcionRol"
+                                        style="min-height:140px;"
+                                        placeholder="Describe el dia a dia del rol, el equipo con el que trabajara, los retos del puesto y el impacto esperado."
+                                        th:text="${empleo.descripcionRol}" required></textarea>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Stack y herramientas requeridas <span
+                                            class="req">*</span></label>
+                                    <div class="tags-field" id="stack-field">
+                                        <input class="tag-input" id="stack-input" name="stack" type="text"
+                                            placeholder="Escribe y presiona Enter o coma...">
+                                    </div>
+                                    <span class="field-hint">Presiona Enter o , para agregar. Ej: React, TypeScript, Figma,
+                                        Node.js</span>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Habilidades blandas deseadas</label>
+                                    <div class="tags-field" id="soft-field">
+                                        <input class="tag-input" id="soft-input" name="softSkills" type="text"
+                                            placeholder="Ej: Liderazgo, Comunicacion, Trabajo en equipo...">
+                                    </div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Requisitos deseables (no obligatorios)</label>
+                                    <textarea class="form-textarea" id="req-deseables" name="requisitosDeseables"
+                                        placeholder="Ej: Experiencia con microservicios, conocimiento de accesibilidad WCAG, haber trabajado en equipos distribuidos."
+                                        style="min-height:80px;" th:text="${empleo.requisitosDeseables}"></textarea>
+                                    <span class="field-hint">Esto ayuda a filtrar candidatos sin limitar el alcance del
+                                        anuncio.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin: 15px 0;">
+                            <h2 class="section-title">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                Visibilidad y opciones
+                            </h2>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <strong>Mostrar salario publicamente</strong>
+                                    <span>Los empleos con salario visible reciben 2× mas aplicaciones</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-salario" name="mostrarSalario"
+                                           th:checked="${empleo.id == null or empleo.mostrarSalario}">
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <strong>Match automatico con talentos</strong>
+                                    <span>DevCoast notifica a perfiles compatibles con este rol</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-match" name="matchAutomatico"
+                                           th:checked="${empleo.id == null or empleo.matchAutomatico}">
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <strong>Destacar en la seccion de inicio</strong>
+                                    <span th:if="${destacadosActivos lt limiteDestacados or empleo.destacar}">Aparece en "Destacados esta semana" del landing page</span>
+                                    <span th:unless="${destacadosActivos lt limiteDestacados or empleo.destacar}">Alcanzaste tu límite de destacados (<span th:text="${destacadosActivos} + '/' + ${limiteDestacados}"></span>). Actualiza a Pro en Ajustes para destacar más.</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-destacar" name="destacar"
+                                           th:checked="${empleo.destacar}"
+                                           th:disabled="${destacadosActivos ge limiteDestacados and !empleo.destacar}">
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <strong>Recibir notificaciones por email</strong>
+                                    <span>Te avisamos cada vez que alguien aplica al empleo</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-email" name="notificacionesEmail"
+                                           th:checked="${empleo.id == null or empleo.notificacionesEmail}">
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin: 15px 0;">
+                            <h2 class="section-title">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                                Screening automático
+                            </h2>
+                            <p class="muted" style="font-size:.83rem;margin-bottom:14px;">
+                                Filtra automáticamente candidatos que no cumplan los requisitos mínimos de stack.
+                                Pasan el filtro quienes tengan al menos una de las habilidades indicadas.
+                            </p>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <strong>Activar screening automático</strong>
+                                    <span>Descarta candidatos sin las habilidades requeridas antes de que lleguen a tu bandeja</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-screening" name="screeningActivo"
+                                           th:checked="${empleo.screeningActivo}"
+                                           onchange="document.getElementById('screening-config').style.display=this.checked?'':'none'">
+                                    <span class="toggle-track"></span>
+                                </label>
+                            </div>
+                            <div id="screening-config" th:style="${empleo.screeningActivo} ? 'margin-top:14px;' : 'display:none;margin-top:14px;'">
+                                <div class="field-group">
+                                    <label class="field-label">Habilidades mínimas requeridas</label>
+                                    <input class="form-input" id="screening-keywords" name="screeningKeywords" type="text"
+                                        placeholder="Ej: React, TypeScript, Node.js" th:value="${empleo.screeningKeywords}">
+                                    <span class="field-hint">
+                                        Separa por coma. Un candidato <strong>pasa</strong> el screening si su stack contiene
+                                        al menos una de estas habilidades. Los demás quedan como "Filtrados" y puedes
+                                        reconsiderarlos manualmente.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-nav">
+                            <button class="btn btn-ghost btn-icon" id="btn-atras-2" type="button">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m12 19-7-7 7-7" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                                Atras
+                            </button>
+                            <button class="btn btn-primary btn-icon" id="btn-siguiente-2" type="button">
+                                Revisar empleo
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14" />
+                                    <path d="m12 5 7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="paso-panel" id="paso-3" style="display:none;">
+                        <div class="grid-2">
+
+                            <div style="display:grid;gap:16px;">
+                                <div class="card">
+                                    <h2 class="section-title">
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                        </svg>
+                                        Resumen del empleo
+                                    </h2>
+
+                                    <div class="review-section">
+                                        <div class="review-header">
+                                            <span class="review-label">Empresa</span>
+                                            <a class="review-edit" onclick="irAPaso(0)">Editar</a>
+                                        </div>
+                                        <div class="review-value" id="rv-empresa">—</div>
+                                    </div>
+                                    <div class="review-section">
+                                        <div class="review-header">
+                                            <span class="review-label">Puesto</span>
+                                            <a class="review-edit" onclick="irAPaso(1)">Editar</a>
+                                        </div>
+                                        <div class="review-value" id="rv-puesto">—</div>
+                                    </div>
+                                    <div class="review-section">
+                                        <div class="review-header">
+                                            <span class="review-label">Condiciones</span>
+                                            <a class="review-edit" onclick="irAPaso(1)">Editar</a>
+                                        </div>
+                                        <div class="review-value" id="rv-condiciones">—</div>
+                                    </div>
+                                    <div class="review-section">
+                                        <div class="review-header">
+                                            <span class="review-label">Compensacion</span>
+                                            <a class="review-edit" onclick="irAPaso(1)">Editar</a>
+                                        </div>
+                                        <div class="review-value" id="rv-salario"
+                                            style="color:var(--ws-accent-soft);font-weight:700;">—</div>
+                                    </div>
+                                    <div class="review-section">
+                                        <div class="review-header">
+                                            <span class="review-label">Stack</span>
+                                            <a class="review-edit" onclick="irAPaso(2)">Editar</a>
+                                        </div>
+                                        <div class="chip-row" id="rv-stack" style="margin-top:4px;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <h2 class="section-title">
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                        </svg>
+                                        Calidad del anuncio
+                                    </h2>
+                                    <div class="score-wrap" id="score-wrap">
+                                    </div>
+                                    <p class="muted" style="font-size:.82rem;margin-top:12px;" id="score-tip"></p>
+                                </div>
+                            </div>
+
+                            <div style="display:grid;gap:16px;">
+                                <div class="card">
+                                    <h2 class="section-title">
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                        Vista previa del card
+                                    </h2>
+                                    <p class="muted" style="font-size:.82rem;margin-bottom:14px;">Asi se vera el empleo en
+                                        la
+                                        pagina de empleos.</p>
+
+                                    <div class="preview-job-card job-card">
+                                        <div class="job-header">
+                                            <div class="logo-tile" id="pv-logo" style="grid-area:logo;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" style="width:22px;height:22px;">
+                                                    <polyline points="16 18 22 12 16 6" />
+                                                    <polyline points="8 6 2 12 8 18" />
+                                                </svg>
+                                            </div>
+                                            <div class="job-info">
+                                                <strong id="pv-titulo" style="font-size:1.05rem;">Titulo del puesto</strong>
+                                                <div class="job-extra"><span id="pv-empresa">Empresa</span> · <span
+                                                        id="pv-modalidad">Modalidad</span> · <span
+                                                        id="pv-vacantes">Vacantes</span></div>
+                                                <div style="margin-top:6px;"><span class="badge-open" id="pv-badge">Abierta</span>
+                                                </div>
+                                            </div>
+                                            <div class="salary-box">
+                                                <div class="salary-range" id="pv-salario">—</div>
+                                                <div class="salary-meta" id="pv-periodo">USD / mes</div>
+                                                <div class="salary-tags">
+                                                    <span class="salary-pill" id="pv-seniority">Senior</span>
+                                                    <span class="salary-pill" id="pv-contrato">Tiempo completo</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="chip-row" id="pv-stack"></div>
+                                        <div class="job-actions">
+                                            <button class="btn btn-primary btn-icon" type="button"
+                                                style="font-size:.88rem;min-height:38px;">
+                                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                                </svg>
+                                                Aplicar
+                                            </button>
+                                            <button class="btn btn-ghost btn-icon" type="button"
+                                                style="font-size:.88rem;min-height:38px;">
+                                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+                                                </svg>
+                                                Guardar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-nav">
+                            <button class="btn btn-ghost btn-icon" id="btn-atras-3" type="button">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m12 19-7-7 7-7" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                                Atras
+                            </button>
+                            <button class="btn btn-primary btn-icon" id="btn-publicar" type="submit">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                                <span th:text="${empleo.id != null} ? 'Guardar cambios' : 'Publicar empleo'">Publicar empleo</span>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="icono" id="hidden-icono" th:value="${empleo.icono ?: 'code'}">
+                    <input type="hidden" name="colorIcono" id="hidden-color-icono" th:value="${empleo.colorIcono ?: '#1f8f8f'}">
+                    <input type="hidden" name="moneda" id="hidden-moneda" th:value="${empleo.moneda ?: 'USD'}">
+                    <input type="hidden" name="logoUrl" id="hidden-logo-url" th:value="${empleo.logoUrl ?: ''}">
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <footer class="ws-status">
+        <div class="ws-status-l">
+            <span class="ws-status-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <span>empresa</span>
+            </span>
+            <span class="sp">·</span>
+            <span>✓ datos actualizados</span>
+        </div>
+        <div class="ws-status-r">
+            <span class="hide-sm">devcoast v2</span>
+            <span class="sp hide-sm">·</span>
+            <span id="clock">00:00:00</span>
+            <span class="sp">·</span>
+            <a th:href="@{/about-us}">¿Ayuda?</a>
+        </div>
+    </footer>
+
+</body>
+<script th:src="@{/JS/steps.js}"></script>
+<script th:if="${empleo.id != null}" th:inline="javascript">
+    (function () {
+        moneda = /*[[${empleo.moneda ?: 'USD'}]]*/ 'USD';
+        var hiddenMon = document.getElementById('hidden-moneda');
+        if (hiddenMon) hiddenMon.value = moneda;
+
+        function precargarTags(valor, array, fieldId, inputId) {
+            var field = document.getElementById(fieldId);
+            var input = document.getElementById(inputId);
+            if (!field || !input || !valor) return;
+            valor.split(',').map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (t) {
+                if (array.indexOf(t) === -1) {
+                    array.push(t);
+                    field.insertBefore(crearTagChip(t, array, fieldId), input);
+                }
+            });
+        }
+        precargarTags(/*[[${empleo.stack ?: ''}]]*/ '', stackTags, 'stack-field', 'stack-input');
+        precargarTags(/*[[${empleo.softSkills ?: ''}]]*/ '', softTags, 'soft-field', 'soft-input');
+
+        var logoUrl = /*[[${empleo.logoUrl ?: ''}]]*/ '';
+        if (logoUrl) {
+            imagenSubida = true;
+            var preview = document.getElementById('icon-preview');
+            var label = document.getElementById('upload-label');
+            var btn = document.getElementById('btn-quitar-img');
+            if (preview) {
+                preview.style.background = 'transparent';
+                preview.innerHTML = '<img src="' + logoUrl + '" style="width:48px;height:48px;object-fit:cover;border-radius:10px;">';
+            }
+            if (label) label.textContent = 'Logo actual (haz clic para reemplazar)';
+            if (btn) btn.style.display = 'block';
+        }
+    })();
+</script>
+
+</html>

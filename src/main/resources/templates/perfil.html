@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
+    <title th:text="${usuario != null ? usuario.nombre + ' · DevCoast' : 'DevCoast | Perfil'}">DevCoast | Perfil</title>
+    <meta name="description"
+        th:content="${usuario != null and usuario.bio != null ? usuario.bio : 'Perfil profesional en DevCoast'}">
+    <meta property="og:title"
+        th:content="${usuario != null ? usuario.nombre + ' – ' + (usuario.rolTitulo ?: 'Talento') + ' · DevCoast' : 'DevCoast'}">
+    <meta property="og:description"
+        th:content="${usuario != null and usuario.bio != null ? usuario.bio : 'Explora el perfil profesional en DevCoast'}">
+    <meta property="og:type" content="profile">
+    <meta property="og:image"
+        th:content="${usuario != null and usuario.fotoUrl != null ? usuario.fotoUrl : '/images/og-default.png'}">
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/talentos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/perfil.css}">
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <script th:src="@{/JS/dashboard-extras.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/ws-shell.js}" defer></script>
+</head>
+
+<body class="wsjobs" th:classappend="${usuarioActualTipo == 'empresa'} ? ' is-empresa' : ''">
+    <div class="unsaved-bar" id="unsaved-bar">
+        <div class="unsaved-bar-left">
+            <span class="unsaved-dot"></span>
+            <span>Tienes cambios sin guardar</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost" type="button" id="btn-revertir-perfil">Revertir</button>
+            <button class="btn btn-primary" type="button" id="btn-guardar-perfil-bar">Guardar</button>
+        </div>
+    </div>
+
+    <div class="ws-boot" id="wsBoot" aria-hidden="true">
+        <div class="ws-boot-box">
+            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
+            <div class="ws-boot-line"><span class="ok">✓</span> cargando tu ficha…</div>
+            <div class="ws-boot-line" id="bootLast">$ devcoast run perfil.md</div>
+            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
+        </div>
+    </div>
+
+    <div id="nav-progress" class="ws-navprogress"></div>
+    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <div class="ws-grain" aria-hidden="true"></div>
+    <div class="ws-vignette" aria-hidden="true"></div>
+    <div class="ws-scrim" id="scrim"></div>
+
+    <div class="ws-palette-scrim" id="paletteScrim">
+        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+            <div class="ws-palette-input-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
+                <kbd>Esc</kbd>
+            </div>
+            <div class="ws-palette-list" id="paletteList"></div>
+        </div>
+    </div>
+
+    <header class="ws-top">
+        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <a class="ws-brand" th:href="@{/dashboard}">
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">perfil</span>
+        </a>
+        <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+
+        <button class="ws-search" id="paletteOpen" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar en el workspace…
+            <kbd>⌘K</kbd>
+        </button>
+
+        <div class="ws-bell" id="bellWrap">
+            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
+            </button>
+            <div class="ws-bell-drop" id="bellDrop">
+                <div class="ws-bell-drop-head">
+                    <span class="ws-bell-drop-title">Notificaciones</span>
+                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
+                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
+                </div>
+                <div class="ws-bell-drop-list">
+                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
+                        Sin notificaciones nuevas
+                    </div>
+                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
+                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
+                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
+                            <div class="ws-notif-icon">
+                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div class="ws-notif-body">
+                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
+                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a th:href="@{/perfil/preview}" class="ws-btn" title="Ver tu perfil como lo ven las empresas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="lbl">Vista previa</span>
+        </a>
+        <button class="ws-btn ws-btn-primary" type="button" id="btn-guardar-perfil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span class="lbl">Guardar cambios</span>
+        </button>
+
+        <div class="ws-avatar" th:title="${usuarioActualNombre}"
+            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
+            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
+    </header>
+
+    <div class="ws-body">
+        <aside class="ws-side" id="side" aria-label="Navegación">
+            <div class="ws-side-bar">
+                <span class="ws-side-bar-title">explorer</span>
+                <span class="ws-side-bar-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </span>
+            </div>
+
+            <div class="ws-side-profile">
+                <div class="ws-side-avatar"
+                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
+                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
+                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                    <div class="ws-side-profile-role" th:text="${usuarioActualTipo == 'empresa'} ? 'portal empresa' : 'talento creativo'">talento creativo</div>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    general<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/dashboard}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/empleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
+                        <span class="name">Empleos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/talentos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Talentos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/proyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Guardados</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
+                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
+                        <span class="name">Mis empleos</span>
+                        <span class="ws-side-badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}">1</span>
+                        <span class="ext" th:if="${solicitudesPendientesEmpresa == null or solicitudesPendientesEmpresa == 0}">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Candidatos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                        <span class="name">Publicar</span> <span class="ext">+</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    cuenta<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/mensajes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Mensajes</span>
+                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
+                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                        <span class="name">Solicitudes</span>
+                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
+                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
+                    </a>
+                    <a class="ws-side-link is-active" th:href="@{/perfil}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                        <span class="name">Perfil</span> <span class="ext">.md</span>
+                    </a>
+                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
+                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/ajustes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="ws-main">
+            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
+            <div class="ws-content">
+                <div class="ws-crumb">
+                    <span>~</span><span class="sep">/</span>
+                    <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+                    <span class="sep">/</span><span class="cur">perfil.md</span>
+                </div>
+
+                <p class="ws-eyebrow">// tu perfil<span class="ws-cursor" aria-hidden="true">▌</span></p>
+                <h1 class="ws-big-head" style="margin-bottom:20px;">
+                    <span class="ws-big-num dc-counter" th:text="${usuario != null} ? ${usuario.completitudPerfil} : 0">0</span>
+                    <span class="ws-big-head-sub">% de tu perfil<br>está completo</span>
+                </h1>
+
+                <section class="card profile-hero">
+                    <div class="profile-banner">
+                        <div class="profile-info">
+
+                            <div class="avatar-wrap">
+                                <div class="avatar" id="pf-avatar" role="button" tabindex="0"
+                                    aria-label="Cambiar foto de perfil"
+                                    th:data-nombre="${usuario != null ? usuario.nombre : 'D'}" th:style="${usuario != null and usuario.fotoUrl != null}
+                                               ? 'background-image: url(' + ${usuario.fotoUrl} + '); background-size: cover; background-position: center;'
+                                               : ''">
+                                    <span th:if="${usuario == null or usuario.fotoUrl == null or #strings.isEmpty(usuario.fotoUrl)}"
+                                        th:text="${usuario != null and usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1))} : 'D'">D</span>
+                                </div>
+
+                                <div id="avatar-overlay" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                                        <circle cx="12" cy="13" r="3" />
+                                    </svg>
+                                    <span>Cambiar</span>
+                                </div>
+
+                                <button id="btn-quitar-foto" type="button" aria-label="Quitar foto de perfil" title="Quitar foto de perfil"
+                                    th:style="${usuario != null and usuario.fotoUrl != null} ? 'display:flex;' : 'display:none;'">
+                                    ×
+                                </button>
+                            </div>
+
+                            <input type="file" id="input-foto-perfil" accept="image/*" style="display:none" />
+
+                            <div>
+                                <input class="profile-name-input" id="pf-nombre" type="text"
+                                    th:value="${usuario != null ? usuario.nombre : ''}" placeholder="Tu nombre completo">
+                                <input class="profile-subtitle-input" id="pf-rol" type="text"
+                                    th:value="${usuario != null and usuario.rolTitulo != null ? usuario.rolTitulo : ''}"
+                                    placeholder="Rol profesional · Especialidad">
+                                <p class="muted" id="pf-ubicacion-text" style="font-size:.82rem;margin-top:6px;"
+                                    th:text="${usuario != null and usuario.ubicacion != null ? usuario.ubicacion : 'Ciudad, País · Remoto'}">
+                                    Ciudad, País · Remoto</p>
+                            </div>
+                        </div>
+                        <div class="profile-actions">
+                            <div th:if="${usuario != null}" class="pf-flex-center">
+                                <div class="dc-profile-ring"
+                                     th:style="'width:44px;height:44px;--pct:' + ${usuario.completitudPerfil} + ';'">
+                                    <div class="dc-profile-ring-inner dc-mono" style="width:36px;height:36px;font-size:.68rem;"
+                                         th:text="${usuario.completitudPerfil} + '%'">0%</div>
+                                </div>
+                                <span class="muted" style="font-size:.76rem;line-height:1.3;max-width:110px;">Perfil<br>completo</span>
+                            </div>
+                            <div class="chip-row">
+                                <span class="chip" id="pf-chip-disponibilidad"
+                                    th:text="${usuario != null and usuario.disponibilidad != null ? usuario.disponibilidad : 'Disponible'}">Disponible</span>
+                                <span class="chip" id="pf-chip-modalidad"
+                                    th:text="${usuario != null and usuario.modalidad != null ? usuario.modalidad : 'Full time'}">Full
+                                    time</span>
+                            </div>
+                            <div class="profile-cta">
+                                <a class="btn btn-ghost btn-icon" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                    Ver CV
+                                </a>
+                                <button class="btn btn-ghost btn-icon" type="button" id="btn-compartir-perfil">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="18" cy="5" r="3" />
+                                        <circle cx="6" cy="12" r="3" />
+                                        <circle cx="18" cy="19" r="3" />
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                    </svg>
+                                    <span id="compartir-label">Compartir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-metrics" th:if="${usuarioActualTipo != 'empresa'}">
+                        <div class="metric-card" title="Solicitudes que enviaste a empleos">
+                            <div class="metric-icon stat-icon--dev"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg></div>
+                            <span class="metric-value" th:text="${statSolicitudesTotal ?: 0}">0</span>
+                            <span class="metric-label">Solicitudes enviadas</span>
+                        </div>
+                        <div class="metric-card" title="Solicitudes aprobadas por empresas">
+                            <div class="metric-icon stat-icon--success"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg></div>
+                            <span class="metric-value" th:text="${statSolicitudesAceptadas ?: 0}">0</span>
+                            <span class="metric-label">Solicitudes aprobadas</span>
+                        </div>
+                        <div class="metric-card" title="Tus proyectos publicados en DevCoast">
+                            <div class="metric-icon stat-icon--design"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                                </svg></div>
+                            <span class="metric-value" th:text="${statProyectos ?: 0}">0</span>
+                            <span class="metric-label">Proyectos publicados</span>
+                        </div>
+                        <div class="metric-card" title="Invitaciones directas de empresas">
+                            <div class="metric-icon stat-icon--data"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                </svg></div>
+                            <span class="metric-value" th:text="${statInvitacionesTotal ?: 0}">0</span>
+                            <span class="metric-label">Invitaciones recibidas</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h3 class="section-title">Sobre mí</h3>
+                    <div class="form-grid">
+                        <div class="field field-full">
+                            <label for="bio">Resumen</label>
+                            <textarea id="bio" placeholder="Cuenta tu historia profesional" data-maxlength="400"
+                                th:text="${usuario != null and usuario.bio != null ? usuario.bio : ''}"></textarea>
+                        </div>
+                        <div class="field">
+                            <label for="rol">Rol principal</label>
+                            <input id="rol" type="text" placeholder="Frontend, UI, Branding"
+                                th:value="${usuario != null and usuario.rolTitulo != null ? usuario.rolTitulo : ''}">
+                        </div>
+                        <div class="field">
+                            <label for="ubicacion">Ubicación</label>
+                            <input id="ubicacion" type="text" placeholder="Cartagena, Colombia · UTC-5"
+                                th:value="${usuario != null and usuario.ubicacion != null ? usuario.ubicacion : ''}">
+                        </div>
+                        <div class="field field-full">
+                            <label>Stack o herramientas</label>
+                            <div class="chips-wrapper" id="stack-wrapper">
+                                <input class="chip-real-input" id="stack-input" type="text"
+                                    placeholder="Escribe y presiona Enter...">
+                            </div>
+                            <small class="field-hint">Enter o coma para agregar · ✕ para quitar</small>
+                        </div>
+                        <div class="field field-full">
+                            <label>Habilidades destacadas</label>
+                            <div class="chips-wrapper" id="habilidades-wrapper">
+                                <input class="chip-real-input" id="habilidades-input" type="text"
+                                    placeholder="Escribe y presiona Enter...">
+                            </div>
+                            <small class="field-hint">Enter o coma para agregar · ✕ para quitar</small>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h3 class="section-title">Datos clave</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="email">Correo profesional</label>
+                            <input id="email" type="email" placeholder="nombre@correo.com"
+                                th:value="${usuario != null and usuario.emailContacto != null ? usuario.emailContacto : (usuario != null ? usuario.correo : '')}">
+                        </div>
+                        <div class="field">
+                            <label for="telefono">Teléfono</label>
+                            <input id="telefono" type="text" placeholder="+57 300 000 0000"
+                                th:value="${usuario != null and usuario.telefono != null ? usuario.telefono : ''}">
+                        </div>
+                        <div class="field">
+                            <label for="portfolio">Portafolio</label>
+                            <input id="portfolio" type="url" placeholder="https://tuportfolio.com"
+                                th:value="${usuario != null and usuario.portfolioUrl != null ? usuario.portfolioUrl : ''}">
+                        </div>
+                        <div class="field">
+                            <label for="linkedin">LinkedIn</label>
+                            <input id="linkedin" type="url" placeholder="https://linkedin.com/in/tuusuario"
+                                th:value="${usuario != null and usuario.linkedinUrl != null ? usuario.linkedinUrl : ''}">
+                        </div>
+                        <div class="field">
+                            <label for="github">GitHub</label>
+                            <input id="github" type="url" placeholder="https://github.com/tuusuario"
+                                th:value="${usuario != null and usuario.githubUrl != null ? usuario.githubUrl : ''}">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card" th:if="${usuarioActualTipo != 'empresa'}">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                        <div>
+                            <h3 class="section-title" style="margin-bottom:2px;">Así te ven en Talentos</h3>
+                            <p class="muted" style="font-size:.8rem;margin:0;">Vista previa en vivo de tu card en el directorio — cambia apenas guardas.</p>
+                        </div>
+                        <span th:if="${usuario != null and usuario.perfilPublico}" class="dc-status-pill dc-status-pill--success">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:3px;vertical-align:-1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                            Visible en el directorio
+                        </span>
+                        <span th:if="${usuario == null or !usuario.perfilPublico}" class="dc-status-pill dc-status-pill--amber">
+                            Oculto — actívalo en Preferencias de privacidad
+                        </span>
+                    </div>
+
+                    <div class="ws-job-grid" style="grid-template-columns:1fr;">
+                        <section class="job-card" th:style="'--card-accent:' + ${previewAccent} + ';'">
+                            <div class="job-band"></div>
+                            <div class="job-avatar"
+                                th:style="${usuario != null and usuario.fotoUrl != null} ? 'background-image:url(' + ${usuario.fotoUrl} + ');background-size:cover;background-position:center;' : ''">
+                                <span th:if="${usuario == null or usuario.fotoUrl == null}"
+                                    th:text="${usuario != null and usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1))} : 'D'">D</span>
+                            </div>
+                            <div class="job-body">
+                                <div class="job-content">
+                                    <span class="job-title" th:text="${usuario != null and usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${usuario.nombre} : 'Tu nombre'">Nombre</span>
+                                    <div class="job-meta-line">
+                                        <b th:if="${usuario != null and usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo)}" th:text="${usuario.rolTitulo}">Rol</b>
+                                        <span th:if="${usuario == null or usuario.rolTitulo == null or #strings.isEmpty(usuario.rolTitulo)}" class="muted">Agrega tu rol arriba</span>
+                                        <th:block th:if="${usuario != null and usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo) and usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}"> · </th:block>
+                                        <span th:if="${usuario != null and usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}" th:text="${usuario.ubicacion}">Ubicación</span>
+                                    </div>
+                                    <p class="job-tagline" th:if="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}" th:text="${usuario.bio}">Bio</p>
+
+                                    <div class="job-reqs" th:if="${usuario != null and ((usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)) or (usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)))}">
+                                        <span class="job-req" th:if="${usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                            <span th:text="${usuario.modalidad}">Modalidad</span>
+                                        </span>
+                                        <span class="job-req" th:if="${usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            <span th:text="${usuario.disponibilidad}">Disponibilidad</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="job-tags" th:if="${usuario != null}">
+                                        <span class="job-tag match" th:if="${usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)}" th:text="${usuario.especialidad}">Especialidad</span>
+                                        <span class="job-tag" th:each="s, sSt : ${usuario.stack != null ? usuario.stack : {}}" th:if="${sSt.index < 6}" th:text="${s}">tech</span>
+                                        <span class="job-tag" th:if="${usuario.stack != null and #lists.size(usuario.stack) > 6}" th:text="'+' + (${#lists.size(usuario.stack)} - 6)">+n</span>
+                                    </div>
+
+                                    <div class="talent-swatches" th:if="${previewColores != null and !#lists.isEmpty(previewColores)}">
+                                        <span th:each="c : ${previewColores}" th:style="'background:' + ${c}"></span>
+                                        <span class="lbl" th:text="${#lists.size(previewColores)} + (${#lists.size(previewColores)} == 1 ? ' proyecto en tu portafolio' : ' proyectos en tu portafolio')">proyectos</span>
+                                    </div>
+                                </div>
+
+                                <div class="job-foot">
+                                    <div class="job-foot-l" th:if="${usuario != null}">
+                                        <a th:if="${usuario.portfolioUrl != null and (usuario.portfolioUrl.startsWith('http://') or usuario.portfolioUrl.startsWith('https://'))}"
+                                            th:href="${usuario.portfolioUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-icon" title="Portafolio">
+                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                        </a>
+                                        <a th:if="${usuario.linkedinUrl != null and (usuario.linkedinUrl.startsWith('http://') or usuario.linkedinUrl.startsWith('https://'))}"
+                                            th:href="${usuario.linkedinUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-icon" title="LinkedIn">
+                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C20.9 8.65 22 11 22 14.3V21h-4v-6c0-1.43-.03-3.28-2-3.28-2 0-2.3 1.56-2.3 3.17V21H9Z"/></svg>
+                                        </a>
+                                        <a th:if="${usuario.githubUrl != null and (usuario.githubUrl.startsWith('http://') or usuario.githubUrl.startsWith('https://'))}"
+                                            th:href="${usuario.githubUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-icon" title="GitHub">
+                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.4-3.88-1.4-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.4-5.25 5.68.42.36.78 1.08.78 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+                                        </a>
+                                    </div>
+                                    <div class="job-actions">
+                                        <a th:if="${usuario != null and usuario.perfilPublico}" th:href="@{/talentos/{id}(id=${usuario.id})}" class="btn btn-primary">
+                                            Ver mi ficha pública
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                                        </a>
+                                        <span th:if="${usuario == null or !usuario.perfilPublico}" class="btn btn-applied">No visible todavía</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <section class="card">
+                        <h3 class="section-title">Preferencias</h3>
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="modalidad">Modalidad deseada</label>
+                                <select id="modalidad">
+                                    <option value="" th:selected="${usuario == null or #strings.isEmpty(usuario.modalidad)}">— Selecciona —</option>
+                                    <option value="Remoto" th:selected="${usuario != null and 'Remoto' == usuario.modalidad}">Remoto</option>
+                                    <option value="Presencial" th:selected="${usuario != null and 'Presencial' == usuario.modalidad}">Presencial</option>
+                                    <option value="Híbrido" th:selected="${usuario != null and 'Híbrido' == usuario.modalidad}">Híbrido</option>
+                                </select>
+                                <small class="field-hint">Así te filtran en el directorio de Talentos.</small>
+                            </div>
+                            <div class="field">
+                                <label for="disponibilidad">Disponibilidad</label>
+                                <select id="disponibilidad">
+                                    <option value="" th:selected="${usuario == null or #strings.isEmpty(usuario.disponibilidad)}">— Selecciona —</option>
+                                    <option value="Full-time" th:selected="${usuario != null and 'Full-time' == usuario.disponibilidad}">Full-time</option>
+                                    <option value="Part-time" th:selected="${usuario != null and 'Part-time' == usuario.disponibilidad}">Part-time</option>
+                                    <option value="Freelance" th:selected="${usuario != null and 'Freelance' == usuario.disponibilidad}">Freelance</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="salario">Rango salarial</label>
+                                <input id="salario" type="text" placeholder="USD 1800 - 2500"
+                                    th:value="${usuario != null and usuario.salarioEsperado != null ? usuario.salarioEsperado : ''}">
+                            </div>
+                            <div class="field">
+                                <label for="especialidad">Especialidad</label>
+                                <input id="especialidad" type="text" placeholder="Product design, UI"
+                                    th:value="${usuario != null and usuario.especialidad != null ? usuario.especialidad : ''}">
+                            </div>
+                        </div>
+                        <div class="toggle-row" th:if="${usuarioActualTipo != 'empresa'}">
+                            <div class="toggle-row-text">
+                                <strong>Destacar mi perfil</strong>
+                                <p>Aparece con prioridad en la portada del directorio de Talentos.</p>
+                            </div>
+                            <div class="pf-flex-center">
+                                <span class="save-indicator" id="si-destacar"></span>
+                                <label class="switch">
+                                    <input type="checkbox" id="toggle-destacar"
+                                        th:checked="${usuario != null and usuario.destacar}">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                </section>
+
+                <section class="card">
+                        <h3 class="section-title">Experiencia express</h3>
+                        <div class="timeline" id="exp-timeline">
+                            <th:block
+                                th:if="${usuario != null and usuario.cvExperiencias != null and !usuario.cvExperiencias.isEmpty()}">
+                                <div th:each="exp : ${usuario.cvExperiencias}" class="timeline-item">
+                                    <span class="timeline-dot"></span>
+                                    <div>
+                                        <strong th:text="${exp.cargo}">Cargo</strong>
+                                        <div class="timeline-meta"
+                                            th:text="${exp.empresa + ' · ' + (exp.periodo != null ? exp.periodo : '')}">
+                                            Empresa · Período</div>
+                                    </div>
+                                </div>
+                            </th:block>
+                            <th:block
+                                th:unless="${usuario != null and usuario.cvExperiencias != null and !usuario.cvExperiencias.isEmpty()}">
+                                <div class="timeline-item">
+                                    <span class="timeline-dot"></span>
+                                    <div><strong>Agrega tu experiencia</strong>
+                                        <div class="timeline-meta">en el Curriculum → Editar secciones</div>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+                        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}" class="btn btn-ghost"
+                            style="margin-top:12px;width:100%;justify-content:center;">
+                            Editar experiencia →
+                        </a>
+                </section>
+
+                <section class="card" th:if="${usuarioActualTipo != 'empresa'}">
+                        <h3 class="section-title">Logros</h3>
+                        <p class="muted" style="font-size:.81rem;margin-bottom:14px;">Se desbloquean automáticamente con tu
+                            actividad.</p>
+                        <div class="logros-grid">
+
+                            <div class="logro-card unlocked">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                        <path d="M2 17l10 5 10-5" />
+                                        <path d="M2 12l10 5 10-5" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Miembro</span>
+                                <span class="logro-desc">Bienvenido a DevCoast</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M12 20h9" />
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Historia propia</span>
+                                <span class="logro-desc">Bio profesional escrita</span>
+                                <span class="logro-prog"
+                                    th:unless="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}">Agrega
+                                    tu bio</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.completitudPerfil >= 80} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="m9 12 2 2 4-4" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">CV completo</span>
+                                <span class="logro-desc">Perfil al 80% o más</span>
+                                <span class="logro-prog" th:unless="${usuario != null and usuario.completitudPerfil >= 80}"
+                                    th:text="${usuario != null ? usuario.completitudPerfil : 0} + '% / 80%'">0%</span>
+                            </div>
+
+                            <div th:classappend="${statProyectos != null and statProyectos > 0} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Portafolio activo</span>
+                                <span class="logro-desc">Al menos 1 proyecto</span>
+                                <span class="logro-prog" th:unless="${statProyectos != null and statProyectos > 0}">Sube tu
+                                    primer proyecto</span>
+                            </div>
+
+                            <div th:classappend="${statProyectos != null and statProyectos >= 3} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Portafolio rico</span>
+                                <span class="logro-desc">3 o más proyectos</span>
+                                <span class="logro-prog" th:unless="${statProyectos != null and statProyectos >= 3}"
+                                    th:text="${statProyectos ?: 0} + ' / 3'">0/3</span>
+                            </div>
+
+                            <div th:classappend="${statProyectos != null and statProyectos >= 5} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="m12 3-1.912 5.744a2 2 0 0 1-1.265 1.265L3 12l5.823 1.912a2 2 0 0 1 1.265 1.265L12 21l1.912-5.823a2 2 0 0 1 1.265-1.265L21 12l-5.823-1.912a2 2 0 0 1-1.265-1.265L12 3Z" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Estrella</span>
+                                <span class="logro-desc">5 o más proyectos</span>
+                                <span class="logro-prog" th:unless="${statProyectos != null and statProyectos >= 5}"
+                                    th:text="${statProyectos ?: 0} + ' / 5'">0/5</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.cvExperiencias != null and !usuario.cvExperiencias.isEmpty()} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="2" y="7" width="20" height="14" rx="2" />
+                                        <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Trayectoria</span>
+                                <span class="logro-desc">Experiencia en CV</span>
+                                <span class="logro-prog"
+                                    th:unless="${usuario != null and usuario.cvExperiencias != null and !usuario.cvExperiencias.isEmpty()}">Agrega
+                                    en Curriculum</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2h-4V8z"></path>
+                                        <rect x="2" y="9" width="4" height="12"></rect>
+                                        <circle cx="4" cy="4" r="2"></circle>
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Conectado</span>
+                                <span class="logro-desc">LinkedIn enlazado</span>
+                                <span class="logro-prog"
+                                    th:unless="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">Agrega
+                                    tu LinkedIn</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                                        <path d="M9 18c-4.51 2-5-2-7-2" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Código público</span>
+                                <span class="logro-desc">GitHub enlazado</span>
+                                <span class="logro-prog"
+                                    th:unless="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">Agrega
+                                    en Curriculum</span>
+                            </div>
+
+                            <div th:classappend="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Disponible</span>
+                                <span class="logro-desc">Disponibilidad configurada</span>
+                                <span class="logro-prog"
+                                    th:unless="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}">Configura
+                                    disponibilidad</span>
+                            </div>
+
+                            <div th:classappend="${statInvitacionesTotal != null and statInvitacionesTotal > 0} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Radar empresarial</span>
+                                <span class="logro-desc">Primera invitación recibida</span>
+                                <span class="logro-prog"
+                                    th:unless="${statInvitacionesTotal != null and statInvitacionesTotal > 0}">Activa tu
+                                    perfil público</span>
+                            </div>
+
+                            <div th:classappend="${statSolicitudesAceptadas != null and statSolicitudesAceptadas > 0} ? 'unlocked' : 'locked'"
+                                class="logro-card">
+                                <div class="logro-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                                        <path d="M4 22h16" />
+                                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                                    </svg>
+                                </div>
+                                <span class="logro-name">Preseleccionado</span>
+                                <span class="logro-desc">Solicitud aprobada</span>
+                                <span class="logro-prog"
+                                    th:unless="${statSolicitudesAceptadas != null and statSolicitudesAceptadas > 0}">Aplica
+                                    a empleos</span>
+                            </div>
+
+                        </div>
+                        <div style="margin-top:16px;" th:with="
+                            totalLogros=12,
+                            desbloqueados=${
+                                (1)
+                                + (usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio) ? 1 : 0)
+                                + (usuario != null and usuario.completitudPerfil >= 80 ? 1 : 0)
+                                + (statProyectos != null and statProyectos > 0 ? 1 : 0)
+                                + (statProyectos != null and statProyectos >= 3 ? 1 : 0)
+                                + (statProyectos != null and statProyectos >= 5 ? 1 : 0)
+                                + (usuario != null and usuario.cvExperiencias != null and !usuario.cvExperiencias.isEmpty() ? 1 : 0)
+                                + (usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl) ? 1 : 0)
+                                + (usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl) ? 1 : 0)
+                                + (usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad) ? 1 : 0)
+                                + (statInvitacionesTotal != null and statInvitacionesTotal > 0 ? 1 : 0)
+                                + (statSolicitudesAceptadas != null and statSolicitudesAceptadas > 0 ? 1 : 0)
+                            }">
+                            <div class="muted" style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:6px;">
+                                <span>Logros desbloqueados</span>
+                                <span class="dc-mono text-accent" style="font-weight:700;"
+                                    th:text="${desbloqueados} + ' / ' + ${totalLogros}">0/12</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" th:style="'width:' + (${desbloqueados} * 100 / 12) + '%'"></div>
+                            </div>
+                        </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="ws-status">
+        <div class="ws-status-l">
+            <span class="ws-status-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
+            </span>
+            <span class="sp">·</span>
+            <span>tu ficha profesional</span>
+        </div>
+        <div class="ws-status-r">
+            <span class="hide-sm">devcoast v2</span>
+            <span class="sp hide-sm">·</span>
+            <span id="clock">00:00:00</span>
+            <span class="sp">·</span>
+            <a th:href="@{/about-us}">¿Ayuda?</a>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script th:inline="javascript">
+        const STACK_INICIAL = /*[[${usuario != null and usuario.stack != null ? usuario.stack : #lists.toList({})}]]*/[];
+        const HABS_INICIALES = /*[[${usuario != null and usuario.habilidadesBlandas != null ? usuario.habilidadesBlandas : #lists.toList({})}]]*/[];
+    </script>
+
+    <script th:src="@{/JS/perfil-editor.js}"></script>
+
+    <script>
+        // ── Barra flotante de cambios sin guardar ──────────────
+        const TRACKED_IDS = ['bio', 'rol', 'ubicacion', 'email', 'telefono', 'portfolio', 'linkedin', 'github', 'modalidad', 'disponibilidad', 'salario', 'especialidad']
+        const originalVals = {}
+        TRACKED_IDS.forEach(id => {
+            const el = document.getElementById(id)
+            if (el) originalVals[id] = el.value
+        })
+
+        const unsavedBar = document.getElementById('unsaved-bar')
+        let isDirty = false
+
+        function checkDirty() {
+            const nowDirty = TRACKED_IDS.some(id => {
+                const el = document.getElementById(id)
+                return el && el.value !== originalVals[id]
+            })
+            if (nowDirty !== isDirty) {
+                isDirty = nowDirty
+                unsavedBar?.classList.toggle('visible', isDirty)
+            }
+        }
+
+        TRACKED_IDS.forEach(id => {
+            const el = document.getElementById(id)
+            el?.addEventListener('input', checkDirty)
+            el?.addEventListener('change', checkDirty)
+        })
+
+        document.getElementById('btn-revertir-perfil')?.addEventListener('click', () => {
+            TRACKED_IDS.forEach(id => {
+                const el = document.getElementById(id)
+                if (el) el.value = originalVals[id]
+            })
+            isDirty = false
+            unsavedBar?.classList.remove('visible')
+        })
+
+        // Guardar desde la barra flotante dispara el mismo botón principal
+        document.getElementById('btn-guardar-perfil-bar')?.addEventListener('click', () => {
+            document.getElementById('btn-guardar-perfil')?.click()
+        })
+
+        // Sincronizar originalVals tras un guardado exitoso
+        document.addEventListener('perfilGuardado', () => {
+            TRACKED_IDS.forEach(id => {
+                const el = document.getElementById(id)
+                if (el) originalVals[id] = el.value
+            })
+            isDirty = false
+            unsavedBar?.classList.remove('visible')
+        })
+
+        // Advertir al salir de la página con cambios
+        window.addEventListener('beforeunload', e => {
+            if (isDirty) { e.preventDefault(); e.returnValue = '' }
+        })
+
+        // ── Foto ──────────────────────────────────────────────
+        document.getElementById('pf-avatar')?.addEventListener('click', () => {
+            document.getElementById('input-foto-perfil').click()
+        })
+        document.getElementById('pf-avatar')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById('input-foto-perfil').click() }
+        })
+        document.getElementById('avatar-overlay')?.addEventListener('click', () => {
+            document.getElementById('input-foto-perfil').click()
+        })
+
+        document.getElementById('input-foto-perfil')?.addEventListener('change', async (e) => {
+            const file = e.target.files[0]
+            if (!file) return
+            const formData = new FormData()
+            formData.append('file', file)
+            try {
+                const res = await fetch('/perfil/foto', { method: 'POST', body: formData })
+                const data = await res.json()
+                if (data.ok) {
+                    const avatar = document.getElementById('pf-avatar')
+                    avatar.style.backgroundImage = `url(${data.url})`
+                    avatar.style.backgroundSize = 'cover'
+                    avatar.style.backgroundPosition = 'center'
+                    avatar.querySelector('span')?.remove()
+                    document.getElementById('btn-quitar-foto').style.display = 'flex'
+                    showToast('Foto actualizada', 'success')
+                } else { showToast('Error al subir la foto', 'error') }
+            } catch { showToast('Error de conexión', 'error') }
+        })
+
+        document.getElementById('btn-quitar-foto')?.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            try {
+                const res = await fetch('/perfil/foto/quitar', { method: 'POST' })
+                const data = await res.json()
+                if (data.ok) {
+                    const avatar = document.getElementById('pf-avatar')
+                    avatar.style.backgroundImage = ''
+                    const nombre = avatar.dataset.nombre || 'D'
+                    avatar.innerHTML = `<span>${nombre.charAt(0).toUpperCase()}</span>`
+                    document.getElementById('btn-quitar-foto').style.display = 'none'
+                    showToast('Foto eliminada', 'success')
+                } else { showToast('Error al eliminar la foto', 'error') }
+            } catch { showToast('Error de conexión', 'error') }
+        })
+
+        // ── Compartir ─────────────────────────────────────────
+        document.getElementById('btn-compartir-perfil')?.addEventListener('click', async () => {
+            const label = document.getElementById('compartir-label')
+            const nombre = document.getElementById('pf-nombre')?.value?.trim() || 'Mi perfil'
+            const url = window.location.href
+            if (navigator.share) {
+                try { await navigator.share({ title: nombre + ' · DevCoast', url }); return } catch { /**/ }
+            }
+            try { await navigator.clipboard.writeText(url) } catch {
+                const ta = document.createElement('textarea')
+                ta.value = url; ta.style.position = 'absolute'; ta.style.left = '-9999px'
+                document.body.appendChild(ta); ta.select()
+                document.execCommand('copy'); document.body.removeChild(ta)
+            }
+            if (label) label.textContent = '¡Copiado!'
+            setTimeout(() => { if (label) label.textContent = 'Compartir' }, 1800)
+        })
+
+        // ── Destacar en Talentos (instantáneo, como los toggles de Ajustes) ──
+        document.getElementById('toggle-destacar')?.addEventListener('change', async function () {
+            const indicator = document.getElementById('si-destacar')
+            try {
+                const res = await fetch('/ajustes/privacidad', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destacar: this.checked })
+                })
+                const data = await res.json()
+                if (indicator) {
+                    indicator.textContent = data.ok ? '✓ Guardado' : '✗ Error'
+                    indicator.style.color = data.ok ? 'var(--ws-mint)' : 'var(--ws-rose)'
+                    indicator.classList.add('show')
+                    clearTimeout(indicator._t)
+                    indicator._t = setTimeout(() => indicator.classList.remove('show'), 1800)
+                }
+            } catch {
+                if (indicator) { indicator.textContent = '✗ Error'; indicator.classList.add('show') }
+            }
+        })
+    </script>
+
+</body>
+
+</html>

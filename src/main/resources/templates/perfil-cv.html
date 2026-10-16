@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${usuario.nombre} + ' — CV | DevCoast'">CV | DevCoast</title>
+    <style>
+        /* ── Variables ───────────────────────────────────────────── */
+        :root {
+            --accent: #1f8f8f;
+            --text:   #1a1a2e;
+            --muted:  #64748b;
+            --border: #e2e8f0;
+            --chip-bg:#e0f7f7;
+        }
+
+        /* ── Reset ───────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ── Topbar de acciones (solo en pantalla) ───────────────── */
+        .print-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 10px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .print-bar a {
+            font-size: .82rem;
+            color: var(--muted);
+            text-decoration: none;
+        }
+        .print-bar a:hover { color: var(--text); }
+        .print-bar .sep { color: var(--border); }
+        .btn-print {
+            margin-left: auto;
+            padding: 7px 18px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: .84rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-print:hover { opacity: .88; }
+
+        /* ── Hoja del CV ─────────────────────────────────────────── */
+        .cv-page {
+            max-width: 780px;
+            margin: 28px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,.08);
+            overflow: hidden;
+        }
+
+        /* ── Cabecera ────────────────────────────────────────────── */
+        .cv-header {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1a2e4a 100%);
+            padding: 32px 40px 28px;
+            color: #fff;
+        }
+        .cv-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            margin-bottom: 4px;
+        }
+        .cv-role {
+            font-size: 1rem;
+            color: #63d2d2;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+        .cv-contact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 20px;
+            font-size: .78rem;
+            color: rgba(255,255,255,.75);
+        }
+        .cv-contact a {
+            color: rgba(255,255,255,.75);
+            text-decoration: none;
+        }
+        .cv-contact a:hover { color: #63d2d2; }
+        .cv-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ── Cuerpo ──────────────────────────────────────────────── */
+        .cv-body {
+            padding: 32px 40px;
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 32px;
+        }
+
+        /* ── Secciones ───────────────────────────────────────────── */
+        .cv-section { margin-bottom: 28px; }
+        .cv-section:last-child { margin-bottom: 0; }
+        .cv-section-title {
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        /* ── Bio ─────────────────────────────────────────────────── */
+        .cv-bio {
+            font-size: .88rem;
+            color: #334155;
+            line-height: 1.65;
+        }
+
+        /* ── Experiencia / Educación ─────────────────────────────── */
+        .cv-entry { margin-bottom: 16px; }
+        .cv-entry:last-child { margin-bottom: 0; }
+        .cv-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        .cv-entry-title {
+            font-weight: 700;
+            font-size: .9rem;
+        }
+        .cv-entry-period {
+            font-size: .75rem;
+            color: var(--muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .cv-entry-sub {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .cv-entry-desc {
+            font-size: .82rem;
+            color: #475569;
+            line-height: 1.55;
+        }
+
+        /* ── Chips ───────────────────────────────────────────────── */
+        .chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .chip {
+            display: inline-block;
+            background: var(--chip-bg);
+            color: var(--accent);
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: .75rem;
+            font-weight: 600;
+            border: 1px solid rgba(31,143,143,.15);
+        }
+        .chip-soft {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: transparent;
+        }
+
+        /* ── Sidebar info items ──────────────────────────────────── */
+        .cv-info-item {
+            margin-bottom: 10px;
+            font-size: .82rem;
+        }
+        .cv-info-label {
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+        .cv-info-value {
+            color: var(--text);
+        }
+
+        /* ── Proyectos sidebar ───────────────────────────────────── */
+        .cv-project {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+        }
+        .cv-project:last-child { margin-bottom: 0; }
+        .cv-project-name {
+            font-size: .84rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .cv-project-stack {
+            font-size: .74rem;
+            color: var(--muted);
+        }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        .cv-footer {
+            padding: 14px 40px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            font-size: .74rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ── @media print ────────────────────────────────────────── */
+        @media print {
+            body { background: #fff; font-size: 11pt; }
+            .print-bar { display: none !important; }
+            .cv-page {
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+            .cv-body { gap: 24px; }
+            .cv-header { padding: 20px 28px 16px; }
+            .cv-body  { padding: 20px 28px; }
+            .cv-footer { padding: 10px 28px; }
+            a { color: inherit !important; text-decoration: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-bar">
+    <a th:href="@{/perfil}" style="display:inline-flex;align-items:center;gap:4px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             style="width:14px;height:14px;">
+            <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Volver al perfil
+    </a>
+    <span class="sep">|</span>
+    <span style="font-size:.82rem;color:var(--muted);">
+        El PDF se genera desde el diálogo de impresión del navegador
+    </span>
+    <button class="btn-print" onclick="window.print()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" style="width:15px;height:15px;">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimir / Guardar PDF
+    </button>
+</div>
+
+<div class="cv-page">
+
+    <div class="cv-header">
+        <div class="cv-name" th:text="${usuario.nombre}">Nombre Apellido</div>
+        <div class="cv-role" th:if="${usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo)}"
+             th:text="${usuario.rolTitulo}">Rol</div>
+        <div class="cv-contact">
+            <div class="cv-contact-item"
+                 th:if="${(usuario.emailContacto != null and !#strings.isEmpty(usuario.emailContacto)) or usuario.correo != null}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0;">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <span th:text="${!#strings.isEmpty(usuario.emailContacto)} ? ${usuario.emailContacto} : ${usuario.correo}">email</span>
+            </div>
+            <div class="cv-contact-item"
+                 th:if="${usuario.telefono != null and !#strings.isEmpty(usuario.telefono)}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0;">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.36 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l.87-1.87a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16h1.42z"/>
+                </svg>
+                <span th:text="${usuario.telefono}">tel</span>
+            </div>
+            <div class="cv-contact-item"
+                 th:if="${usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0;">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span th:text="${usuario.ubicacion}">Ciudad</span>
+            </div>
+            <div class="cv-contact-item"
+                 th:if="${usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                     style="width:12px;height:12px;flex-shrink:0;">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/>
+                    <circle cx="4" cy="4" r="2"/>
+                </svg>
+                <a th:href="${usuario.linkedinUrl}" th:text="${usuario.linkedinUrl}" target="_blank">linkedin</a>
+            </div>
+            <div class="cv-contact-item"
+                 th:if="${usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                     style="width:12px;height:12px;flex-shrink:0;">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                <a th:href="${usuario.githubUrl}" th:text="${usuario.githubUrl}" target="_blank">github</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="cv-body">
+
+        <div class="cv-main">
+
+            <div class="cv-section"
+                 th:if="${usuario.bio != null and !#strings.isEmpty(usuario.bio)}">
+                <div class="cv-section-title">Sobre mí</div>
+                <p class="cv-bio" th:text="${usuario.bio}"></p>
+            </div>
+
+            <div class="cv-section"
+                 th:if="${usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
+                <div class="cv-section-title">Experiencia</div>
+                <div th:each="exp : ${usuario.cvExperiencias}" class="cv-entry">
+                    <div class="cv-entry-header">
+                        <span class="cv-entry-title" th:text="${exp.cargo}">Cargo</span>
+                        <span class="cv-entry-period" th:if="${exp.periodo != null}"
+                              th:text="${exp.periodo}">Período</span>
+                    </div>
+                    <div class="cv-entry-sub">
+                        <span th:text="${exp.empresa}">Empresa</span>
+                        <span th:if="${exp.modalidad != null}">
+                            · <span th:text="${exp.modalidad}">Modalidad</span>
+                        </span>
+                    </div>
+                    <div class="cv-entry-desc"
+                         th:if="${exp.descripcion != null and !#strings.isEmpty(exp.descripcion)}"
+                         th:text="${exp.descripcion}"></div>
+                </div>
+            </div>
+
+            <div class="cv-section"
+                 th:if="${usuario.cvEducaciones != null and !#lists.isEmpty(usuario.cvEducaciones)}">
+                <div class="cv-section-title">Educación</div>
+                <div th:each="edu : ${usuario.cvEducaciones}" class="cv-entry">
+                    <div class="cv-entry-header">
+                        <span class="cv-entry-title" th:text="${edu.titulo}">Título</span>
+                        <span class="cv-entry-period" th:if="${edu.periodo != null}"
+                              th:text="${edu.periodo}">Período</span>
+                    </div>
+                    <div class="cv-entry-sub" th:text="${edu.institucion}">Institución</div>
+                    <div class="cv-entry-desc"
+                         th:if="${edu.descripcion != null and !#strings.isEmpty(edu.descripcion)}"
+                         th:text="${edu.descripcion}"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="cv-sidebar">
+
+            <div class="cv-section"
+                 th:if="${usuario.stack != null and !#lists.isEmpty(usuario.stack)}">
+                <div class="cv-section-title">Stack</div>
+                <div class="chip-list">
+                    <span th:each="s : ${usuario.stack}" class="chip" th:text="${s}">Tech</span>
+                </div>
+            </div>
+
+            <div class="cv-section"
+                 th:if="${usuario.habilidadesBlandas != null and !#lists.isEmpty(usuario.habilidadesBlandas)}">
+                <div class="cv-section-title">Habilidades</div>
+                <div class="chip-list">
+                    <span th:each="h : ${usuario.habilidadesBlandas}" class="chip chip-soft" th:text="${h}">Skill</span>
+                </div>
+            </div>
+
+            <div class="cv-section">
+                <div class="cv-section-title">Preferencias</div>
+                <div class="cv-info-item"
+                     th:if="${usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}">
+                    <div class="cv-info-label">Modalidad</div>
+                    <div class="cv-info-value" th:text="${usuario.modalidad}"></div>
+                </div>
+                <div class="cv-info-item"
+                     th:if="${usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}">
+                    <div class="cv-info-label">Disponibilidad</div>
+                    <div class="cv-info-value" th:text="${usuario.disponibilidad}"></div>
+                </div>
+                <div class="cv-info-item"
+                     th:if="${usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)}">
+                    <div class="cv-info-label">Expectativa salarial</div>
+                    <div class="cv-info-value" th:text="${usuario.salarioEsperado}"></div>
+                </div>
+                <div class="cv-info-item"
+                     th:if="${usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}">
+                    <div class="cv-info-label">Portafolio</div>
+                    <div class="cv-info-value">
+                        <a th:href="${usuario.portfolioUrl}" th:text="${usuario.portfolioUrl}" target="_blank"
+                           style="color:var(--accent);font-size:.8rem;"></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-section"
+                 th:if="${proyectos != null and !#lists.isEmpty(proyectos)}">
+                <div class="cv-section-title">Proyectos</div>
+                <div th:each="p,iter : ${proyectos}" th:if="${iter.index < 4}" class="cv-project">
+                    <div class="cv-project-name" th:text="${p.nombre}">Proyecto</div>
+                    <div class="cv-project-stack"
+                         th:if="${p.stack != null and !#lists.isEmpty(p.stack)}"
+                         th:text="${#strings.listJoin(p.stack, ', ')}">Stack</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="cv-footer">
+        <span>Generado desde DevCoast</span>
+        <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">Fecha</span>
+    </div>
+
+</div>
+
+<script>
+    // Abre el diálogo de impresión automáticamente al cargar la página
+    window.addEventListener('load', function () {
+        setTimeout(function () { window.print(); }, 600);
+    });
+</script>
+
+</body>
+</html>

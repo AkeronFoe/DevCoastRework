@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
+    <title>DevCoast | Facturación</title>
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
+    <link rel="stylesheet" th:href="@{/CSS/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/CSS/analytics.css}">
+    <script th:src="@{/JS/ui-feedback.js}"></script>
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/ws-shell.js}" defer></script>
+</head>
+
+<body class="wsjobs is-empresa">
+
+    <div class="ws-boot" id="wsBoot" aria-hidden="true">
+        <div class="ws-boot-box">
+            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
+            <div class="ws-boot-line"><span class="ok">✓</span> cargando facturacion.inv…</div>
+            <div class="ws-boot-line" id="bootLast">$ devcoast run facturacion.json</div>
+            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
+        </div>
+    </div>
+
+    <div id="nav-progress" class="ws-navprogress"></div>
+    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <div class="ws-grain" aria-hidden="true"></div>
+    <div class="ws-vignette" aria-hidden="true"></div>
+    <div class="ws-scrim" id="scrim"></div>
+
+    <div class="ws-palette-scrim" id="paletteScrim">
+        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+            <div class="ws-palette-input-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
+                <kbd>Esc</kbd>
+            </div>
+            <div class="ws-palette-list" id="paletteList"></div>
+        </div>
+    </div>
+
+    <header class="ws-top">
+        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <a class="ws-brand" th:href="@{/dashboard}">
+            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
+            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">facturacion</span>
+        </a>
+        <span class="ws-role-pill">empresa</span>
+
+        <button class="ws-search" id="paletteOpen" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Buscar en el workspace…
+            <kbd>⌘K</kbd>
+        </button>
+
+        <div class="ws-bell" id="bellWrap">
+            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
+            </button>
+            <div class="ws-bell-drop" id="bellDrop">
+                <div class="ws-bell-drop-head">
+                    <span class="ws-bell-drop-title">Notificaciones</span>
+                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
+                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
+                </div>
+                <div class="ws-bell-drop-list">
+                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
+                        Sin notificaciones nuevas
+                    </div>
+                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
+                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
+                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
+                            <div class="ws-notif-icon">
+                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
+                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div class="ws-notif-body">
+                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
+                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${notifNoLeidas != null and notifNoLeidas > 0}" class="ws-bell-drop-foot">
+                    <button class="ws-mark-read" id="markAllRead" type="button">Marcar todas como leídas</button>
+                </div>
+            </div>
+        </div>
+
+        <a th:href="@{/ajustes}" class="ws-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            <span class="lbl">Volver a ajustes</span>
+        </a>
+
+        <div class="ws-avatar" th:title="${usuarioActualNombre}"
+            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
+            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
+    </header>
+
+    <div class="ws-body">
+        <aside class="ws-side" id="side" aria-label="Navegación">
+            <div class="ws-side-bar">
+                <span class="ws-side-bar-title">explorer</span>
+                <span class="ws-side-bar-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </span>
+            </div>
+
+            <div class="ws-side-profile">
+                <div class="ws-side-avatar"
+                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
+                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
+                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
+                </div>
+                <div>
+                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
+                    <div class="ws-side-profile-role">portal empresa</div>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    general<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/dashboard}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/analytics}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16v5"/><path d="M16 14v7"/><path d="M20 10v11"/><path d="M8 18v3"/><path d="M4 12v9"/><path d="M4 4h16"/><path d="M4 4v3"/><path d="M8 14.66V21"/></svg></span>
+                        <span class="name">Analytics</span> <span class="ext">.chart</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/misEmpleos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
+                        <span class="name">Mis empleos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/candidatos}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="name">Candidatos</span> <span class="ext">.json</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/crearEmpleo}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+                        <span class="name">Publicar</span> <span class="ext">+</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="ws-side-group">
+                <button type="button" class="ws-side-head" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    cuenta<span class="slash">/</span>
+                </button>
+                <div class="ws-side-items">
+                    <a class="ws-side-link" th:href="@{/mensajes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                        <span class="name">Mensajes</span>
+                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
+                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/perfil}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                        <span class="name">Perfil</span> <span class="ext">.md</span>
+                    </a>
+                    <a class="ws-side-link is-active" th:href="@{/facturacion}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14v-4a3 3 0 0 1 6 0v4"/><rect x="5" y="10" width="14" height="10" rx="2"/></svg></span>
+                        <span class="name">Facturación</span> <span class="ext">.inv</span>
+                    </a>
+                    <a class="ws-side-link" th:href="@{/ajustes}">
+                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="ws-main">
+            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
+            <div class="ws-content">
+                <div class="ws-crumb">
+                    <span>~</span><span class="sep">/</span><span>empresa</span>
+                    <span class="sep">/</span><span class="cur">facturacion.inv</span>
+                </div>
+
+                <div class="ws-page-head">
+                    <div>
+                        <p class="ws-eyebrow">// historial de cobros<span class="ws-cursor" aria-hidden="true">▌</span></p>
+                        <h1 class="ws-big-head" style="font-size:1.6rem;">Facturación</h1>
+                        <p class="ws-page-sub">Tarifas de colocación cobradas mientras estuviste en el plan Gratis.</p>
+                    </div>
+                </div>
+
+                <div class="dash-stat-row" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+                    <div class="dash-stat">
+                        <div class="dash-stat-top">
+                            <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14v-4a3 3 0 0 1 6 0v4"/><rect x="5" y="10" width="14" height="10" rx="2"/></svg></span>
+                        </div>
+                        <span class="dash-stat-num" th:text="'$' + ${#numbers.formatDecimal(totalCobrado, 1, 2)}">$0.00</span>
+                        <span class="dash-stat-label">Total cobrado</span>
+                    </div>
+                    <div class="dash-stat">
+                        <div class="dash-stat-top">
+                            <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
+                        </div>
+                        <span class="dash-stat-num" th:text="${#lists.size(cobros)}">0</span>
+                        <span class="dash-stat-label">Colocaciones cobradas</span>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">Historial de cobros</div>
+                    <div class="chart-subtitle">Se cobra una tarifa fija por cada postulación aprobada mientras tu plan sea Gratis. Con el plan Pro no se cobra nada por contratar.</div>
+                    <table class="analytics-table" style="margin-top:.75rem;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Vacante</th>
+                                <th>Motivo</th>
+                                <th style="text-align:right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cobro : ${cobros}">
+                                <td th:text="${#dates.format(cobro.fecha, 'dd/MM/yyyy')}">01/01/2026</td>
+                                <td th:text="${cobro.empleoTitulo}" style="font-weight:600;color:var(--ws-ink);">Vacante</td>
+                                <td th:text="${cobro.motivo}">Motivo</td>
+                                <td style="text-align:right;font-weight:800;color:var(--ws-ink);" th:text="'$' + ${#numbers.formatDecimal(cobro.monto, 1, 2)}">$0.00</td>
+                            </tr>
+                            <tr th:if="${cobros == null or cobros.isEmpty()}">
+                                <td colspan="4" class="analytics-empty-cell">
+                                    Todavía no se te ha cobrado ninguna tarifa de colocación.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <footer class="ws-status">
+        <div class="ws-status-l">
+            <span class="ws-status-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                <span>empresa</span>
+            </span>
+            <span class="sp">·</span>
+            <span>✓ datos actualizados</span>
+        </div>
+        <div class="ws-status-r">
+            <span class="hide-sm">devcoast v2</span>
+            <span class="sp hide-sm">·</span>
+            <span id="clock">00:00:00</span>
+            <span class="sp">·</span>
+            <a th:href="@{/about-us}">¿Ayuda?</a>
+        </div>
+    </footer>
+
+</body>
+</html>

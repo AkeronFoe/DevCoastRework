@@ -1,0 +1,2108 @@
+/* DevCoast — register. Mismo "lienzo de sesión" que login.css (mismo canvas
+   de herramienta de diseño, mismas reglas, el mismo drag-and-drop con imanes
+   y guías), pero el frame ahora es un selector de tipo de cuenta que se
+   "compila" en el wizard correspondiente sin salir de la página — un único
+   archivo register.tsx, no dos formularios sueltos.
+
+   Self-contenido como login.css: todos los tokens viven bajo .rg-page para
+   que el theme global (styles.css / themes.js) no se filtre ni lo pise, y
+   para que este archivo no dependa de login.css (prefijo .rg- en vez de
+   .lc- para que ambos puedan convivir si algún día se navega entre ellos
+   sin recarga completa). */
+
+.rg-page {
+    /* sin esto el navegador pinta el popup nativo del <select> siempre en
+       blanco, sin importar cuánto se estilen el control o sus <option> */
+    color-scheme: dark;
+
+    --rg-void: #0d0f13;
+    --rg-panel: #15181e;
+    --rg-panel-2: #1a1e25;
+    --rg-line: #2a303a;
+    --rg-line-soft: #1f242c;
+    --rg-ink: #eef1f4;
+    --rg-dim: #95a0ad;
+    --rg-dim-2: #66707d;
+    --rg-cyan: #4fa0e8;
+    --rg-cyan-soft: #b8dbf9;
+    --rg-cyan-dim: rgba(79, 160, 232, .16);
+    --rg-violet: #c7b6fc;
+    --rg-violet-dim: rgba(199, 182, 252, .18);
+    --rg-paper: #f3ede2;
+    --rg-rose: #ef7b92;
+    --rg-rose-dim: rgba(239, 123, 146, .16);
+    --rg-amber: #f2ab5c;
+    --rg-amber-dim: rgba(242, 171, 92, .16);
+    --rg-mint: #7bd8ae;
+    --rg-on-accent: #061119;
+
+    /* acento activo — cian por defecto (talento); JS/CSS lo pisan a violeta
+       cuando el tipo elegido es empresa, ver [data-tipo="empresa"] abajo */
+    --rg-accent: var(--rg-cyan);
+    --rg-accent-dim: var(--rg-cyan-dim);
+    --rg-accent-soft: var(--rg-cyan-soft);
+
+    --rg-disp: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --rg-body: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --rg-editorial: "Fraunces", Georgia, serif;
+
+    background: var(--rg-void);
+    color: var(--rg-ink);
+    font-family: var(--rg-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.rg-page * {
+    box-sizing: border-box;
+}
+
+.rg-page ::selection {
+    background: var(--rg-accent);
+    color: var(--rg-on-accent);
+}
+
+.rg-page a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.rg-page img {
+    max-width: 100%;
+    display: block;
+}
+
+.rg-page button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.rg-page input,
+.rg-page select,
+.rg-page textarea {
+    font: inherit;
+}
+
+.rg-page :focus-visible {
+    outline: 2px solid var(--rg-accent);
+    outline-offset: 3px;
+}
+
+/* el acento entero de la página se pisa a violeta cuando el tipo elegido es
+   empresa — el borde del frame, el stepper, el botón, el chip de color, el
+   badge del ícono... todo lo que lea var(--rg-accent*) sigue al tipo */
+.rg-page[data-tipo="empresa"] {
+    --rg-accent: var(--rg-violet);
+    --rg-accent-dim: var(--rg-violet-dim);
+    --rg-accent-soft: var(--rg-violet);
+}
+
+/* ============================= toolbar ============================= */
+
+.rg-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 22px;
+    background: var(--rg-panel-2);
+    border-bottom: 1px solid var(--rg-line);
+}
+
+.rg-build-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--rg-disp);
+    font-size: .68rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(123, 216, 174, .12);
+    border: 1px solid rgba(123, 216, 174, .35);
+    color: var(--rg-mint);
+    white-space: nowrap;
+}
+
+.rg-build-badge svg {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .rg-build-badge {
+        display: none;
+    }
+}
+
+.rg-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--rg-disp);
+    font-size: .86rem;
+}
+
+.rg-brand img {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+}
+
+.rg-brand b {
+    font-weight: 800;
+    color: var(--rg-ink);
+}
+
+.rg-crumb {
+    color: var(--rg-dim);
+    font-size: .76rem;
+}
+
+.rg-crumb .sep {
+    color: var(--rg-dim-2);
+    margin: 0 5px;
+}
+
+.rg-crumb .file {
+    color: var(--rg-accent-soft);
+    transition: color .2s ease;
+}
+
+@media (max-width: 480px) {
+    .rg-crumb {
+        display: none;
+    }
+}
+
+.rg-tools {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.rg-tool {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    color: var(--rg-dim);
+    border: 1px solid transparent;
+}
+
+.rg-tool svg {
+    width: 14px;
+    height: 14px;
+}
+
+.rg-tool.is-active {
+    background: var(--rg-cyan-dim);
+    color: var(--rg-cyan);
+    border-color: rgba(79, 160, 232, .35);
+}
+
+@media (max-width: 420px) {
+    .rg-tools {
+        display: none;
+    }
+}
+
+/* ============================= canvas ============================= */
+
+.rg-canvas {
+    position: relative;
+    flex: 1;
+    min-height: 460px;
+    padding: 26px 24px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rg-ruler-x,
+.rg-ruler-y {
+    position: absolute;
+    color: var(--rg-dim-2);
+    font-family: var(--rg-disp);
+    font-size: .6rem;
+    pointer-events: none;
+}
+
+.rg-ruler-x {
+    top: 0;
+    left: 24px;
+    right: 0;
+    height: 22px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 6px 4px;
+    border-bottom: 1px solid var(--rg-line-soft);
+}
+
+.rg-ruler-y {
+    top: 22px;
+    left: 0;
+    bottom: 0;
+    width: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-right: 1px solid var(--rg-line-soft);
+}
+
+.rg-ruler-mark {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform;
+    transition: opacity .15s ease;
+}
+
+.rg-ruler-mark.is-visible {
+    opacity: 1;
+}
+
+.rg-ruler-mark.x {
+    top: 100%;
+    left: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--rg-accent);
+}
+
+.rg-ruler-mark.y {
+    left: 100%;
+    top: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--rg-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rg-ruler-mark {
+        transition: none;
+    }
+}
+
+.rg-page .rg-chip {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--rg-disp);
+    font-size: .66rem;
+    color: var(--rg-dim);
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-line);
+    border-radius: 5px;
+    padding: 5px 10px;
+    opacity: .85;
+}
+
+.rg-chip.type {
+    top: 44px;
+    right: 40px;
+    transition: border-color .15s ease;
+}
+
+.rg-chip.type:hover {
+    border-color: var(--rg-dim-2);
+}
+
+.rg-chip.type .aa {
+    font-family: var(--rg-editorial);
+    font-style: italic;
+    color: var(--rg-paper);
+    font-size: .92rem;
+    line-height: 1;
+}
+
+.rg-type-expand {
+    display: inline-block;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    color: var(--rg-dim-2);
+    transition: max-width .25s ease, opacity .2s ease, margin-left .25s ease;
+}
+
+.rg-chip.type:hover .rg-type-expand {
+    max-width: 100px;
+    opacity: 1;
+    margin-left: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rg-type-expand {
+        transition: none;
+    }
+}
+
+.rg-chip.code {
+    left: 44px;
+    bottom: 54px;
+}
+
+.rg-chip.code span {
+    color: var(--rg-violet);
+}
+
+.rg-chip.color {
+    left: 44px;
+    top: 44px;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease, transform .1s ease;
+}
+
+.rg-chip.color:active {
+    transform: scale(.96);
+}
+
+.rg-chip.color .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--rg-accent);
+    flex-shrink: 0;
+    transition: background-color .2s ease;
+}
+
+.rg-chip.color:hover {
+    border-color: var(--rg-dim-2);
+    color: var(--rg-ink);
+}
+
+.rg-copy-done {
+    display: none;
+    color: var(--rg-accent-soft);
+}
+
+.rg-chip.color.is-copied .rg-copy-label {
+    display: none;
+}
+
+.rg-chip.color.is-copied .rg-copy-done {
+    display: inline;
+}
+
+@media (max-width: 760px) {
+
+    .rg-ruler-x,
+    .rg-ruler-y,
+    .rg-chip,
+    .rg-sidebar,
+    .rg-cursor-tag,
+    .rg-inspector,
+    .rg-guide-third {
+        display: none;
+    }
+
+    .rg-canvas {
+        padding: 30px 18px;
+    }
+}
+
+/* ===================== lienzo interactivo: guías, drag, inspector ===================== */
+/* Idéntico a login.css — mismo mecanismo de imán al centro/tercios, mismas
+   distancias a bordes, mismo tooltip de coordenadas y panel inspector. El
+   requisito era explícito: que el frame se pueda arrastrar "tal como el
+   form del login" — así que esto es un port 1:1 de esas reglas, solo con
+   el prefijo .rg- para no pisar login.css si ambas hojas conviven. */
+
+.rg-dots-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: transform .3s ease;
+}
+
+.rg-guide {
+    position: absolute;
+    background: var(--rg-accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease, background-color .2s ease;
+}
+
+.rg-guide.v {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-.5px);
+    background-image: linear-gradient(var(--rg-accent) 60%, transparent 0);
+    background-size: 1px 8px;
+    background-repeat: repeat-y;
+    background-color: transparent;
+}
+
+.rg-guide.h {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-.5px);
+    background-image: linear-gradient(90deg, var(--rg-accent) 60%, transparent 0);
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    background-color: transparent;
+}
+
+.rg-guide.is-active {
+    opacity: .85;
+}
+
+.rg-guide-third {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease;
+    background-color: transparent;
+}
+
+.rg-guide-third.is-active {
+    opacity: .5;
+}
+
+.rg-guide-third.v {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-image: linear-gradient(var(--rg-dim-2) 50%, transparent 0);
+    background-size: 1px 5px;
+    background-repeat: repeat-y;
+}
+
+.rg-guide-third.h {
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-image: linear-gradient(90deg, var(--rg-dim-2) 50%, transparent 0);
+    background-size: 5px 1px;
+    background-repeat: repeat-x;
+}
+
+.rg-centered-chip {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translate(-50%, -6px);
+    font-family: var(--rg-disp);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: var(--rg-on-accent);
+    background: var(--rg-accent);
+    padding: 4px 9px;
+    border-radius: 3px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease, transform .12s ease, background-color .2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 2;
+}
+
+.rg-centered-chip.is-active {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.rg-centered-chip svg {
+    width: 10px;
+    height: 10px;
+}
+
+.rg-edge {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .1s ease;
+    z-index: 1;
+}
+
+.rg-edge.is-active {
+    opacity: 1;
+}
+
+.rg-edge.t,
+.rg-edge.b {
+    width: 1px;
+    background-image: linear-gradient(var(--rg-amber) 60%, transparent 0);
+    background-size: 1px 6px;
+    background-repeat: repeat-y;
+}
+
+.rg-edge.l,
+.rg-edge.r {
+    height: 1px;
+    background-image: linear-gradient(90deg, var(--rg-amber) 60%, transparent 0);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+}
+
+.rg-edge span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--rg-disp);
+    font-size: .6rem;
+    font-weight: 700;
+    color: var(--rg-on-accent);
+    background: var(--rg-amber);
+    border-radius: 3px;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+
+.rg-cursor-tag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease;
+    transform: translate(14px, 16px);
+    font-family: var(--rg-disp);
+    font-size: .62rem;
+    color: var(--rg-dim);
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-line);
+    border-radius: 3px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    z-index: 4;
+}
+
+.rg-cursor-tag.is-visible {
+    opacity: 1;
+}
+
+.rg-inspector {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-line);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-family: var(--rg-disp);
+    font-size: .64rem;
+    color: var(--rg-dim);
+    min-width: 100px;
+}
+
+.rg-inspector-title {
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-size: .56rem;
+    color: var(--rg-dim-2);
+    margin-bottom: 6px;
+}
+
+.rg-inspector-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 2px 0;
+}
+
+.rg-inspector-row span {
+    color: var(--rg-dim-2);
+}
+
+.rg-inspector-row b {
+    color: var(--rg-accent-soft);
+    font-weight: 700;
+}
+
+.rg-frame-wrap.is-snap-ease {
+    transition: transform .16s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* usada sólo cuando un cambio de contenido (elegir tipo, cambiar de paso)
+   saca al frame de los límites del canvas y hay que reacomodarlo — un
+   deslizamiento suave en vez de un salto instantáneo al centro */
+.rg-frame-wrap.is-recentering {
+    transition: transform .4s cubic-bezier(.16, .8, .3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rg-dots-canvas {
+        transition: none;
+    }
+
+    .rg-frame-wrap.is-snap-ease {
+        transition: none;
+    }
+
+    .rg-frame-wrap.is-recentering {
+        transition: none;
+    }
+}
+
+/* ============================= sidebar (explorer) ============================= */
+
+.rg-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.rg-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--rg-panel-2);
+    border-right: 1px solid var(--rg-line);
+    padding: 12px 8px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rg-line) transparent;
+}
+
+.rg-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rg-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rg-sidebar::-webkit-scrollbar-thumb {
+    background: var(--rg-line);
+    border-radius: 4px;
+}
+
+.rg-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--rg-dim-2);
+}
+
+.rg-sidebar-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px 12px;
+}
+
+.rg-sidebar-title {
+    font-family: var(--rg-disp);
+    font-size: .6rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--rg-dim-2);
+}
+
+.rg-sidebar-tools {
+    display: flex;
+    gap: 8px;
+    color: var(--rg-dim-2);
+}
+
+.rg-sidebar-tools svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+}
+
+.rg-tree-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: .78rem;
+    line-height: 1.3;
+    color: var(--rg-dim);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color .12s ease, color .12s ease;
+}
+
+/* las filas de archivo real (login.tsx / register.tsx) son <a> — necesitan
+   perder el subrayado/azul nativo y heredar el mismo look que un <div>.
+   El color es igual de necesario: ".rg-page a { color:inherit }" (arriba)
+   tiene más especificidad que ".rg-tree-row" solo, así que sin este empate
+   explícito el link se veía más claro que el resto de las filas del árbol. */
+a.rg-tree-row {
+    color: var(--rg-dim);
+    text-decoration: none;
+}
+
+.rg-tree-row.is-folder {
+    font-family: var(--rg-disp);
+    color: var(--rg-dim);
+}
+
+.rg-tree-row:not(.is-selected):hover {
+    background: var(--rg-panel);
+    color: var(--rg-ink);
+}
+
+.rg-tree-row.is-selected {
+    background: var(--rg-cyan-dim);
+    color: var(--rg-cyan-soft);
+    cursor: default;
+}
+
+.rg-tree-row.is-selected::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--rg-cyan);
+}
+
+.rg-tree-chevron {
+    display: inline-block;
+    width: 11px;
+    flex-shrink: 0;
+    font-size: .6rem;
+    color: var(--rg-dim-2);
+    transition: transform .12s ease;
+}
+
+.rg-tree-row.is-folder.is-collapsed .rg-tree-chevron {
+    transform: rotate(-90deg);
+}
+
+.rg-tree-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.rg-tree-dot.tsx {
+    background: var(--rg-cyan);
+}
+
+.rg-tree-dot.ts {
+    background: var(--rg-violet);
+}
+
+.rg-tree-dot.json {
+    background: var(--rg-amber);
+}
+
+.rg-tree-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rg-tree-badge {
+    margin-left: auto;
+    padding-left: 8px;
+    flex-shrink: 0;
+    font-family: var(--rg-disp);
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--rg-amber);
+}
+
+.rg-tree-row.rg-tree-summary {
+    color: var(--rg-dim-2);
+    font-style: italic;
+    cursor: default;
+}
+
+.rg-tree-children .rg-tree-row.rg-tree-summary:hover {
+    background: transparent;
+}
+
+.rg-tree-children {
+    margin-left: 14px;
+    padding-left: 9px;
+    border-left: 1px solid var(--rg-line-soft);
+}
+
+.rg-tree-children.is-collapsed {
+    display: none;
+}
+
+.rg-sb-hint {
+    margin-top: auto;
+    padding: 10px 12px;
+    font-size: .68rem;
+    color: var(--rg-dim-2);
+    line-height: 1.6;
+    border-top: 1px dashed var(--rg-line-soft);
+}
+
+/* ============================= frame ============================= */
+
+.rg-frame-wrap {
+    position: relative;
+}
+
+.rg-frame-tag {
+    position: absolute;
+    top: -28px;
+    left: 0;
+    font-family: var(--rg-disp);
+    font-size: .64rem;
+    color: var(--rg-on-accent);
+    background: var(--rg-accent);
+    border-radius: 4px;
+    padding: 5px 10px 5px 9px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background-color .2s ease;
+}
+
+.rg-frame-tag::before {
+    content: "▣";
+    font-size: .72rem;
+}
+
+.rg-frame-tag.is-busy {
+    background: var(--rg-amber);
+}
+
+@keyframes rgTagPulse {
+    0% { box-shadow: 0 0 0 0 var(--rg-accent-dim); }
+    100% { box-shadow: 0 0 0 6px rgba(79, 160, 232, 0); }
+}
+
+.rg-frame-tag.is-editing {
+    animation: rgTagPulse .5s ease-out;
+}
+
+.rg-unsaved-dot {
+    display: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rg-on-accent);
+    opacity: .65;
+    flex-shrink: 0;
+}
+
+.rg-unsaved-dot.is-visible {
+    display: inline-block;
+}
+
+.rg-handle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--rg-accent);
+    border-radius: 1px;
+    z-index: 2;
+    transition: background-color .15s ease, box-shadow .15s ease;
+}
+
+.rg-handle.tl { top: -4px; left: -4px; }
+.rg-handle.tr { top: -4px; right: -4px; }
+.rg-handle.bl { bottom: -4px; left: -4px; }
+.rg-handle.br { bottom: -4px; right: -4px; }
+
+.rg-frame-wrap:hover .rg-handle {
+    background: var(--rg-accent-soft);
+    box-shadow: 0 0 0 3px var(--rg-accent-dim);
+}
+
+.rg-frame-wrap.is-selected .rg-handle {
+    background: var(--rg-accent-soft);
+    box-shadow: 0 0 0 3px var(--rg-accent-dim);
+}
+
+.rg-page .rg-move-handle {
+    display: none;
+    position: absolute;
+    top: -27px;
+    right: 0;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-accent);
+    border-radius: 4px;
+    color: var(--rg-accent);
+    cursor: grab;
+    z-index: 3;
+    transition: border-color .2s ease, color .2s ease;
+}
+
+.rg-move-handle svg {
+    width: 13px;
+    height: 13px;
+}
+
+.rg-frame-wrap.is-selected .rg-move-handle {
+    display: flex;
+}
+
+.rg-move-handle:active,
+.rg-move-handle.is-dragging {
+    cursor: grabbing;
+}
+
+@keyframes rgDrop {
+    0% { transform: scale(1); }
+    40% { transform: scale(.985); }
+    70% { transform: scale(1.006); }
+    100% { transform: scale(1); }
+}
+
+.rg-frame-scale.is-dropping {
+    animation: rgDrop .26s ease-out;
+}
+
+.rg-frame {
+    position: relative;
+    width: 560px;
+    max-width: calc(100vw - 48px);
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-accent);
+    border-radius: 7px;
+    box-shadow: 0 30px 60px -25px rgba(0, 0, 0, .65);
+    overflow: hidden;
+    transition: border-color .2s ease;
+}
+
+@keyframes rgFramePulse {
+    0% { box-shadow: 0 30px 60px -25px rgba(0,0,0,.65), 0 0 0 0 var(--rg-accent-dim); }
+    45% { box-shadow: 0 30px 60px -25px rgba(0,0,0,.65), 0 0 0 9px var(--rg-accent-dim); }
+    100% { box-shadow: 0 30px 60px -25px rgba(0,0,0,.65), 0 0 0 0 rgba(0,0,0,0); }
+}
+
+.rg-frame.is-ready {
+    animation: rgFramePulse .6s ease;
+}
+
+.rg-frame-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    pointer-events: none;
+}
+
+.rg-frame-progress::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: var(--rg-accent);
+}
+
+.rg-frame.is-loading .rg-frame-progress::after {
+    animation: rgProgress 1.6s cubic-bezier(.15, .6, .4, 1) forwards;
+}
+
+@keyframes rgProgress {
+    0% { transform: scaleX(0); }
+    70% { transform: scaleX(.78); }
+    100% { transform: scaleX(.88); }
+}
+
+.rg-fbody {
+    padding: 32px 34px 28px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.rg-kicker {
+    font-family: var(--rg-disp);
+    font-size: .7rem;
+    color: var(--rg-dim-2);
+    margin: 0 0 11px;
+}
+
+.rg-kicker::before {
+    content: "// ";
+    color: var(--rg-dim-2);
+}
+
+.rg-kicker .ktype {
+    color: var(--rg-accent-soft);
+    transition: color .2s ease;
+}
+
+.rg-page .rg-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--rg-disp);
+    font-size: .7rem;
+    color: var(--rg-accent-soft);
+    margin-bottom: 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: transform .1s ease;
+}
+
+.rg-back-link:hover {
+    color: var(--rg-ink);
+}
+
+.rg-back-link:active {
+    transform: scale(.96);
+}
+
+.rg-title {
+    font-family: var(--rg-editorial);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.6rem;
+    color: var(--rg-ink);
+    margin: 0 0 8px;
+    letter-spacing: -.01em;
+}
+
+.rg-sub {
+    font-size: .84rem;
+    color: var(--rg-dim);
+    margin: 0 0 14px;
+    max-width: 40ch;
+}
+
+.rg-esta {
+    font-family: var(--rg-disp);
+    font-size: .7rem;
+    color: var(--rg-dim-2);
+    margin: 0 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rg-type-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rg-accent-dim);
+    color: var(--rg-accent);
+    flex-shrink: 0;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.rg-type-badge svg {
+    width: 11px;
+    height: 11px;
+}
+
+@keyframes rgFadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rg-enter {
+    animation: rgFadeSlideIn .5s cubic-bezier(.16, .8, .3, 1) both;
+}
+
+/* ============================= chooser cards ============================= */
+
+.rg-cards {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+/* .rg-page prefix is load-bearing here: the global ".rg-page button" reset
+   (background:none; border:none) outranks a bare ".rg-card" on specificity
+   alone regardless of source order, since it is card is a <button> — without
+   this prefix the card rendered with no visible fill or border at all. */
+.rg-page .rg-card {
+    flex: 1;
+    position: relative;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--rg-panel-2);
+    border: 1px solid var(--rg-line-soft);
+    border-radius: 10px;
+    padding: 22px 18px 20px;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+    animation: rgFadeSlideIn .4s cubic-bezier(.16, .8, .3, 1) both;
+}
+
+.rg-cards .rg-card:first-child { animation-delay: 0s; }
+.rg-cards .rg-card:last-child { animation-delay: .09s; }
+
+.rg-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .55;
+    pointer-events: none;
+    background: radial-gradient(120px 90px at 18% -10%, var(--tint), transparent 70%);
+}
+
+.rg-card.talento { --tint: var(--rg-cyan-dim); }
+.rg-card.empresa { --tint: var(--rg-violet-dim); }
+
+.rg-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--rg-dim-2);
+    box-shadow: 0 14px 30px -18px rgba(0, 0, 0, .6);
+}
+
+.rg-card.talento:hover { border-color: rgba(79, 160, 232, .5); }
+.rg-card.empresa:hover { border-color: rgba(199, 182, 252, .5); }
+.rg-card:active { transform: translateY(-1px) scale(.96); }
+
+.rg-card.is-selected {
+    transform: translateY(-3px) scale(1.015);
+}
+
+.rg-card.talento.is-selected {
+    border-color: var(--rg-cyan);
+    box-shadow: 0 0 0 3px var(--rg-cyan-dim), 0 16px 30px -16px rgba(0, 0, 0, .6);
+}
+
+.rg-card.empresa.is-selected {
+    border-color: var(--rg-violet);
+    box-shadow: 0 0 0 3px var(--rg-violet-dim), 0 16px 30px -16px rgba(0, 0, 0, .6);
+}
+
+.rg-card.is-dim {
+    opacity: .4;
+    transform: translateY(0) scale(.98);
+}
+
+.rg-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+}
+
+.rg-card .cicon {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    transition: transform .18s ease;
+}
+
+.rg-card:hover .cicon {
+    transform: scale(1.06) rotate(-2deg);
+}
+
+.rg-card.talento .cicon { background: var(--rg-cyan-dim); color: var(--rg-cyan); }
+.rg-card.empresa .cicon { background: var(--rg-violet-dim); color: var(--rg-violet); }
+
+.rg-card .cicon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.rg-card .check-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(.25);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1);
+}
+
+.rg-card.is-selected .check-badge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.rg-card.talento .check-badge { background: var(--rg-cyan); color: var(--rg-on-accent); }
+.rg-card.empresa .check-badge { background: var(--rg-violet); color: var(--rg-on-accent); }
+
+.rg-card .check-badge svg {
+    width: 11px;
+    height: 11px;
+}
+
+.rg-card h3 {
+    margin: 14px 0 6px;
+    font-family: var(--rg-editorial);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.12rem;
+    position: relative;
+    color: var(--rg-ink);
+}
+
+.rg-card p.cdesc {
+    margin: 0 0 14px;
+    font-size: .76rem;
+    color: var(--rg-dim);
+    line-height: 1.5;
+    position: relative;
+    max-width: 26ch;
+}
+
+.rg-card .cbullets {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0 0 16px;
+    padding: 0;
+    position: relative;
+}
+
+.rg-card .cbullets li {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .7rem;
+    color: var(--rg-dim);
+}
+
+.rg-card .cbullets svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.rg-card.talento .cbullets svg { color: var(--rg-cyan); }
+.rg-card.empresa .cbullets svg { color: var(--rg-violet); }
+
+.rg-card .cselect {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--rg-disp);
+    font-size: .68rem;
+    font-weight: 700;
+    position: relative;
+}
+
+.rg-card.talento .cselect { color: var(--rg-cyan-soft); }
+.rg-card.empresa .cselect { color: var(--rg-violet); }
+
+.rg-card .cselect svg {
+    width: 12px;
+    height: 12px;
+    transition: transform .18s ease;
+}
+
+.rg-card:hover .cselect svg {
+    transform: translateX(3px);
+}
+
+.rg-card-divider {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--rg-disp);
+    font-size: .64rem;
+    color: var(--rg-dim-2);
+}
+
+.rg-foot {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    font-size: .8rem;
+    color: var(--rg-dim);
+    margin-top: 4px;
+    padding-top: 17px;
+    border-top: 1px dashed var(--rg-line-soft);
+}
+
+.rg-foot a {
+    color: var(--rg-cyan-soft);
+    font-weight: 700;
+}
+
+/* ============================= "compilando" ============================= */
+
+.rg-loadwrap {
+    justify-content: center;
+}
+
+@keyframes rgShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.rg-skel {
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--rg-line-soft) 25%, #232833 50%, var(--rg-line-soft) 75%);
+    background-size: 200% 100%;
+    animation: rgShimmer 1.15s ease-in-out infinite;
+}
+
+.rg-skel-steps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 22px 0 24px;
+}
+
+.rg-skel-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.rg-skel-seg {
+    flex: 1;
+    height: 1px;
+    max-width: 24px;
+    background: var(--rg-line);
+}
+
+.rg-buildlog {
+    list-style: none;
+    margin: 0 0 6px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.rg-buildlog li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: .78rem;
+    color: var(--rg-dim);
+    opacity: 0;
+    animation: rgLogIn .32s ease forwards;
+}
+
+.rg-buildlog li .lchk {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--rg-accent-dim);
+    color: var(--rg-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rg-buildlog li .lchk svg {
+    width: 9px;
+    height: 9px;
+}
+
+.rg-buildlog li .accent {
+    color: var(--rg-accent-soft);
+    font-weight: 600;
+}
+
+@keyframes rgLogIn {
+    from { opacity: 0; transform: translateX(-7px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.rg-loadbar-track {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--rg-line-soft);
+    margin: 24px 0 14px;
+    overflow: hidden;
+}
+
+.rg-loadbar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--rg-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+/* estado de respaldo sin GSAP (CDN caído) — sin animación, solo el resultado final */
+.rg-loadbar-fill.is-filling {
+    transform: scaleX(1);
+}
+
+.rg-loadlabel {
+    font-family: var(--rg-disp);
+    font-size: .7rem;
+    color: var(--rg-dim-2);
+    text-align: center;
+}
+
+.rg-loadlabel .accent {
+    color: var(--rg-accent-soft);
+}
+
+/* ============================= wizard ============================= */
+
+.rg-stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.rg-step-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rg-snum {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--rg-disp);
+    font-size: .64rem;
+    font-weight: 700;
+    background: var(--rg-panel-2);
+    color: var(--rg-dim-2);
+    border: 1px solid var(--rg-line);
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.rg-snum.is-active,
+.rg-snum.is-done {
+    background: var(--rg-accent);
+    color: var(--rg-on-accent);
+    border-color: var(--rg-accent);
+}
+
+.rg-sline {
+    flex: 1;
+    height: 1px;
+    background: var(--rg-line);
+    max-width: 24px;
+    transition: background-color .2s ease;
+}
+
+.rg-sline.is-done {
+    background: var(--rg-accent);
+}
+
+.rg-slabel {
+    font-family: var(--rg-disp);
+    font-size: .62rem;
+    color: var(--rg-dim-2);
+    transition: color .2s ease;
+}
+
+.rg-slabel.is-active {
+    color: var(--rg-accent-soft);
+}
+
+.rg-paso-panel {
+    animation: rgFadeSlideIn .3s cubic-bezier(.16, .8, .3, 1) both;
+}
+
+.rg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+}
+
+.rg-field {
+    margin-bottom: 14px;
+    min-width: 0;
+}
+
+/* .rg-grid ya separa filas con su propio "gap" — sin este reset, el
+   margin-bottom de cada .rg-field se sumaba al gap y duplicaba el salto
+   vertical entre filas (28px en vez de los 14px previstos). */
+.rg-grid>.rg-field {
+    margin-bottom: 0;
+}
+
+.rg-field--full {
+    grid-column: 1 / -1;
+}
+
+.rg-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--rg-disp);
+    font-size: .68rem;
+    color: var(--rg-dim);
+    margin-bottom: 6px;
+}
+
+.rg-field .req {
+    color: var(--rg-rose);
+}
+
+.rg-irow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rg-panel-2);
+    border: 1px solid var(--rg-line-soft);
+    border-radius: 5px;
+    padding: 0 12px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.rg-irow input,
+.rg-irow select {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--rg-ink);
+    font-family: var(--rg-body);
+    font-size: .84rem;
+    padding: 11px 0;
+    caret-color: var(--rg-accent);
+}
+
+.rg-irow select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2395a0ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    background-size: 14px;
+    padding-right: 20px;
+}
+
+.rg-irow select option {
+    background: var(--rg-panel-2);
+    color: var(--rg-ink);
+}
+
+textarea.rg-textarea {
+    width: 100%;
+    background: var(--rg-panel-2);
+    border: 1px solid var(--rg-line-soft);
+    border-radius: 5px;
+    padding: 11px 12px;
+    color: var(--rg-ink);
+    font-family: var(--rg-body);
+    font-size: .84rem;
+    resize: vertical;
+    min-height: 84px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+textarea.rg-textarea:focus-visible,
+.rg-irow:focus-within {
+    border-color: var(--rg-accent);
+    box-shadow: 0 0 0 3px var(--rg-accent-dim);
+    outline: none;
+}
+
+.rg-irow.is-invalid,
+textarea.rg-textarea.is-invalid {
+    border-color: rgba(242, 171, 92, .55);
+}
+
+.rg-irow.is-invalid:focus-within {
+    border-color: var(--rg-amber);
+    box-shadow: 0 0 0 3px var(--rg-amber-dim);
+}
+
+.rg-irow input:-webkit-autofill,
+.rg-irow input:-webkit-autofill:hover,
+.rg-irow input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--rg-ink);
+    -webkit-box-shadow: 0 0 0 1000px var(--rg-panel-2) inset;
+    box-shadow: 0 0 0 1000px var(--rg-panel-2) inset;
+    caret-color: var(--rg-accent);
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+.rg-irow input::-ms-reveal,
+.rg-irow input::-ms-clear {
+    display: none;
+}
+
+.rg-page .rg-irow input:focus-visible {
+    outline: none;
+}
+
+.rg-page .rg-pw-toggle {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--rg-dim);
+    display: flex;
+    transition: color .15s ease, transform .1s ease;
+}
+
+.rg-pw-toggle:hover {
+    color: var(--rg-ink);
+}
+
+.rg-pw-toggle:active {
+    transform: scale(.96);
+}
+
+/* cross-fade entre eye-on/eye-off en vez de alternar "display" — los dos
+   iconos quedan superpuestos (position:absolute) y se funden entre sí */
+.rg-pw-toggle svg {
+    position: absolute;
+    inset: 0;
+    width: 18px;
+    height: 18px;
+    display: block;
+    opacity: 0;
+    transform: scale(.25);
+    filter: blur(4px);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1), filter .2s cubic-bezier(.2, 0, 0, 1);
+}
+
+.rg-pw-toggle .eye-on {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+}
+
+.rg-pw-toggle.is-showing .eye-on {
+    opacity: 0;
+    transform: scale(.25);
+    filter: blur(4px);
+}
+
+.rg-pw-toggle.is-showing .eye-off {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+}
+
+.rg-field-check {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--rg-mint);
+    opacity: 0;
+    transform: scale(.25);
+    transition: opacity .2s cubic-bezier(.2, 0, 0, 1), transform .2s cubic-bezier(.2, 0, 0, 1);
+}
+
+.rg-field-check.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.rg-field-check svg {
+    width: 14px;
+    height: 14px;
+}
+
+.rg-field-feedback {
+    display: block;
+    margin-top: 6px;
+    font-size: .68rem;
+    color: var(--rg-dim-2);
+    min-height: 1em;
+}
+
+.rg-field-feedback.is-error { color: var(--rg-rose); }
+.rg-field-feedback.is-ok { color: var(--rg-mint); }
+.rg-field-feedback.is-warning { color: var(--rg-amber); }
+
+.rg-field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: .68rem;
+    color: var(--rg-dim-2);
+}
+
+.rg-char-counter {
+    display: block;
+    margin-top: 6px;
+    font-size: .66rem;
+    color: var(--rg-dim-2);
+    text-align: right;
+}
+
+.rg-pw-strength {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+}
+
+.rg-pw-strength.is-visible {
+    display: flex;
+}
+
+.rg-pw-bar {
+    display: flex;
+    gap: 3px;
+}
+
+.rg-pw-bar i {
+    display: block;
+    width: 16px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--rg-line-soft);
+}
+
+.rg-pw-strength[data-level="1"] .rg-pw-bar i:nth-child(-n+1) { background: var(--rg-rose); }
+.rg-pw-strength[data-level="2"] .rg-pw-bar i:nth-child(-n+2) { background: var(--rg-amber); }
+.rg-pw-strength[data-level="3"] .rg-pw-bar i:nth-child(-n+3) { background: var(--rg-cyan-soft); }
+.rg-pw-strength[data-level="4"] .rg-pw-bar i:nth-child(-n+4) { background: var(--rg-accent); }
+
+.rg-pw-label {
+    font-family: var(--rg-disp);
+    font-size: .64rem;
+    color: var(--rg-dim-2);
+}
+
+.rg-step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rg-line-soft);
+}
+
+.rg-step-nav.is-borderless {
+    border-top: none;
+    padding-top: 0;
+}
+
+.rg-page .rg-btn-ghost {
+    font-family: var(--rg-disp);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--rg-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: transform .1s ease;
+}
+
+.rg-btn-ghost:hover {
+    color: var(--rg-ink);
+}
+
+.rg-btn-ghost:active {
+    transform: scale(.96);
+}
+
+.rg-page .rg-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: var(--rg-accent);
+    border: 1px solid var(--rg-accent);
+    border-radius: 5px;
+    color: var(--rg-on-accent);
+    font-family: var(--rg-disp);
+    font-weight: 700;
+    font-size: .82rem;
+    padding: 12px 20px;
+    box-shadow: 0 4px 16px -6px rgba(79, 160, 232, .45);
+    transition: background-color .15s ease, border-color .15s ease, transform .1s ease, box-shadow .15s ease;
+}
+
+.rg-btn:hover {
+    background: var(--rg-accent-soft);
+    border-color: var(--rg-accent-soft);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px -6px var(--rg-accent-dim);
+}
+
+.rg-btn:active {
+    transform: translateY(0) scale(.96);
+}
+
+.rg-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.rg-btn.is-loading {
+    pointer-events: none;
+    opacity: .85;
+}
+
+.rg-btn .btn-txt,
+.rg-btn .btn-load {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rg-btn .btn-load {
+    display: none;
+}
+
+.rg-btn.is-loading .btn-txt {
+    display: none;
+}
+
+.rg-btn.is-loading .btn-load {
+    display: flex;
+}
+
+.rg-actions {
+    margin-top: 20px;
+}
+
+.rg-actions .rg-btn {
+    width: 100%;
+}
+
+.rg-note {
+    text-align: center;
+    font-size: .68rem;
+    color: var(--rg-dim-2);
+    margin: 10px 0 0;
+}
+
+.rg-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--rg-rose-dim);
+    border: 1px solid rgba(239, 123, 146, .4);
+    color: var(--rg-ink);
+    border-radius: 6px;
+    padding: 11px 13px;
+    font-size: .78rem;
+    margin-bottom: 18px;
+}
+
+/* ============================= wizard state machine ============================= */
+/* Los tres bloques (chooser/loading/wizard) y ambos <form> viven en el DOM
+   siempre — lo único que cambia es cuál se muestra, gobernado por
+   [data-state] y [data-tipo] en <body> (renderizados ya correctos por el
+   servidor según tipoPreset, así no hay parpadeo inicial esperando a que
+   corra el JS) y actualizados en vivo por register.js durante la
+   interacción (elegir tarjeta, "cambiar tipo"). */
+
+.rg-chooser-block,
+.rg-wizard-block {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.rg-loading-block {
+    display: none;
+}
+
+.rg-wizard-form {
+    display: none;
+}
+
+.rg-page[data-state="chooser"] .rg-loading-block,
+.rg-page[data-state="chooser"] .rg-wizard-block,
+.rg-page[data-state="loading"] .rg-chooser-block,
+.rg-page[data-state="loading"] .rg-wizard-block,
+.rg-page[data-state="wizard"] .rg-chooser-block,
+.rg-page[data-state="wizard"] .rg-loading-block {
+    display: none;
+}
+
+.rg-page[data-state="loading"] .rg-loading-block {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.rg-page[data-tipo="talento"] .rg-wizard-form[data-tipo="talento"],
+.rg-page[data-tipo="empresa"] .rg-wizard-form[data-tipo="empresa"] {
+    display: block;
+}
+
+/* ============================= status bar ============================= */
+
+.rg-statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 22px;
+    background: var(--rg-panel-2);
+    border-top: 1px solid var(--rg-line);
+    font-family: var(--rg-disp);
+    font-size: .68rem;
+    color: var(--rg-dim-2);
+}
+
+.rg-statusbar .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rg-accent);
+    display: inline-block;
+    margin-right: 6px;
+    box-shadow: 0 0 5px var(--rg-accent);
+    transition: background-color .2s ease, box-shadow .2s ease;
+}
+
+.rg-statusbar .dot.is-busy {
+    background: var(--rg-amber);
+    box-shadow: 0 0 5px var(--rg-amber);
+}
+
+@media (max-width: 480px) {
+    .rg-statusbar span:last-child {
+        display: none;
+    }
+}
+
+/* ============================= toast ============================= */
+
+.rg-page .flash-banner.register-toast {
+    top: 26px;
+    background: var(--rg-panel);
+    border: 1px solid var(--rg-line);
+    border-radius: 6px;
+    box-shadow: 0 20px 45px -20px rgba(0, 0, 0, .65);
+    font-family: var(--rg-body);
+    font-size: .84rem;
+    font-weight: 500;
+    color: var(--rg-ink);
+    padding: 13px 14px 13px 18px;
+}
+
+.rg-page .flash-banner.register-toast::before {
+    width: 3px;
+    background: var(--rg-accent);
+}
+
+.rg-page .flash-banner.register-toast span:first-of-type::before {
+    content: "// ";
+    color: var(--rg-dim-2);
+}
+
+.rg-page .flash-banner.register-toast.error {
+    border-color: rgba(239, 123, 146, .35);
+}
+
+.rg-page .flash-banner.register-toast.error::before {
+    background: var(--rg-rose);
+}
+
+.rg-page .flash-banner .flash-close {
+    font-family: var(--rg-disp);
+    color: var(--rg-dim);
+    font-size: 1rem;
+    /* el glyph "×" solo mide ~10px — este padding lleva el área de click a
+       ~24px sin mover la posición visual (el margin negativo simétrico
+       compensa el padding en los 4 lados, así el gap del flex no se corre) */
+    padding: 7px;
+    margin: -7px;
+}
+
+.rg-page .flash-banner .flash-close:hover {
+    color: var(--rg-ink);
+}
+
+@media (max-width: 720px) {
+    .rg-frame {
+        width: 100%;
+    }
+
+    .rg-cards {
+        flex-direction: column;
+    }
+
+    .rg-card-divider {
+        display: none;
+    }
+
+    .rg-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rg-btn:hover,
+    .rg-btn:active,
+    .rg-card:active,
+    .rg-back-link:active,
+    .rg-btn-ghost:active,
+    .rg-chip.color:active,
+    .rg-pw-toggle:active {
+        transform: none;
+    }
+
+    .rg-pw-toggle svg {
+        transition: none;
+    }
+
+    .rg-frame-tag.is-editing,
+    .rg-frame.is-ready,
+    .rg-frame-scale.is-dropping {
+        animation: none;
+    }
+
+    .rg-frame.is-loading .rg-frame-progress::after {
+        animation: none;
+        transform: scaleX(.6);
+    }
+
+    .rg-card,
+    .rg-enter,
+    .rg-paso-panel,
+    .rg-buildlog li {
+        animation: none;
+        opacity: 1;
+    }
+
+    .rg-skel {
+        animation: none;
+    }
+}

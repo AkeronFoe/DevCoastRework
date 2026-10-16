@@ -1,0 +1,158 @@
+/* solicitudes (postulaciones + invitaciones), extiende empleos.css/talentos.css */
+
+/* ============================= tabs ============================= */
+.wsjobs .ws-tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--ws-line); }
+.wsjobs .ws-tab {
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--ws-mono-disp); font-size: .82rem; font-weight: 700;
+  color: var(--ws-dim); padding: 10px 4px; margin-bottom: -1px; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+}
+.wsjobs .ws-tab svg { width: 14px; height: 14px; }
+.wsjobs .ws-tab:hover { color: var(--ws-ink); }
+.wsjobs .ws-tab.active { color: var(--ws-accent); border-bottom-color: var(--ws-accent); }
+.wsjobs .ws-tab-badge {
+  font-size: .64rem; font-weight: 800; border-radius: 20px; padding: 1px 7px; background: var(--ws-panel-3); color: var(--ws-dim);
+}
+.wsjobs .ws-tab-badge.is-alert { background: var(--ws-rose-dim); color: var(--ws-rose); }
+.wsjobs .ws-tab.active .ws-tab-badge:not(.is-alert) { background: var(--ws-accent-dim); color: var(--ws-accent); }
+
+/* ============================= tabla de solicitudes ============================= */
+.wsjobs .ws-table-wrap { overflow-x: auto; }
+.wsjobs .ws-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.wsjobs .ws-table th {
+  text-align: left; font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ws-dim-2); padding: 0 12px 10px; border-bottom: 1px solid var(--ws-line);
+}
+.wsjobs .ws-table td { padding: 13px 12px; border-bottom: 1px solid var(--ws-line-soft); color: var(--ws-ink); vertical-align: middle; }
+.wsjobs .ws-table tbody tr { cursor: pointer; transition: background .15s; }
+.wsjobs .ws-table tbody tr:hover { background: var(--ws-panel-2); }
+.wsjobs .ws-table .muted-cell { color: var(--ws-dim-2); font-size: .78rem; margin-top: 2px; }
+.wsjobs .ws-table-chat {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 7px;
+  color: var(--ws-dim-2); background: var(--ws-panel-2); border: 1px solid var(--ws-line); transition: color .15s, border-color .15s;
+}
+.wsjobs .ws-table-chat:hover { color: var(--ws-accent); border-color: var(--ws-accent); }
+.wsjobs .ws-table-chat svg { width: 14px; height: 14px; }
+
+/* ============================= pill de estado ============================= */
+.wsjobs .status-pill {
+  display: inline-flex; align-items: center; font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700;
+  border-radius: 20px; padding: 4px 11px; white-space: nowrap;
+}
+.wsjobs .status-pill.status-review   { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .status-pill.status-approved { background: var(--ws-mint-dim);  color: var(--ws-mint); }
+.wsjobs .status-pill.status-rejected { background: var(--ws-rose-dim);  color: var(--ws-rose); }
+.wsjobs .status-pill.status-discarded{ background: var(--ws-panel-3);  color: var(--ws-dim-2); }
+
+/* ============================= cards de invitación ============================= */
+.wsjobs .inv-list { display: flex; flex-direction: column; gap: 14px; }
+.wsjobs .inv-card { background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; padding: 18px 20px; }
+.wsjobs .inv-card-header { display: flex; align-items: flex-start; gap: 12px; }
+.wsjobs .inv-avatar {
+  width: 40px; height: 40px; border-radius: 10px; background: var(--ws-violet-dim); color: var(--ws-violet-soft);
+  display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-weight: 800; font-size: 1rem; flex-shrink: 0;
+}
+.wsjobs .inv-header-info { flex: 1; min-width: 0; }
+.wsjobs .inv-header-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wsjobs .inv-empresa-name { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.05rem; color: var(--ws-ink); }
+.wsjobs .inv-estado-badge { font-family: var(--ws-mono-disp); font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; border-radius: 20px; padding: 3px 9px; }
+.wsjobs .inv-estado-badge.pendiente { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .inv-estado-badge.aceptada  { background: var(--ws-mint-dim);  color: var(--ws-mint); }
+.wsjobs .inv-estado-badge.rechazada { background: var(--ws-rose-dim);  color: var(--ws-rose); }
+.wsjobs .inv-sector { font-size: .76rem; color: var(--ws-dim-2); }
+.wsjobs .inv-fecha-header { font-size: .72rem; color: var(--ws-dim-2); flex-shrink: 0; }
+
+.wsjobs .inv-card-body { margin-top: 14px; }
+.wsjobs .inv-empleo-block { background: var(--ws-panel-2); border: 1px solid var(--ws-line-soft); border-radius: 8px; padding: 12px 14px; }
+.wsjobs .inv-empleo-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.wsjobs .inv-empleo-label { display: flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ws-dim-2); }
+.wsjobs .inv-empleo-link { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 700; color: var(--ws-accent); }
+.wsjobs .inv-empleo-titulo { font-family: var(--ws-editorial); font-style: italic; font-size: 1rem; color: var(--ws-ink); }
+.wsjobs .inv-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.wsjobs .inv-chip { font-family: var(--ws-mono-disp); font-size: .66rem; color: var(--ws-dim-2); background: var(--ws-panel-3); border-radius: 4px; padding: 3px 8px; }
+.wsjobs .inv-chip.inv-chip-salary { color: var(--ws-mint); background: var(--ws-mint-dim); font-weight: 700; }
+
+.wsjobs .inv-mensaje-block { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--ws-line-soft); }
+.wsjobs .inv-mensaje-label { font-family: var(--ws-mono-disp); font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ws-dim-2); margin-bottom: 4px; }
+.wsjobs .inv-mensaje-texto { font-size: .84rem; color: var(--ws-ink); opacity: .92; line-height: 1.55; }
+
+.wsjobs .inv-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ws-line-soft); flex-wrap: wrap; }
+.wsjobs .inv-footer-left { display: flex; align-items: center; gap: 10px; }
+.wsjobs .inv-hora { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--ws-dim-2); }
+.wsjobs .inv-hora svg { width: 12px; height: 12px; }
+.wsjobs .inv-acciones { display: flex; gap: 8px; }
+.wsjobs .inv-estado-final { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; }
+.wsjobs .inv-estado-final.aceptada { color: var(--ws-mint); }
+.wsjobs .inv-estado-final.rechazada { color: var(--ws-dim-2); }
+.wsjobs .inv-copy-btn.is-copied { color: var(--ws-mint); border-color: rgba(123,216,174,.4); }
+
+/* ============================= detalle de solicitud ============================= */
+.wsjobs .detail-hero { display: flex; align-items: center; gap: 16px; }
+.wsjobs .detail-hero-icon {
+  width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--card-accent, var(--ws-cyan)); color: #0a1826; box-shadow: 0 0 0 4px var(--ws-panel);
+}
+.wsjobs .detail-hero-icon svg { width: 24px; height: 24px; }
+.wsjobs .detail-hero-title { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.3rem; color: var(--ws-ink); }
+.wsjobs .detail-hero-sub { font-size: .84rem; color: var(--ws-dim-2); margin-top: 2px; }
+.wsjobs .detail-hero-extra { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+.wsjobs .detail-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .wsjobs .detail-grid-2 { grid-template-columns: 1fr; } }
+.wsjobs .detail-item strong { display: block; font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ws-dim-2); margin-bottom: 4px; }
+.wsjobs .detail-item p { margin: 0; font-size: .88rem; color: var(--ws-ink); }
+
+.wsjobs .detail-message { background: var(--ws-panel-2); border: 1px solid var(--ws-line-soft); border-radius: 8px; padding: 14px 16px; }
+.wsjobs .detail-message__text { margin: 0; font-size: .88rem; color: var(--ws-ink); line-height: 1.6; }
+
+.wsjobs .detail-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+.wsjobs .detail-count { font-size: .72rem; color: var(--ws-dim-2); }
+.wsjobs .detail-subtext { font-size: .8rem; color: var(--ws-dim-2); margin: 0 0 12px; }
+.wsjobs .detail-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.wsjobs .detail-chip__link { font-family: var(--ws-mono-disp); font-size: .74rem; color: var(--ws-accent); background: var(--ws-accent-dim); border-radius: 6px; padding: 5px 10px; }
+.wsjobs .detail-footer-note { margin: 14px 0 0; font-size: .8rem; }
+.wsjobs .detail-footer-note a { color: var(--ws-accent); font-weight: 600; }
+.wsjobs .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── estado actual ── */
+.wsjobs .sol-estado-actual { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 10px; border: 1px solid; }
+.wsjobs .sol-estado-actual p { margin: 4px 0 0; font-size: .85rem; }
+.wsjobs .sol-estado-actual strong { font-size: .92rem; color: var(--ws-ink); }
+.wsjobs .sol-estado-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wsjobs .sol-estado-icon svg { width: 16px; height: 16px; }
+.wsjobs .sol-estado-ok      { background: var(--ws-mint-dim);  border-color: rgba(123,216,174,.35); color: var(--ws-mint); }
+.wsjobs .sol-estado-no      { background: var(--ws-rose-dim);  border-color: rgba(239,123,146,.35); color: var(--ws-rose); }
+.wsjobs .sol-estado-warn    { background: var(--ws-amber-dim); border-color: rgba(242,171,92,.35);  color: var(--ws-amber); }
+.wsjobs .sol-estado-pending { background: var(--ws-cyan-dim);  border-color: rgba(79,160,232,.35);  color: var(--ws-cyan); }
+.wsjobs .sol-estado-ok .sol-estado-icon      { background: rgba(123,216,174,.22); }
+.wsjobs .sol-estado-no .sol-estado-icon      { background: rgba(239,123,146,.22); }
+.wsjobs .sol-estado-warn .sol-estado-icon    { background: rgba(242,171,92,.22); }
+.wsjobs .sol-estado-pending .sol-estado-icon { background: rgba(79,160,232,.22); }
+
+/* ── línea de tiempo ── */
+.wsjobs .sol-timeline { display: flex; flex-direction: column; }
+.wsjobs .sol-tl-event { display: flex; gap: 16px; align-items: flex-start; }
+.wsjobs .sol-tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 14px; padding-top: 3px; }
+.wsjobs .sol-tl-dot { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid; background: var(--ws-panel); flex-shrink: 0; z-index: 1; }
+.wsjobs .sol-tl-connector { width: 1.5px; flex: 1; min-height: 24px; background: var(--ws-line); margin: 3px 0; }
+.wsjobs .sol-tl-body { padding-bottom: 20px; flex: 1; }
+.wsjobs .sol-tl-event:last-child .sol-tl-body { padding-bottom: 0; }
+.wsjobs .dot-ok      { border-color: var(--ws-mint); }
+.wsjobs .dot-no      { border-color: var(--ws-rose); }
+.wsjobs .dot-warn    { border-color: var(--ws-amber); }
+.wsjobs .dot-pending { border-color: var(--ws-cyan); }
+.wsjobs .sol-tl-badge { display: inline-block; font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.wsjobs .tl-badge-ok      { background: var(--ws-mint-dim);  color: var(--ws-mint); }
+.wsjobs .tl-badge-no      { background: var(--ws-rose-dim);  color: var(--ws-rose); }
+.wsjobs .tl-badge-warn    { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .tl-badge-pending { background: var(--ws-cyan-dim);  color: var(--ws-cyan); }
+
+/* ============================= modal de confirmación ============================= */
+.wsjobs .ws-modal-scrim {
+  display: none; position: fixed; inset: 0; background: rgba(6,7,10,.75); z-index: 300; align-items: center; justify-content: center; padding: 16px;
+}
+.wsjobs .ws-modal-scrim.is-open { display: flex; }
+.wsjobs .ws-modal-box { background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 12px; padding: 26px 28px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 30px 70px -20px rgba(0,0,0,.7); }
+.wsjobs .ws-modal-box svg.warn { color: var(--ws-rose); margin-bottom: 10px; }
+.wsjobs .ws-modal-box h3 { margin: 0 0 8px; color: var(--ws-ink); font-family: var(--ws-editorial); font-style: italic; font-size: 1.2rem; }
+.wsjobs .ws-modal-box p { font-size: .84rem; color: var(--ws-dim-2); margin: 0 0 20px; }
+.wsjobs .ws-modal-actions { display: flex; gap: 10px; justify-content: center; }

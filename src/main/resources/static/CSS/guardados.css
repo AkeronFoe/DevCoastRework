@@ -1,0 +1,27 @@
+/* guardados, sobre la base de empleos.css. Las cards de empleo son
+   literalmente las mismas .job-card que en /empleos — así una vacante
+   guardada se ve exactamente igual acá que en el listado real. Lo único
+   propio de esta página son los gauges del resumen y el guardado_en. */
+
+.gd-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 22px; }
+.gd-stat {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; padding: 16px 16px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.gd-stat-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.gd-stat-icon svg { width: 15px; height: 15px; }
+.gd-stat-icon--cyan { background: var(--ws-cyan-dim); color: var(--ws-cyan); }
+.gd-stat-icon--mint { background: var(--ws-mint-dim); color: var(--ws-mint); }
+.gd-stat-icon--amber { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.gd-stat-num { font-family: var(--ws-mono-disp); font-weight: 800; font-size: 1.7rem; color: var(--ws-ink); line-height: 1; font-variant-numeric: tabular-nums; }
+.gd-stat-label { font-size: .72rem; color: var(--ws-dim-2); }
+
+/* la card guardada reusa .job-card tal cual; solo el botón de "quitar"
+   necesita un estado de salida propio */
+.wsjobs .job-card.is-removing { pointer-events: none; }
+
+/* el chip de filtro de esta página no usa data-filter (no son categorías
+   reales, son estados: todos / alta compat / sin aplicar), así que no
+   hereda el "--" ni el lowercase que sí llevan los chips de categoría */
+.gd-filter-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.gd-sort { display: flex; align-items: center; gap: 8px; font-size: .74rem; color: var(--ws-dim-2); }

@@ -1,0 +1,66 @@
+.wsjobs .analytics-badge {
+  font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ws-mint); background: var(--ws-mint-dim); border-radius: 20px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 5px;
+}
+.wsjobs .analytics-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ws-mint); }
+
+.wsjobs .charts-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.wsjobs .charts-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 980px) {
+  .wsjobs .charts-grid, .wsjobs .charts-grid-3 { grid-template-columns: 1fr; }
+}
+
+.wsjobs .chart-card {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; padding: 18px 20px;
+}
+.wsjobs .chart-title { font-family: var(--ws-mono-disp); font-weight: 700; font-size: .84rem; color: var(--ws-ink); }
+.wsjobs .chart-subtitle { font-size: .74rem; color: var(--ws-dim-2); margin: 3px 0 0; }
+.wsjobs .chart-wrap { position: relative; margin-top: 12px; }
+.wsjobs .chart-wrap.h200 { height: 200px; }
+.wsjobs .chart-wrap.h240 { height: 240px; }
+
+.wsjobs .remoto-ring { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.wsjobs .remoto-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 120px; }
+.wsjobs .legend-item { display: flex; align-items: center; gap: 8px; font-size: .78rem; color: var(--ws-dim); }
+.wsjobs .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.wsjobs .legend-val { margin-left: auto; font-family: var(--ws-mono-disp); font-weight: 700; color: var(--ws-ink); }
+
+.wsjobs .analytics-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.wsjobs .analytics-table th {
+  text-align: left; font-family: var(--ws-mono-disp); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ws-dim-2); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--ws-line);
+}
+.wsjobs .analytics-table td { padding: 10px; border-bottom: 1px solid var(--ws-line); color: var(--ws-dim); }
+.wsjobs .analytics-table tr:last-child td { border-bottom: none; }
+.wsjobs .analytics-empty-cell { text-align: center; color: var(--ws-dim-2); padding: 28px 10px; }
+
+.wsjobs .pill-blue  { color: var(--ws-cyan);  background: var(--ws-cyan-dim); }
+.wsjobs .pill-amber { color: var(--ws-amber); background: var(--ws-amber-dim); }
+.wsjobs .pill-green { color: var(--ws-mint);  background: var(--ws-mint-dim); }
+.wsjobs .pill-red    { color: var(--ws-rose);  background: var(--ws-rose-dim); }
+
+.wsjobs .analytics-tip-card { display: flex; flex-direction: column; }
+.wsjobs .analytics-tip { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 10px; }
+.wsjobs .analytics-tip p { font-size: .8rem; color: var(--ws-dim); margin: 0; }
+.wsjobs .analytics-tip-icon {
+  width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.wsjobs .analytics-tip-icon svg { width: 16px; height: 16px; }
+.wsjobs .analytics-tip-icon.c1 { background: var(--ws-cyan-dim); color: var(--ws-cyan); }
+.wsjobs .analytics-tip-icon.c2 { background: var(--ws-mint-dim); color: var(--ws-mint); }
+.wsjobs .analytics-tip-icon.c3 { background: var(--ws-amber-dim); color: var(--ws-amber); }
+.wsjobs .analytics-tip-icon.c4 { background: var(--ws-rose-dim); color: var(--ws-rose); }
+
+.wsjobs .analytics-plat {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; padding: 16px 20px; margin-top: 4px;
+}
+.wsjobs .analytics-plat-label { font-family: var(--ws-mono-disp); font-size: .7rem; font-weight: 700; color: var(--ws-dim-2); text-transform: uppercase; letter-spacing: .04em; }
+.wsjobs .analytics-plat-stats { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.wsjobs .analytics-plat-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.wsjobs .analytics-plat-val { font-family: var(--ws-mono-disp); font-weight: 800; font-size: 1.15rem; color: var(--ws-ink); }
+.wsjobs .analytics-plat-lbl { font-size: .68rem; color: var(--ws-dim-2); }
+.wsjobs .analytics-plat-sep { width: 1px; height: 24px; background: var(--ws-line); }
+
+@keyframes analyticsFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.wsjobs .kpi-anim, .wsjobs .chart-card { animation: analyticsFadeUp .3s ease both; }

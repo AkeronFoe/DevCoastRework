@@ -1,0 +1,61 @@
+/* detalles-empleo, sobre empleos.css + talentos.css + solicitudes.css
+   (de ahí salen .detail-hero, .detail-grid-2, .status-pill, etc. — esta
+   página reusa ese mismo lenguaje de "ficha de detalle" en vez de inventar
+   uno nuevo). Solo lo propio: el modal de aplicar y las cards de proyecto
+   para adjuntar. */
+
+.wsjobs .detail-hero { justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.wsjobs .detail-hero-main { display: flex; align-items: center; gap: 16px; min-width: 0; }
+
+/* ============================= modal: aplicar a este empleo ============================= */
+.jd-modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(6,7,10,.75); backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 16px; }
+.jd-modal-overlay.is-open { display: flex; }
+.jd-modal {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 14px; width: 100%; max-width: 620px;
+  height: min(640px, 88vh); display: flex; flex-direction: column; box-shadow: 0 40px 90px -24px rgba(0,0,0,.7);
+}
+.jd-modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 22px 0; flex-shrink: 0; }
+.jd-modal-header h2 { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.15rem; color: var(--ws-ink); margin: 0 0 3px; }
+.jd-modal-header p { font-size: .8rem; color: var(--ws-dim-2); margin: 0; }
+.jd-modal-close { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--ws-dim); background: var(--ws-panel-2); border: 1px solid var(--ws-line); flex-shrink: 0; }
+.jd-modal-close:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
+.jd-modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+.jd-field { margin-bottom: 18px; }
+.jd-field-label { font-family: var(--ws-mono-disp); font-size: .7rem; font-weight: 700; letter-spacing: .02em; color: var(--ws-dim); display: block; margin-bottom: 8px; }
+.jd-field-label .opt { color: var(--ws-dim-2); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.jd-textarea {
+  width: 100%; box-sizing: border-box; background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 8px;
+  padding: 10px 12px; color: var(--ws-ink); font-family: var(--ws-mono-body); font-size: .86rem; resize: vertical; outline: none; transition: border-color .15s;
+}
+.jd-textarea:focus { border-color: var(--ws-accent); }
+.jd-textarea::placeholder { color: var(--ws-dim-2); }
+.jd-hint { font-size: .78rem; color: var(--ws-dim-2); margin: -2px 0 12px; }
+
+.jd-proy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.jd-proy-card {
+  position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 13px; border-radius: 9px;
+  border: 1.5px solid var(--ws-line); background: var(--ws-panel-2); cursor: pointer; transition: border-color .15s, background .15s, transform .1s; user-select: none;
+}
+.jd-proy-card:active { transform: scale(.98); }
+.jd-proy-card.is-selected { border-color: var(--ws-accent); background: var(--ws-accent-dim); }
+.jd-proy-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0a1826; flex-shrink: 0; }
+.jd-proy-icon svg { width: 15px; height: 15px; }
+.jd-proy-name { font-size: .84rem; font-weight: 700; color: var(--ws-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jd-proy-cat { font-size: .7rem; color: var(--ws-dim-2); }
+.jd-proy-check {
+  width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--ws-line); flex-shrink: 0; display: flex;
+  align-items: center; justify-content: center; transition: background .15s, border-color .15s; margin-left: auto;
+}
+.jd-proy-check svg { width: 11px; height: 11px; opacity: 0; transition: opacity .15s; color: #08131f; }
+.jd-proy-card.is-selected .jd-proy-check { background: var(--ws-accent); border-color: var(--ws-accent); }
+.jd-proy-card.is-selected .jd-proy-check svg { opacity: 1; }
+.jd-proy-empty { padding: 20px; border: 1.5px dashed var(--ws-line); border-radius: 9px; text-align: center; }
+.jd-proy-empty p { font-size: .84rem; color: var(--ws-dim-2); margin: 0 0 10px; }
+.jd-max-warn { display: none; font-size: .76rem; color: var(--ws-amber); margin-top: 10px; }
+
+.jd-modal-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 22px; border-top: 1px solid var(--ws-line); flex-shrink: 0; }
+.jd-modal-footer-count { font-size: .76rem; color: var(--ws-dim-2); }
+
+.jd-empresa-note { display: flex; align-items: center; gap: 10px; background: var(--ws-accent-dim); border: 1px solid var(--ws-accent); border-radius: 8px; padding: 12px 14px; font-size: .84rem; color: var(--ws-ink); flex-wrap: wrap; }
+.jd-empresa-note svg { width: 16px; height: 16px; color: var(--ws-accent); flex-shrink: 0; }
+.jd-empresa-note a { color: var(--ws-accent); font-weight: 700; }

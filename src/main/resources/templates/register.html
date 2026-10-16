@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta}"></th:block>
+    <title>Crear cuenta | DevCoast</title>
+    <th:block th:replace="~{fragments/head :: assets}"></th:block>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/register.css}">
+    <script th:src="@{/JS/transitions.js}" defer></script>
+    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <script th:src="@{/JS/polish.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script th:src="@{/JS/register.js}" defer></script>
+</head>
+
+<body class="rg-page" th:with="errorTipo=${param.error != null ? param.error[0] : null}"
+    th:attr="data-state=${tipoPreset != null ? 'wizard' : 'chooser'},data-tipo=${tipoPreset}">
+
+    <header class="rg-toolbar">
+        <a class="rg-brand" th:href="@{/about-us}">
+            <img th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast" width="22" height="22">
+            <b>DevCoast</b>
+            <span class="rg-crumb"><span class="sep">/</span>auth<span class="sep">/</span><span class="file"
+                    id="rg-crumb-file">register.tsx</span></span>
+        </a>
+        <span class="rg-build-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+            </svg>
+            build passing
+        </span>
+        <div class="rg-tools" aria-hidden="true">
+            <span class="rg-tool" title="cursor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="m4 4 7.07 17 2.51-7.39L21 11.07Z" />
+                </svg>
+            </span>
+            <span class="rg-tool is-active" title="frame">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="1" />
+                </svg>
+            </span>
+            <span class="rg-tool" title="pluma">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z" />
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+                </svg>
+            </span>
+            <span class="rg-tool" title="capas">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                </svg>
+            </span>
+        </div>
+    </header>
+
+    <div class="rg-body">
+        <aside class="rg-sidebar">
+            <div class="rg-sidebar-bar">
+                <span class="rg-sidebar-title">explorer</span>
+                <span class="rg-sidebar-tools">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 2v6h6" />
+                        <path d="M12 12v6M9 15h6" />
+                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                        <path d="M21 3v5h-5" />
+                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                        <path d="M3 21v-5h5" />
+                    </svg>
+                </span>
+            </div>
+
+            <div class="rg-tree-item">
+                <div class="rg-tree-row is-folder"><span class="rg-tree-chevron">▾</span><span
+                        class="rg-tree-name">DEVCOAST</span></div>
+                <div class="rg-tree-children">
+
+                    <div class="rg-tree-item">
+                        <div class="rg-tree-row is-folder"><span class="rg-tree-chevron">▾</span><span
+                                class="rg-tree-name">src</span></div>
+                        <div class="rg-tree-children">
+
+                            <div class="rg-tree-item">
+                                <div class="rg-tree-row is-folder"><span class="rg-tree-chevron">▾</span><span
+                                        class="rg-tree-name">auth</span></div>
+                                <div class="rg-tree-children">
+                                    <a class="rg-tree-row" th:href="@{/login}"><span
+                                            class="rg-tree-dot tsx"></span><span
+                                            class="rg-tree-name">login.tsx</span><span
+                                            class="rg-tree-badge">M</span></a>
+                                    <div class="rg-tree-row is-selected"><span class="rg-tree-dot tsx"></span><span
+                                            class="rg-tree-name">register.tsx</span><span
+                                            class="rg-tree-badge">M</span></div>
+                                    <div class="rg-tree-row"><span class="rg-tree-dot ts"></span><span
+                                            class="rg-tree-name">session.ts</span></div>
+                                </div>
+                            </div>
+
+                            <div class="rg-tree-item">
+                                <div class="rg-tree-row is-folder"><span class="rg-tree-chevron">▾</span><span
+                                        class="rg-tree-name">components</span></div>
+                                <div class="rg-tree-children">
+                                    <div class="rg-tree-row"><span class="rg-tree-dot tsx"></span><span
+                                            class="rg-tree-name">Button.tsx</span></div>
+                                    <div class="rg-tree-row"><span class="rg-tree-dot tsx"></span><span
+                                            class="rg-tree-name">Input.tsx</span></div>
+                                    <div class="rg-tree-row"><span class="rg-tree-dot tsx"></span><span
+                                            class="rg-tree-name">Frame.tsx</span></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="rg-tree-item">
+                        <div class="rg-tree-row is-folder is-collapsed"><span class="rg-tree-chevron">▾</span><span
+                                class="rg-tree-name">node_modules</span></div>
+                        <div class="rg-tree-children is-collapsed">
+                            <div class="rg-tree-row"><span class="rg-tree-dot tsx"></span><span
+                                    class="rg-tree-name">gsap</span></div>
+                            <div class="rg-tree-row"><span class="rg-tree-dot ts"></span><span
+                                    class="rg-tree-name">typescript</span></div>
+                            <div class="rg-tree-row rg-tree-summary">⋯ +1,282 más</div>
+                        </div>
+                    </div>
+
+                    <div class="rg-tree-row"><span class="rg-tree-dot json"></span><span
+                            class="rg-tree-name">package.json</span></div>
+
+                </div>
+            </div>
+
+        </aside>
+
+        <main class="rg-canvas" id="rg-canvas">
+            <canvas class="rg-dots-canvas" id="rg-dots-canvas" aria-hidden="true"></canvas>
+
+            <div class="rg-ruler-x" aria-hidden="true">
+                <span>0</span><span>120</span><span>240</span><span>360</span><span>480</span><span>600</span>
+                <span class="rg-ruler-mark x" id="rg-ruler-mark-x"></span>
+            </div>
+            <div class="rg-ruler-y" aria-hidden="true">
+                <span>0</span><span>120</span><span>240</span><span>360</span><span>480</span>
+                <span class="rg-ruler-mark y" id="rg-ruler-mark-y"></span>
+            </div>
+
+            <div class="rg-guide-third v" id="rg-third-v1" style="left:33.333%" aria-hidden="true"></div>
+            <div class="rg-guide-third v" id="rg-third-v2" style="left:66.667%" aria-hidden="true"></div>
+            <div class="rg-guide-third h" id="rg-third-h1" style="top:33.333%" aria-hidden="true"></div>
+            <div class="rg-guide-third h" id="rg-third-h2" style="top:66.667%" aria-hidden="true"></div>
+
+            <div class="rg-guide v" id="rg-guide-v" aria-hidden="true"></div>
+            <div class="rg-guide h" id="rg-guide-h" aria-hidden="true"></div>
+            <div class="rg-centered-chip" id="rg-centered-chip" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M5 12h14M12 5v14" />
+                </svg>
+                centrado
+            </div>
+
+            <div class="rg-edge t" id="rg-edge-t" aria-hidden="true"><span id="rg-edge-t-val"></span></div>
+            <div class="rg-edge b" id="rg-edge-b" aria-hidden="true"><span id="rg-edge-b-val"></span></div>
+            <div class="rg-edge l" id="rg-edge-l" aria-hidden="true"><span id="rg-edge-l-val"></span></div>
+            <div class="rg-edge r" id="rg-edge-r" aria-hidden="true"><span id="rg-edge-r-val"></span></div>
+
+            <button type="button" class="rg-chip color" id="rg-copy-hex" aria-label="Copiar color al portapapeles">
+                <span class="swatch"></span>
+                <span class="rg-copy-label" id="rg-copy-label">#4FA0E8</span>
+                <span class="rg-copy-done">copiado ✓</span>
+            </button>
+            <div class="rg-chip type" aria-hidden="true">
+                <span class="aa">Aa</span>
+                <span>Fraunces 500</span>
+                <span class="rg-type-expand">· italic · 26px</span>
+            </div>
+            <div class="rg-chip code" aria-hidden="true">{ }<span>auth.register</span></div>
+
+            <div class="rg-cursor-tag" id="rg-cursor-tag" aria-hidden="true"></div>
+
+            <div class="rg-inspector" id="rg-inspector" aria-hidden="true">
+                <div class="rg-inspector-title">inspector</div>
+                <div class="rg-inspector-row"><span>x</span><b id="rg-insp-x">0</b></div>
+                <div class="rg-inspector-row"><span>y</span><b id="rg-insp-y">0</b></div>
+            </div>
+
+            <div class="rg-frame-wrap" id="rg-frame-wrap">
+                <div class="rg-frame-scale" id="rg-frame-scale">
+                    <div class="rg-frame-tag" id="rg-frame-tag">
+                        <span id="rg-frame-tag-label">register-frame · elegir tipo</span>
+                        <span class="rg-unsaved-dot" id="rg-unsaved-dot" aria-hidden="true"
+                            title="cambios sin enviar"></span>
+                    </div>
+                    <div class="rg-handle tl"></div>
+                    <div class="rg-handle tr"></div>
+                    <div class="rg-handle bl"></div>
+                    <div class="rg-handle br"></div>
+                    <button type="button" class="rg-move-handle" id="rg-move-handle" aria-hidden="true"
+                        tabindex="-1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="5 9 2 12 5 15" />
+                            <polyline points="9 5 12 2 15 5" />
+                            <polyline points="15 19 12 22 9 19" />
+                            <polyline points="19 9 22 12 19 15" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <line x1="12" y1="2" x2="12" y2="22" />
+                        </svg>
+                    </button>
+
+                    <div class="rg-frame" id="rg-frame">
+                        <div class="rg-fbody" id="rg-fbody">
+
+                            <!-- ================= selector de tipo de cuenta ================= -->
+                            <div class="rg-chooser-block rg-enter" id="rg-chooser">
+                                <p class="rg-kicker">cuenta.tipo = null</p>
+                                <h1 class="rg-title">¿Cómo querés sumarte a DevCoast?</h1>
+                                <p class="rg-sub">Elegí una opción para armar tu cuenta — vas a poder revisar todo
+                                    antes de confirmar.</p>
+                                <div class="rg-cards">
+                                    <button type="button" class="rg-card talento" id="rg-pick-talento"
+                                        data-pick="talento">
+                                        <div class="rg-card-top">
+                                            <div class="cicon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                                    <circle cx="12" cy="7" r="4" />
+                                                </svg>
+                                            </div>
+                                            <div class="check-badge">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <h3>Soy Talento</h3>
+                                        <p class="cdesc">Portafolio, stack y postulaciones en un solo perfil.</p>
+                                        <ul class="cbullets">
+                                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>Portafolio visible para reclutadores</li>
+                                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>Seguimiento de tus postulaciones</li>
+                                        </ul>
+                                        <div class="cselect">Empezar como talento<svg viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M5 12h14M13 6l6 6-6 6" />
+                                            </svg></div>
+                                    </button>
+                                    <div class="rg-card-divider">o</div>
+                                    <button type="button" class="rg-card empresa" id="rg-pick-empresa"
+                                        data-pick="empresa">
+                                        <div class="rg-card-top">
+                                            <div class="cicon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+                                                    <path d="M10 6h4M10 10h4M10 14h4M10 18h4" />
+                                                </svg>
+                                            </div>
+                                            <div class="check-badge">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <h3>Soy Empresa</h3>
+                                        <p class="cdesc">Publicá vacantes y gestioná candidatos en un solo lugar.</p>
+                                        <ul class="cbullets">
+                                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>Marca empleadora más cuidada</li>
+                                            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 6 9 17l-5-5" />
+                                                </svg>Gestión centralizada de candidaturas</li>
+                                        </ul>
+                                        <div class="cselect">Empezar como empresa<svg viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M5 12h14M13 6l6 6-6 6" />
+                                            </svg></div>
+                                    </button>
+                                </div>
+                                <p class="rg-foot">¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
+                            </div>
+
+                            <!-- ================= "compilando" ================= -->
+                            <div class="rg-loading-block rg-loadwrap" id="rg-loading">
+                                <p class="rg-kicker">compilando register.tsx</p>
+                                <h1 class="rg-title" id="rg-loading-title">Construye un perfil que destaque.</h1>
+                                <div class="rg-skel-steps">
+                                    <div class="rg-skel rg-skel-dot"></div>
+                                    <div class="rg-skel-seg"></div>
+                                    <div class="rg-skel rg-skel-dot"></div>
+                                    <div class="rg-skel-seg"></div>
+                                    <div class="rg-skel rg-skel-dot"></div>
+                                </div>
+                                <ul class="rg-buildlog" id="rg-buildlog">
+                                    <li style="animation-delay:.05s"><span class="lchk"><svg viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2.5"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 6 9 17l-5-5" />
+                                            </svg></span>instalando validaciones del formulario</li>
+                                    <li style="animation-delay:.4s"><span class="lchk"><svg viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2.5"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 6 9 17l-5-5" />
+                                            </svg></span>armando el wizard de pasos</li>
+                                    <li style="animation-delay:.75s"><span class="lchk"><svg viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2.5"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 6 9 17l-5-5" />
+                                            </svg></span>aplicando estilos de <span class="accent"
+                                            id="rg-buildlog-tipo">talento</span></li>
+                                </ul>
+                                <div class="rg-loadbar-track">
+                                    <div class="rg-loadbar-fill" id="rg-loadbar-fill"></div>
+                                </div>
+                                <p class="rg-loadlabel">preparando tu formulario de <span class="accent"
+                                        id="rg-loadlabel-tipo">talento</span>…</p>
+                            </div>
+
+                            <!-- ================= wizard ================= -->
+                            <div class="rg-wizard-block" id="rg-wizard">
+                                <button type="button" class="rg-back-link" id="rg-change-type">← Cambiar tipo de
+                                    cuenta</button>
+                                <p class="rg-kicker">cuenta.tipo = "<span class="ktype" id="rg-kicker-tipo">talento</span>"
+                                </p>
+                                <h1 class="rg-title" id="rg-wizard-title">Construye un perfil que destaque.</h1>
+                                <p class="rg-sub" id="rg-wizard-sub">Crea tu cuenta, muestra tu stack y presenta tu
+                                    trabajo en 3 pasos rápidos.</p>
+                                <p class="rg-esta">
+                                    <span class="rg-type-badge" id="rg-type-badge">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                    </span>
+                                    <span id="rg-esta-text">Perfil profesional · 3 pasos · ~2 min</span>
+                                </p>
+
+                                <!-- ---- formulario TALENTO ---- -->
+                                <form class="rg-wizard-form" data-tipo="talento" th:action="@{/register/talento}"
+                                    method="post" id="rg-form-talento">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                    <div class="rg-stepper" data-stepper>
+                                        <div class="rg-step-item" data-step="0">
+                                            <div class="rg-snum">1</div><span class="rg-slabel">Cuenta</span>
+                                        </div>
+                                        <div class="rg-sline"></div>
+                                        <div class="rg-step-item" data-step="1">
+                                            <div class="rg-snum">2</div><span class="rg-slabel">Perfil</span>
+                                        </div>
+                                        <div class="rg-sline"></div>
+                                        <div class="rg-step-item" data-step="2">
+                                            <div class="rg-snum">3</div><span class="rg-slabel">Presencia</span>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${tipoPreset == 'talento' and errorTipo != null}" class="rg-alert">
+                                        <span th:if="${errorTipo == 'correo'}">Ya existe una cuenta con ese correo.
+                                            Usa otro correo o inicia sesión.</span>
+                                        <span th:if="${errorTipo == 'password'}">La contraseña debe tener al menos 8
+                                            caracteres.</span>
+                                    </div>
+
+                                    <div class="rg-paso-panel" data-paso="0">
+                                        <div class="rg-grid">
+                                            <div class="rg-field">
+                                                <label for="t-nombre">Nombre completo <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow">
+                                                    <input id="t-nombre" type="text" name="nombre"
+                                                        placeholder="Ej. Andrea López" th:value="${fNombre ?: ''}"
+                                                        required>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-correo">Correo de acceso <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow" data-correo-row>
+                                                    <input id="t-correo" type="email" name="correo"
+                                                        placeholder="tu@correo.com" th:value="${fCorreo ?: ''}"
+                                                        th:with="dataErrCorreo=${(tipoPreset == 'talento' and errorTipo == 'correo') ? 'true' : null}"
+                                                        th:attr="data-error-field=${dataErrCorreo}"
+                                                        autocomplete="off" data-correo-input required>
+                                                    <span class="rg-field-check" data-correo-check><svg
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2.5" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M20 6 9 17l-5-5" />
+                                                        </svg></span>
+                                                </div>
+                                                <small class="rg-field-feedback" data-correo-feedback></small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-password">Contraseña <span class="req">*</span></label>
+                                                <div class="rg-irow">
+                                                    <input id="t-password" type="password" name="password"
+                                                        placeholder="Mínimo 8 caracteres" autocomplete="new-password"
+                                                        th:with="dataErrPassword=${(tipoPreset == 'talento' and errorTipo == 'password') ? 'true' : null}"
+                                                        th:attr="data-error-field=${dataErrPassword}"
+                                                        data-password-input required>
+                                                    <button type="button" class="rg-pw-toggle" data-pw-toggle
+                                                        data-target="t-password" aria-label="Mostrar contraseña">
+                                                        <svg class="eye-on" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                        <svg class="eye-off" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                                            <path
+                                                                d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                                            <path
+                                                                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                                            <line x1="2" y1="2" x2="22" y2="22" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="rg-pw-strength" data-pw-strength>
+                                                    <span class="rg-pw-bar"><i></i><i></i><i></i><i></i></span>
+                                                    <span class="rg-pw-label" data-pw-label></span>
+                                                </div>
+                                                <small class="rg-field-hint" data-pw-help>Mínimo 8 caracteres. Usa
+                                                    mayúsculas, números y símbolos para más seguridad.</small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-passwordConfirm">Confirmar contraseña <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow">
+                                                    <input id="t-passwordConfirm" type="password"
+                                                        name="passwordConfirm" placeholder="Repite tu contraseña"
+                                                        autocomplete="new-password" data-password-confirm required>
+                                                    <button type="button" class="rg-pw-toggle" data-pw-toggle
+                                                        data-target="t-passwordConfirm"
+                                                        aria-label="Mostrar contraseña">
+                                                        <svg class="eye-on" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                        <svg class="eye-off" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                                            <path
+                                                                d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                                            <path
+                                                                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                                            <line x1="2" y1="2" x2="22" y2="22" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <small class="rg-field-feedback" data-password-match-msg></small>
+                                            </div>
+                                            <div class="rg-field rg-field--full">
+                                                <label for="t-emailContacto">Correo de contacto</label>
+                                                <div class="rg-irow">
+                                                    <input id="t-emailContacto" type="email" name="emailContacto"
+                                                        th:value="${fEmailContacto ?: ''}"
+                                                        placeholder="opcional, para reclutadores">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rg-step-nav">
+                                            <span></span>
+                                            <button type="button" class="rg-btn" data-next="1">Continuar<svg
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                                </svg></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="rg-paso-panel" data-paso="1" style="display:none;">
+                                        <div class="rg-grid">
+                                            <div class="rg-field">
+                                                <label for="t-rolTitulo">Rol o título <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow"><input id="t-rolTitulo" type="text"
+                                                        name="rolTitulo" placeholder="Frontend Developer"
+                                                        th:value="${fRolTitulo ?: ''}" required></div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-especialidad">Especialidad</label>
+                                                <div class="rg-irow">
+                                                    <select id="t-especialidad" name="especialidad">
+                                                        <option value=""
+                                                            th:selected="${fEspecialidad == null or fEspecialidad == ''}">
+                                                            Seleccionar</option>
+                                                        <option value="frontend"
+                                                            th:selected="${fEspecialidad == 'frontend'}">Frontend
+                                                        </option>
+                                                        <option value="backend"
+                                                            th:selected="${fEspecialidad == 'backend'}">Backend
+                                                        </option>
+                                                        <option value="fullstack"
+                                                            th:selected="${fEspecialidad == 'fullstack'}">Full Stack
+                                                        </option>
+                                                        <option value="ui-ux"
+                                                            th:selected="${fEspecialidad == 'ui-ux'}">UI / UX</option>
+                                                        <option value="data" th:selected="${fEspecialidad == 'data'}">
+                                                            Data / Analytics</option>
+                                                        <option value="mobile"
+                                                            th:selected="${fEspecialidad == 'mobile'}">Mobile</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-modalidad">Modalidad</label>
+                                                <div class="rg-irow">
+                                                    <select id="t-modalidad" name="modalidad">
+                                                        <option value=""
+                                                            th:selected="${fModalidad == null or fModalidad == ''}">
+                                                            Seleccionar</option>
+                                                        <option value="remoto" th:selected="${fModalidad == 'remoto'}">
+                                                            Remoto</option>
+                                                        <option value="hibrido"
+                                                            th:selected="${fModalidad == 'hibrido'}">Híbrido</option>
+                                                        <option value="presencial"
+                                                            th:selected="${fModalidad == 'presencial'}">Presencial
+                                                        </option>
+                                                        <option value="freelance"
+                                                            th:selected="${fModalidad == 'freelance'}">Freelance
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-disponibilidad">Disponibilidad</label>
+                                                <div class="rg-irow">
+                                                    <select id="t-disponibilidad" name="disponibilidad">
+                                                        <option value=""
+                                                            th:selected="${fDisponibilidad == null or fDisponibilidad == ''}">
+                                                            Seleccionar</option>
+                                                        <option value="full-time"
+                                                            th:selected="${fDisponibilidad == 'full-time'}">Tiempo
+                                                            completo</option>
+                                                        <option value="part-time"
+                                                            th:selected="${fDisponibilidad == 'part-time'}">Medio
+                                                            tiempo</option>
+                                                        <option value="freelance"
+                                                            th:selected="${fDisponibilidad == 'freelance'}">Freelance
+                                                        </option>
+                                                        <option value="practicas"
+                                                            th:selected="${fDisponibilidad == 'practicas'}">Prácticas
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-salarioEsperado">Expectativa salarial</label>
+                                                <div class="rg-irow"><input id="t-salarioEsperado" type="text"
+                                                        name="salarioEsperado" th:value="${fSalarioEsperado ?: ''}"
+                                                        placeholder="Ej. USD 2,000 - 2,500"></div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-telefono">Teléfono</label>
+                                                <div class="rg-irow"><input id="t-telefono" type="tel" name="telefono"
+                                                        th:value="${fTelefono ?: ''}"
+                                                        placeholder="+57 300 000 0000"></div>
+                                            </div>
+                                        </div>
+                                        <div class="rg-field">
+                                            <label for="t-bio">Bio profesional</label>
+                                            <textarea class="rg-textarea" id="t-bio" name="bio"
+                                                th:text="${fBio ?: ''}"
+                                                placeholder="Cuéntales quién eres, qué haces mejor y qué tipo de proyectos te interesan."></textarea>
+                                        </div>
+                                        <div class="rg-step-nav">
+                                            <button type="button" class="rg-btn-ghost" data-back="0">← Atrás</button>
+                                            <button type="button" class="rg-btn" data-next="2">Continuar<svg
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                                </svg></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="rg-paso-panel" data-paso="2" style="display:none;">
+                                        <div class="rg-grid">
+                                            <div class="rg-field rg-field--full">
+                                                <label for="t-stack">Stack principal <span class="req">*</span></label>
+                                                <div class="rg-irow"><input id="t-stack" type="text" name="stack"
+                                                        placeholder="React, Java, Spring Boot, MongoDB"
+                                                        th:value="${fStack ?: ''}" required></div>
+                                                <small class="rg-field-hint">Separa tecnologías con comas. Ej: React,
+                                                    Node.js, MongoDB.</small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-portfolioUrl">Portafolio</label>
+                                                <div class="rg-irow"><input id="t-portfolioUrl" type="url"
+                                                        name="portfolioUrl" th:value="${fPortfolioUrl ?: ''}"
+                                                        placeholder="https://tuportfolio.com"></div>
+                                                <small class="rg-field-hint">Proyectos públicos o repositorios
+                                                    (GitHub, Behance).</small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="t-linkedinUrl">LinkedIn</label>
+                                                <div class="rg-irow"><input id="t-linkedinUrl" type="url"
+                                                        name="linkedinUrl" th:value="${fLinkedinUrl ?: ''}"
+                                                        placeholder="https://linkedin.com/in/..."></div>
+                                                <small class="rg-field-hint">Tu perfil profesional, si tienes
+                                                    uno.</small>
+                                            </div>
+                                        </div>
+                                        <div class="rg-step-nav is-borderless">
+                                            <button type="button" class="rg-btn-ghost" data-back="1">← Atrás</button>
+                                        </div>
+                                        <div class="rg-actions">
+                                            <button type="submit" class="rg-btn">
+                                                <span class="btn-txt">Crear cuenta de talento<svg viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14M13 6l6 6-6 6" />
+                                                    </svg></span>
+                                                <span class="btn-load">creando cuenta…</span>
+                                            </button>
+                                            <p class="rg-note">Al registrarte aceptas las condiciones de uso de
+                                                DevCoast.</p>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- ---- formulario EMPRESA ---- -->
+                                <form class="rg-wizard-form" data-tipo="empresa" th:action="@{/register/empresa}"
+                                    method="post" id="rg-form-empresa">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                    <div class="rg-stepper" data-stepper>
+                                        <div class="rg-step-item" data-step="0">
+                                            <div class="rg-snum">1</div><span class="rg-slabel">Cuenta</span>
+                                        </div>
+                                        <div class="rg-sline"></div>
+                                        <div class="rg-step-item" data-step="1">
+                                            <div class="rg-snum">2</div><span class="rg-slabel">Empresa</span>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${tipoPreset == 'empresa' and errorTipo != null}" class="rg-alert">
+                                        <span th:if="${errorTipo == 'correo'}">Ya existe una cuenta con ese correo.
+                                            Prueba con otro o inicia sesión.</span>
+                                        <span th:if="${errorTipo == 'password'}">La contraseña debe tener al menos 8
+                                            caracteres.</span>
+                                    </div>
+
+                                    <div class="rg-paso-panel" data-paso="0">
+                                        <div class="rg-grid">
+                                            <div class="rg-field">
+                                                <label for="e-nombreEmpresa">Nombre de la empresa <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow"><input id="e-nombreEmpresa" type="text"
+                                                        name="nombreEmpresa" placeholder="Aurora Labs"
+                                                        th:value="${fNombreEmpresa ?: ''}" required></div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-correo">Correo corporativo <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow" data-correo-row>
+                                                    <input id="e-correo" type="email" name="correo"
+                                                        placeholder="contacto@empresa.com"
+                                                        th:value="${fCorreo ?: ''}"
+                                                        th:with="dataErrCorreo=${(tipoPreset == 'empresa' and errorTipo == 'correo') ? 'true' : null}"
+                                                        th:attr="data-error-field=${dataErrCorreo}"
+                                                        autocomplete="off" data-correo-input required>
+                                                    <span class="rg-field-check" data-correo-check><svg
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2.5" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M20 6 9 17l-5-5" />
+                                                        </svg></span>
+                                                </div>
+                                                <small class="rg-field-feedback" data-correo-feedback></small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-password">Contraseña <span class="req">*</span></label>
+                                                <div class="rg-irow">
+                                                    <input id="e-password" type="password" name="password"
+                                                        placeholder="Mínimo 8 caracteres" autocomplete="new-password"
+                                                        th:with="dataErrPassword=${(tipoPreset == 'empresa' and errorTipo == 'password') ? 'true' : null}"
+                                                        th:attr="data-error-field=${dataErrPassword}"
+                                                        data-password-input required>
+                                                    <button type="button" class="rg-pw-toggle" data-pw-toggle
+                                                        data-target="e-password" aria-label="Mostrar contraseña">
+                                                        <svg class="eye-on" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                        <svg class="eye-off" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                                            <path
+                                                                d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                                            <path
+                                                                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                                            <line x1="2" y1="2" x2="22" y2="22" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="rg-pw-strength" data-pw-strength>
+                                                    <span class="rg-pw-bar"><i></i><i></i><i></i><i></i></span>
+                                                    <span class="rg-pw-label" data-pw-label></span>
+                                                </div>
+                                                <small class="rg-field-hint" data-pw-help>Mínimo 8 caracteres. Usa
+                                                    mayúsculas, números y símbolos para más seguridad.</small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-passwordConfirm">Confirmar contraseña <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow">
+                                                    <input id="e-passwordConfirm" type="password"
+                                                        name="passwordConfirm" placeholder="Repite tu contraseña"
+                                                        autocomplete="new-password" data-password-confirm required>
+                                                    <button type="button" class="rg-pw-toggle" data-pw-toggle
+                                                        data-target="e-passwordConfirm"
+                                                        aria-label="Mostrar contraseña">
+                                                        <svg class="eye-on" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                        <svg class="eye-off" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                                            <path
+                                                                d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                                            <path
+                                                                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                                            <line x1="2" y1="2" x2="22" y2="22" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <small class="rg-field-feedback" data-password-match-msg></small>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-nombreRepresentante">Nombre del representante <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow"><input id="e-nombreRepresentante" type="text"
+                                                        name="nombreRepresentante"
+                                                        th:value="${fNombreRepresentante ?: ''}"
+                                                        placeholder="Nombre completo" required></div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-cargoRepresentante">Cargo del representante <span
+                                                        class="req">*</span></label>
+                                                <div class="rg-irow"><input id="e-cargoRepresentante" type="text"
+                                                        name="cargoRepresentante"
+                                                        th:value="${fCargoRepresentante ?: ''}"
+                                                        placeholder="Ej. HR Manager" required></div>
+                                            </div>
+                                            <div class="rg-field rg-field--full">
+                                                <label for="e-telefono">Teléfono</label>
+                                                <div class="rg-irow"><input id="e-telefono" type="tel" name="telefono"
+                                                        th:value="${fTelefono ?: ''}"
+                                                        placeholder="+57 300 000 0000"></div>
+                                            </div>
+                                        </div>
+                                        <div class="rg-step-nav">
+                                            <span></span>
+                                            <button type="button" class="rg-btn" data-next="1">Continuar<svg
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                                </svg></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="rg-paso-panel" data-paso="1" style="display:none;">
+                                        <div class="rg-grid">
+                                            <div class="rg-field">
+                                                <label for="e-sector">Sector / Industria</label>
+                                                <div class="rg-irow">
+                                                    <select id="e-sector" name="sector">
+                                                        <option value="" th:selected="${fSector == null or fSector == ''}">
+                                                            Seleccionar</option>
+                                                        <option value="software"
+                                                            th:selected="${fSector == 'software'}">Software</option>
+                                                        <option value="diseno" th:selected="${fSector == 'diseno'}">
+                                                            Diseño</option>
+                                                        <option value="marketing"
+                                                            th:selected="${fSector == 'marketing'}">Marketing</option>
+                                                        <option value="fintech" th:selected="${fSector == 'fintech'}">
+                                                            Fintech</option>
+                                                        <option value="educacion"
+                                                            th:selected="${fSector == 'educacion'}">Educación</option>
+                                                        <option value="salud" th:selected="${fSector == 'salud'}">
+                                                            Salud</option>
+                                                        <option value="retail" th:selected="${fSector == 'retail'}">
+                                                            Retail</option>
+                                                        <option value="otro" th:selected="${fSector == 'otro'}">Otro
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field">
+                                                <label for="e-tamano">Tamaño del equipo</label>
+                                                <div class="rg-irow">
+                                                    <select id="e-tamano" name="tamano">
+                                                        <option value="" th:selected="${fTamano == null or fTamano == ''}">
+                                                            Seleccionar</option>
+                                                        <option value="1-10" th:selected="${fTamano == '1-10'}">1 - 10
+                                                        </option>
+                                                        <option value="11-50" th:selected="${fTamano == '11-50'}">11 -
+                                                            50</option>
+                                                        <option value="51-200" th:selected="${fTamano == '51-200'}">51
+                                                            - 200</option>
+                                                        <option value="201-500"
+                                                            th:selected="${fTamano == '201-500'}">201 - 500</option>
+                                                        <option value="500+" th:selected="${fTamano == '500+'}">500+
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="rg-field rg-field--full">
+                                                <label for="e-sitioWeb">Sitio web</label>
+                                                <div class="rg-irow"><input id="e-sitioWeb" type="url" name="sitioWeb"
+                                                        th:value="${fSitioWeb ?: ''}"
+                                                        placeholder="https://miempresa.com"></div>
+                                                <small class="rg-field-hint">Incluye https:// para que el enlace
+                                                    funcione correctamente.</small>
+                                            </div>
+                                        </div>
+                                        <div class="rg-field">
+                                            <label for="e-descripcion">Descripción de la empresa</label>
+                                            <textarea class="rg-textarea" id="e-descripcion" name="descripcion"
+                                                maxlength="300" data-counter="e-desc-counter"
+                                                th:text="${fDescripcion ?: ''}"
+                                                placeholder="Cuéntales a los candidatos quiénes son, qué construyen y cuál es la cultura de trabajo."></textarea>
+                                            <small class="rg-char-counter" id="e-desc-counter">0 / 300</small>
+                                        </div>
+                                        <div class="rg-step-nav is-borderless">
+                                            <button type="button" class="rg-btn-ghost" data-back="0">← Atrás</button>
+                                        </div>
+                                        <div class="rg-actions">
+                                            <button type="submit" class="rg-btn">
+                                                <span class="btn-txt">Crear cuenta de empresa<svg viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14M13 6l6 6-6 6" />
+                                                    </svg></span>
+                                                <span class="btn-load">creando cuenta…</span>
+                                            </button>
+                                            <p class="rg-note">Al registrarte aceptas las condiciones de uso de
+                                                DevCoast.</p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                        <span class="rg-frame-progress" id="rg-frame-progress" aria-hidden="true"></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="rg-statusbar">
+        <span><span class="dot" id="rg-status-dot"></span>select · register-frame · <span
+                id="rg-status-label">1 sin confirmar</span></span>
+        <span id="rg-coords">x: 0&nbsp;&nbsp;&nbsp;y: 0&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;zoom
+            100%&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;devcoast v2</span>
+    </footer>
+
+    <div th:if="${flashMessage != null}" class="flash-banner register-toast"
+        th:classappend="${flashType != null ? ' ' + flashType : ''}">
+        <span th:text="${flashMessage}">Notificacion</span>
+        <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
+    </div>
+
+</body>
+
+</html>

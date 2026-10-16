@@ -1,0 +1,7 @@
+{
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m -javaagent:\"${env:USERPROFILE}\\.m2\\repository\\org\\projectlombok\\lombok\\1.18.46\\lombok-1.18.46.jar\"",
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.test.config": {
+        "envFile": "${workspaceFolder}/.env"
+    }
+}

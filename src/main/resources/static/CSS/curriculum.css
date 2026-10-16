@@ -1,0 +1,310 @@
+/* curriculum, extiende empleos.css. Acá va lo propio de la ficha de CV:
+   hero, completitud, timeline, idiomas, el modal de edición y el modo
+   lectura que usa una empresa para revisar una postulación */
+
+/* ============================= hero de identidad ============================= */
+.wsjobs .cv-hero { padding: 22px; display: grid; grid-template-columns: 1.7fr 1fr; gap: 26px; }
+@media (max-width: 820px) { .wsjobs .cv-hero { grid-template-columns: 1fr; } }
+
+.wsjobs .cv-identity { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; }
+.wsjobs .cv-avatar {
+  width: 76px; height: 76px; border-radius: 16px; background: var(--ws-panel-3); border: 1px solid var(--ws-line);
+  display: flex; align-items: center; justify-content: center; font-family: var(--ws-mono-disp); font-weight: 800;
+  font-size: 1.6rem; color: var(--ws-ink); flex-shrink: 0; background-size: cover; background-position: center;
+}
+.wsjobs .cv-name { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.75rem; letter-spacing: -.01em; color: var(--ws-ink); margin: 0 0 6px; }
+.wsjobs .cv-role { font-family: var(--ws-mono-disp); font-weight: 700; font-size: .82rem; color: var(--ws-accent); margin: 0 0 10px; }
+
+.wsjobs .badge-available {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700;
+  color: var(--ws-mint); background: var(--ws-mint-dim); border-radius: 20px; padding: 4px 10px 4px 8px;
+}
+.wsjobs .badge-available-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--ws-mint); box-shadow: 0 0 0 2px rgba(123,216,174,.25);
+  animation: cvAvailablePulse 2.4s ease-in-out infinite;
+}
+@keyframes cvAvailablePulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(123,216,174,.25); }
+  50%      { box-shadow: 0 0 0 5px rgba(123,216,174,.1); }
+}
+@media (prefers-reduced-motion: reduce) { .wsjobs .badge-available-dot { animation: none; } }
+.wsjobs .cv-pref-chip {
+  font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700; color: var(--ws-dim); background: var(--ws-panel-2);
+  border: 1px solid var(--ws-line); border-radius: 20px; padding: 4px 10px;
+}
+.wsjobs .cv-pref-chip.is-active { color: var(--ws-accent-soft); background: var(--ws-accent-dim); border-color: transparent; }
+
+/* mismas comillas que .job-tagline, para que la bio se lea como una cita */
+.wsjobs .cv-bio { position: relative; padding-left: 18px; font-size: .92rem; color: var(--ws-dim); line-height: 1.7; max-width: 62ch; margin: 0 0 14px; }
+.wsjobs .cv-bio::before {
+  content: "\201C"; position: absolute; left: -2px; top: -9px; font-family: var(--ws-editorial); font-size: 2rem;
+  font-weight: 600; color: var(--ws-accent); opacity: .6; line-height: 1;
+}
+
+.wsjobs .cv-bullets { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.wsjobs .cv-bullets li { position: relative; padding-left: 18px; font-size: .85rem; color: var(--ws-ink); opacity: .92; line-height: 1.5; }
+.wsjobs .cv-bullets li::before { content: "→"; position: absolute; left: 0; color: var(--ws-accent); font-family: var(--ws-mono-disp); }
+
+.wsjobs .cv-socials { display: flex; gap: 8px; flex-wrap: wrap; }
+.wsjobs .cv-social-link {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .74rem; color: var(--ws-dim);
+  background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 7px; padding: 6px 10px; max-width: 220px;
+  transition: color .15s, border-color .15s;
+}
+.wsjobs .cv-social-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wsjobs .cv-social-link:hover { color: var(--ws-accent); border-color: var(--ws-dim-2); }
+.wsjobs .cv-social-link svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ── columna de contacto ── */
+.wsjobs .cv-contact { display: flex; flex-direction: column; gap: 14px; padding: 16px; background: var(--ws-panel-2); border: 1px solid var(--ws-line-soft); border-radius: 10px; }
+.wsjobs .cv-contact-item { display: flex; align-items: flex-start; gap: 10px; }
+.wsjobs .cv-contact-item svg { width: 15px; height: 15px; color: var(--ws-dim-2); margin-top: 2px; flex-shrink: 0; }
+.wsjobs .cv-contact-item .muted { display: block; font-size: .66rem; font-family: var(--ws-mono-disp); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+.wsjobs .cv-contact-item strong { font-size: .84rem; color: var(--ws-ink); font-weight: 600; word-break: break-word; }
+.wsjobs .cv-availability { margin-top: 4px; display: flex; flex-direction: column; gap: 6px; }
+
+/* ============================= pills genéricas ============================= */
+.wsjobs .pill {
+  display: inline-flex; align-items: center; font-family: var(--ws-mono-disp); font-size: .72rem; font-weight: 600;
+  color: var(--ws-dim); background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 20px; padding: 4px 11px;
+}
+.wsjobs .pill-soft {
+  font-family: var(--ws-mono-disp); font-size: .72rem; font-weight: 600; color: var(--ws-violet-soft); background: var(--ws-violet-dim);
+  border-radius: 20px; padding: 4px 11px; display: inline-flex; align-items: center;
+}
+/* estos links abren el modal directo en la pestaña que corresponde */
+.wsjobs .cv-inline-link { color: var(--ws-accent); font-weight: 600; text-decoration: none; }
+.wsjobs .cv-inline-link:hover { text-decoration: underline; }
+.wsjobs .pill.cv-inline-link { color: var(--ws-accent-soft); background: var(--ws-accent-dim); border-color: transparent; }
+.wsjobs .pill.cv-inline-link:hover { background: var(--ws-accent); color: var(--ws-accent-on); text-decoration: none; }
+.wsjobs .badge-open {
+  font-family: var(--ws-mono-disp); font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ws-mint); background: var(--ws-mint-dim); border-radius: 20px; padding: 3px 9px;
+}
+
+/* ============================= completitud del CV ============================= */
+.wsjobs .cv-completeness-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.wsjobs .cv-progress-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.wsjobs .cv-progress-block:last-of-type { margin-bottom: 0; }
+.wsjobs .cv-progress-label { display: flex; align-items: center; justify-content: space-between; font-size: .76rem; color: var(--ws-dim); }
+.wsjobs .progress-track { height: 6px; border-radius: 4px; background: var(--ws-line-soft); overflow: hidden; }
+.wsjobs .progress-fill { height: 100%; background: var(--ws-accent); border-radius: 4px; transition: width .35s cubic-bezier(.4,0,.2,1); }
+.wsjobs .cv-completeness-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--ws-line-soft); }
+.wsjobs .cv-action-tip { display: flex; gap: 10px; align-items: flex-start; font-size: .82rem; color: var(--ws-dim); line-height: 1.5; }
+.wsjobs .cv-action-tip strong { color: var(--ws-ink); }
+.wsjobs .cv-action-tip a { color: var(--ws-accent); font-weight: 600; white-space: nowrap; }
+
+/* ============================= resultados clave (stats) ============================= */
+/* la grilla de 4 columnas dejaba huecos vacíos, así que ahora es una sola
+   línea con divisores en vez de repartir el ancho completo */
+.wsjobs .cv-stats { display: flex; flex-wrap: wrap; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--ws-line-soft); }
+.wsjobs .cv-stat { display: flex; align-items: center; gap: 11px; padding-right: 26px; margin-right: 26px; border-right: 1px solid var(--ws-line-soft); }
+.wsjobs .cv-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+@media (max-width: 640px) {
+  .wsjobs .cv-stat { flex: 1 1 42%; border-right: none; margin-right: 0; padding-right: 0; margin-bottom: 14px; }
+}
+.wsjobs .cv-stat-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wsjobs .cv-stat-icon svg { width: 14px; height: 14px; }
+.wsjobs .cv-stat-icon--dev { color: var(--ws-cyan); background: var(--ws-cyan-dim); }
+.wsjobs .cv-stat-icon--data { color: var(--ws-amber); background: var(--ws-amber-dim); }
+.wsjobs .cv-stat-icon--design { color: var(--ws-violet); background: var(--ws-violet-dim); }
+.wsjobs .cv-stat-icon--success { color: var(--ws-mint); background: var(--ws-mint-dim); }
+.wsjobs .cv-stat-text { display: flex; flex-direction: column; gap: 1px; line-height: 1.15; }
+.wsjobs .cv-stat-text strong { font-family: var(--ws-mono-disp); font-weight: 800; font-size: 1.3rem; color: var(--ws-ink); font-variant-numeric: tabular-nums; }
+.wsjobs .cv-stat-text .muted { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ============================= grillas de secciones ============================= */
+.wsjobs .cv-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 820px) { .wsjobs .cv-grid-2 { grid-template-columns: 1fr; } }
+/* numera cada .section-title automático, como el gutter del resto del sitio */
+.wsjobs .ws-content { counter-reset: cv-section; }
+.wsjobs .section-title { counter-increment: cv-section; display: flex; align-items: center; gap: 10px; font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.05rem; color: var(--ws-ink); margin: 0 0 4px; }
+.wsjobs .section-title::before {
+  content: counter(cv-section, decimal-leading-zero);
+  font-family: var(--ws-mono-disp); font-style: normal; font-weight: 700; font-size: .68rem;
+  color: var(--ws-dim-2); letter-spacing: .02em;
+}
+.wsjobs .cv-section-icon {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--ws-accent-dim); color: var(--ws-accent);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.wsjobs .cv-section-icon svg { width: 14px; height: 14px; }
+.wsjobs .cv-section-hint { font-size: .82rem; color: var(--ws-dim-2); margin: 4px 0 14px; }
+
+/* ── experiencia ── */
+.wsjobs .cv-timeline { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+.wsjobs .cv-timeline-item { display: flex; gap: 12px; align-items: flex-start; }
+.wsjobs .cv-timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ws-line); margin-top: 7px; flex-shrink: 0; }
+.wsjobs .cv-timeline-dot.is-active { background: var(--ws-accent); box-shadow: 0 0 0 3px var(--ws-accent-dim); }
+.wsjobs .cv-timeline-item strong { font-size: .88rem; color: var(--ws-ink); }
+
+/* ── educación ── */
+.wsjobs .resume-row { padding: 12px 0; border-top: 1px solid var(--ws-line-soft); display: flex; flex-direction: column; gap: 2px; }
+.wsjobs .resume-row:first-child { border-top: none; padding-top: 0; }
+.wsjobs .resume-row strong { font-size: .87rem; color: var(--ws-ink); }
+.wsjobs .resume-row span { font-size: .8rem; }
+
+/* ── idiomas ── */
+.wsjobs .cv-lang-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid var(--ws-line-soft); flex-wrap: wrap; }
+.wsjobs .cv-lang-item:first-child { border-top: none; padding-top: 0; }
+.wsjobs .cv-lang-info { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.wsjobs .cv-lang-flag {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--ws-panel-2); border: 1px solid var(--ws-line); color: var(--ws-dim-2);
+}
+.wsjobs .cv-lang-flag svg { width: 13px; height: 13px; }
+.wsjobs .cv-lang-item strong { display: block; font-size: .87rem; color: var(--ws-ink); }
+.wsjobs .cv-lang-item p.muted { margin: 1px 0 0; font-size: .78rem; }
+.wsjobs .cv-lang-bars { display: flex; gap: 4px; flex-shrink: 0; }
+.wsjobs .cv-lang-bar { width: 20px; height: 6px; border-radius: 3px; background: var(--ws-line-soft); }
+.wsjobs .cv-lang-bar.fill { background: var(--ws-accent); }
+.wsjobs .cv-lang-bar.fill-full { background: var(--ws-mint); }
+
+/* ============================= modo lectura: postulación ============================= */
+.wsjobs .cv-review-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.wsjobs .cv-review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; margin-top: 16px; }
+@media (max-width: 700px) { .wsjobs .cv-review-grid { grid-template-columns: 1fr; } }
+.wsjobs .cv-review-grid strong { display: block; font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ws-dim-2); margin-bottom: 4px; }
+.wsjobs .cv-review-grid p { margin: 0; font-size: .88rem; color: var(--ws-ink); }
+.wsjobs .cv-review-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+.wsjobs .cv-quote-block { background: var(--ws-panel-2); border-left: 3px solid var(--ws-accent); border-radius: 0 8px 8px 0; padding: 16px 18px; }
+.wsjobs .cv-quote-block p { margin: 0; font-size: .88rem; line-height: 1.7; color: var(--ws-ink); opacity: .92; white-space: pre-wrap; }
+
+/* ============================= proyectos (adjuntos / portafolio) ============================= */
+.wsjobs .cv-project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+.wsjobs .cv-project-card {
+  display: flex; flex-direction: column; background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 10px;
+  overflow: hidden; text-decoration: none; transition: border-color .15s;
+}
+.wsjobs .cv-project-card:hover { border-color: var(--ws-dim-2); }
+.wsjobs .cv-project-banner { height: 78px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.wsjobs .cv-project-banner img:first-child { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .6; }
+.wsjobs .cv-project-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+.wsjobs .cv-project-name { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: .95rem; color: var(--ws-ink); }
+.wsjobs .cv-project-desc { font-size: .78rem; color: var(--ws-dim-2); line-height: 1.5; margin: 0; }
+.wsjobs .cv-project-stack { font-family: var(--ws-mono-disp); font-size: .68rem; color: var(--ws-dim-2); }
+.wsjobs .cv-project-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.wsjobs .cv-count-badge { font-family: var(--ws-mono-disp); font-size: .66rem; font-weight: 700; color: var(--ws-accent); background: var(--ws-accent-dim); border-radius: 20px; padding: 4px 10px; }
+
+/* ============================= modal "Editar secciones" ============================= */
+/* el que scrollea esta página es <html>, no <body> — por eso el lock va
+   en los dos, si no el fondo sigue moviéndose con el modal abierto */
+html.dc-scroll-lock, html.dc-scroll-lock body { overflow: hidden; height: 100%; }
+
+.wsjobs .edit-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300; background: rgba(6,7,10,.75); align-items: center; justify-content: center; padding: 16px;
+}
+.wsjobs .edit-overlay.is-open { display: flex; }
+.wsjobs .edit-modal {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 14px; width: 100%; max-width: 620px;
+  /* altura fija a propósito: con max-height, cada tab cambiaba el tamaño
+     de la ventana entera y eso se sentía como lag. Así el que scrollea
+     es el contenido de adentro, no el modal */
+  height: min(640px, 88vh); display: flex; flex-direction: column; box-shadow: 0 40px 90px -24px rgba(0,0,0,.7);
+}
+.wsjobs .edit-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px 0; }
+.wsjobs .edit-modal-header h2 { font-family: var(--ws-editorial); font-style: italic; font-weight: 600; font-size: 1.2rem; color: var(--ws-ink); margin: 0; }
+.wsjobs .edit-modal-close {
+  width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  color: var(--ws-dim); background: var(--ws-panel-2); border: 1px solid var(--ws-line); flex-shrink: 0;
+}
+.wsjobs .edit-modal-close:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
+
+.wsjobs .edit-tabs { display: flex; gap: 4px; padding: 16px 22px 0; border-bottom: 1px solid var(--ws-line); overflow-x: auto; flex-shrink: 0; }
+.wsjobs .edit-tab {
+  font-family: var(--ws-mono-disp); font-size: .74rem; font-weight: 700; color: var(--ws-dim-2); background: none; border: none;
+  padding: 9px 10px; margin-bottom: -1px; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s;
+}
+.wsjobs .edit-tab:hover { color: var(--ws-ink); }
+.wsjobs .edit-tab.active { color: var(--ws-accent); border-bottom-color: var(--ws-accent); }
+
+.wsjobs .edit-panel { display: none; padding: 20px 22px; overflow-y: auto; flex: 1; overscroll-behavior: contain; }
+.wsjobs .edit-panel.active { display: block; }
+.wsjobs .edit-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.wsjobs .edit-field:last-child { margin-bottom: 0; }
+.wsjobs .edit-field label { font-family: var(--ws-mono-disp); font-size: .7rem; font-weight: 700; letter-spacing: .03em; color: var(--ws-dim); }
+.wsjobs .edit-field input[type="text"], .wsjobs .edit-field input[type="email"], .wsjobs .edit-field input[type="tel"],
+.wsjobs .edit-field input[type="url"], .wsjobs .edit-field textarea {
+  background: var(--ws-panel-2); border: 1px solid var(--ws-line); border-radius: 7px; padding: 9px 11px;
+  color: var(--ws-ink); font-family: var(--ws-mono-body); font-size: .86rem; outline: none; transition: border-color .15s; width: 100%;
+}
+.wsjobs .edit-field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.wsjobs .edit-field input:focus, .wsjobs .edit-field textarea:focus { border-color: var(--ws-accent); }
+.wsjobs .edit-field input::placeholder, .wsjobs .edit-field textarea::placeholder { color: var(--ws-dim-2); }
+.wsjobs .field-hint { font-size: .68rem; color: var(--ws-dim-2); }
+.wsjobs .edit-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+@media (max-width: 480px) { .wsjobs .edit-grid-2 { grid-template-columns: 1fr; } }
+
+#bio-char-counter { font-size: .72rem; color: var(--ws-dim-2); text-align: right; }
+#bio-char-counter.near-limit { color: var(--ws-amber); }
+#bio-char-counter.at-limit { color: var(--ws-rose); }
+
+.wsjobs .pref-chips-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.wsjobs .pref-chip-toggle {
+  font-family: var(--ws-mono-disp); font-size: .76rem; font-weight: 600; color: var(--ws-dim); background: var(--ws-panel-2);
+  border: 1px solid var(--ws-line); border-radius: 20px; padding: 6px 13px; transition: background .15s, color .15s, border-color .15s;
+}
+.wsjobs .pref-chip-toggle:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
+.wsjobs .pref-chip-toggle.selected { color: var(--ws-accent-soft); background: var(--ws-accent-dim); border-color: transparent; }
+
+.wsjobs .edit-timeline-item { position: relative; background: var(--ws-panel-2); border: 1px solid var(--ws-line-soft); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.wsjobs .edit-item-label { font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ws-dim-2); margin-bottom: 10px; }
+.wsjobs .edit-timeline-item .edit-grid-2 { margin-bottom: 10px; }
+.wsjobs .edit-timeline-item .edit-field:last-child { margin-bottom: 0; }
+.wsjobs .btn-remove-item {
+  position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center;
+  justify-content: center; color: var(--ws-dim-2); background: var(--ws-panel-3); border: 1px solid var(--ws-line);
+}
+.wsjobs .btn-remove-item:hover { color: var(--ws-rose); border-color: rgba(239,123,146,.4); }
+.wsjobs .btn-add-item {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .78rem; font-weight: 700;
+  color: var(--ws-accent); background: var(--ws-accent-dim); border: none; border-radius: 8px; padding: 9px 14px;
+}
+.wsjobs .btn-add-item:hover { background: var(--ws-accent); color: var(--ws-accent-on); }
+
+.wsjobs .lang-section { margin-bottom: 18px; }
+.wsjobs .lang-section:last-child { margin-bottom: 0; }
+.wsjobs .lang-section-label { font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ws-dim-2); margin-bottom: 8px; }
+.wsjobs .lang-level-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wsjobs .lang-flag { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ws-dim-2); background: var(--ws-panel-2); border: 1px solid var(--ws-line); flex-shrink: 0; }
+.wsjobs .lang-flag svg { width: 12px; height: 12px; }
+.wsjobs .lang-name { font-size: .84rem; color: var(--ws-ink); font-weight: 600; min-width: 60px; }
+.wsjobs .lang-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.wsjobs .lang-btn {
+  font-family: var(--ws-mono-disp); font-size: .7rem; font-weight: 700; color: var(--ws-dim); background: var(--ws-panel-2);
+  border: 1px solid var(--ws-line); border-radius: 6px; padding: 5px 10px; transition: background .15s, color .15s, border-color .15s;
+}
+.wsjobs .lang-btn:hover { color: var(--ws-ink); border-color: var(--ws-dim-2); }
+.wsjobs .lang-btn.selected { color: var(--ws-accent-on); background: var(--ws-accent); border-color: var(--ws-accent); }
+
+.wsjobs .chips-input-wrapper {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: var(--ws-panel-2); border: 1px solid var(--ws-line);
+  border-radius: 7px; padding: 8px 9px; cursor: text;
+}
+.wsjobs .chip-tag {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--ws-mono-disp); font-size: .74rem; font-weight: 600;
+  color: var(--ws-violet-soft); background: var(--ws-violet-dim); border-radius: 5px; padding: 4px 6px 4px 9px;
+}
+.wsjobs .chip-tag button { background: none; border: none; color: inherit; opacity: .7; cursor: pointer; padding: 0 2px; display: inline-flex; }
+.wsjobs .chip-tag button:hover { opacity: 1; }
+.wsjobs .chips-real-input { flex: 1; min-width: 140px; background: none; border: none; outline: none; color: var(--ws-ink); font-family: var(--ws-mono-body); font-size: .84rem; padding: 4px 2px; }
+.wsjobs .chips-real-input::placeholder { color: var(--ws-dim-2); }
+
+.wsjobs .edit-modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 22px; border-top: 1px solid var(--ws-line); flex-shrink: 0; }
+.wsjobs .btn-saving { opacity: .7; pointer-events: none; }
+
+/* ============================= impresión / PDF ============================= */
+@media print {
+  .ws-top, .ws-side, #nav-progress, #back-to-top, .ws-grain, .ws-vignette, #scrim, .ws-palette-scrim,
+  #wsBoot, .ws-gutter, .ws-status, .edit-overlay, .toast, #btn-descargar-pdf, #btn-editar-secciones,
+  .cv-completeness, .cv-review-panel, .cv-project-actions, #link-editar-bio { display: none !important; }
+  .ws-body { display: block !important; }
+  .ws-main { margin: 0 !important; width: 100% !important; }
+  .ws-content { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  body, .wsjobs { background: #fff !important; }
+  .wsjobs .card { background: #fff !important; border: 1px solid #ddd !important; box-shadow: none !important; break-inside: avoid; page-break-inside: avoid; }
+  .wsjobs .cv-grid-2 { display: block !important; }
+  .wsjobs .cv-grid-2 > .card { margin-bottom: 12px !important; }
+  * { animation: none !important; color-scheme: light; }
+}
