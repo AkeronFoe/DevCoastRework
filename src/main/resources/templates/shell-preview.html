@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Shell náutico | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+</head>
+
+<body th:classappend="${session.usuarioActualTipo == 'empresa'} ? 'empresa'">
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('dashboard')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
+
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', ${q})}"></header>
+
+            <main class="content" id="contenido">
+                <div class="head">
+                    <div>
+                        <div class="eyebrow">// shell</div>
+                        <h1>Shell náutico</h1>
+                        <p class="sub" aria-live="polite">Página temporal para revisar el marco de la app.</p>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="fg" role="group" aria-labelledby="fDemo"><span class="lab" id="fDemo">CHIPS</span>
+                        <div class="chs">
+                            <button class="ch" type="button" aria-pressed="true">Activo</button>
+                            <button class="ch" type="button" aria-pressed="false">Inactivo</button>
+                        </div>
+                    </div>
+                    <button class="clear" id="demoToast" type="button">probar aviso</button>
+                </div>
+
+                <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Así se ve cualquier lista vacía.', '/shell-preview', 'Limpiar filtros')}"></div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/nautico :: toast}"></div>
+    <script>
+        document.getElementById('demoToast').addEventListener('click', function () {
+            DevCoast.toast('Aviso de prueba.', { undo: function () { DevCoast.toast('Deshecho.'); } });
+        });
+    </script>
+</body>
+
+</html>

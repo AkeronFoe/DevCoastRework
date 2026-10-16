@@ -791,7 +791,35 @@ const TRANSLATIONS = {
         'Pendiente:': 'Pending:',
         'Pendiente': 'Pending:',
         'Vista previa del card': 'Preview of the project card',
-        'Asi se vera en la pagina de proyectos.': 'This is how it will look on the projects page.'
+        'Asi se vera en la pagina de proyectos.': 'This is how it will look on the projects page.',
+
+        // ── sistema visual náutico: shell (menú lateral, barra superior, componentes compartidos) ──
+        'Menú principal': 'Main menu',
+        'Secciones': 'Sections',
+        'Saltar al contenido': 'Skip to content',
+        'Abrir menú': 'Open menu',
+        'Proyectos': 'Projects',
+        'Directorio': 'Directory',
+        'Mi perfil': 'My profile',
+        'Perfil de empresa': 'Company profile',
+        'Mis ofertas': 'My job posts',
+        'Postulaciones': 'Applications received',
+        'Crear oferta': 'Create job post',
+        'MÁS': 'MORE',
+        'Mensajes': 'Messages',
+        'Guardados': 'Saved',
+        'Currículum': 'Resume',
+        'Analytics': 'Analytics',
+        'PERFIL': 'PROFILE',
+        'Completar perfil': 'Complete profile',
+        'Perfil completo': 'Profile completeness',
+        'Sin notificaciones.': 'No notifications.',
+        'Notificaciones recientes': 'Recent notifications',
+        'Marcar todas como leídas': 'Mark all as read',
+        'Mar en calma.': 'Calm seas.',
+        'Limpiar filtros': 'Clear filters',
+        'limpiar filtros': 'clear filters',
+        'Deshacer': 'Undo'
 
     }
 }

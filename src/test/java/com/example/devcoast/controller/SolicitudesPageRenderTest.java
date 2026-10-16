@@ -40,6 +40,8 @@ class SolicitudesPageRenderTest {
     @MockitoBean
     private SolicitudRepository solicitudRepository;
     @MockitoBean
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+    @MockitoBean
     private EmpleoRepository empleoRepository;
     @MockitoBean
     private UsuarioRepository usuarioRepository;
