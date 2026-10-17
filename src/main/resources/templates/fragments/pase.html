@@ -11,7 +11,7 @@
             <span class="fpill" th:if="${feat}"
                 th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.8 1.5 7.1L12 17.6 5.7 21.3l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
-                <span th:text="${destacadoMotivo == 'match'} ? 'DESTACADO · MEJOR MATCH' : 'DESTACADO · PROMOCIONADO'">DESTACADO · MEJOR MATCH</span>
+                <span th:text="${destacadoEtiqueta != null} ? ${destacadoEtiqueta} : (${destacadoMotivo == 'match'} ? 'DESTACADO · MEJOR MATCH' : 'DESTACADO · PROMOCIONADO')">DESTACADO · MEJOR MATCH</span>
             </span>
 
             <div class="jt-top">
@@ -253,25 +253,73 @@
     </article>
 
     <!-- ===== Carta de navegación del Dashboard (carta = CartaVista). Dibuja el barquito una vez con <symbol> y lo reutiliza ===== -->
-    <section th:fragment="carta(carta)" class="carta" aria-label="Tus solicitudes en ruta">
+    <section th:fragment="carta(carta)" class="carta" th:attr="aria-label=${carta.etiqueta}">
         <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="hullv"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath><symbol id="vessel" viewBox="90 30 470 490"><polygon points="273,52 510,274 408,276" style="fill:var(--s1)" stroke-width="5" stroke-linejoin="round"/><polygon points="273,52 408,274 350,292 274,366" style="fill:var(--s2)"/><polygon points="350,292 406,271 464,396 392,396" style="fill:var(--s3)"/><rect x="260" y="42" width="12" height="356" rx="6" fill="#F3F4F8"/><g clip-path="url(#hullv)"><rect x="100" y="397" width="450" height="15" fill="#F3F4F8"/><rect x="100" y="412" width="450" height="29" fill="#2DD4BF"/><rect x="100" y="441" width="450" height="8" fill="#F3F4F8"/><rect x="100" y="449" width="450" height="45" fill="#CDD1DB"/></g></symbol></defs></svg>
         <div class="zones" th:style="'--zn:' + ${#lists.size(carta.zonas)}">
             <section class="zone" th:each="z, zs : ${carta.zonas}" th:attr="aria-label=${z.aria}">
                 <h3><i></i><span th:text="${z.titulo}">EN ALTA MAR</span><em th:text="${z.total}">3</em></h3>
                 <p class="zs" th:text="${z.subtitulo}">EN REVISIÓN</p>
-                <a class="vs" th:each="b : ${z.barcos}" th:href="@{/solicitudes/{id}(id=${b.id})}" th:attr="aria-label=${b.aria}"
+                <a class="vs" th:each="b : ${z.barcos}" th:href="@{${b.href}}" th:attr="aria-label=${b.aria}"
                     th:style="'--i:' + ${b.indice} + ';--s1:' + ${b.s1} + ';--s2:' + ${b.s2} + ';--s3:' + ${b.s3}">
                     <svg viewBox="90 30 470 490" aria-hidden="true"><use href="#vessel"/></svg>
-                    <span class="tx"><b th:text="${b.cargo}">Cargo</b><span th:text="${b.match != null ? b.empresa + ' · ' + b.match + '%' : b.empresa}">Empresa · 72%</span></span>
+                    <span class="tx"><b th:text="${b.titulo}">Cargo</b><span th:text="${b.match != null ? b.detalle + ' · ' + b.match + '%' : b.detalle}">Empresa · 72%</span></span>
                     <span class="ok" th:if="${b.aceptada}" aria-hidden="true">✓</span>
                 </a>
-                <a class="mas" th:if="${z.extra > 0}" th:href="@{/solicitudes(estado=${zs.index == 0 ? 'proceso' : 'aceptadas'})}" th:text="'+' + ${z.extra} + ' más'">+2 más</a>
-                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and !carta.vacia}">Sin solicitudes en esta etapa.</p>
-                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and carta.vacia and zs.first}">Todavía no has zarpado. <a th:href="@{/empleos}">Explora empleos</a> y postúlate.</p>
+                <a class="mas" th:if="${z.extra > 0}" th:href="@{${carta.hrefMas}(estado=${z.estadoFiltro})}" th:text="'+' + ${z.extra} + ' más'">+2 más</a>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and !carta.vacia}" th:text="${carta.textoZonaVacia}">Sin solicitudes en esta etapa.</p>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and carta.vacia and zs.first}" th:text="${carta.textoVacia}">Todavía no has zarpado.</p>
             </section>
         </div>
         <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
     </section>
+
+    <!-- ===== Mini pase de oferta para "Avistadas" (v = EmpleoVista): todo el pase es un enlace ===== -->
+    <a th:fragment="mini(v)" class="jt mini" th:href="@{/empleos/{id}(id=${v.id})}"
+        th:aria-label="|${v.titulo}${v.empresaNombre != null ? ', ' + v.empresaNombre : ''}, match ${v.match} por ciento|">
+        <div class="jt-main">
+            <span class="area" th:classappend="${v.areaClave}">
+                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+            </span>
+            <h3 class="jt-t" th:text="${v.titulo}">Cargo</h3>
+            <div class="co" th:if="${v.empresaNombre != null}">
+                <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')"><b th:text="${v.empresaInicial}">E</b></span>
+                <span th:text="${v.empresaNombre}">Empresa</span>
+            </div>
+            <span class="when" th:if="${v.modalidad != null or v.hace != null}"
+                th:text="${(v.modalidad != null ? v.modalidad : '') + (v.modalidad != null and v.hace != null ? ' · ' : '') + (v.hace != null ? v.hace : '')}">Híbrido · hace 2 días</span>
+        </div>
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <span class="mt-k">MATCH</span>
+            <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">88</span><small>%</small></div>
+        </div>
+    </a>
+
+    <!-- ===== Mini pase de candidato para la cuenta de Empresa (v = SolicitudVista) ===== -->
+    <a th:fragment="miniCandidato(v)" class="jt mini" th:href="@{/empleos/{e}/postulaciones/{s}(e=${v.empleoId},s=${v.id})}"
+        th:aria-label="|${v.candidato}, para ${v.cargo}, match ${v.match} por ciento|">
+        <div class="jt-main">
+            <span class="area" th:classappend="${v.areaClave}">
+                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+            </span>
+            <h3 class="jt-t" th:text="${v.candidato != null} ? ${v.candidato} : 'Candidato'">Nombre</h3>
+            <div class="co">
+                <span class="co-t" aria-hidden="true" style="background:#1F8F82"><b th:text="${v.candidato != null and !#strings.isEmpty(v.candidato)} ? ${#strings.toUpperCase(#strings.substring(v.candidato, 0, 1))} : 'C'">N</b></span>
+                <span th:text="'para ' + ${v.cargo}">para Cargo</span>
+            </div>
+            <span class="when" th:if="${v.candidatoRol != null or v.hace != null}"
+                th:text="${(v.candidatoRol != null ? v.candidatoRol : '') + (v.candidatoRol != null and v.hace != null ? ' · ' : '') + (v.hace != null ? v.hace : '')}">Frontend · hace 2 días</span>
+        </div>
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <span class="mt-k">MATCH</span>
+            <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">88</span><small>%</small></div>
+        </div>
+    </a>
 
 </body>
 

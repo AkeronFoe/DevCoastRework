@@ -3,7 +3,6 @@ package com.example.devcoast.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
@@ -70,118 +69,7 @@ public class PageController {
         return RoleGuard.sinSesion(session) ? "redirect:/about-us" : "redirect:/dashboard";
     }
 
-    @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        if (RoleGuard.sinSesion(session))
-            return "redirect:/login";
-
-        String id = RoleGuard.getId(session);
-        cargarUsuario(session, model);
-
-        String tipo = RoleGuard.getTipo(session);
-        Usuario usuarioActual = id != null ? usuarioRepository.findById(id).orElse(null) : null;
-        model.addAttribute("mostrarOnboarding", usuarioActual != null && !usuarioActual.isOnboardingCompleto() && "talento".equals(tipo));
-
-        if (RoleGuard.esEmpresa(session)) {
-            List<Empleo> empleosActivos = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(id, "ACTIVO");
-            List<Empleo> empleosCerrados = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(id, "CERRADO");
-
-            List<String> todosEmpleoIds = new ArrayList<>();
-            empleosActivos.forEach(e -> todosEmpleoIds.add(e.getId()));
-            empleosCerrados.forEach(e -> todosEmpleoIds.add(e.getId()));
-
-            long totalRecibidas = todosEmpleoIds.isEmpty() ? 0
-                    : mongoTemplate.count(
-                            Query.query(Criteria.where("empleoId").in(todosEmpleoIds)),
-                            Solicitud.class);
-            long enRevision = todosEmpleoIds.isEmpty() ? 0
-                    : mongoTemplate.count(
-                            Query.query(Criteria.where("empleoId").in(todosEmpleoIds).and("estado").is("revision")),
-                            Solicitud.class);
-            long invEnviadas = invitacionRepository.findByEmpresaIdOrderByFechaEnvioDesc(id).size();
-
-            model.addAttribute("statEmpleosActivos", empleosActivos.size());
-            model.addAttribute("statEmpleosCerrados", empleosCerrados.size());
-            model.addAttribute("statTotalEmpleos", empleosActivos.size() + empleosCerrados.size());
-            model.addAttribute("statSolicitudesRecibidas", totalRecibidas);
-            model.addAttribute("statSolicitudesPendientes", enRevision);
-            model.addAttribute("statInvitacionesEnviadas", invEnviadas);
-            model.addAttribute("empleosActivos", empleosActivos);
-
-        } else {
-            long enviadas = solicitudRepository.countByUsuarioId(id);
-            long enRevision = solicitudRepository.countByUsuarioIdAndEstado(id, "revision");
-            long aceptadas = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
-            long invPend = invitacionRepository.countByTalentoIdAndEstado(id, "pendiente");
-
-            List<com.example.devcoast.model.Proyecto> todosProyectos =
-                    proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
-            long proyectos = todosProyectos.size();
-            int maxP = Math.min(3, (int) proyectos);
-            model.addAttribute("proyectosRecientes", todosProyectos.subList(0, maxP));
-
-            Usuario talento = usuarioRepository.findById(id).orElse(null);
-            if (talento != null && talento.getEmpleosFavoritos() != null && !talento.getEmpleosFavoritos().isEmpty()) {
-                List<String> favIds = talento.getEmpleosFavoritos();
-                int maxF = Math.min(3, favIds.size());
-                List<com.example.devcoast.model.Empleo> favEmpleos = favIds.subList(0, maxF).stream()
-                        .map(eid -> empleoRepository.findById(eid).orElse(null))
-                        .filter(java.util.Objects::nonNull)
-                        .collect(java.util.stream.Collectors.toList());
-                model.addAttribute("empleosFavoritosRecientes", favEmpleos);
-            } else {
-                model.addAttribute("empleosFavoritosRecientes", java.util.Collections.emptyList());
-            }
-
-            // recomendaciones basadas en el stack del talento
-            if (talento != null && talento.getStack() != null && !talento.getStack().isEmpty()) {
-                Set<String> yaAplicados = solicitudRepository
-                        .findByUsuarioIdOrderByFechaSolicitudDesc(id).stream()
-                        .map(Solicitud::getEmpleoId)
-                        .collect(Collectors.toSet());
-
-                // agarro hasta 60 empleos activos recientes como candidatos
-                Query recQuery = new Query()
-                        .addCriteria(Criteria.where("estado").is("ACTIVO"))
-                        .with(Sort.by(Sort.Direction.DESC, "_id"))
-                        .limit(60);
-                List<com.example.devcoast.model.Empleo> candidatos =
-                        mongoTemplate.find(recQuery, com.example.devcoast.model.Empleo.class);
-
-                java.util.TreeMap<Integer, List<com.example.devcoast.model.Empleo>> porScore =
-                        new java.util.TreeMap<>(java.util.Collections.reverseOrder());
-                for (com.example.devcoast.model.Empleo e : candidatos) {
-                    if (yaAplicados.contains(e.getId())) continue;
-                    int sc = com.example.devcoast.controller.EmpleoController.calcularScore(talento, e);
-                    if (sc >= 30) porScore.computeIfAbsent(sc, k -> new ArrayList<>()).add(e);
-                }
-                List<com.example.devcoast.model.Empleo> recomendados = new ArrayList<>();
-                Map<String, Integer> recScores = new java.util.LinkedHashMap<>();
-                outer:
-                for (Map.Entry<Integer, List<com.example.devcoast.model.Empleo>> entry : porScore.entrySet()) {
-                    for (com.example.devcoast.model.Empleo e : entry.getValue()) {
-                        if (recomendados.size() >= 5) break outer;
-                        recomendados.add(e);
-                        recScores.put(e.getId(), entry.getKey());
-                    }
-                }
-                model.addAttribute("empleosRecomendados", recomendados);
-                model.addAttribute("scoresRecomendados",  recScores);
-            } else {
-                model.addAttribute("empleosRecomendados", java.util.Collections.emptyList());
-                model.addAttribute("scoresRecomendados",  java.util.Collections.emptyMap());
-            }
-
-            model.addAttribute("statSolicitudesEnviadas", enviadas);
-            model.addAttribute("statSolicitudesEnRevision", enRevision);
-            model.addAttribute("statSolicitudesAceptadas", aceptadas);
-            model.addAttribute("statProyectos", proyectos);
-            model.addAttribute("statInvitacionesPendientes", invPend);
-            model.addAttribute("invPendienteCount", invPend);
-        }
-
-        return "dashboard";
-    }
+    // /dashboard lo atiende DashboardController (ronda 5 del rediseño náutico)
 
     @GetMapping("/perfil")
     public String perfil(HttpSession session, Model model) {

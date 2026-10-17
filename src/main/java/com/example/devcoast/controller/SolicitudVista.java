@@ -32,6 +32,8 @@ public class SolicitudVista {
     private String empresa;
     private String empresaInicial;
     private String empresaColor;
+    private String candidato;       // quien se postuló (lo usa el Dashboard de la cuenta de Empresa)
+    private String candidatoRol;
     private String areaClave;
     private String categoria;
     private String hace;
@@ -47,6 +49,8 @@ public class SolicitudVista {
     private boolean retirable;
     private int orden;              // para "Por estado": en revisión, aceptadas, cerradas
     private Date fecha;
+    private Date fechaEnvio;        // la del primer evento del historial (o, sin historial, la de la solicitud)
+    private Date fechaDecision;     // la del evento de la decisión (aceptada o rechazada), si el historial la trae
     private List<Etapa> etapas = new ArrayList<>();
 
     public static SolicitudVista de(Solicitud s, Usuario talento, Date ahora) {
@@ -55,12 +59,15 @@ public class SolicitudVista {
         v.empleoId = s.getEmpleoId();
         v.cargo = s.getEmpleoTitulo();
         v.empresa = s.getEmpleoEmpresaNombre();
+        v.candidato = s.getUsuarioNombre();
+        v.candidatoRol = s.getUsuarioRolTitulo();
         v.empresaInicial = v.empresa != null && !v.empresa.isBlank() ? v.empresa.trim().substring(0, 1).toUpperCase(Locale.ROOT) : null;
         v.empresaColor = s.getEmpleoColorIcono() != null && s.getEmpleoColorIcono().matches("#[0-9a-fA-F]{3,8}") ? s.getEmpleoColorIcono() : null;
         AreaEmpleo.Area area = AreaEmpleo.de(s.getEmpleoCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
         v.categoria = AreaEmpleo.categoriaVisible(s.getEmpleoCategoria());
         v.fecha = s.getFechaSolicitud();
+        v.fechaEnvio = primerEvento(s);
         v.hace = hace(s.getFechaSolicitud(), ahora);
 
         // match con el stack que tenía la oferta cuando se envió la solicitud
@@ -80,7 +87,8 @@ public class SolicitudVista {
             case "aprobada":
                 v.claseEstado = "s-ace";
                 v.estadoTexto = "Aceptada";
-                v.detalle = "Aceptada" + conFecha(fechaEvento(s, "aprobada"));
+                v.fechaDecision = fechaEvento(s, "aprobada");
+                v.detalle = "Aceptada" + conFecha(v.fechaDecision);
                 v.siguientePaso = "La empresa te eligió. Revisa tus mensajes: puede escribirte con los siguientes pasos.";
                 v.sello = "ACEPTADA";
                 v.claseSello = "ok";
@@ -90,7 +98,8 @@ public class SolicitudVista {
             case "rechazada":
                 v.claseEstado = "s-rec";
                 v.estadoTexto = "No avanzó";
-                v.detalle = "Respuesta" + conFecha(fechaEvento(s, "rechazada"));
+                v.fechaDecision = fechaEvento(s, "rechazada");
+                v.detalle = "Respuesta" + conFecha(v.fechaDecision);
                 v.siguientePaso = "La empresa decidió no continuar esta vez. Puedes seguir postulándote desde Empleos.";
                 v.sello = "NO AVANZÓ";
                 v.claseSello = "no";
@@ -126,6 +135,16 @@ public class SolicitudVista {
             v.etapas.add(new Etapa(ETAPAS[i], est, texto));
         }
         return v;
+    }
+
+    // fecha del primer evento del historial; sin historial, la fecha de la solicitud
+    private static Date primerEvento(Solicitud s) {
+        Date f = null;
+        if (s.getHistorial() != null)
+            for (EventoEstado e : s.getHistorial())
+                if (e.getFecha() != null && (f == null || e.getFecha().before(f)))
+                    f = e.getFecha();
+        return f != null ? f : s.getFechaSolicitud();
     }
 
     private static Date fechaEvento(Solicitud s, String estado) {

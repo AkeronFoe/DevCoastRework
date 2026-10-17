@@ -132,7 +132,7 @@
                     Mis ofertas</a>
                 <a class="mi" th:href="@{/candidatos}" th:aria-current="${active == 'postulaciones'} ? 'page'">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L3 10l7 3 3 7z"/></svg>
-                    Postulaciones<span class="badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}" th:aria-label="|${solicitudesPendientesEmpresa} postulaciones en revisión|">1</span></a>
+                    Postulaciones<span class="badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}" th:aria-label="|${solicitudesPendientesEmpresa} ${solicitudesPendientesEmpresa == 1 ? 'postulación' : 'postulaciones'} en revisión|">1</span></a>
             </th:block>
 
             <a class="mi" th:href="@{/talentos}" th:aria-current="${active == 'directorio'} ? 'page'">
