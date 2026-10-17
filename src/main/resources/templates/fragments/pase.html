@@ -252,6 +252,27 @@
         </div>
     </article>
 
+    <!-- ===== Carta de navegación del Dashboard (carta = CartaVista). Dibuja el barquito una vez con <symbol> y lo reutiliza ===== -->
+    <section th:fragment="carta(carta)" class="carta" aria-label="Tus solicitudes en ruta">
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="hullv"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath><symbol id="vessel" viewBox="90 30 470 490"><polygon points="273,52 510,274 408,276" style="fill:var(--s1)" stroke-width="5" stroke-linejoin="round"/><polygon points="273,52 408,274 350,292 274,366" style="fill:var(--s2)"/><polygon points="350,292 406,271 464,396 392,396" style="fill:var(--s3)"/><rect x="260" y="42" width="12" height="356" rx="6" fill="#F3F4F8"/><g clip-path="url(#hullv)"><rect x="100" y="397" width="450" height="15" fill="#F3F4F8"/><rect x="100" y="412" width="450" height="29" fill="#2DD4BF"/><rect x="100" y="441" width="450" height="8" fill="#F3F4F8"/><rect x="100" y="449" width="450" height="45" fill="#CDD1DB"/></g></symbol></defs></svg>
+        <div class="zones" th:style="'--zn:' + ${#lists.size(carta.zonas)}">
+            <section class="zone" th:each="z, zs : ${carta.zonas}" th:attr="aria-label=${z.aria}">
+                <h3><i></i><span th:text="${z.titulo}">EN ALTA MAR</span><em th:text="${z.total}">3</em></h3>
+                <p class="zs" th:text="${z.subtitulo}">EN REVISIÓN</p>
+                <a class="vs" th:each="b : ${z.barcos}" th:href="@{/solicitudes/{id}(id=${b.id})}" th:attr="aria-label=${b.aria}"
+                    th:style="'--i:' + ${b.indice} + ';--s1:' + ${b.s1} + ';--s2:' + ${b.s2} + ';--s3:' + ${b.s3}">
+                    <svg viewBox="90 30 470 490" aria-hidden="true"><use href="#vessel"/></svg>
+                    <span class="tx"><b th:text="${b.cargo}">Cargo</b><span th:text="${b.match != null ? b.empresa + ' · ' + b.match + '%' : b.empresa}">Empresa · 72%</span></span>
+                    <span class="ok" th:if="${b.aceptada}" aria-hidden="true">✓</span>
+                </a>
+                <a class="mas" th:if="${z.extra > 0}" th:href="@{/solicitudes(estado=${zs.index == 0 ? 'proceso' : 'aceptadas'})}" th:text="'+' + ${z.extra} + ' más'">+2 más</a>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and !carta.vacia}">Sin solicitudes en esta etapa.</p>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and carta.vacia and zs.first}">Todavía no has zarpado. <a th:href="@{/empleos}">Explora empleos</a> y postúlate.</p>
+            </section>
+        </div>
+        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+    </section>
+
 </body>
 
 </html>
