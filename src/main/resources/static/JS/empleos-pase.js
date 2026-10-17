@@ -43,10 +43,10 @@
                     if (d.descartado) { toast(d.mensaje); return; }
                     toast(T('Solicitud enviada a') + ' ' + (empresa || T('la empresa')) + ' (' + cargo + ').', {
                         undo: function () {
-                            // la solicitud se cancela con el mismo endpoint que usa "Mis solicitudes"; responde con una redirección
-                            fetch('/solicitudes/' + encodeURIComponent(d.solicitudId) + '/delete', { method: 'POST', redirect: 'manual' })
+                            // la solicitud se cancela con el mismo endpoint que usa "Solicitudes"; con Accept: json no deja avisos pendientes
+                            fetch('/solicitudes/' + encodeURIComponent(d.solicitudId) + '/delete', { method: 'POST', headers: { 'Accept': 'application/json' } })
                                 .then(function (r) {
-                                    if (r.ok || r.type === 'opaqueredirect') { restaurar(art, btn); toast(T('Solicitud cancelada.')); }
+                                    if (r.ok) { restaurar(art, btn); toast(T('Solicitud cancelada.')); }
                                     else toast(T('No se pudo cancelar. Hazlo desde Solicitudes.'));
                                 })
                                 .catch(function () { toast(T('No se pudo cancelar. Hazlo desde Solicitudes.')); });

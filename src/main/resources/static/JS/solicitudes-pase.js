@@ -26,7 +26,7 @@
         if (!isNaN(n)) el.textContent = Math.max(0, n + delta);
     }
 
-    /* retirar: POST real a /solicitudes/{id}/delete (responde con una redirección); sin JS se envía el formulario normal */
+    /* retirar: POST real a /solicitudes/{id}/delete (con Accept: json responde JSON y no deja avisos); sin JS se envía el formulario normal */
     document.addEventListener('submit', function (e) {
         var f = e.target.closest ? e.target.closest('form.retirar') : null;
         if (!f) return;
@@ -36,9 +36,9 @@
         if (btn) btn.disabled = true;
         var cargo = f.getAttribute('data-cargo') || '';
 
-        fetch(f.getAttribute('action'), { method: 'POST', redirect: 'manual' })
+        fetch(f.getAttribute('action'), { method: 'POST', headers: { 'Accept': 'application/json' } })
             .then(function (r) {
-                if (!(r.ok || r.type === 'opaqueredirect')) throw new Error('fallo');
+                if (!r.ok) throw new Error('fallo');
                 art.classList.remove('in');
                 art.classList.add('sent');
                 // contadores de las pestañas "Todas" y "En proceso"

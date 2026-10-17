@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -540,19 +541,31 @@ public class SolicitudController {
         return "redirect:/empleos/" + empleoId + "/postulaciones/" + solicitudId;
     }
 
+    // Retira (borra) la solicitud propia. Con Accept: application/json (los botones de Empleos y Solicitudes que
+    // usan fetch) responde JSON y no deja ningún aviso: la página ya muestra su propio toast. Sin JavaScript
+    // redirige a /solicitudes con el aviso "Solicitud retirada."
     @PostMapping("/solicitudes/{id}/delete")
-    public String deleteSolicitud(@PathVariable String id, HttpSession session, RedirectAttributes ra) {
+    public Object deleteSolicitud(@PathVariable String id,
+            @RequestHeader(value = "Accept", required = false) String accept,
+            HttpSession session, RedirectAttributes ra) {
+        boolean json = accept != null && accept.contains("application/json");
         if (RoleGuard.soloTalento(session))
-            return "redirect:/login";
+            return json ? ResponseEntity.status(401).body(Map.of("ok", false)) : "redirect:/login";
         String uid = RoleGuard.getId(session);
+        boolean[] retirada = { false };
         solicitudRepository.findById(id).ifPresent(s -> {
             if (uid.equals(s.getUsuarioId())) {
                 cleanupService.limpiarDatosDeSolicitud(id);
                 solicitudRepository.deleteById(id);
-                ra.addFlashAttribute("flashMessage", "Solicitud retirada.");
-                ra.addFlashAttribute("flashType", "success");
+                retirada[0] = true;
             }
         });
+        if (json)
+            return retirada[0] ? ResponseEntity.ok(Map.of("ok", true)) : ResponseEntity.status(404).body(Map.of("ok", false));
+        if (retirada[0]) {
+            ra.addFlashAttribute("flashMessage", "Solicitud retirada.");
+            ra.addFlashAttribute("flashType", "success");
+        }
         return "redirect:/solicitudes";
     }
 

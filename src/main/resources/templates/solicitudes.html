@@ -58,7 +58,7 @@
                     <a class="ch" th:href="@{/solicitudes(estado='proceso',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'proceso'} ? 'true'">En proceso <b th:text="${nProceso}">0</b></a>
                     <a class="ch" th:href="@{/solicitudes(estado='aceptadas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b th:text="${nAceptadas}">0</b></a>
                     <a class="ch" th:href="@{/solicitudes(estado='cerradas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'cerradas'} ? 'true'">Cerradas <b th:text="${nCerradas}">0</b></a>
-                    <a class="ch" th:href="@{/solicitudes(estado='invitaciones',q=${q})}" th:attr="aria-current=${estadoSel == 'invitaciones'} ? 'true'">Invitaciones <b th:text="${nInvitaciones}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='invitaciones',q=${q})}" th:attr="aria-current=${estadoSel == 'invitaciones'} ? 'true',title='Invitaciones por responder'">Invitaciones <b th:text="${invPendientes}">0</b></a>
                 </div>
 
                 <section class="reqs" aria-label="Lista de solicitudes" th:if="${estadoSel != 'invitaciones' and !#lists.isEmpty(solicitudes)}">

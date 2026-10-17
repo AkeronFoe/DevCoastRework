@@ -176,7 +176,8 @@ class SolicitudesPaseRenderTest {
                 .andExpect(content().string(containsString("/empleos/e-s2")))
                 // aviso de acción pendiente real + pestañas
                 .andExpect(content().string(containsString("Tienes 1 invitación por responder.")))
-                .andExpect(content().string(containsString("Invitaciones <b>2</b>")))
+                // el contador de Invitaciones cuenta solo las pendientes (hay 2 invitaciones, 1 pendiente)
+                .andExpect(content().string(containsString("Invitaciones <b>1</b>")))
                 .andExpect(content().string(containsString("Todas <b>4</b>")))
                 .andExpect(content().string(containsString("Cerradas <b>2</b>")))
                 // shell
@@ -274,6 +275,36 @@ class SolicitudesPaseRenderTest {
                 .andExpect(flash().attribute("flashMessage", "Solicitud retirada."));
         verify(cleanupService).limpiarDatosDeSolicitud("s1");
         verify(solicitudRepository).deleteById("s1");
+    }
+
+    @Test
+    void retirarConFetchRespondeJsonYNoDejaAvisoPendiente() throws Exception {
+        Solicitud s = solicitud("s1", "Desarrollo Backend", "Nordic Labs", "revision", 2);
+        s.setUsuarioId("t1");
+        when(solicitudRepository.findById("s1")).thenReturn(Optional.of(s));
+
+        // es lo que usan el "Deshacer" de Empleos y el "Retirar" de Solicitudes: la página ya muestra su toast
+        mockMvc.perform(post("/solicitudes/s1/delete").accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                .session(sesion("talento")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.ok").value(true))
+                .andExpect(flash().attributeCount(0));
+        verify(solicitudRepository).deleteById("s1");
+    }
+
+    @Test
+    void retirarConFetchDeLaSolicitudDeOtraPersonaEs404() throws Exception {
+        Solicitud s = solicitud("s9", "Otro", "Otra", "revision", 2);
+        s.setUsuarioId("otro");
+        when(solicitudRepository.findById("s9")).thenReturn(Optional.of(s));
+
+        mockMvc.perform(post("/solicitudes/s9/delete").accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                .session(sesion("talento")).with(csrf()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/solicitudes/s9/delete").accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                .session(sesion("empresa")).with(csrf()))
+                .andExpect(status().isUnauthorized());
+        verify(solicitudRepository, never()).deleteById("s9");
     }
 
     @Test
