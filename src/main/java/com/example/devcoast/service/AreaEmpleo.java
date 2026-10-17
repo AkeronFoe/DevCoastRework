@@ -52,6 +52,20 @@ public final class AreaEmpleo {
         return Area.OTRAS;
     }
 
+    /**
+     * Área de un proyecto del portafolio según su categoría (las del formulario de subir proyecto):
+     * Frontend, Backend, Full Stack y App móvil son Programación; UI/UX, Ilustraciones 3D, Branding,
+     * Motion, Design System y Dashboard SaaS son Diseño; "Otro" y lo desconocido, Otras.
+     */
+    public static Area deProyecto(String categoria) {
+        String c = sinTildes(categoria).toLowerCase().trim();
+        if (c.matches("^(frontend|backend|full ?stack|app movil|mobile|api|devops|data).*"))
+            return Area.PROGRAMACION;
+        if (c.matches("^(ui|ux|ilustracion|branding|motion|design system|dashboard|diseno|grafico|3d).*"))
+            return Area.DISENO;
+        return Area.OTRAS;
+    }
+
     /** "Programacion · Backend" se muestra como "Programación · Backend"; el resto queda igual. */
     public static String categoriaVisible(String categoria) {
         if (categoria == null)

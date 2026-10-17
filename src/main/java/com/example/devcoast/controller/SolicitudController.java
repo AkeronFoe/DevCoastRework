@@ -57,9 +57,15 @@ public class SolicitudController {
     private final CobroRepository cobroRepository;
     private final PlanService planService;
 
+    // Solicitudes y invitaciones del talento como pases de abordaje.
+    // ?estado=todas|proceso|aceptadas|cerradas|invitaciones &orden=recientes|estado &q=
+    // (tab=invitaciones se conserva porque InvitacionController redirige con ese parámetro)
     @GetMapping("/solicitudes")
     public String listarSolicitudes(
-            @RequestParam(defaultValue = "solicitudes") String tab,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String tab,
+            @RequestParam(required = false) String orden,
+            @RequestParam(required = false) String q,
             Model model, HttpSession session, RedirectAttributes ra) {
 
         if (RoleGuard.soloTalento(session)) {
@@ -72,21 +78,75 @@ public class SolicitudController {
         }
 
         String usuarioId = RoleGuard.getId(session);
-        List<Solicitud> solicitudes = solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId);
-        List<Invitacion> invitaciones = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(usuarioId);
+        Usuario talento = usuarioRepository.findById(usuarioId).orElse(null);
+        java.util.Date ahora = new java.util.Date();
 
-        model.addAttribute("solicitudes", solicitudes);
-        model.addAttribute("totalSolicitudes", solicitudes.size());
-        model.addAttribute("revisionCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "revision"));
-        model.addAttribute("aprobadaCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "aprobada"));
-        model.addAttribute("rechazadaCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "rechazada"));
-        model.addAttribute("invitaciones", invitaciones);
-        model.addAttribute("invPendienteCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "pendiente"));
-        model.addAttribute("invAceptadaCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "aceptada"));
-        model.addAttribute("invRechazadaCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "rechazada"));
-        model.addAttribute("tabActiva", tab);
+        List<SolicitudVista> todas = new ArrayList<>();
+        for (Solicitud s : solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId))
+            todas.add(SolicitudVista.de(s, talento, ahora));
+        List<InvitacionVista> invitaciones = new ArrayList<>();
+        for (Invitacion i : invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(usuarioId))
+            invitaciones.add(InvitacionVista.de(i, ahora));
+
+        String sel = estado != null ? estado : ("invitaciones".equals(tab) ? "invitaciones" : "todas");
+        if (!List.of("todas", "proceso", "aceptadas", "cerradas", "invitaciones").contains(sel))
+            sel = "todas";
+        String ordenSel = "estado".equals(orden) ? "estado" : "recientes";
+        String qSel = q == null ? "" : q.trim();
+        String qNorm = normalizar(qSel);
+
+        long nProceso = todas.stream().filter(v -> "revision".equals(v.getEstado())).count();
+        long nAceptadas = todas.stream().filter(v -> "aprobada".equals(v.getEstado())).count();
+        long nCerradas = todas.size() - nProceso - nAceptadas;
+
+        List<SolicitudVista> lista = new ArrayList<>();
+        for (SolicitudVista v : todas) {
+            boolean ok = switch (sel) {
+                case "proceso" -> "revision".equals(v.getEstado());
+                case "aceptadas" -> "aprobada".equals(v.getEstado());
+                case "cerradas" -> "rechazada".equals(v.getEstado()) || "descartado".equals(v.getEstado());
+                case "invitaciones" -> false;
+                default -> true;
+            };
+            if (!ok)
+                continue;
+            if (!qNorm.isEmpty() && !normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+                continue;
+            lista.add(v);
+        }
+        // la lista llega por fecha (más reciente primero); sort() es estable
+        if ("estado".equals(ordenSel))
+            lista.sort(java.util.Comparator.comparingInt(SolicitudVista::getOrden));
+
+        List<InvitacionVista> listaInv = new ArrayList<>();
+        if ("invitaciones".equals(sel))
+            for (InvitacionVista v : invitaciones)
+                if (qNorm.isEmpty() || normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+                    listaInv.add(v);
+
+        long invPendientes = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).count();
+        InvitacionVista primeraPendiente = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).findFirst().orElse(null);
+
+        model.addAttribute("solicitudes", lista);
+        model.addAttribute("invitaciones", listaInv);
+        model.addAttribute("nTodas", todas.size());
+        model.addAttribute("nProceso", nProceso);
+        model.addAttribute("nAceptadas", nAceptadas);
+        model.addAttribute("nCerradas", nCerradas);
+        model.addAttribute("nInvitaciones", invitaciones.size());
+        model.addAttribute("invPendientes", invPendientes);
+        model.addAttribute("primeraPendiente", primeraPendiente);
+        model.addAttribute("estadoSel", sel);
+        model.addAttribute("ordenSel", ordenSel);
+        model.addAttribute("q", qSel.isEmpty() ? null : qSel);
+        model.addAttribute("invPendienteCount", invPendientes);
         agregarSesion(session, model);
         return "solicitudes";
+    }
+
+    private static String normalizar(String s) {
+        return java.text.Normalizer.normalize(s == null ? "" : s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").toLowerCase().trim();
     }
 
     @GetMapping("/solicitudes/{id}")
@@ -481,7 +541,7 @@ public class SolicitudController {
     }
 
     @PostMapping("/solicitudes/{id}/delete")
-    public String deleteSolicitud(@PathVariable String id, HttpSession session) {
+    public String deleteSolicitud(@PathVariable String id, HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.soloTalento(session))
             return "redirect:/login";
         String uid = RoleGuard.getId(session);
@@ -489,6 +549,8 @@ public class SolicitudController {
             if (uid.equals(s.getUsuarioId())) {
                 cleanupService.limpiarDatosDeSolicitud(id);
                 solicitudRepository.deleteById(id);
+                ra.addFlashAttribute("flashMessage", "Solicitud retirada.");
+                ra.addFlashAttribute("flashType", "success");
             }
         });
         return "redirect:/solicitudes";

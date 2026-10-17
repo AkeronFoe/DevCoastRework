@@ -35,7 +35,7 @@ public class NotificacionInterceptor implements HandlerInterceptor {
     // vistas que usan el shell náutico (fragments/nautico :: sidebar). Solo ellas piden los datos
     // del menú lateral, para no gastar consultas en las páginas que todavía tienen el shell viejo.
     // Al migrar una página al shell nuevo, agregar aquí el nombre de su vista.
-    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos");
+    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos");
 
     public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {
