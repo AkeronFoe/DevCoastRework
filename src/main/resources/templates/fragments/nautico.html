@@ -16,11 +16,17 @@
         <meta name="color-scheme" content="dark">
     </th:block>
 
-    <th:block th:fragment="assets">
+    <!-- tipografías (Space Grotesk y JetBrains Mono) -->
+    <th:block th:fragment="fonts">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+    </th:block>
+
+    <!-- páginas de la app (con shell). Las páginas públicas (landing, login, registro) traen su propio CSS autocontenido -->
+    <th:block th:fragment="assets">
+        <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
         <link rel="stylesheet" th:href="@{/CSS/nautico.css}">
         <script th:src="@{/JS/i18n.js}"></script>
         <script th:src="@{/JS/nautico.js}" defer></script>
@@ -72,6 +78,14 @@
             </g></g>
           </g>
       </g>
+    </th:block>
+
+    <!-- banderines que ondean (landing, login y registro) -->
+    <th:block th:fragment="bunting">
+  <svg class="bunting" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 6 Q360 46 720 6 Q1080 46 1440 6" fill="none" stroke="#3A3D47" stroke-width="2"/>
+    <polygon class="flag" style="--d:0s" points="44,12 76,12 60,56" fill="#FF7B4F"/><polygon class="flag" style="--d:.3s" points="164,21 196,21 180,65" fill="#2DD4BF"/><polygon class="flag" style="--d:.6s" points="284,25 316,25 300,69" fill="#F3F4F8"/><polygon class="flag" style="--d:.2s" points="404,25 436,25 420,69" fill="#CC4B27"/><polygon class="flag" style="--d:.5s" points="524,21 556,21 540,65" fill="#FF7B4F"/><polygon class="flag" style="--d:.1s" points="644,12 676,12 660,56" fill="#2DD4BF"/><polygon class="flag" style="--d:.4s" points="764,12 796,12 780,56" fill="#F3F4F8"/><polygon class="flag" style="--d:.7s" points="884,21 916,21 900,65" fill="#CC4B27"/><polygon class="flag" style="--d:.2s" points="1004,25 1036,25 1020,69" fill="#FF7B4F"/><polygon class="flag" style="--d:.5s" points="1124,25 1156,25 1140,69" fill="#2DD4BF"/><polygon class="flag" style="--d:.3s" points="1244,21 1276,21 1260,65" fill="#F3F4F8"/><polygon class="flag" style="--d:.6s" points="1364,12 1396,12 1380,56" fill="#CC4B27"/>
+  </svg>
     </th:block>
 
     <!-- las tres olas planas -->

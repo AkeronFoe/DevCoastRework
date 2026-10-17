@@ -388,34 +388,16 @@ public class PageController {
         return "register";
     }
 
+    // landing pública: los tres "pases" de la escena de empleos salen de las ofertas activas más recientes
+    // (solo los campos que muestra el pase). Sin ofertas, la plantilla omite esa escena.
     @GetMapping("/about-us")
     public String aboutUs(Model model) {
-        long totalTalentos = mongoTemplate.count(
-                Query.query(Criteria.where("perfil_publico").is(true).and("tipo").ne("empresa")), Usuario.class);
-        long totalEmpresas = empresaRepository.count();
-        long totalEmpleosActivos = mongoTemplate.count(
-                Query.query(new Criteria().orOperator(
-                        Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false))),
-                Empleo.class);
-        long totalSolicitudes = solicitudRepository.count();
-        long solicitudesAprobadas = mongoTemplate.count(
-                Query.query(Criteria.where("estado").is("aprobada")), Solicitud.class);
-        long invitacionesAceptadas = mongoTemplate.count(
-                Query.query(Criteria.where("estado").is("aceptada")),
-                com.example.devcoast.model.Invitacion.class);
-        long conexiones = solicitudesAprobadas + invitacionesAceptadas;
-
-        long respondidas = solicitudesAprobadas + mongoTemplate.count(
-                Query.query(Criteria.where("estado").is("rechazada")), Solicitud.class);
-        long tasaRespuesta = totalSolicitudes > 0
-                ? Math.min(99, (respondidas * 100) / totalSolicitudes)
-                : 0;
-
-        model.addAttribute("kpiTalentos", totalTalentos);
-        model.addAttribute("kpiEmpresas", totalEmpresas);
-        model.addAttribute("kpiEmpleos", totalEmpleosActivos);
-        model.addAttribute("kpiConexiones", conexiones);
-        model.addAttribute("kpiTasaRespuesta", tasaRespuesta);
+        Query recientes = new Query(new Criteria().orOperator(
+                Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false)))
+                .with(Sort.by(Sort.Direction.DESC, "_id"))
+                .limit(3);
+        recientes.fields().include("titulo", "empresaNombre", "modalidad", "categoria");
+        model.addAttribute("empleosLanding", mongoTemplate.find(recientes, Empleo.class));
         return "aboutUs";
     }
 
