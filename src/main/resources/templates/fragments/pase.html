@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<body>
+
+    <!-- ===== Pase de abordaje (ticket). v = EmpleoVista; feat = destacado; i = orden de entrada ===== -->
+    <article th:fragment="ticket(v, feat, i)" class="jt in"
+        th:classappend="${(feat ? 'feat ' : '') + (v.solicitada ? 'sent' : '')}" th:attr="data-id=${v.id}"
+        th:style="'--i:' + ${i}">
+        <div class="jt-main">
+            <span class="fpill" th:if="${feat}"
+                th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.8 1.5 7.1L12 17.6 5.7 21.3l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+                <span th:text="${destacadoMotivo == 'match'} ? 'DESTACADO · MEJOR MATCH' : 'DESTACADO · PROMOCIONADO'">DESTACADO · MEJOR MATCH</span>
+            </span>
+
+            <div class="jt-top">
+                <span class="area" th:classappend="${v.areaClave}">
+                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+                </span>
+                <span class="when" th:if="${v.hace != null}">
+                    <span class="tag" th:if="${v.nueva}">NUEVA</span><span th:text="${v.hace}">hace 3 días</span>
+                </span>
+            </div>
+
+            <h2 class="jt-t"><a th:href="@{/empleos/{id}(id=${v.id})}" th:text="${v.titulo}">Cargo</a></h2>
+
+            <div class="co" th:if="${v.empresaNombre != null}">
+                <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')">
+                    <img th:if="${v.logoUrl != null}" th:src="${v.logoUrl}" alt="">
+                    <b th:if="${v.logoUrl == null}" th:text="${v.empresaInicial}">E</b>
+                </span>
+                <span th:text="${v.empresaNombre}">Empresa</span>
+            </div>
+
+            <p class="desc" th:if="${feat and v.descripcionCorta != null}" th:text="${v.descripcionCorta}">Descripción corta.</p>
+
+            <dl class="facts" th:if="${v.modalidad != null or v.seniority != null or v.salarioTexto != null or (feat and v.postulantes != null)}">
+                <div th:if="${v.modalidad != null}"><dt>MODALIDAD</dt><dd th:text="${v.modalidad}">Remoto</dd></div>
+                <div th:if="${v.seniority != null}"><dt>NIVEL</dt><dd th:text="${v.seniority}">Senior</dd></div>
+                <div th:if="${v.salarioTexto != null}"><dt th:text="${v.salarioEtiqueta}">SALARIO</dt><dd th:text="${v.salarioTexto}">$5–7 M</dd></div>
+                <div th:if="${feat and v.postulantes != null}"><dt>POSTULANTES</dt><dd th:text="${v.postulantes}">12</dd></div>
+            </dl>
+
+            <div class="why" th:if="${!#lists.isEmpty(v.habilidades)}">
+                <div class="sk" th:if="${feat}"><span class="k" th:text="${v.match != null} ? 'TU PERFIL VS. LA OFERTA' : 'HABILIDADES QUE PIDE'">TU PERFIL VS. LA OFERTA</span></div>
+                <div class="sk">
+                    <th:block th:each="h : ${v.habilidades}">
+                        <span class="s y" th:if="${h.estado == 'tiene'}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span th:text="${h.nombre}">Java</span><span class="sr"> (lo tienes)</span>
+                        </span>
+                        <span class="s n" th:if="${h.estado == 'falta'}"><span th:text="${h.nombre}">Docker</span><span class="sr"> (te falta)</span></span>
+                        <span class="s nm" th:if="${h.estado == 'neutra'}" th:text="${h.nombre}">Java</span>
+                    </th:block>
+                    <span class="s more" th:if="${v.habilidadesRestantes > 0}" th:text="'+' + ${v.habilidadesRestantes}">+2</span>
+                </div>
+            </div>
+
+            <div class="stamp" aria-hidden="true">SOLICITADA</div>
+        </div>
+
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <th:block th:if="${v.match != null}">
+                <span class="mt-k" th:text="'MATCH ' + ${#strings.toUpperCase(v.nivel)}">MATCH ALTO</span>
+                <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">94</span><small>%</small></div>
+                <div class="mt-bar" aria-hidden="true">
+                    <i th:each="c : ${#numbers.sequence(0, 9)}" th:class="${c < v.cubos} ? 'on'" th:style="${c < v.cubos} ? '--c:' + ${c}"></i>
+                </div>
+            </th:block>
+            <th:block th:if="${v.match == null}">
+                <span class="mt-k">MATCH</span>
+                <p class="nomatch" th:if="${!esTalento}">Es una oferta de otra empresa.</p>
+                <p class="nomatch" th:if="${esTalento and talentoSinStack}">Agrega tu stack para ver tu match.</p>
+                <p class="nomatch" th:if="${esTalento and !talentoSinStack}">La oferta no lista habilidades.</p>
+            </th:block>
+
+            <form th:if="${esTalento}" method="post" th:action="@{/empleos/{id}/aplicar(id=${v.id})}" class="postular"
+                th:attr="data-postular=@{/empleos/{id}/postular(id=${v.id})},data-cargo=${v.titulo},data-empresa=${v.empresaNombre}">
+                <button class="apply" type="submit" th:disabled="${v.solicitada}"
+                    th:aria-label="|Postularme a ${v.titulo}${v.empresaNombre != null ? ' en ' + v.empresaNombre : ''}|"
+                    th:text="${v.solicitada} ? 'Solicitada' : 'Postularme'">Postularme</button>
+            </form>
+            <a class="apply ghost" th:unless="${esTalento}" th:href="@{/empleos/{id}(id=${v.id})}"
+                th:aria-label="|Ver la oferta ${v.titulo}|">Ver oferta</a>
+        </div>
+    </article>
+
+</body>
+
+</html>

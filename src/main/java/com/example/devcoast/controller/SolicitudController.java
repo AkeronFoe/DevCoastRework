@@ -123,34 +123,91 @@ public class SolicitudController {
             return "redirect:/empleos/" + id;
         }
 
-        String usuarioId = RoleGuard.getId(session);
+        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session),
+                proyectosIds, mensajeMotivacion);
 
+        switch (r.salida()) {
+            case NO_DISPONIBLE:
+                ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
+                ra.addFlashAttribute("flashType", "error");
+                return "redirect:/empleos";
+            case NO_ACTIVO:
+                ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
+                ra.addFlashAttribute("flashType", "error");
+                return "redirect:/empleos/" + id;
+            case YA_APLICO:
+                ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
+                ra.addFlashAttribute("flashType", "info");
+                return "redirect:/solicitudes/" + (r.solicitud() != null ? r.solicitud().getId() : "");
+            default:
+                break;
+        }
+
+        if (r.descartado()) {
+            ra.addFlashAttribute("flashMessage",
+                    "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa. Puedes mejorar tu perfil e intentarlo con otros empleos.");
+            ra.addFlashAttribute("flashType", "warning");
+        } else {
+            ra.addFlashAttribute("flashMessage", "Postulación enviada correctamente");
+            ra.addFlashAttribute("flashType", "success");
+        }
+        return "redirect:/solicitudes/" + r.solicitud().getId();
+    }
+
+    // misma postulación que /aplicar, pero para el botón "Postularme" de la lista de empleos: responde JSON
+    // (con el id de la solicitud, que sirve para deshacerla con /solicitudes/{id}/delete) en vez de redirigir
+    @PostMapping(value = "/empleos/{id}/postular", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> postular(@PathVariable String id, HttpSession session) {
+        if (RoleGuard.sinSesion(session))
+            return ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión para postularte."));
+        if (RoleGuard.soloTalento(session))
+            return ResponseEntity.status(403).body(Map.of("ok", false, "mensaje", "Las empresas no pueden aplicar a empleos."));
+
+        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session), null, null);
+        switch (r.salida()) {
+            case NO_DISPONIBLE:
+                return ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
+            case NO_ACTIVO:
+                return ResponseEntity.status(409).body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
+            case YA_APLICO:
+                return ResponseEntity.status(409).body(Map.of("ok", false, "yaAplicaste", true,
+                        "mensaje", "Ya aplicaste a este empleo."));
+            default:
+                return ResponseEntity.ok(Map.of("ok", true,
+                        "solicitudId", r.solicitud().getId(),
+                        "estado", r.solicitud().getEstado(),
+                        "descartado", r.descartado(),
+                        "mensaje", r.descartado()
+                                ? "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa."
+                                : "Postulación enviada."));
+        }
+    }
+
+    private enum Salida { NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA }
+
+    private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {}
+
+    // crea la solicitud (con el screening automático y la notificación a la empresa); lo comparten /aplicar y /postular
+    private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
+            List<String> proyectosIds, String mensajeMotivacion) {
         Optional<Empleo> empleoOpt = empleoRepository.findById(id);
-        if (empleoOpt.isEmpty()) {
-            ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
-            ra.addFlashAttribute("flashType", "error");
-            return "redirect:/empleos";
-        }
+        if (empleoOpt.isEmpty())
+            return new ResultadoAplicacion(Salida.NO_DISPONIBLE, null, false);
         String estadoEmpleo = empleoOpt.get().getEstado();
-        if (estadoEmpleo != null && !"ACTIVO".equals(estadoEmpleo)) {
-            ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
-            ra.addFlashAttribute("flashType", "error");
-            return "redirect:/empleos/" + id;
-        }
+        if (estadoEmpleo != null && !"ACTIVO".equals(estadoEmpleo))
+            return new ResultadoAplicacion(Salida.NO_ACTIVO, null, false);
 
         Optional<Solicitud> existente = solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id);
-        if (existente.isPresent()) {
-            ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
-            ra.addFlashAttribute("flashType", "info");
-            return "redirect:/solicitudes/" + existente.get().getId();
-        }
+        if (existente.isPresent())
+            return new ResultadoAplicacion(Salida.YA_APLICO, existente.get(), false);
 
         Empleo empleo = empleoOpt.get();
         Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
 
         Solicitud solicitud = new Solicitud();
         solicitud.setUsuarioId(usuarioId);
-        solicitud.setUsuarioCorreo(RoleGuard.getCorreo(session));
+        solicitud.setUsuarioCorreo(correo);
         if (usuario != null) {
             solicitud.setUsuarioNombre(usuario.getNombre());
             solicitud.setUsuarioRolTitulo(usuario.getRolTitulo());
@@ -202,10 +259,8 @@ public class SolicitudController {
             guardada = solicitudRepository.save(solicitud);
         } catch (org.springframework.dao.DuplicateKeyException e) {
             // dos postulaciones al mismo empleo casi al mismo tiempo, la BD rechazó la segunda
-            Optional<Solicitud> yaExiste = solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id);
-            ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
-            ra.addFlashAttribute("flashType", "info");
-            return "redirect:/solicitudes/" + yaExiste.map(Solicitud::getId).orElse("");
+            return new ResultadoAplicacion(Salida.YA_APLICO,
+                    solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id).orElse(null), false);
         }
 
         boolean descartadoPorScreening = false;
@@ -239,15 +294,7 @@ public class SolicitudController {
             } catch (Exception ignored) {}
         }
 
-        if (descartadoPorScreening) {
-            ra.addFlashAttribute("flashMessage",
-                    "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa. Puedes mejorar tu perfil e intentarlo con otros empleos.");
-            ra.addFlashAttribute("flashType", "warning");
-        } else {
-            ra.addFlashAttribute("flashMessage", "Postulación enviada correctamente");
-            ra.addFlashAttribute("flashType", "success");
-        }
-        return "redirect:/solicitudes/" + guardada.getId();
+        return new ResultadoAplicacion(Salida.CREADA, guardada, descartadoPorScreening);
     }
 
     @GetMapping("/empleos/{empleoId}/postulaciones")

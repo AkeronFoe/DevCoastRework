@@ -99,6 +99,8 @@ class PublicPagesRenderTest {
                 .andExpect(content().string(containsString("Desarrollo Backend")))
                 .andExpect(content().string(containsString("Estudio Lumen")))
                 .andExpect(content().string(containsString("ÁREA · DISEÑO · UI/UX")))
+                // la categoría guardada sin tilde se muestra con tilde
+                .andExpect(content().string(containsString("ÁREA · PROGRAMACIÓN · BACKEND")))
                 .andExpect(content().string(containsString("id=\"pases\"")))
                 .andExpect(content().string(containsString("hullclip")))
                 .andExpect(content().string(not(containsString("[Cargo]"))))

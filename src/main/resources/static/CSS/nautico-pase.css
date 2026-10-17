@@ -1,0 +1,123 @@
+/* DevCoast · pases de abordaje (tickets). Fuente: docs/diseno/devcoast-empleos-motion.html.
+   Se usa en Empleos y, después, en Solicitudes y Dashboard. Requiere nautico.css (tokens y shell). */
+/* ofertas = pases de abordaje: el talón muestra el MATCH (color = nivel de match) */
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-top:16px;font-family:var(--font-mono);font-size:12px;color:var(--mute)}
+.legend b{color:var(--ink)}
+.lg{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.lg svg{width:14px;height:14px;fill:none;stroke:var(--teal);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.lg .dash{width:20px;height:12px;border:1.5px dashed #8A8F9C;border-radius:4px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.sw.hi{background:var(--teal)} .sw.md{background:var(--orange)} .sw.lo{background:#CDD1DB}
+.fwrap{padding-top:4px}
+.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,500px),1fr));gap:22px}
+.jt{position:relative;display:flex;transition:transform .25s ease}
+.jt:hover{transform:translateY(-4px) rotate(-.3deg)}
+.jt-main,.jt-stub{--r:11px;position:relative;background:var(--paper);color:var(--paper-ink)}
+.jt-main{flex:1;min-width:0;border-radius:14px 0 0 14px;padding:16px 20px 16px 22px;display:flex;flex-direction:column;gap:12px;
+  -webkit-mask:radial-gradient(circle var(--r) at 100% 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle var(--r) at 100% 100%,#0000 98%,#000) bottom/100% 51% no-repeat;
+  mask:radial-gradient(circle var(--r) at 100% 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle var(--r) at 100% 100%,#0000 98%,#000) bottom/100% 51% no-repeat}
+.jt-stub{width:156px;flex:none;border-radius:0 14px 14px 0;padding:16px 14px;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;gap:10px;text-align:center;transform-origin:top left;transition:transform .25s ease,opacity .6s ease .1s;
+  -webkit-mask:radial-gradient(circle var(--r) at 0 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle var(--r) at 0 100%,#0000 98%,#000) bottom/100% 51% no-repeat;
+  mask:radial-gradient(circle var(--r) at 0 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle var(--r) at 0 100%,#0000 98%,#000) bottom/100% 51% no-repeat}
+.jt-stub:before{content:"";position:absolute;left:-1px;top:16px;bottom:16px;border-left:2px dashed rgba(16,17,20,.4)}
+.jt:hover .jt-stub{transform:translateX(6px)}
+.jt-stub.hi{background:var(--teal)}
+.jt-stub.md{background:var(--orange)}
+.jt-stub.lo{background:#CDD1DB}
+.jt-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.area{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.area svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.area.p{color:var(--teal-d)} .area.d{color:var(--orange-ink)}
+.when{display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--paper-mute)}
+.k{font-family:var(--font-mono);font-size:10.5px;color:var(--paper-mute);letter-spacing:.05em}
+.jt-t{font-size:24px;line-height:1.1;font-weight:700;letter-spacing:-.01em}
+.co{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;margin-top:-4px}
+.co-t{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex:none}
+.co-t svg{width:14px;height:14px;fill:#F3F4F8}
+.desc{font-size:15px;line-height:1.45;color:#2B2E36;max-width:56ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0}
+.facts div{display:flex;flex-direction:column;gap:1px}
+.facts dt{font-family:var(--font-mono);font-size:10.5px;color:var(--paper-mute);letter-spacing:.05em}
+.facts dd{margin:0;font-size:15px;font-weight:600}
+.sk{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.sk .k{margin-right:2px}
+.s{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:11.5px;font-weight:500;padding:3px 9px;border-radius:6px}
+.s.y{background:var(--paper-ink);color:var(--paper)}
+.s.y svg{width:11px;height:11px;fill:none;stroke:var(--teal);stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.s.n{border:1.5px dashed #8A8F9C;color:var(--paper-mute)}
+.tag{font-family:var(--font-mono);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--paper-ink);color:var(--paper);letter-spacing:.05em}
+.mt-k{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.08em}
+.mt-n{font-size:40px;line-height:1;font-weight:700;letter-spacing:-.04em}
+.mt-n small{font-size:.48em;letter-spacing:0;margin-left:1px}
+.mt-bar{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}
+.mt-bar i{display:block;height:10px;border-radius:1px;background:rgba(16,17,20,.2)}
+.mt-bar i.on{background:var(--paper-ink)}
+.apply{width:100%;height:44px;border:0;border-radius:10px;background:var(--paper-ink);color:var(--ink);font:700 15px var(--font-display);cursor:pointer;transition:transform .2s ease}
+.apply:hover{transform:translateY(-3px)}
+.apply:focus-visible{outline:3px solid var(--paper-ink);outline-offset:3px}
+.stamp{position:absolute;right:26px;bottom:16px;padding:6px 12px;border:3px solid var(--orange-ink);border-radius:8px;color:var(--orange-ink);font:700 15px var(--font-mono);letter-spacing:.08em;opacity:0;transform:rotate(-8deg) scale(1.6);transition:opacity .25s ease .3s,transform .35s cubic-bezier(.2,.9,.3,1.2) .3s;pointer-events:none;background:var(--paper)}
+.jt.sent .jt-stub{transform:translate(20px,40px) rotate(9deg);opacity:0;pointer-events:none}
+.jt.sent .stamp{opacity:1;transform:rotate(-8deg) scale(1)}
+.jt.sent:hover{transform:none}
+
+/* empleo destacado = el de mayor match */
+.fpill{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:8px;color:var(--sky);font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.08em}
+.fpill svg{width:14px;height:14px;fill:var(--sky)}
+.fpill.hi{background:var(--teal)} .fpill.md{background:var(--orange)} .fpill.lo{background:#CDD1DB}
+.jt.feat:hover{transform:translateY(-4px)}
+.jt.feat .jt-main{padding:22px 28px;gap:16px}
+.jt.feat .jt-t{font-size:clamp(28px,3.4vw,40px);letter-spacing:-.02em}
+.jt.feat .co{font-size:17px;margin-top:-6px}
+.jt.feat .co-t{width:30px;height:30px}
+.jt.feat .co-t svg{width:16px;height:16px}
+.jt.feat .jt-stub{width:218px;padding:22px 18px;gap:14px}
+.jt.feat .mt-k{font-size:12px}
+.jt.feat .mt-n{font-size:68px}
+.jt.feat .mt-bar i{height:14px}
+.jt.feat .apply{height:48px;font-size:16px}
+.why{display:flex;flex-direction:column;gap:8px}
+
+/* enlace del cargo hacia el detalle de la oferta: el ticket sigue siendo un <article> */
+.jt-t a{color:inherit}
+.jt-t a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.jt-t a:focus-visible{outline:3px solid var(--paper-ink);outline-offset:3px;border-radius:4px}
+.area.o{color:var(--paper-mute)}
+.co-t b{font:700 13px var(--font-mono);color:#F3F4F8;line-height:1}
+.co-t img{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}
+.s.nm{border:1.5px solid #B9BEC9;color:var(--paper-ink)}
+.s.more{background:#E4E6EC;color:var(--paper-mute)}
+.apply:disabled{cursor:default;transform:none}
+.apply.ghost{display:flex;align-items:center;justify-content:center;background:none;border:2px solid var(--paper-ink);color:var(--paper-ink);text-align:center;font-size:14px}
+.nomatch{font-family:var(--font-mono);font-size:10.5px;line-height:1.35;color:var(--paper-ink);letter-spacing:.04em}
+.legend a{color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 20px;margin-top:34px;font-family:var(--font-mono);font-size:13px;color:var(--mute)}
+.pager a{display:inline-flex;align-items:center;height:42px;padding:0 18px;border:1px solid var(--line2);border-radius:10px;color:var(--ink)}
+.pager a:hover{border-color:var(--mute)}
+.flash{margin:18px 0 0;padding:12px 16px;border-radius:10px;background:var(--paper);color:var(--paper-ink);border-left:6px solid var(--teal);font-weight:500}
+.flash.error{border-left-color:var(--err)}
+@media (max-width:900px){
+  .jobs{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .jt-stub{width:118px;padding:14px 10px}
+  .jt-main,.jt.feat .jt-main{padding:16px 14px 16px 16px}
+  .jt-t{font-size:21px}
+  .jt-top{flex-wrap:wrap;row-gap:6px}
+  .mt-n{font-size:32px}
+  .jt.feat .jt-stub{width:132px;padding:16px 10px}
+  .jt.feat .mt-n{font-size:46px}
+  .jt.feat .jt-t{font-size:26px}
+  .stamp{right:14px;font-size:13px}
+  .clear{margin-left:0}
+@media (prefers-reduced-motion:no-preference){
+@keyframes rise{from{opacity:0;transform:translateY(24px) rotate(1deg)}to{opacity:1;transform:none}}
+@keyframes riseF{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes mcube{from{transform:scaleY(0)}to{transform:none}}
+.jt.in{animation:rise .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 55ms)}
+.jt.feat.in{animation-name:riseF}
+.jt.in .mt-bar i.on{transform-origin:bottom;animation:mcube .35s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i) * 55ms + 250ms + var(--c) * 45ms)}
+}
+@media (prefers-reduced-motion:reduce){
+  .jt,.jt-stub,.stamp{transition:none !important}
+}
+.jt-stub form{display:contents}

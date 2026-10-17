@@ -26,6 +26,8 @@ public interface SolicitudRepository extends MongoRepository<Solicitud, String> 
 
     long countByUsuarioId(String usuarioId);
 
+    long countByEmpleoId(String empleoId);
+
     // para el inbox de empresa, trae solicitudes de varios empleos a la vez
     List<Solicitud> findByEmpleoIdIn(List<String> empleoIds);
 }
