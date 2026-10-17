@@ -68,6 +68,15 @@ public class UsuarioController {
                 empresa.setSitioWeb(str(datos, "portfolioUrl"));
             if (datos.containsKey("rolTitulo"))
                 empresa.setSector(str(datos, "rolTitulo"));
+            if (datos.containsKey("tamano"))
+                empresa.setTamano(str(datos, "tamano"));
+            if (datos.containsKey("telefono"))
+                empresa.setTelefono(str(datos, "telefono"));
+            if (datos.containsKey("nombreRepresentante"))
+                empresa.setNombreRepresentante(str(datos, "nombreRepresentante"));
+            if (datos.containsKey("cargoRepresentante"))
+                empresa.setCargoRepresentante(str(datos, "cargoRepresentante"));
+            empresa.setActualizadoEn(new Date());
             empresaRepository.save(empresa);
             return ResponseEntity.ok(Map.of("ok", true, "mensaje", "Perfil guardado"));
         }

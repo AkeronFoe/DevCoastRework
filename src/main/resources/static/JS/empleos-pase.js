@@ -8,9 +8,6 @@
     var T = function (t) { return typeof window.translateText === 'function' ? window.translateText(t) : t; };
     var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-    /* orden: el selector envía el formulario (sin JS queda el botón "aplicar") */
-    var sort = $('#sort');
-    if (sort) sort.addEventListener('change', function () { sort.form.submit(); });
 
     function marcarSolicitada(art, btn) {
         art.classList.remove('in');

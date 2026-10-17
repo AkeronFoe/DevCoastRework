@@ -31,6 +31,7 @@ import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
+import com.example.devcoast.service.EtiquetasPerfil;
 import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
@@ -77,44 +78,58 @@ public class PageController {
             return "redirect:/login";
         cargarUsuario(session, model);
         String id = RoleGuard.getId(session);
-        if (id != null && !RoleGuard.esEmpresa(session)) {
-            List<Proyecto> proyectosUsuario = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
-            long invPend    = invitacionRepository.countByTalentoIdAndEstado(id, "pendiente");
-            long invTotal   = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id).size();
-            long solActivas = solicitudRepository.countByUsuarioIdAndEstado(id, "revision");
-            long solTotal   = solicitudRepository.countByUsuarioId(id);
-            long solAcept   = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
-            model.addAttribute("statProyectos",            proyectosUsuario.size());
-            model.addAttribute("statInvitacionesPendientes", invPend);
-            model.addAttribute("statInvitacionesTotal",    invTotal);
-            model.addAttribute("statSolicitudesActivas",   solActivas);
-            model.addAttribute("statSolicitudesTotal",     solTotal);
-            model.addAttribute("statSolicitudesAceptadas", solAcept);
+        if (id == null)
+            return "perfil";
+        if (RoleGuard.esEmpresa(session)) {
+            Empresa empresa = empresaRepository.findById(id).orElse(null);
+            model.addAttribute("empresa", empresa);
+            model.addAttribute("nActivas", empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(id, "ACTIVO").size());
+            return "perfil-empresa";
+        }
 
-            // vista previa "así te ven en Talentos" — mismo acento determinista
-            // que usa el directorio, y los colores reales de hasta 4 proyectos
-            // publicados, para que la ficha de acá y la card real nunca difieran
-            model.addAttribute("previewAccent", colorParaId(id));
-            List<String> previewColores = proyectosUsuario.stream()
-                    .filter(Proyecto::isPublicado)
-                    .map(Proyecto::getColorIcono)
-                    .filter(c -> c != null && !c.isBlank())
-                    .distinct()
-                    .limit(4)
-                    .collect(Collectors.toList());
-            model.addAttribute("previewColores", previewColores);
+        Usuario usuario = (Usuario) model.asMap().get("usuario");
+        List<Proyecto> proyectosUsuario = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
+        long invTotal   = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id).size();
+        long solTotal   = solicitudRepository.countByUsuarioId(id);
+        long solAcept   = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
+        model.addAttribute("statProyectos",            proyectosUsuario.size());
+        model.addAttribute("statInvitacionesTotal",    invTotal);
+        model.addAttribute("statSolicitudesTotal",     solTotal);
+        model.addAttribute("statSolicitudesAceptadas", solAcept);
+
+        // vista previa "así te ven en el Directorio": la misma tarjeta del listado, con los colores
+        // reales de hasta 4 proyectos publicados
+        List<String> previewColores = proyectosUsuario.stream()
+                .filter(Proyecto::isPublicado)
+                .map(Proyecto::getColorIcono)
+                .filter(c -> c != null && c.matches("#[0-9a-fA-F]{3,8}"))
+                .distinct()
+                .limit(4)
+                .collect(Collectors.toList());
+        long publicados = proyectosUsuario.stream().filter(Proyecto::isPublicado).count();
+        if (usuario != null) {
+            // valor actual de cada selector del formulario (claves unificadas); si el guardado es un texto libre
+            // que no está en la lista, se agrega como opción para no perderlo al guardar
+            String mod = EtiquetasPerfil.modalidadClave(usuario.getModalidad());
+            String disp = EtiquetasPerfil.disponibilidadClave(usuario.getDisponibilidad());
+            String esp = EtiquetasPerfil.especialidadClave(usuario.getEspecialidad());
+            model.addAttribute("selModalidad", mod);
+            model.addAttribute("selDisponibilidad", disp);
+            model.addAttribute("selEspecialidad", esp);
+            model.addAttribute("extraModalidad", mod.isEmpty() ? sinVacios(usuario.getModalidad()) : null);
+            model.addAttribute("extraDisponibilidad", disp.isEmpty() ? sinVacios(usuario.getDisponibilidad()) : null);
+            model.addAttribute("extraEspecialidad", esp.isEmpty() ? sinVacios(usuario.getEspecialidad()) : null);
+            model.addAttribute("preview", TalentoVista.de(usuario, (int) publicados, previewColores, usuario.isDestacar(), false));
+            List<LogrosPerfil.Logro> logros = LogrosPerfil.de(usuario, proyectosUsuario.size(), invTotal, solAcept);
+            model.addAttribute("logros", logros);
+            model.addAttribute("logrosDesbloqueados", logros.stream().filter(LogrosPerfil.Logro::desbloqueado).count());
+            model.addAttribute("pendientes", DashboardCalculos.pendientesPerfil(usuario));
         }
         return "perfil";
     }
 
-    // Usuario no tiene colorIcono propio — mismo hash determinista que usa
-    // TalentoController para que la vista previa de Perfil combine con la
-    // card real del directorio de Talentos
-    private static final String[] PALETA_ACENTOS = { "#4fa0e8", "#a78bfa", "#f2ab5c", "#ef7b92", "#7bd8ae" };
-
-    private static String colorParaId(String id) {
-        int idx = Math.floorMod(id == null ? 0 : id.hashCode(), PALETA_ACENTOS.length);
-        return PALETA_ACENTOS[idx];
+    private static String sinVacios(String v) {
+        return v == null || v.isBlank() ? null : v.trim();
     }
 
     @GetMapping("/curriculum")
@@ -300,6 +315,7 @@ public class PageController {
         if (talento == null) return "redirect:/perfil";
 
         model.addAttribute("talento", talento);
+        model.addAttribute("tv", TalentoVista.de(talento, 0, null, false, false));
         model.addAttribute("esPreview", true);
         model.addAttribute("esEmpresa", false);
         model.addAttribute("yaInvitado", false);

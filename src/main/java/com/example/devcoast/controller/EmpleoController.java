@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -572,8 +573,9 @@ public class EmpleoController {
         target.setLogoUrl(form.getLogoUrl());
     }
 
+    // Mis ofertas (cuenta de Empresa): ?tab=activas|cerradas
     @GetMapping("/misEmpleos")
-    public String misEmpleos(Model model, HttpSession session, RedirectAttributes ra) {
+    public String misEmpleos(@RequestParam(required = false) String tab, Model model, HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.soloEmpresa(session)) {
             if (RoleGuard.sinSesion(session))
                 return "redirect:/login";
@@ -582,15 +584,37 @@ public class EmpleoController {
             return "redirect:/dashboard";
         }
         String empresaId = RoleGuard.getId(session);
-        model.addAttribute("empleosActivos",
-                empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO"));
-        model.addAttribute("empleosCerrados",
-                empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO"));
-        agregarSesion(session, model);
+        List<Empleo> activos = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO");
+        List<Empleo> cerrados = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO");
+
+        // postulaciones de todas sus ofertas, agrupadas por oferta
+        List<String> ids = new ArrayList<>();
+        activos.forEach(e -> ids.add(e.getId()));
+        cerrados.forEach(e -> ids.add(e.getId()));
+        Map<String, List<Solicitud>> porOferta = new HashMap<>();
+        if (!ids.isEmpty())
+            for (Solicitud s : solicitudRepository.findByEmpleoIdIn(ids))
+                porOferta.computeIfAbsent(s.getEmpleoId(), k -> new ArrayList<>()).add(s);
+
+        Date ahora = new Date();
+        List<OfertaEmpresaVista> vistasActivas = new ArrayList<>();
+        for (Empleo e : activos)
+            vistasActivas.add(OfertaEmpresaVista.de(e, porOferta.getOrDefault(e.getId(), List.of()), ahora));
+        List<OfertaEmpresaVista> vistasCerradas = new ArrayList<>();
+        for (Empleo e : cerrados)
+            vistasCerradas.add(OfertaEmpresaVista.de(e, porOferta.getOrDefault(e.getId(), List.of()), ahora));
 
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
-        model.addAttribute("limiteVacantesActivas", planService.limiteVacantesActivas(empresa));
+        int limite = planService.limiteVacantesActivas(empresa);
 
+        model.addAttribute("ofertas", "cerradas".equals(tab) ? vistasCerradas : vistasActivas);
+        model.addAttribute("tabSel", "cerradas".equals(tab) ? "cerradas" : "activas");
+        model.addAttribute("nActivas", vistasActivas.size());
+        model.addAttribute("nCerradas", vistasCerradas.size());
+        model.addAttribute("limiteActivas", limite);
+        model.addAttribute("puedePublicar", vistasActivas.size() < limite);
+        model.addAttribute("nPostulacionesRevision", vistasActivas.stream().mapToInt(OfertaEmpresaVista::getEnRevision).sum());
+        agregarSesion(session, model);
         return "misEmpleos";
     }
 
@@ -636,7 +660,7 @@ public class EmpleoController {
                 ra.addFlashAttribute("flashType", "success");
             }
         });
-        return "redirect:/misEmpleos";
+        return "redirect:/misEmpleos?tab=cerradas";
     }
 
     @PostMapping(value = "/empleos/{id}/fase", produces = "application/json")

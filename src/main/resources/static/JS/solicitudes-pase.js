@@ -9,16 +9,6 @@
     var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
     var rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    var sort = $('#sort');
-    if (sort) sort.addEventListener('change', function () { sort.form.submit(); });
-
-    // "Cancelar" cierra la confirmación y devuelve el foco al botón Retirar
-    document.addEventListener('click', function (e) {
-        var c = e.target.closest ? e.target.closest('[data-cancelar]') : null;
-        if (!c) return;
-        var det = c.closest('details');
-        if (det) { det.open = false; var s = $('summary', det); if (s) s.focus(); }
-    });
 
     function restar(el, delta) {
         if (!el) return;

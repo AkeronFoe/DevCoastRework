@@ -35,7 +35,8 @@ public class NotificacionInterceptor implements HandlerInterceptor {
     // vistas que usan el shell náutico (fragments/nautico :: sidebar). Solo ellas piden los datos
     // del menú lateral, para no gastar consultas en las páginas que todavía tienen el shell viejo.
     // Al migrar una página al shell nuevo, agregar aquí el nombre de su vista.
-    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa");
+    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa",
+            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos");
 
     public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {
@@ -109,7 +110,10 @@ public class NotificacionInterceptor implements HandlerInterceptor {
             // si falla el conteo el menú simplemente no muestra la insignia
         }
 
-        if (!esTalento) return;
+        if (!esTalento) {
+            cargarPendientesEmpresa(mav, uid);
+            return;
+        }
         try {
             // si el controlador ya cargó al usuario de la sesión no se vuelve a consultar
             Object ya = mav.getModel().get("usuario");
@@ -124,6 +128,23 @@ public class NotificacionInterceptor implements HandlerInterceptor {
             if (u != null) mav.addObject("shellCompletitud", u.getCompletitudPerfil());
         } catch (Exception ignored) {
             // sin el dato el menú oculta el widget de perfil
+        }
+    }
+
+    // insignia "Postulaciones" del menú de Empresa: postulaciones en revisión de sus ofertas activas
+    // (si el controlador ya la calculó, no se repite)
+    private void cargarPendientesEmpresa(ModelAndView mav, String uid) {
+        if (mav.getModel().containsKey("solicitudesPendientesEmpresa")) return;
+        try {
+            Query ofertas = new Query(Criteria.where("empresaId").is(uid).and("estado").is("ACTIVO"));
+            ofertas.fields().include("_id");
+            List<String> ids = mongoTemplate.find(ofertas, Empleo.class).stream().map(Empleo::getId).toList();
+            long pendientes = ids.isEmpty() ? 0
+                    : mongoTemplate.count(new Query(Criteria.where("empleoId").in(ids).and("estado").is("revision")),
+                            com.example.devcoast.model.Solicitud.class);
+            mav.addObject("solicitudesPendientesEmpresa", pendientes);
+        } catch (Exception ignored) {
+            // sin el dato el menú no muestra la insignia
         }
     }
 }

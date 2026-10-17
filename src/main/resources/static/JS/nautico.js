@@ -27,6 +27,18 @@
         };
     })();
 
+    /* ── orden de las listas: el selector #sort envía su formulario (sin JS queda el botón "aplicar") ── */
+    var sortSel = $('#sort');
+    if (sortSel && sortSel.form) sortSel.addEventListener('change', function () { sortSel.form.submit(); });
+
+    /* ── confirmaciones a la vista (<details>): "Cancelar" la cierra y devuelve el foco al botón que la abrió ── */
+    document.addEventListener('click', function (e) {
+        var c = e.target.closest ? e.target.closest('[data-cancelar]') : null;
+        if (!c) return;
+        var det = c.closest('details');
+        if (det) { det.open = false; var s = det.querySelector('summary'); if (s) s.focus(); }
+    });
+
     /* ── cajón del menú en móvil ── */
     var side = $('#side'), scrim = $('#scrim'), menuBtn = $('#menuBtn');
     if (side && scrim && menuBtn) {
