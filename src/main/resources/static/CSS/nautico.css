@@ -149,6 +149,11 @@ h2 {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    background:
+        linear-gradient(var(--panel) 30%, transparent) center top / 100% 26px no-repeat local,
+        linear-gradient(transparent, var(--panel) 70%) center bottom / 100% 26px no-repeat local,
+        radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, .4), transparent) center top / 100% 10px no-repeat scroll,
+        radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, .4), transparent) center bottom / 100% 10px no-repeat scroll;
 }
 
 .mi {
@@ -334,8 +339,97 @@ h2 {
     display: block;
 }
 
+@media (max-height: 920px) {
+    .brand {
+        padding: 16px 22px 4px;
+    }
+
+    .menu {
+        padding: 10px 12px;
+    }
+
+    .mi {
+        height: 40px;
+    }
+
+    .mi.sm {
+        height: 34px;
+    }
+
+    .menu-h {
+        margin-top: 8px;
+    }
+
+    .prog {
+        margin-bottom: 10px;
+        padding: 10px 14px;
+        gap: 6px;
+    }
+
+    .mi.out {
+        margin-bottom: 6px;
+    }
+
+    .dock {
+        height: 100px;
+    }
+
+    .dock .boat {
+        bottom: 24px;
+        height: 70px;
+        margin-left: -33px;
+    }
+
+    .dock .wvs,
+    .dock .wv {
+        height: 52px;
+    }
+}
+
+@media (max-height: 800px) {
+    .dock {
+        height: 76px;
+    }
+
+    .dock .boat {
+        bottom: 18px;
+        height: 54px;
+        margin-left: -26px;
+    }
+
+    .dock .wvs,
+    .dock .wv {
+        height: 40px;
+    }
+}
+
 @media (max-height: 720px) {
     .dock {
+        display: none;
+    }
+}
+
+@media (max-height: 700px) {
+    .mi {
+        height: 38px;
+    }
+
+    .mi.sm {
+        height: 32px;
+    }
+
+    .menu-h {
+        margin-top: 4px;
+    }
+
+    .prog {
+        padding: 8px 14px;
+        gap: 4px;
+    }
+}
+
+@media (max-height: 600px) {
+    .prog {
         display: none;
     }
 }
