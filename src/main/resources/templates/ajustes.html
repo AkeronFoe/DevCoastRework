@@ -2,769 +2,376 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: meta}"></th:block>
-    <title>DevCoast | Ajustes</title>
-    <th:block th:replace="~{fragments/head :: assets}"></th:block>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
-    <link rel="stylesheet" th:href="@{/CSS/ajustes.css}">
-    <script th:src="@{/JS/ui-feedback.js}"></script>
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
-    <script th:src="@{/JS/polish.js}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script th:src="@{/JS/ws-shell.js}" defer></script>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Ajustes | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-ajustes.css}">
     <script th:src="@{/JS/ajustes.js}" defer></script>
 </head>
 
-<body class="wsjobs" th:classappend="${usuarioActualTipo == 'empresa'} ? ' is-empresa' : ''">
+<body th:classappend="${session.usuarioActualTipo == 'empresa'} ? 'empresa'"
+    th:with="esEmpresa=${session.usuarioActualTipo == 'empresa'}">
+    <a class="skip" href="#contenido">Saltar al contenido</a>
 
-    <div class="ws-boot" id="wsBoot" aria-hidden="true">
-        <div class="ws-boot-box">
-            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
-            <div class="ws-boot-line"><span class="ok">✓</span> cargando tu perfil…</div>
-            <div class="ws-boot-line" id="bootLast">$ devcoast run ajustes.yml</div>
-            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
-        </div>
-    </div>
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('ajustes')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
 
-    <div id="nav-progress" class="ws-navprogress"></div>
-    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-    </button>
-    <div class="ws-grain" aria-hidden="true"></div>
-    <div class="ws-vignette" aria-hidden="true"></div>
-    <div class="ws-scrim" id="scrim"></div>
+        <div class="main">
+            <header
+                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}"></header>
 
-    <div class="ws-palette-scrim" id="paletteScrim">
-        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-            <div class="ws-palette-input-row">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
-                <kbd>Esc</kbd>
-            </div>
-            <div class="ws-palette-list" id="paletteList"></div>
-        </div>
-    </div>
+            <main class="content" id="contenido">
+                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
+                    th:text="${flashMessage}">Aviso</p>
 
-    <header class="ws-top">
-        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-        <a class="ws-brand" th:href="@{/dashboard}">
-            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
-            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">ajustes</span>
-        </a>
-        <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-
-        <button class="ws-search" id="paletteOpen" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Buscar en el workspace…
-            <kbd>⌘K</kbd>
-        </button>
-
-        <div class="ws-bell" id="bellWrap">
-            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
-            </button>
-            <div class="ws-bell-drop" id="bellDrop">
-                <div class="ws-bell-drop-head">
-                    <span class="ws-bell-drop-title">Notificaciones</span>
-                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
-                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
-                </div>
-                <div class="ws-bell-drop-list">
-                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
-                        Sin notificaciones nuevas
+                <!-- ===== banner con el barco ===== -->
+                <section class="aj-hello" aria-label="Ajustes">
+                    <div class="aj-hello-t">
+                        <div class="eyebrow">// ajustes</div>
+                        <h1>Tu camarote.</h1>
+                        <p>Cada cambio se aplica y se guarda <b>al instante</b>. No hay botón de guardar.</p>
                     </div>
-                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
-                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
-                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
-                            <div class="ws-notif-icon">
-                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
-                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
-                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <div class="aj-sea" aria-hidden="true">
+                        <th:block th:replace="~{fragments/nautico :: boat('hullclip-aj')}"></th:block>
+                        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+                    </div>
+                </section>
+
+                <!-- ===== tu cuenta, como pase ===== -->
+                <article class="jt aj-id" aria-label="Tu cuenta">
+                    <div class="jt-main">
+                        <span class="k">TU CUENTA</span>
+                        <h2 class="jt-t" th:text="${session.usuarioActualNombre != null and !#strings.isEmpty(session.usuarioActualNombre)} ? ${session.usuarioActualNombre} : 'Cuenta DevCoast'">[Nombre]</h2>
+                        <p class="co" th:text="${usuarioActualCorreo}">[correo@ejemplo.com]</p>
+                        <dl class="facts">
+                            <div>
+                                <dt>TIPO DE CUENTA</dt>
+                                <dd th:text="${esEmpresa} ? 'Empresa' : 'Talento'">Talento</dd>
                             </div>
-                            <div class="ws-notif-body">
-                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
-                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
+                            <div th:unless="${esEmpresa}">
+                                <dt>PERFIL</dt>
+                                <dd th:text="${usuario != null ? usuario.completitudPerfil : 0} + '% completo'">80% completo</dd>
                             </div>
-                        </a>
+                            <div th:if="${esEmpresa}">
+                                <dt>PLAN</dt>
+                                <dd th:text="${plan == 'PRO'} ? 'Pro' : 'Gratis'">Gratis</dd>
+                            </div>
+                            <div th:unless="${esEmpresa}">
+                                <dt>EN EL DIRECTORIO</dt>
+                                <dd id="idDirectorio" th:text="${usuario != null and usuario.perfilPublico} ? 'Sí, visible' : 'No, oculto'">Sí, visible</dd>
+                            </div>
+                        </dl>
                     </div>
-                </div>
-                <div th:if="${notifNoLeidas != null and notifNoLeidas > 0}" class="ws-bell-drop-foot">
-                    <button class="ws-mark-read" id="markAllRead" type="button">Marcar todas como leídas</button>
-                </div>
-            </div>
-        </div>
-
-        <a th:href="@{/perfil}" class="ws-btn ws-btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-            <span class="lbl">Editar perfil</span>
-        </a>
-
-        <div class="ws-avatar" th:title="${usuarioActualNombre}"
-            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
-            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
-    </header>
-
-    <div class="ws-body">
-        <aside class="ws-side" id="side" aria-label="Navegación">
-            <div class="ws-side-bar">
-                <span class="ws-side-bar-title">explorer</span>
-                <span class="ws-side-bar-tools" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
-                </span>
-            </div>
-
-            <div class="ws-side-profile">
-                <div class="ws-side-avatar"
-                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
-                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
-                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
-                </div>
-                <div>
-                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                    <div class="ws-side-profile-role" th:text="${usuarioActualTipo == 'empresa'} ? 'portal empresa' : 'talento creativo'">talento creativo</div>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    general<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/dashboard}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
-                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/empleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
-                        <span class="name">Empleos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/talentos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Talentos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/proyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
-                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Guardados</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
-                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
-                        <span class="name">Mis empleos</span>
-                        <span class="ws-side-badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}">1</span>
-                        <span class="ext" th:if="${solicitudesPendientesEmpresa == null or solicitudesPendientesEmpresa == 0}">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Candidatos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                        <span class="name">Publicar</span> <span class="ext">+</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    cuenta<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/mensajes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Mensajes</span>
-                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
-                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
-                        <span class="name">Solicitudes</span>
-                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
-                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/perfil}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
-                        <span class="name">Perfil</span> <span class="ext">.md</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
-                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
-                    </a>
-                    <a class="ws-side-link is-active" th:href="@{/ajustes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        <main class="ws-main">
-            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
-            <div class="ws-content">
-                <div class="ws-crumb">
-                    <span>~</span><span class="sep">/</span>
-                    <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-                    <span class="sep">/</span><span class="cur" id="crumbFile">ajustes.yml</span>
-                </div>
-
-                <div th:if="${flashMessage != null}" class="flash-banner" th:classappend="${flashType != null ? ' ' + flashType : ''}">
-                    <span th:text="${flashMessage}">Notificacion</span>
-                    <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
-                </div>
-
-                <div class="ws-page-head">
-                    <div>
-                        <p class="ws-eyebrow">// tu configuración<span class="ws-cursor" aria-hidden="true">▌</span></p>
-                        <h1 class="ws-big-head">
-                            <span class="ws-big-num" th:text="(${usuario != null ? usuario.completitudPerfil : 0}) + '%'">0%</span>
-                            <span class="ws-big-head-sub">perfil<br>completo</span>
-                        </h1>
-                        <p class="ws-page-sub">Tema, densidad, privacidad, notificaciones y accesibilidad — cada cambio se aplica y se guarda al instante, sin botón de "guardar".</p>
-                        <span class="set-status-pill">
-                            <span class="set-status-pill-dot"></span>
-                            <span th:text="${usuarioActualTipo == 'empresa'} ? 'Cuenta empresa activa' : 'Cuenta talento activa'">Cuenta activa</span>
-                        </span>
+                    <div class="jt-stub hi">
+                        <span class="mt-k">ESTADO</span>
+                        <div class="aj-st">Activa</div>
+                        <a class="apply aj-go" th:href="@{/perfil}" th:text="${esEmpresa} ? 'Ver mi empresa' : 'Ver mi perfil'">Ver mi perfil</a>
                     </div>
-                    <div class="ws-mini-card">
-                        <div class="ws-mini-card-head">
-                            <span class="ficha" th:text="'Ficha #' + ${#strings.toUpperCase(#strings.substring(#strings.concat(usuarioActualId ?: '', '000000'), 0, 6))}">Ficha</span>
-                            <span class="cat" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-                        </div>
-                        <div class="ws-mini-card-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                        <div class="ws-mini-card-role" th:text="${usuarioActualCorreo}">correo@ejemplo.com</div>
+                </article>
 
-                        <div class="ws-mini-card-badges">
-                            <span class="ws-mini-badge">
-                                <b th:text="${usuario != null and usuario.perfilPublico} ? '✓' : '·'">✓</b>
-                                <span th:text="${usuario != null and usuario.perfilPublico} ? 'perfil visible en el directorio' : 'perfil oculto del directorio'">perfil</span>
-                            </span>
-                        </div>
-
-                        <div class="ws-mini-card-foot">
-                            <span id="miembro-desde-label">miembro DevCoast</span>
-                            · <span th:text="(${usuario != null ? usuario.completitudPerfil : 0}) + '% perfil'">0% perfil</span>
-                        </div>
+                <!-- ===== secciones ===== -->
+                <nav class="filters aj-tabs" aria-label="Secciones de ajustes">
+                    <div class="chs" id="ajTabs">
+                        <button class="ch" type="button" data-sec="cuenta" aria-pressed="true">Cuenta</button>
+                        <button class="ch" type="button" data-sec="plan" aria-pressed="false" th:if="${esEmpresa}">Plan</button>
+                        <button class="ch" type="button" data-sec="apariencia" aria-pressed="false">Apariencia</button>
+                        <button class="ch" type="button" data-sec="privacidad" aria-pressed="false" th:unless="${esEmpresa}">Privacidad</button>
+                        <button class="ch" type="button" data-sec="notificaciones" aria-pressed="false">Notificaciones</button>
+                        <button class="ch" type="button" data-sec="accesibilidad" aria-pressed="false">Accesibilidad</button>
                     </div>
-                </div>
-
-                <nav class="set-filetabs" aria-label="Secciones de ajustes">
-                    <button type="button" class="set-filetab active" data-section="apariencia">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                        <span class="lbl">apariencia</span><span class="ext">.theme</span>
-                    </button>
-                    <button type="button" class="set-filetab" data-section="cuenta">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span class="lbl">cuenta</span><span class="ext">.env</span>
-                    </button>
-                    <button type="button" class="set-filetab" data-section="plan" th:if="${usuarioActualTipo == 'empresa'}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                        <span class="lbl">plan</span><span class="ext">.plan</span>
-                    </button>
-                    <button type="button" class="set-filetab" data-section="privacidad">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span class="lbl">privacidad</span><span class="ext">.lock</span>
-                        <span class="tab-dot" id="tabdot-privacidad" style="display:none;"></span>
-                    </button>
-                    <button type="button" class="set-filetab" data-section="notificaciones">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                        <span class="lbl">notificaciones</span><span class="ext">.json</span>
-                        <span class="tab-dot" id="tabdot-notif" style="display:none;"></span>
-                    </button>
-                    <button type="button" class="set-filetab" data-section="accesibilidad">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696C3.423 8.743 6.5 6 12 6s8.577 2.743 9.938 5.652a1 1 0 0 1 0 .696C20.577 15.257 17.5 18 12 18s-8.577-2.743-9.938-5.652"/><circle cx="12" cy="12" r="3"/></svg>
-                        <span class="lbl">accesibilidad</span><span class="ext">.a11y</span>
-                    </button>
-                    <button type="button" class="set-filetab danger" data-section="peligro">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span class="lbl">peligro</span><span class="ext">.danger</span>
-                    </button>
+                    <button class="ch dg" type="button" data-sec="peligro" aria-pressed="false">Zona de peligro</button>
                 </nav>
 
-                <div class="set-panel-wrap">
-
-                    <section class="set-panel active" id="panel-apariencia">
-                        <div class="set-group">
-                            <div class="set-group-title">tema</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22a7 7 0 0 0 7-7c0-2-1-4-3-6l-4-5-4 5c-2 2-3 4-3 6a7 7 0 0 0 7 7z"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">color_del_sitio<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Se aplica de inmediato y se recuerda entre sesiones.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <div class="set-swatches" id="theme-swatches">
-                                        <button type="button" class="set-swatch" data-theme="light" title="Modo claro">
-                                            <div class="set-swatch-preview" style="background:#f6f9ff;">
-                                                <div class="set-swatch-surface" style="background:#ffffff;"></div>
-                                                <div class="set-swatch-accent" style="background:#1d7fd0;"></div>
-                                                <div class="set-swatch-lines">
-                                                    <div class="set-swatch-line" style="width:26px;background:rgba(30,80,140,.2);"></div>
-                                                    <div class="set-swatch-line" style="width:18px;background:rgba(30,80,140,.13);"></div>
-                                                </div>
-                                            </div>
-                                            <div class="set-swatch-footer">
-                                                <div class="set-swatch-footer-top">claro <span class="set-swatch-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
-                                                <span class="set-swatch-token">bg #f6f9ff</span>
-                                            </div>
-                                        </button>
-                                        <button type="button" class="set-swatch" data-theme="dark" title="Modo oscuro">
-                                            <div class="set-swatch-preview" style="background:#121316;">
-                                                <div class="set-swatch-surface" style="background:#1d2026;"></div>
-                                                <div class="set-swatch-accent" style="background:#45b6f6;"></div>
-                                                <div class="set-swatch-lines">
-                                                    <div class="set-swatch-line" style="width:26px;background:rgba(255,255,255,.22);"></div>
-                                                    <div class="set-swatch-line" style="width:18px;background:rgba(255,255,255,.14);"></div>
-                                                </div>
-                                            </div>
-                                            <div class="set-swatch-footer">
-                                                <div class="set-swatch-footer-top">oscuro <span class="set-swatch-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
-                                                <span class="set-swatch-token">bg #161a21</span>
-                                            </div>
-                                        </button>
-                                        <button type="button" class="set-swatch" data-theme="midnight" title="Midnight">
-                                            <div class="set-swatch-preview" style="background:#0b0f1a;">
-                                                <div class="set-swatch-surface" style="background:#111827;"></div>
-                                                <div class="set-swatch-accent" style="background:#63d2d2;"></div>
-                                                <div class="set-swatch-lines">
-                                                    <div class="set-swatch-line" style="width:26px;background:rgba(255,255,255,.22);"></div>
-                                                    <div class="set-swatch-line" style="width:18px;background:rgba(255,255,255,.14);"></div>
-                                                </div>
-                                            </div>
-                                            <div class="set-swatch-footer">
-                                                <div class="set-swatch-footer-top">midnight <span class="set-swatch-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></div>
-                                                <span class="set-swatch-token">bg #0b0f1a</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="set-hint"><b>Nota:</b> este selector todavía pinta las páginas "clásicas" del sitio (Dashboard, Mensajes, Analytics…) mientras dura la migración a este workspace. Las páginas ya migradas — como esta — usan siempre este tema oscuro.</p>
+                <!-- CUENTA -->
+                <div class="aj-stack" id="sec-cuenta" data-panel="cuenta">
+                    <section class="aj-pn" aria-labelledby="h-info">
+                        <h2 id="h-info">Información <span>2 datos</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
+                            <div class="aj-rt"><b>Correo</b><span th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
+                            <div class="aj-ctl"><span class="aj-chip">VERIFICADO</span></div>
                         </div>
-                        <div class="set-group">
-                            <div class="set-group-title">densidad y texto</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="18" y2="18"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">espaciado<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Cuánto espacio hay entre los componentes de las páginas clásicas.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <div class="set-density" id="density-options">
-                                        <button type="button" class="set-density-opt" data-density="compact" title="Compacto">
-                                            <div class="set-d-lines" style="gap:2px;"><div class="set-d-line" style="width:100%;"></div><div class="set-d-line" style="width:75%;"></div><div class="set-d-line" style="width:90%;"></div><div class="set-d-line" style="width:65%;"></div><div class="set-d-line" style="width:80%;"></div></div>
-                                            <span>compacto</span>
-                                        </button>
-                                        <button type="button" class="set-density-opt" data-density="normal" title="Normal">
-                                            <div class="set-d-lines" style="gap:5px;"><div class="set-d-line" style="width:100%;"></div><div class="set-d-line" style="width:75%;"></div><div class="set-d-line" style="width:90%;"></div><div class="set-d-line" style="width:65%;"></div></div>
-                                            <span>normal</span>
-                                        </button>
-                                        <button type="button" class="set-density-opt" data-density="spacious" title="Amplio">
-                                            <div class="set-d-lines" style="gap:9px;"><div class="set-d-line" style="width:100%;"></div><div class="set-d-line" style="width:75%;"></div><div class="set-d-line" style="width:90%;"></div></div>
-                                            <span>amplio</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">tamaño_texto<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Ajusta la legibilidad general de las páginas clásicas.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <select id="text-size-select" class="select" aria-label="Tamaño de texto">
-                                        <option value="small">pequeño</option>
-                                        <option value="normal">normal</option>
-                                        <option value="large">grande</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg></span>
+                            <div class="aj-rt"><b>Tipo de cuenta</b><span th:text="${esEmpresa} ? 'Empresa' : 'Talento creativo'">Talento creativo</span></div>
+                            <div class="aj-ctl"><span class="aj-chip">ACTIVA</span></div>
                         </div>
                     </section>
-
-                    <section class="set-panel" id="panel-cuenta">
-                        <div class="set-group">
-                            <div class="set-group-title">información</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">correo<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:text="${usuarioActualCorreo ?: '—'}">—</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><span class="chip">verificado</span></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">tipo_cuenta<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:text="${usuarioActualTipo == 'empresa'} ? 'Empresa' : 'Talento creativo'">Talento</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><span class="chip">activa</span></div>
-                            </div>
+                    <section class="aj-pn" aria-labelledby="h-seg">
+                        <h2 id="h-seg">Seguridad <span>acceso a tu cuenta</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                            <div class="aj-rt"><b>Correo electrónico</b><span th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
+                            <div class="aj-ctl"><button class="aj-btn" type="button" id="btnCorreo">Cambiar</button></div>
                         </div>
-                        <div class="set-group">
-                            <div class="set-group-title">seguridad</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">correo_electrónico<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:text="${usuarioActualCorreo ?: '—'}">—</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><button class="btn btn-outline" type="button" id="btn-cambiar-correo">Cambiar</button></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">contraseña<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Cambia tu contraseña de acceso a DevCoast.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><a th:href="@{/cambiarPassword}" class="btn btn-outline">Cambiar</a></div>
-                            </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                            <div class="aj-rt"><b>Contraseña</b><span>Cambia tu contraseña de acceso a DevCoast.</span></div>
+                            <div class="aj-ctl"><a class="aj-btn" th:href="@{/cambiarPassword}">Cambiar</a></div>
                         </div>
                     </section>
-
-                    <section class="set-panel" id="panel-plan" th:if="${usuarioActualTipo == 'empresa'}">
-                        <div class="set-group">
-                            <div class="set-group-title">tu plan</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">plan_actual<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:if="${plan == 'PRO'}" th:text="'Pro · vence el ' + ${#dates.format(planVenceEn, 'dd/MM/yyyy')}">Pro</p>
-                                        <p class="set-row-desc" th:unless="${plan == 'PRO'}">Gratis</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <button class="btn btn-primary" type="button" id="btn-actualizar-pro" th:unless="${plan == 'PRO'}">Actualizar a Pro</button>
-                                    <span class="chip" th:if="${plan == 'PRO'}">activo</span>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">vacantes_activas<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:text="${vacantesActivas} + ' / ' + ${limiteVacantes}">0 / 2</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">destacados<span class="colon">:</span></span>
-                                        <p class="set-row-desc" th:text="${destacadosActivos} + ' / ' + ${limiteDestacados}">0 / 0</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="set-group">
-                            <div class="set-group-title">facturación</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14v-4a3 3 0 0 1 6 0v4"/><rect x="5" y="10" width="14" height="10" rx="2"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">historial<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Tarifas de colocación cobradas mientras estuviste en el plan Gratis.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><a th:href="@{/facturacion}" class="btn btn-outline">Ver historial</a></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="set-panel" id="panel-privacidad">
-                        <div class="set-group">
-                            <div class="set-group-title">visibilidad</div>
-                            <div class="set-privacy">
-                                <div class="set-privacy-item">
-                                    <div class="p-dot" id="pdot-perfil"></div>
-                                    <div><strong>perfil</strong><div class="pval" id="pval-perfil">—</div></div>
-                                </div>
-                                <div class="set-privacy-item">
-                                    <div class="p-dot" id="pdot-correo"></div>
-                                    <div><strong>correo</strong><div class="pval" id="pval-correo">—</div></div>
-                                </div>
-                                <div class="set-privacy-item">
-                                    <div class="p-dot" id="pdot-mensajes"></div>
-                                    <div><strong>contacto</strong><div class="pval" id="pval-mensajes">—</div></div>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">perfil_publico<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Tu perfil aparece en el directorio de talentos para empresas.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <label class="switch">
-                                        <input type="checkbox" id="toggle-perfil-publico" th:checked="${usuario != null and usuario.perfilPublico}">
-                                        <span class="switch-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">mostrar_correo<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Visible en tu perfil público para empresas interesadas.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <label class="switch">
-                                        <input type="checkbox" id="toggle-mostrar-correo" th:checked="${usuario != null and usuario.mostrarCorreo}">
-                                        <span class="switch-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">permitir_mensajes<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Las empresas pueden enviarte invitaciones directamente.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control">
-                                    <label class="switch">
-                                        <input type="checkbox" id="toggle-permitir-mensajes" th:checked="${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes}">
-                                        <span class="switch-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="set-panel" id="panel-notificaciones">
-                        <div class="set-group">
-                            <div class="set-group-title">alertas</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">invitaciones<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Cuando una empresa te contacte directamente.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><label class="switch"><input type="checkbox" id="notif-invitaciones" checked><span class="switch-slider"></span></label></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">solicitudes<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Cuando una empresa revise o responda tu solicitud.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><label class="switch"><input type="checkbox" id="notif-solicitudes" checked><span class="switch-slider"></span></label></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">producto<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Nuevas funciones y actualizaciones de la plataforma.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><label class="switch"><input type="checkbox" id="notif-producto"><span class="switch-slider"></span></label></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="set-panel" id="panel-accesibilidad">
-                        <div class="set-group">
-                            <div class="set-group-title">lectura y percepción</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">contraste_alto<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Aumenta el contraste visual para mejor legibilidad.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><label class="switch"><input type="checkbox" id="toggle-contrast"><span class="switch-slider"></span></label></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">reducir_movimiento<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Desactiva las transiciones y animaciones de página (incluidas las de este workspace).</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><label class="switch"><input type="checkbox" id="toggle-reduce-motion"><span class="switch-slider"></span></label></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="set-panel" id="panel-peligro">
-                        <div class="set-group danger">
-                            <div class="set-group-title">zona de peligro</div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key">cerrar_sesión<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Salir de tu cuenta en este dispositivo.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><a th:href="@{/logout}" class="btn btn-outline-rose">Cerrar sesión</a></div>
-                            </div>
-                            <div class="set-row">
-                                <div class="set-row-main">
-                                    <span class="set-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
-                                    <div class="set-row-label">
-                                        <span class="set-row-key" style="color:var(--ws-rose);">eliminar_cuenta<span class="colon">:</span></span>
-                                        <p class="set-row-desc">Elimina permanentemente tu cuenta y todos tus datos. Esta acción es irreversible.</p>
-                                    </div>
-                                </div>
-                                <div class="set-row-control"><button class="btn btn-outline-rose" type="button" id="btn-eliminar-cuenta">Eliminar</button></div>
-                            </div>
-                        </div>
-                    </section>
-
                 </div>
 
-                <div class="set-yaml">
-                    <div class="set-yaml-head">
-                        <span class="set-yaml-head-lbl">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                            ajustes.yml — vista previa
-                        </span>
-                        <span class="set-yaml-head-r">
-                            <span class="set-yaml-live"><span class="sync-dot"></span>en vivo</span>
-                            <button type="button" class="set-yaml-copy" id="yaml-copy" title="Copiar YAML" aria-label="Copiar YAML">
-                                <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </button>
-                        </span>
-                    </div>
-                    <div class="set-yaml-body">
-                        <span class="set-yaml-gutter" id="yaml-gutter" aria-hidden="true"></span>
-                        <pre id="yaml-output"></pre>
-                    </div>
+                <!-- PLAN (solo empresa) -->
+                <div class="aj-stack" id="sec-plan" data-panel="plan" th:if="${esEmpresa}" hidden>
+                    <section class="aj-pn" aria-labelledby="h-plan">
+                        <h2 id="h-plan">Tu plan <span th:text="${plan == 'PRO'} ? 'Pro' : 'Gratis'">Gratis</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+                            <div class="aj-rt"><b>Plan actual</b>
+                                <span th:if="${plan == 'PRO'}" th:text="'Pro · vence el ' + ${#dates.format(planVenceEn, 'dd/MM/yyyy')}">Pro</span>
+                                <span th:unless="${plan == 'PRO'}">Gratis</span>
+                            </div>
+                            <div class="aj-ctl">
+                                <button class="btn-o" type="button" id="btnPro" th:unless="${plan == 'PRO'}">Actualizar a Pro</button>
+                                <span class="aj-chip" th:if="${plan == 'PRO'}">ACTIVO</span>
+                            </div>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+                            <div class="aj-rt"><b>Vacantes activas</b><span th:text="${vacantesActivas} + ' de ' + ${limiteVacantes}">1 de 2</span></div>
+                            <div class="aj-ctl aj-bar">
+                                <div class="pbar" role="progressbar" aria-label="Vacantes usadas" aria-valuemin="0" aria-valuemax="100"
+                                    th:attr="aria-valuenow=${limiteVacantes > 0 ? (vacantesActivas * 100 / limiteVacantes > 100 ? 100 : vacantesActivas * 100 / limiteVacantes) : 0}">
+                                    <i th:style="'width:' + ${limiteVacantes > 0 ? (vacantesActivas * 100 / limiteVacantes > 100 ? 100 : vacantesActivas * 100 / limiteVacantes) : 0} + '%'"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></span>
+                            <div class="aj-rt"><b>Destacados</b><span th:text="${destacadosActivos} + ' de ' + ${limiteDestacados}">0 de 0</span></div>
+                            <div class="aj-ctl aj-bar">
+                                <div class="pbar" role="progressbar" aria-label="Destacados usados" aria-valuemin="0" aria-valuemax="100"
+                                    th:attr="aria-valuenow=${limiteDestacados > 0 ? (destacadosActivos * 100 / limiteDestacados > 100 ? 100 : destacadosActivos * 100 / limiteDestacados) : 0}">
+                                    <i th:style="'width:' + ${limiteDestacados > 0 ? (destacadosActivos * 100 / limiteDestacados > 100 ? 100 : destacadosActivos * 100 / limiteDestacados) : 0} + '%'"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="aj-pn" aria-labelledby="h-fact">
+                        <h2 id="h-fact">Facturación <span>historial</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></span>
+                            <div class="aj-rt"><b>Historial</b><span>Tarifas de colocación cobradas mientras estuviste en el plan Gratis.</span></div>
+                            <div class="aj-ctl"><a class="aj-btn" th:href="@{/facturacion}">Ver historial</a></div>
+                        </div>
+                    </section>
                 </div>
 
-            </div>
-        </main>
-    </div>
+                <!-- APARIENCIA -->
+                <div class="aj-stack" id="sec-apariencia" data-panel="apariencia" hidden>
+                    <section class="aj-pn" aria-labelledby="h-tema">
+                        <h2 id="h-tema">Tema <span>se recuerda en este navegador</span></h2>
+                        <div class="aj-row aj-row-col">
+                            <div class="aj-rt"><b id="l-tema">Color del sitio</b><span>Elige cómo se ve DevCoast: de noche en el puerto, de día o a medianoche.</span></div>
+                            <div class="aj-themes" role="group" aria-labelledby="l-tema">
+                                <button class="aj-theme" type="button" data-theme-opt="dark" aria-pressed="false">
+                                    <span class="aj-prev" style="background:#101114" aria-hidden="true">
+                                        <i class="aj-prev-side" style="background:#0B0C0F"></i>
+                                        <i class="aj-prev-card" style="background:#F3F4F8"></i>
+                                        <i class="aj-prev-acc" style="background:#FF7B4F"></i>
+                                    </span>
+                                    <span class="aj-theme-n">Oscuro<small>noche en el puerto</small></span>
+                                </button>
+                                <button class="aj-theme" type="button" data-theme-opt="light" aria-pressed="false">
+                                    <span class="aj-prev" style="background:#D9DFEA" aria-hidden="true">
+                                        <i class="aj-prev-side" style="background:#F4F6FA"></i>
+                                        <i class="aj-prev-card" style="background:#FFFFFF"></i>
+                                        <i class="aj-prev-acc" style="background:#FF7B4F"></i>
+                                    </span>
+                                    <span class="aj-theme-n">Claro<small>el puerto de día</small></span>
+                                </button>
+                                <button class="aj-theme" type="button" data-theme-opt="midnight" aria-pressed="false">
+                                    <span class="aj-prev" style="background:#0A0E1B" aria-hidden="true">
+                                        <i class="aj-prev-side" style="background:#060913"></i>
+                                        <i class="aj-prev-card" style="background:#F3F4F8"></i>
+                                        <i class="aj-prev-acc" style="background:#2DD4BF"></i>
+                                    </span>
+                                    <span class="aj-theme-n">Midnight<small>azul casi negro</small></span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="aj-pn" aria-labelledby="h-dens">
+                        <h2 id="h-dens">Densidad y texto <span>se aplica al instante</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="18" y2="18"/></svg></span>
+                            <div class="aj-rt"><b id="l-dens">Espaciado</b><span>Cuánto aire hay entre las tarjetas y los bloques de cada página.</span></div>
+                            <div class="aj-dens" role="group" aria-labelledby="l-dens">
+                                <button class="aj-dopt" type="button" data-dens="compact" aria-pressed="false"><span class="aj-dl" style="gap:3px"><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:65%"></i><i style="width:80%"></i></span>compacto</button>
+                                <button class="aj-dopt" type="button" data-dens="normal" aria-pressed="false"><span class="aj-dl" style="gap:6px"><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:65%"></i></span>normal</button>
+                                <button class="aj-dopt" type="button" data-dens="spacious" aria-pressed="false"><span class="aj-dl" style="gap:10px"><i></i><i style="width:75%"></i><i style="width:90%"></i></span>amplio</button>
+                            </div>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
+                            <div class="aj-rt"><b id="l-txt">Tamaño de texto</b><span>Ajusta la legibilidad del contenido de las páginas.</span></div>
+                            <div class="chs" role="group" aria-labelledby="l-txt">
+                                <button class="ch" type="button" data-text="small" aria-pressed="false">pequeño</button>
+                                <button class="ch" type="button" data-text="normal" aria-pressed="false">normal</button>
+                                <button class="ch" type="button" data-text="large" aria-pressed="false">grande</button>
+                            </div>
+                        </div>
+                        <div class="aj-pvl">VISTA PREVIA</div>
+                        <div class="aj-pv" aria-hidden="true">
+                            <span class="aj-pv-k">PROGRAMACIÓN</span>
+                            <span class="aj-pv-t">Desarrollo Backend</span>
+                            <span class="aj-pv-s">[Empresa A] · Remoto · Java, Spring Boot, MongoDB</span>
+                        </div>
+                    </section>
+                </div>
 
-    <footer class="ws-status">
-        <div class="ws-status-l">
-            <span class="ws-status-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-            </span>
-            <span class="sp">·</span>
-            <span class="hide-sm">6 archivos</span>
-            <span class="sp hide-sm">·</span>
-            <span id="syncState">sincronizado</span>
-        </div>
-        <div class="ws-status-r">
-            <span class="hide-sm">UTF-8</span>
-            <span class="sp hide-sm">·</span>
-            <span id="clock">00:00:00</span>
-            <span class="sp">·</span>
-            <a th:href="@{/about-us}">¿Ayuda?</a>
-        </div>
-    </footer>
+                <!-- PRIVACIDAD (solo talento: el servidor rechaza estas opciones a las empresas) -->
+                <div class="aj-stack" id="sec-privacidad" data-panel="privacidad" th:unless="${esEmpresa}" hidden>
+                    <section class="aj-pn" aria-labelledby="h-vis">
+                        <h2 id="h-vis">Visibilidad <span>quién te ve</span></h2>
+                        <div class="aj-vis" role="status" aria-live="polite">
+                            <div class="aj-vi"><span class="aj-dot" id="dotPerfil"></span><div><b>Perfil</b><span id="valPerfil">—</span></div></div>
+                            <div class="aj-vi"><span class="aj-dot" id="dotCorreo"></span><div><b>Correo</b><span id="valCorreo">—</span></div></div>
+                            <div class="aj-vi"><span class="aj-dot" id="dotMensajes"></span><div><b>Contacto</b><span id="valMensajes">—</span></div></div>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                            <div class="aj-rt"><b id="l-perfil">Perfil público</b><span>Tu perfil aparece en el directorio de talentos para empresas.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-perfil" data-priv="perfilPublico"
+                                th:attr="aria-checked=${usuario != null and usuario.perfilPublico} ? 'true' : 'false'"></button>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
+                            <div class="aj-rt"><b id="l-correo">Mostrar correo</b><span>Visible en tu perfil público para empresas interesadas.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-correo" data-priv="mostrarCorreo"
+                                th:attr="aria-checked=${usuario != null and usuario.mostrarCorreo} ? 'true' : 'false'"></button>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+                            <div class="aj-rt"><b id="l-mensajes">Permitir mensajes</b><span>Las empresas pueden enviarte invitaciones directamente.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mensajes" data-priv="permitirMensajes"
+                                th:attr="aria-checked=${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes} ? 'true' : 'false'"></button>
+                        </div>
+                    </section>
+                </div>
 
-    <div id="modal-eliminar" class="set-modal-overlay">
-        <div class="set-modal danger">
-            <div class="set-modal-head">
-                <div class="set-modal-icn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ws-rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                <!-- NOTIFICACIONES -->
+                <div class="aj-stack" id="sec-notificaciones" data-panel="notificaciones" hidden>
+                    <section class="aj-pn" aria-labelledby="h-al">
+                        <h2 id="h-al">Alertas <span>qué quieres que te avisemos</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
+                            <div class="aj-rt"><b id="l-inv" th:text="${esEmpresa} ? 'Respuestas a invitaciones' : 'Invitaciones'">Invitaciones</b><span th:text="${esEmpresa} ? 'Cuando un talento acepte o rechace tu invitación.' : 'Cuando una empresa te contacte directamente.'">Cuando una empresa te contacte directamente.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-inv" data-notif="invitaciones" aria-checked="true"></button>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                            <div class="aj-rt"><b id="l-sol" th:text="${esEmpresa} ? 'Postulaciones' : 'Solicitudes'">Solicitudes</b><span th:text="${esEmpresa} ? 'Cuando un talento se postule a una de tus ofertas.' : 'Cuando una empresa revise o responda tu solicitud.'">Cuando una empresa revise o responda tu solicitud.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-sol" data-notif="solicitudes" aria-checked="true"></button>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                            <div class="aj-rt"><b id="l-prod">Novedades del producto</b><span>Nuevas funciones y actualizaciones de la plataforma.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-prod" data-notif="producto" aria-checked="false"></button>
+                        </div>
+                        <p class="aj-note"><b>Nota:</b> estas preferencias se guardan en este navegador. Las notificaciones de la campana siguen llegando igual.</p>
+                    </section>
                 </div>
-                <div>
-                    <span class="set-modal-title" style="color:var(--ws-rose);">Eliminar cuenta</span>
-                    <span class="set-modal-sub">Esta acción es permanente e irreversible</span>
+
+                <!-- ACCESIBILIDAD -->
+                <div class="aj-stack" id="sec-accesibilidad" data-panel="accesibilidad" hidden>
+                    <section class="aj-pn" aria-labelledby="h-a11y">
+                        <h2 id="h-a11y">Lectura y percepción <span>pruébalos: cambian esta página</span></h2>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none"/></svg></span>
+                            <div class="aj-rt"><b id="l-contraste">Contraste alto</b><span>Aumenta el contraste visual para mejor legibilidad.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-contraste" data-pref="contrast" aria-checked="false"></button>
+                        </div>
+                        <div class="aj-row">
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></span>
+                            <div class="aj-rt"><b id="l-mov">Reducir movimiento</b><span>Detiene el oleaje, el barco, la gaviota y las transiciones de página.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mov" data-pref="motion" aria-checked="false"></button>
+                        </div>
+                    </section>
                 </div>
-            </div>
-            <p class="set-modal-copy">Se eliminarán <strong>todos tus datos</strong>: perfil, proyectos, solicitudes e invitaciones. No podrás recuperar tu cuenta.</p>
-            <div class="set-field">
-                <label class="set-field-label">Escribe <code>ELIMINAR</code> para confirmar</label>
-                <input type="text" id="input-confirmar-eliminar" placeholder="ELIMINAR" class="set-input">
-            </div>
-            <form th:action="@{/cuenta/eliminar}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <div class="set-field">
-                    <label class="set-field-label">Tu contraseña actual</label>
-                    <input type="password" id="input-password-eliminar" name="password" placeholder="Contraseña" class="set-input">
+
+                <!-- PELIGRO -->
+                <div class="aj-stack" id="sec-peligro" data-panel="peligro" hidden>
+                    <p class="aj-dznote">// zona de peligro: aquí las acciones te sacan de tu cuenta o no tienen vuelta atrás.</p>
+                    <article class="jt aj-dz">
+                        <div class="jt-main">
+                            <span class="k">SESIÓN</span>
+                            <h2 class="jt-t">Cerrar sesión</h2>
+                            <p class="desc">Sales de tu cuenta en este dispositivo. Tus datos quedan como están.</p>
+                        </div>
+                        <div class="jt-stub gr">
+                            <span class="mt-k">ESTADO</span>
+                            <div class="aj-st sm">Reversible</div>
+                            <a class="apply aj-go" th:href="@{/logout}">Cerrar sesión</a>
+                        </div>
+                    </article>
+                    <article class="jt aj-dz">
+                        <div class="jt-main">
+                            <span class="k aj-errk">ZONA DE PELIGRO</span>
+                            <h2 class="jt-t">Eliminar cuenta</h2>
+                            <p class="desc">Elimina permanentemente tu cuenta y todos tus datos
+                                <span th:unless="${esEmpresa}">(perfil, proyectos, solicitudes e invitaciones)</span><span th:if="${esEmpresa}">(empresa, ofertas, postulaciones e invitaciones)</span>.
+                                Esta acción es irreversible.</p>
+                        </div>
+                        <div class="jt-stub er">
+                            <span class="mt-k">ESTADO</span>
+                            <div class="aj-st sm">Irreversible</div>
+                            <button class="apply" type="button" id="btnEliminar">Eliminar</button>
+                        </div>
+                    </article>
                 </div>
-                <div class="set-modal-actions">
-                    <button class="btn btn-ghost" type="button" id="btn-cancelar-eliminar">Cancelar</button>
-                    <button id="btn-confirmar-eliminar" type="submit" disabled class="btn btn-solid-rose" style="opacity:.45;">
-                        Sí, eliminar cuenta
-                    </button>
-                </div>
-            </form>
+            </main>
         </div>
     </div>
 
-    <div id="modal-correo" class="set-modal-overlay">
-        <div class="set-modal">
-            <div class="set-modal-head">
-                <span class="set-modal-title">Cambiar correo electrónico</span>
-                <button id="btn-cerrar-correo" class="set-modal-close" type="button">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
+    <!-- ===== diálogo: cambiar correo ===== -->
+    <dialog class="aj-dlg" id="dlgCorreo" aria-labelledby="t-correo">
+        <form class="aj-dlg-f" method="dialog" novalidate>
+            <h2 id="t-correo">Cambiar correo electrónico</h2>
+            <div class="aj-fl">
+                <label for="inCorreo">NUEVO CORREO</label>
+                <input id="inCorreo" type="email" inputmode="email" autocomplete="email" placeholder="nuevo@correo.com" aria-describedby="errCorreo">
             </div>
-            <div class="set-field">
-                <label class="set-field-label">Nuevo correo</label>
-                <input type="email" id="input-nuevo-correo" placeholder="nuevo@correo.com" class="set-input">
+            <div class="aj-fl">
+                <label for="inPassCorreo">CONTRASEÑA ACTUAL</label>
+                <input id="inPassCorreo" type="password" autocomplete="current-password" placeholder="Para confirmar tu identidad" aria-describedby="errCorreo">
             </div>
-            <div class="set-field">
-                <label class="set-field-label">Contraseña actual</label>
-                <input type="password" id="input-password-correo" placeholder="Para confirmar tu identidad" class="set-input">
+            <p class="aj-err" id="errCorreo" role="alert" hidden></p>
+            <div class="aj-dacts">
+                <button class="aj-ghost" type="button" id="cancelCorreo">Cancelar</button>
+                <button class="btn-o" type="button" id="saveCorreo">Guardar correo</button>
             </div>
-            <p id="correo-error" class="set-modal-err"></p>
-            <div class="set-modal-actions">
-                <button class="btn btn-ghost" id="btn-cancelar-correo" type="button">Cancelar</button>
-                <button class="btn btn-primary" id="btn-guardar-correo" type="button">Guardar correo</button>
+        </form>
+    </dialog>
+
+    <!-- ===== diálogo: eliminar cuenta ===== -->
+    <dialog class="aj-dlg danger" id="dlgEliminar" aria-labelledby="t-del">
+        <form class="aj-dlg-f" method="post" th:action="@{/cuenta/eliminar}" id="formEliminar">
+            <h2 id="t-del">Eliminar cuenta</h2>
+            <p class="aj-dlg-p">Se eliminarán <b>todos tus datos</b>. No podrás recuperar tu cuenta.</p>
+            <div class="aj-fl">
+                <label for="inConfirmar">ESCRIBE ELIMINAR PARA CONFIRMAR</label>
+                <input id="inConfirmar" type="text" autocomplete="off" placeholder="ELIMINAR">
             </div>
-        </div>
-    </div>
+            <div class="aj-fl">
+                <label for="inPassDel">TU CONTRASEÑA ACTUAL</label>
+                <input id="inPassDel" name="password" type="password" autocomplete="current-password" placeholder="Contraseña">
+            </div>
+            <div class="aj-dacts">
+                <button class="aj-ghost" type="button" id="cancelEliminar">Cancelar</button>
+                <button class="btn-d" type="submit" id="okEliminar" disabled>Sí, eliminar cuenta</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div th:replace="~{fragments/nautico :: toast}"></div>
 
     <script th:inline="javascript">
         window.__AJUSTES__ = {
-            usuarioId: /*[[${usuario != null ? usuario.id : ''}]]*/ '',
-            tipo: /*[[${usuarioActualTipo}]]*/ 'talento',
+            tipo: /*[[${session.usuarioActualTipo}]]*/ 'talento',
             perfilPublico: /*[[${usuario != null and usuario.perfilPublico}]]*/ false,
             mostrarCorreo: /*[[${usuario != null and usuario.mostrarCorreo}]]*/ false,
             permitirMensajes: /*[[${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes}]]*/ true
