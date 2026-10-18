@@ -1252,3 +1252,38 @@ h2 {
     transform: rotate(calc(var(--look, 0) * 1deg));
     transition: transform .25s ease;
 }
+
+/* ───────── ajustes transversales: movimiento reducido, toque y placeholder ───────── */
+
+/* quien pide menos movimiento no ve animaciones en bucle ni transiciones largas en ninguna página */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* en pantallas táctiles los chips, enlaces secundarios y selectores llegan a 44 px de alto */
+@media (pointer: coarse) {
+
+    .ch,
+    .clear,
+    .mi.sm,
+    .sort select {
+        min-height: 44px;
+    }
+
+    .mi.sm {
+        height: 44px;
+    }
+}
+
+/* el texto (y el placeholder) largo de la búsqueda termina en "…" en pantallas angostas en vez de cortarse a medias */
+.search input {
+    text-overflow: ellipsis;
+}

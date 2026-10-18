@@ -170,3 +170,9 @@ html[data-theme="light"] .fm .req{color:var(--orange-ink)}
 .fm .cp{margin-top:26px}
 .fm .cp-err{margin:0;font:700 12.5px var(--font-mono);color:var(--orange)}
 html[data-theme="light"] .fm .cp-err{color:var(--orange-ink)}
+
+/* pantallas muy angostas (320 px): el indicador de pasos se compacta para no salirse del borde */
+@media (max-width: 420px) {
+    .fm .step-line { margin: 0 6px; min-width: 6px; }
+    .fm .step-item { gap: 6px; }
+}

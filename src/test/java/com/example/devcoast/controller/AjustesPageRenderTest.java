@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -115,8 +116,8 @@ class AjustesPageRenderTest {
                 .andExpect(content().string(containsString("action=\"/cuenta/eliminar\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
                 .andExpect(content().string(containsString("id=\"toast\"")))
-                .andExpect(content().string(containsString("/CSS/nautico-ajustes.css")))
-                .andExpect(content().string(containsString("/JS/preferencias.js")));
+                .andExpect(content().string(matchesPattern("(?s).*/CSS/nautico-ajustes(-[0-9a-f]{32})?\\.css.*")))
+                .andExpect(content().string(matchesPattern("(?s).*/JS/preferencias(-[0-9a-f]{32})?\\.js.*")));
     }
 
     @Test

@@ -98,9 +98,10 @@ public class EmpleoVista {
         String a = e.getSalarioMin() != null ? num(e.getSalarioMin() / divisor) : null;
         String b = e.getSalarioMax() != null ? num(e.getSalarioMax() / divisor) : null;
         v.salarioTexto = "$" + (a != null && b != null ? (a.equals(b) ? a : a + "–" + b) : a != null ? "Desde " + a : "Hasta " + b) + sufijo;
-        String per = e.getSalarioPeriodo() == null ? "" : e.getSalarioPeriodo().trim().toLowerCase(Locale.ROOT);
-        String perAbrev = per.startsWith("mens") ? "MES" : per.startsWith("anu") ? "AÑO" : per.startsWith("hora") ? "HORA"
-                : per.startsWith("seman") ? "SEMANA" : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
+        // el formulario de crear oferta guarda "/ mes", "/ semana", "/ hora" o "/ proyecto"; las ofertas antiguas, "Mensual" o "Anual"
+        String per = e.getSalarioPeriodo() == null ? "" : e.getSalarioPeriodo().trim().replaceFirst("^/\\s*", "").toLowerCase(Locale.ROOT);
+        String perAbrev = per.startsWith("mes") || per.startsWith("mens") ? "MES" : per.startsWith("anu") || per.startsWith("año") ? "AÑO"
+                : per.startsWith("hora") ? "HORA" : per.startsWith("seman") ? "SEMANA" : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
         String mon = vacioANull(e.getMoneda());
         v.salarioEtiqueta = "SALARIO" + (mon != null || perAbrev != null
                 ? " · " + (mon != null ? mon.toUpperCase(Locale.ROOT) : "") + (mon != null && perAbrev != null ? "/" : "") + (perAbrev != null ? perAbrev : "")

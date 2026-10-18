@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -140,7 +141,7 @@ class PostulacionesOfertaRenderTest {
                 // fase del proceso: la de la oferta queda marcada
                 .andExpect(content().string(containsString("data-fase=\"ENTREVISTAS\" aria-pressed=\"true\"")))
                 .andExpect(content().string(containsString("data-fase=\"ABIERTO\" aria-pressed=\"false\"")))
-                .andExpect(content().string(containsString("/JS/postulaciones-fase.js")))
+                .andExpect(content().string(matchesPattern("(?s).*/JS/postulaciones-fase(-[0-9a-f]{32})?\\.js.*")))
                 // ya no hay tablero kanban ni el shell anterior
                 .andExpect(content().string(not(containsString("pe-board"))))
                 .andExpect(content().string(not(containsString("ws-top"))));

@@ -97,9 +97,9 @@ html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
 .cv-chips.soft span { border-style: dashed; border-color: #8A8F9C; color: #2B2E36; }
 
 /* diálogo de edición */
-.cv-dlg { border: 0; padding: 0; background: transparent; width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); color: var(--paper-ink); }
+.cv-dlg { border: 0; padding: 0; background: transparent; width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); color: var(--paper-ink); }
 .cv-dlg::backdrop { background: rgba(6, 17, 19, .78); }
-.cv-dlg-f { background: var(--paper); border-radius: 16px; padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); }
+.cv-dlg-f { background: var(--paper); border-radius: 16px; padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); }
 .cv-dlg-h { display: flex; align-items: center; justify-content: space-between; }
 .cv-dlg-h h2 { font-size: 28px; letter-spacing: -.02em; margin: 0; }
 .cv-x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: none; color: var(--paper-ink); font-size: 28px; line-height: 1; cursor: pointer; }

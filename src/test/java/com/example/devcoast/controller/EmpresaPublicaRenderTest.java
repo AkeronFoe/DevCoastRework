@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -111,7 +112,7 @@ class EmpresaPublicaRenderTest {
                 .andExpect(content().string(containsString("Desarrollo Backend")))
                 .andExpect(content().string(containsString("Plataforma de pagos")))
                 .andExpect(content().string(containsString("href=\"/empleos/e1\"")))
-                .andExpect(content().string(containsString("/CSS/nautico-empresa-publica.css")))
+                .andExpect(content().string(matchesPattern("(?s).*/CSS/nautico-empresa-publica(-[0-9a-f]{32})?\\.css.*")))
                 .andExpect(content().string(not(containsString("ws-top"))));
     }
 

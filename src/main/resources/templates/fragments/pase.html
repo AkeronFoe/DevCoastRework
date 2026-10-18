@@ -35,7 +35,7 @@
 
             <div class="co" th:if="${v.empresaNombre != null}">
                 <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')">
-                    <img th:if="${v.logoUrl != null}" th:src="${v.logoUrl}" alt="">
+                    <img th:if="${v.logoUrl != null}" th:src="${v.logoUrl}" alt="" loading="lazy" decoding="async">
                     <b th:if="${v.logoUrl == null}" th:text="${v.empresaInicial}">E</b>
                 </span>
                 <span th:text="${v.empresaNombre}">Empresa</span>

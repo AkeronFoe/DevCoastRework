@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -123,7 +124,7 @@ class GuardadosPageRenderTest {
                 .andExpect(content().string(containsString("Quitar Backend Java de guardados")))
                 .andExpect(content().string(containsString("MATCH ALTO")))
                 .andExpect(content().string(containsString("Solicitada")))
-                .andExpect(content().string(containsString("/JS/guardados.js")))
+                .andExpect(content().string(matchesPattern("(?s).*/JS/guardados(-[0-9a-f]{32})?\\.js.*")))
                 .andExpect(content().string(containsString("aria-current=\"page\"")));
     }
 

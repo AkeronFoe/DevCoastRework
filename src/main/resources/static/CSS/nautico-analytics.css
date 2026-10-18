@@ -18,12 +18,12 @@
 .an .dash-stat-flag--mint{border-color:var(--teal);color:var(--teal)}
 
 /* ───── gráficas ───── */
-.an .charts-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-bottom:16px}
+.an .charts-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
 .an .charts-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
 .an .chart-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
 .an .chart-title{font:700 16px var(--font-display);letter-spacing:-.01em}
 .an .chart-subtitle{margin:3px 0 0;font:500 12px var(--font-mono);color:var(--mute)}
-.an .chart-wrap{position:relative;margin-top:14px}
+.an .chart-wrap{position:relative;margin-top:14px;min-width:0;max-width:100%}
 .an .chart-wrap.h200{height:200px}
 .an .chart-wrap.h240{height:240px}
 .an .remoto-ring{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:6px}
@@ -65,7 +65,7 @@ html[data-theme="light"] .an :is(.dash-stat-icon--amber,.dash-stat-icon--rose,.a
 html[data-theme="light"] .an :is(.pill-amber,.dash-stat-flag--amber){border-color:var(--orange-ink)}
 
 @media(max-width:980px){
-    .an .charts-grid,.an .charts-grid-3{grid-template-columns:1fr}
+    .an .charts-grid,.an .charts-grid-3{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:640px){
     .an .analytics-table{display:block;overflow-x:auto}

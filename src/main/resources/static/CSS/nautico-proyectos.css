@@ -33,7 +33,7 @@
 .add small{font:500 12px var(--font-mono);max-width:26ch}
 .add:hover{border-color:var(--teal);color:var(--ink);transform:translateY(-4px)}
 .add:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
-.dlg{border:0;padding:0;background:transparent;width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);color:var(--paper-ink)}
+.dlg{border:0;padding:0;background:transparent;width:min(520px,calc(100vw - 32px));max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);color:var(--paper-ink)}
 .dlg::backdrop{background:rgba(6,17,19,.78)}
 .dlg form{background:var(--paper);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px}
 .dlg h2{font-size:28px;letter-spacing:-.02em}

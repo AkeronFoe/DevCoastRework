@@ -103,7 +103,7 @@ html[data-theme="light"] .aj-dopt[aria-pressed="true"] { background: #101114; bo
 .aj-errk { color: var(--err); }
 
 /* ───────── diálogos ───────── */
-.aj-dlg { border: 0; padding: 0; background: transparent; width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); color: var(--paper-ink); }
+.aj-dlg { border: 0; padding: 0; background: transparent; width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); color: var(--paper-ink); }
 .aj-dlg::backdrop { background: rgba(6, 17, 19, .78); }
 .aj-dlg-f { background: var(--paper); border-radius: 16px; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 14px; }
 .aj-dlg.danger .aj-dlg-f { border: 3px solid var(--err); }

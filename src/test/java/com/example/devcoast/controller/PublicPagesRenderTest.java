@@ -212,7 +212,7 @@ class PublicPagesRenderTest {
         String html = renderizar("error/404");
         org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"er-code\""), html);
         org.junit.jupiter.api.Assertions.assertTrue(html.contains(">404<"));
-        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/CSS/nautico-error.css"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.matches("(?s).*/CSS/nautico-error(-[0-9a-f]{32})?\\.css.*"));
         org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"boat\""));
         org.junit.jupiter.api.Assertions.assertFalse(html.contains("error-shell"));
     }
@@ -221,7 +221,7 @@ class PublicPagesRenderTest {
     void laPagina500SeVeEnElDisenoNautico() throws Exception {
         String html = renderizar("error/500");
         org.junit.jupiter.api.Assertions.assertTrue(html.contains("Error interno del servidor"), html);
-        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/CSS/nautico-error.css"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.matches("(?s).*/CSS/nautico-error(-[0-9a-f]{32})?\\.css.*"));
         org.junit.jupiter.api.Assertions.assertTrue(html.contains("href=\"/dashboard\""));
         org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"boat\""));
     }

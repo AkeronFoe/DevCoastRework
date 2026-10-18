@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -249,7 +250,7 @@ class CurriculumPageRenderTest {
                 .andExpect(content().string(containsString("id=\"tplExp\"")))
                 .andExpect(content().string(containsString("data-lineas=\"Reduje el tiempo de deploy un 40%.||Lideré el rediseño.\"")))
                 .andExpect(content().string(containsString("Completitud")))
-                .andExpect(content().string(containsString("/JS/curriculum-editor.js")))
+                .andExpect(content().string(matchesPattern("(?s).*/JS/curriculum-editor(-[0-9a-f]{32})?\\.js.*")))
                 // el currículum del dueño no muestra acciones de empresa
                 .andExpect(content().string(not(containsString("Aceptar"))));
     }

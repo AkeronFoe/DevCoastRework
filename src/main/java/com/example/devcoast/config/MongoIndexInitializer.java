@@ -43,6 +43,23 @@ public class MongoIndexInitializer implements ApplicationRunner {
                 new Index().named("talento_estado_idx")
                         .on("talento_id", Direction.ASC)
                         .on("estado", Direction.ASC));
+
+        // login, registro y búsqueda por correo
+        createIndex("usuarios", "correo_idx", new Index().named("correo_idx").on("correo", Direction.ASC));
+        createIndex("empresas", "correo_idx", new Index().named("correo_idx").on("correo", Direction.ASC));
+        // directorio de talentos: filtra por perfil público y ordena por _id (los más recientes primero)
+        createIndex("usuarios", "publico_id_idx",
+                new Index().named("publico_id_idx").on("perfil_publico", Direction.ASC).on("_id", Direction.DESC));
+        // listado de empleos activos (más recientes primero) y ofertas de una empresa por estado
+        createIndex("empleos", "estado_id_idx",
+                new Index().named("estado_id_idx").on("estado", Direction.ASC).on("_id", Direction.DESC));
+        createIndex("empleos", "empresa_estado_idx",
+                new Index().named("empresa_estado_idx").on("empresaId", Direction.ASC).on("estado", Direction.ASC));
+        // portafolio de cada talento y cobros de cada empresa
+        createIndex("proyectos", "usuario_fecha_idx",
+                new Index().named("usuario_fecha_idx").on("usuarioId", Direction.ASC).on("creadoEn", Direction.DESC));
+        createIndex("cobros", "empresa_fecha_idx",
+                new Index().named("empresa_fecha_idx").on("empresaId", Direction.ASC).on("fecha", Direction.DESC));
     }
 
     private void createIndex(String collection, String name, Index index) {

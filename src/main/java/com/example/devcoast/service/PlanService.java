@@ -53,10 +53,7 @@ public class PlanService {
     @Scheduled(cron = "0 0 3 * * *")
     public void degradarPlanesVencidos() {
         Date ahora = new Date();
-        List<Empresa> vencidas = empresaRepository.findAll().stream()
-                .filter(e -> PLAN_PRO.equals(e.getPlan()))
-                .filter(e -> e.getPlanVenceEn() != null && e.getPlanVenceEn().before(ahora))
-                .toList();
+        List<Empresa> vencidas = empresaRepository.findByPlanAndPlanVenceEnBefore(PLAN_PRO, ahora);
         for (Empresa e : vencidas) {
             e.setPlan(PLAN_GRATIS);
             empresaRepository.save(e);

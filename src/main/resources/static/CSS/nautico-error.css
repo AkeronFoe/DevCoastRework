@@ -1,5 +1,5 @@
 /* DevCoast · páginas de error (404 y 500) con el barco. Autocontenido: no depende de la sesión ni del shell. */
-body.er{min-height:100vh;display:flex;flex-direction:column}
+body.er{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
 .er-main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px var(--gx) 24px}
 .er-card{width:min(100%,520px);text-align:center}
 .er-code{font:700 clamp(84px,18vw,140px)/1 var(--font-display);letter-spacing:-.05em;color:var(--acc)}

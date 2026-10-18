@@ -6,7 +6,7 @@
     <title>Analytics | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/nautico-analytics.css}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script th:src="@{/JS/vendor/chart.umd.js}"></script>
 </head>
 
 <body th:classappend="${usuarioActualTipo == 'empresa'} ? 'empresa'"

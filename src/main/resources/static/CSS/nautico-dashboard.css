@@ -65,9 +65,9 @@ body.empresa .nv.o b{color:var(--teal)}
 .ofs span{font:500 12px var(--font-mono);color:var(--mute);white-space:nowrap}
 @media (max-width:1000px){.bit{grid-template-columns:minmax(0,1fr)}}
 /* diálogo de bienvenida (antes el onboarding de 3 pasos del Dashboard) */
-.ob{border:0;padding:0;background:transparent;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 32px);color:var(--paper-ink)}
+.ob{border:0;padding:0;background:transparent;width:min(560px,calc(100vw - 32px));max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);color:var(--paper-ink)}
 .ob::backdrop{background:rgba(6,17,19,.78)}
-.ob form{background:var(--paper);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow-y:auto}
+.ob form{background:var(--paper);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);overflow-y:auto}
 .ob h2{font-size:28px;letter-spacing:-.02em}
 .ob p.ob-d{font-size:15px;color:#2B2E36}
 .ob .k{font-family:var(--font-mono);font-size:11px;color:var(--paper-mute);letter-spacing:.06em}
