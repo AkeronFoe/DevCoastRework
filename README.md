@@ -1,3 +1,5 @@
+<p align="center"><img src="src/main/resources/static/img/logo-devcoast.png" alt="DevCoast" width="420"></p>
+
 # DevCoast
 
 Plataforma web que conecta **talento tech** (programación, diseño, datos) con **empresas**: ofertas de empleo con

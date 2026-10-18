@@ -157,4 +157,14 @@ class AuthControllerTest {
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("X-Frame-Options", "DENY"));
     }
+
+    @Test
+    void laPaginaTraeElIconoDeLaApp() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
+                        org.hamcrest.Matchers.matchesPattern("(?s).*rel=\"icon\" href=\"/favicon(-[0-9a-f]{32})?\\.ico\".*")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
+                        org.hamcrest.Matchers.matchesPattern("(?s).*rel=\"apple-touch-icon\" href=\"/img/apple-touch-icon(-[0-9a-f]{32})?\\.png\".*")));
+    }
 }
