@@ -195,4 +195,34 @@ class PublicPagesRenderTest {
                 .andReturn();
         volcar("register-error.html", res.getResponse().getContentAsString());
     }
+
+    // ───────── páginas de error con el barco (no dependen de la sesión) ─────────
+    @Autowired
+    private org.thymeleaf.spring6.view.ThymeleafViewResolver viewResolver;
+
+    private String renderizar(String vista) throws Exception {
+        org.springframework.mock.web.MockHttpServletRequest req = new org.springframework.mock.web.MockHttpServletRequest();
+        org.springframework.mock.web.MockHttpServletResponse res = new org.springframework.mock.web.MockHttpServletResponse();
+        viewResolver.resolveViewName(vista, java.util.Locale.forLanguageTag("es")).render(new java.util.HashMap<String, Object>(), req, res);
+        return res.getContentAsString();
+    }
+
+    @Test
+    void laPagina404SeVeEnElDisenoNautico() throws Exception {
+        String html = renderizar("error/404");
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"er-code\""), html);
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains(">404<"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/CSS/nautico-error.css"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"boat\""));
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("error-shell"));
+    }
+
+    @Test
+    void laPagina500SeVeEnElDisenoNautico() throws Exception {
+        String html = renderizar("error/500");
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("Error interno del servidor"), html);
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/CSS/nautico-error.css"));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("href=\"/dashboard\""));
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"boat\""));
+    }
 }

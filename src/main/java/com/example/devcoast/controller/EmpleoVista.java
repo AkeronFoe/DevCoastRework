@@ -41,6 +41,7 @@ public class EmpleoVista {
     private List<Habilidad> habilidades = new ArrayList<>();
     private int habilidadesRestantes;
     private boolean solicitada;
+    private boolean cerrada;        // la empresa ya cerró la oferta (se ve en Guardados, donde no se puede postular)
 
     public static EmpleoVista de(Empleo e, MatchEmpleo.Resultado m, boolean solicitada, boolean destacado, Long postulantes,
             Date ahora) {
@@ -59,6 +60,7 @@ public class EmpleoVista {
         v.seniority = vacioANull(e.getSeniority());
         v.postulantes = postulantes;
         v.solicitada = solicitada;
+        v.cerrada = e.getEstado() != null && !"ACTIVO".equalsIgnoreCase(e.getEstado());
         v.descripcionCorta = destacado ? corta(e.getDescripcionRol(), 140) : null;
 
         Date fecha = e.getFechaPublicacionEfectiva();

@@ -1,0 +1,108 @@
+/* DevCoast · temas y preferencias de la interfaz náutica.
+   El tema por defecto es "oscuro" (los tokens de nautico.css). Aquí van:
+   - "claro" y "midnight": solo reasignan tokens de superficie y texto; los pases de papel, el mar y los
+     colores de marca no cambian (el mar sigue siendo mar);
+   - los pocos sitios donde el texto va sobre una superficie fija (el mar, botones de tinta, fichas de color);
+   - tamaño de texto, densidad, contraste alto y movimiento reducido (los pone preferencias.js en <html>).
+   Todo cuelga de html[data-…], así gana a las reglas base sin importar el orden de las hojas. */
+
+/* ───────── tema midnight: negros azulados ───────── */
+html[data-theme="midnight"] {
+    --sky: #0A0E1B;
+    --panel: #060913;
+    --panel2: #101627;
+    --line: #1D2540;
+    --line2: #2C3760;
+    --mute: #9CA8C8;
+}
+
+/* ───────── tema claro: el puerto de día ───────── */
+html[data-theme="light"] {
+    --sky: #D9DFEA;
+    --panel: #F4F6FA;
+    --panel2: #E6EAF2;
+    --ink: #101114;
+    --mute: #4F5563;
+    --line: #C7CEDB;
+    --line2: #AAB3C4;
+    --paper: #FFFFFF;
+    color-scheme: light;
+}
+
+/* texto de acento y enlaces: el teal y el naranja claros no llegan a 4.5:1 sobre fondo claro */
+html[data-theme="light"] .eyebrow { color: var(--orange-ink); }
+html[data-theme="light"] body.empresa .eyebrow { color: #0F766E; }
+html[data-theme="light"] :is(.lnk, .clear, .prog a, .legend a, .pn h2 a, .sec2 a, .pn .note a, .nums2 dd a:hover) { color: #0F766E; }
+html[data-theme="light"] .mi[aria-current="page"] svg { color: #0F766E; }
+html[data-theme="light"] .lg svg { stroke: #0F766E; }
+html[data-theme="light"] :is(.todo a, .ofs a, .perfil-todo a) { text-decoration-color: #0F766E; }
+html[data-theme="light"] :focus-visible { outline-color: #0F766E; }
+
+/* texto sobre colores de marca: siempre tinta oscura, no el "sky" que ahora es claro */
+html[data-theme="light"] :is(.badge, .av, .bell-n, .btn-o, .fpill, .fpill svg, .vs .ok, .logros li.on .lg-i) { color: #101114; }
+html[data-theme="light"] .fpill svg { fill: #101114; }
+
+/* superficies que siguen oscuras en cualquier tema: el mar y sus banners */
+html[data-theme="light"] :is(.hello, .carta, .hello-sea) { color: #F3F4F8; }
+html[data-theme="light"] :is(.hello p b, .vs, .todo-sea) { color: #F3F4F8; }
+html[data-theme="light"] .apply { color: #F3F4F8; }
+html[data-theme="light"] .btn-d { color: #F3F4F8; }
+html[data-theme="light"] .cv.code { color: #A6ABB8; }
+html[data-theme="light"] .cv.code .c { color: #F3F4F8; }
+
+/* chips y botones neutros */
+html[data-theme="light"] :is(.ch[aria-pressed="true"], .ch[aria-current="true"]) { background: #101114; border-color: #101114; color: #F3F4F8; }
+html[data-theme="light"] .search input::placeholder { color: #6B7180; }
+
+/* la gaviota del estado vacío es blanca: sobre fondo claro necesita su pedazo de mar detrás */
+html[data-theme="light"] .empty svg { background: var(--sea0); border-radius: 18px; padding: 12px 18px 0; }
+
+/* cuadrícula de fondo de la carta: una línea apenas más oscura que el fondo, en cada tema */
+html[data-theme="light"] .main {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M80 0H0V80' fill='none' stroke='%23CDD4E1'/%3E%3C/svg%3E");
+}
+html[data-theme="midnight"] .main {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M80 0H0V80' fill='none' stroke='%23121A30'/%3E%3C/svg%3E");
+}
+
+/* ───────── contraste alto ───────── */
+html[data-contrast="high"] {
+    --mute: #D5D9E3;
+    --line: #5A5F6B;
+    --line2: #8A8F9C;
+    --paper-mute: #2B2E36;
+}
+html[data-contrast="high"][data-theme="light"] {
+    --mute: #1F232C;
+    --line: #6B7180;
+    --line2: #4F5563;
+}
+html[data-contrast="high"] :focus-visible { outline-width: 4px; }
+
+/* ───────── tamaño de texto: solo el contenido de la página ───────── */
+html[data-text-size="small"] .content { zoom: .92; }
+html[data-text-size="large"] .content { zoom: 1.12; }
+
+/* ───────── densidad ───────── */
+html[data-density="compact"] .content :is(.jobs, .reqs, .tcs) { gap: 12px; }
+html[data-density="compact"] .content :is(.minis, .pair, .duo) { gap: 12px; }
+html[data-density="compact"] .content :is(.sec, .sec2) { margin-top: 22px; margin-bottom: 10px; }
+html[data-density="compact"] .content .filters { margin: 14px 0 14px; padding: 10px 0; }
+html[data-density="compact"] .content .pn { padding: 14px 16px; gap: 10px; }
+html[data-density="compact"] .content .jt-main { padding-top: 12px; padding-bottom: 12px; gap: 8px; }
+
+html[data-density="spacious"] .content :is(.jobs, .reqs, .tcs) { gap: 32px; }
+html[data-density="spacious"] .content :is(.minis, .pair, .duo) { gap: 28px; }
+html[data-density="spacious"] .content :is(.sec, .sec2) { margin-top: 52px; margin-bottom: 20px; }
+html[data-density="spacious"] .content .filters { margin: 34px 0 32px; padding: 24px 0; }
+html[data-density="spacious"] .content .pn { padding: 28px 30px; gap: 18px; }
+html[data-density="spacious"] .content .jt-main { padding-top: 24px; padding-bottom: 24px; gap: 14px; }
+
+/* ───────── movimiento reducido: sin oleaje, sin barco, sin transiciones ───────── */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}

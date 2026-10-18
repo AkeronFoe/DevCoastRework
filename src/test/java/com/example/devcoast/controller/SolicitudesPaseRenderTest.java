@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.example.devcoast.config.SecurityConfig;
 import com.example.devcoast.model.EventoEstado;
 import com.example.devcoast.model.Invitacion;
+import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.CobroRepository;
@@ -316,5 +317,46 @@ class SolicitudesPaseRenderTest {
         mockMvc.perform(post("/solicitudes/s9/delete").session(sesion("talento")).with(csrf()))
                 .andExpect(status().is3xxRedirection());
         verify(solicitudRepository, never()).deleteById("s9");
+    }
+    // ===== detalle de una solicitud (/solicitudes/{id}) con el pase de la lista =====
+
+    @Test
+    void elDetalleDeUnaSolicitudMuestraElPaseElHistorialYLosProyectosAdjuntos() throws Exception {
+        Solicitud s = solicitud("s9", "Backend Java", "Astillero Digital", "aprobada", 3);
+        s.setMensajeMotivacion("Me encantaría sumarme al equipo.");
+        s.setProyectosIds(List.of("p1"));
+        s.setEmpleoCategoria("Programación");
+        EventoEstado ev = new EventoEstado();
+        ev.setEstado("aprobada");
+        ev.setFecha(new Date());
+        ev.setNota("Pasaste el screening.");
+        s.setHistorial(new ArrayList<>(List.of(ev)));
+        Proyecto p = new Proyecto();
+        p.setId("p1");
+        p.setNombre("API de pagos");
+        when(solicitudRepository.findByIdAndUsuarioId("s9", "t1")).thenReturn(Optional.of(s));
+        when(usuarioRepository.findById("t1")).thenReturn(Optional.of(new Usuario()));
+        when(proyectoRepository.findById("p1")).thenReturn(Optional.of(p));
+
+        mockMvc.perform(get("/solicitudes/s9").session(sesion("talento")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("class=\"jt rq")))
+                .andExpect(content().string(containsString("Backend Java")))
+                .andExpect(content().string(containsString("¡Postulación aceptada!")))
+                .andExpect(content().string(containsString("Pasaste el screening.")))
+                .andExpect(content().string(containsString("Me encantaría sumarme al equipo.")))
+                .andExpect(content().string(containsString("API de pagos")))
+                .andExpect(content().string(containsString("/misProyectos/p1")))
+                .andExpect(content().string(containsString("Ver empleo original")))
+                .andExpect(content().string(containsString("Volver a solicitudes")));
+    }
+
+    @Test
+    void elDetalleDeUnaSolicitudAjenaVuelveALaLista() throws Exception {
+        when(solicitudRepository.findByIdAndUsuarioId("nada", "t1")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/solicitudes/nada").session(sesion("talento")).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/solicitudes"));
     }
 }

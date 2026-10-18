@@ -1,0 +1,35 @@
+/* DevCoast · Guardados. Reutiliza los pases de Empleos (nautico-pase.css); aquí solo lo propio: el botón "Quitar". */
+
+/* en Guardados la cabecera del pase lleva el botón de quitar a la derecha, junto a "hace N días" */
+.jt-top .unsave {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1.5px solid var(--paper-ink);
+    border-radius: 8px;
+    background: none;
+    color: var(--paper-ink);
+    font: 700 12px var(--font-mono);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+.jt-top .unsave svg { width: 14px; height: 14px; fill: currentColor; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.jt-top .unsave:hover { background: var(--paper-ink); color: var(--paper); }
+.jt-top .unsave:active { transform: scale(.96); }
+.jt-top .unsave:focus-visible { outline: 3px solid var(--paper-ink); outline-offset: 3px; }
+.jt-top .unsave:disabled { opacity: .45; cursor: progress; }
+.jt-top { flex-wrap: wrap; row-gap: 6px; }
+
+/* una oferta que la empresa ya cerró se ve apagada: sigue ahí, pero no se puede postular */
+.jt.closed .jt-main { opacity: .72; }
+.jt.closed .jt-stub { filter: grayscale(.6); }
+
+/* la oferta quitada sale con un desvanecimiento corto (solo opacity) */
+.jt.quitando { opacity: 0; transition: opacity .22s ease; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .jt.quitando { transition: none; }
+}

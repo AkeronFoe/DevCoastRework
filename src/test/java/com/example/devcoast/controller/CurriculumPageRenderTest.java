@@ -1,8 +1,11 @@
 package com.example.devcoast.controller;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Date;
@@ -209,5 +212,80 @@ class CurriculumPageRenderTest {
 
         mockMvc.perform(get("/empleos/emp1/postulaciones/s2").session(sesionEmpresa()).with(csrf()))
                 .andExpect(status().isOk());
+    }
+    // ===== rediseño náutico: la hoja de CV, el diálogo de edición y la revisión de la empresa =====
+
+    @Test
+    void elDuenoVeLaHojaConSusDatosElDialogoYLaCompletitud() throws Exception {
+        Usuario u = new Usuario();
+        u.setId("t1");
+        u.setNombre("Valentina Ríos");
+        u.setTipo("talento");
+        u.setRolTitulo("Frontend Developer");
+        u.setBio("Construyo interfaces claras.");
+        u.setStack(List.of("React", "TypeScript"));
+        u.setHabilidadesBlandas(List.of("Comunicación"));
+        u.setCvBullets(List.of("Reduje el tiempo de deploy un 40%.", "Lideré el rediseño."));
+        u.setNivelIngles(4);
+        Usuario.CvExperiencia exp = new Usuario.CvExperiencia();
+        exp.setCargo("Frontend Developer");
+        exp.setEmpresa("Nordic Labs");
+        exp.setPeriodo("2023 - hoy");
+        u.setCvExperiencias(List.of(exp));
+        when(usuarioRepository.findById("t1")).thenReturn(Optional.of(u));
+        when(proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc("t1")).thenReturn(List.of());
+
+        mockMvc.perform(get("/curriculum").session(sesionTalento("t1")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("// tu currículum")))
+                .andExpect(content().string(containsString("class=\"cv-name\"")))
+                .andExpect(content().string(containsString("Valentina Ríos")))
+                .andExpect(content().string(containsString("Nordic Labs")))
+                .andExpect(content().string(containsString("Reduje el tiempo de deploy un 40%.")))
+                .andExpect(content().string(containsString("B2 Conversacional")))
+                // el diálogo trae sus datos: la experiencia existente, el molde de una nueva y los logros para el textarea
+                .andExpect(content().string(containsString("id=\"dlgCv\"")))
+                .andExpect(content().string(containsString("value=\"Nordic Labs\"")))
+                .andExpect(content().string(containsString("id=\"tplExp\"")))
+                .andExpect(content().string(containsString("data-lineas=\"Reduje el tiempo de deploy un 40%.||Lideré el rediseño.\"")))
+                .andExpect(content().string(containsString("Completitud")))
+                .andExpect(content().string(containsString("/JS/curriculum-editor.js")))
+                // el currículum del dueño no muestra acciones de empresa
+                .andExpect(content().string(not(containsString("Aceptar"))));
+    }
+
+    @Test
+    void laRevisionDeEmpresaMuestraLaPostulacionSinEditorYConAccionesConConfirmacion() throws Exception {
+        Empleo empleo = new Empleo();
+        empleo.setId("emp1");
+        empleo.setEmpresaId("e1");
+        Solicitud s = new Solicitud();
+        s.setId("s1");
+        s.setEmpleoId("emp1");
+        s.setUsuarioId("t1");
+        s.setUsuarioCorreo("valentina@correo.com");
+        s.setEstado("revision");
+        s.setFechaSolicitud(new Date());
+        s.setMensajeMotivacion("Me encantaría formar parte del equipo.");
+        Usuario candidato = new Usuario();
+        candidato.setId("t1");
+        candidato.setNombre("Valentina Ríos");
+        candidato.setTipo("talento");
+        when(empleoRepository.findById("emp1")).thenReturn(Optional.of(empleo));
+        when(solicitudRepository.findByIdAndEmpleoId("s1", "emp1")).thenReturn(Optional.of(s));
+        when(usuarioRepository.findById("t1")).thenReturn(Optional.of(candidato));
+
+        mockMvc.perform(get("/empleos/emp1/postulaciones/s1").session(sesionEmpresa()).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("// revisión de candidatura")))
+                .andExpect(content().string(containsString("EN REVISIÓN")))
+                .andExpect(content().string(containsString("Me encantaría formar parte del equipo.")))
+                .andExpect(content().string(containsString("/empleos/emp1/postulaciones/s1/aprobar")))
+                .andExpect(content().string(containsString("/empleos/emp1/postulaciones/s1/rechazar")))
+                .andExpect(content().string(containsString("Sí, aceptar")))
+                .andExpect(content().string(containsString("Volver al empleo")))
+                // la empresa solo lee: sin diálogo de edición ni completitud
+                .andExpect(content().string(not(containsString("id=\"dlgCv\""))))
+                .andExpect(content().string(not(containsString("Editar secciones"))));
     }
 }

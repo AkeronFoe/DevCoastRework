@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -241,10 +242,10 @@ class ProyectosPageRenderTest {
     }
 
     @Test
-    void sinVolverTodoSigueComoAntes() throws Exception {
+    void guardarSinVolverTambienVuelveAlPortafolio() throws Exception {
         mockMvc.perform(post("/proyectos/guardar").param("nombre", "Landing").param("categoria", "Frontend")
                 .param("tipo", "Personal").param("descripcion", "x").session(sesion("talento")).with(csrf()))
-                .andExpect(redirectedUrl("/misProyectos"));
+                .andExpect(redirectedUrl("/proyectos"));
     }
 
     @Test
@@ -302,6 +303,41 @@ class ProyectosPageRenderTest {
                 .andExpect(flash().attribute("flashMessage", "Proyecto eliminado correctamente"));
         verify(proyectoRepository).deleteById("p1");
         mockMvc.perform(post("/proyectos/eliminar/p1").session(sesion("talento")).with(csrf()))
-                .andExpect(redirectedUrl("/misProyectos"));
+                .andExpect(redirectedUrl("/proyectos"));
+    }
+
+    @Test
+    void laListaDeSiempreAhoraEsElPortafolio() throws Exception {
+        mockMvc.perform(get("/misProyectos").session(sesion("talento")).with(csrf()))
+                .andExpect(redirectedUrl("/proyectos"));
+    }
+
+    @Test
+    void detalleDelProyectoEnElShellNautico() throws Exception {
+        Proyecto p = lista.get(0);
+        p.setDescripcionExtendida("Trabajé el rediseño completo.\nSegunda línea.");
+        p.setRol("Líder técnico");
+        p.setDuracion("3 meses");
+        p.setIncluirCv(true);
+        when(proyectoRepository.findByIdAndUsuarioId(p.getId(), "t1")).thenReturn(Optional.of(p));
+
+        mockMvc.perform(get("/misProyectos/" + p.getId()).session(sesion("talento")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("detalle-proyecto"))
+                .andExpect(content().string(containsString("// proyecto")))
+                .andExpect(content().string(containsString(p.getNombre())))
+                .andExpect(content().string(containsString("Líder técnico")))
+                .andExpect(content().string(containsString("3 meses")))
+                .andExpect(content().string(containsString("Trabajé el rediseño completo.")))
+                .andExpect(content().string(containsString("href=\"/subirProyecto?editar=" + p.getId() + "\"")))
+                .andExpect(content().string(containsString("action=\"/proyectos/eliminar/" + p.getId() + "\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andExpect(content().string(not(containsString("app-shell"))));
+    }
+
+    @Test
+    void detalleDeUnProyectoAjenoVuelveAlPortafolio() throws Exception {
+        mockMvc.perform(get("/misProyectos/otro").session(sesion("talento")).with(csrf()))
+                .andExpect(redirectedUrl("/proyectos"));
     }
 }

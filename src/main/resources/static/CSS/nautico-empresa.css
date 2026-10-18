@@ -47,3 +47,11 @@
 @media (prefers-reduced-motion:reduce){.mv-b,.mvs .ret>summary{transition:none}.mv-b:hover,.mvs .ret>summary:hover{transform:none}.cd.saliendo{transition:none}}
 .jt.rq .jt-top{flex-wrap:wrap;gap:6px 12px}
 .jt.rq .jt-top .when{white-space:normal}
+
+/* ───── Postulaciones de una oferta: fase del proceso ───── */
+.fase{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:22px 0 0}
+.fase-l{font:700 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-right:6px}
+.fase .ch{cursor:pointer}
+.fase .ch[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:var(--sea0)}
+.fase .ch[disabled]{opacity:.6;cursor:default}
+.fase .ch:focus-visible{outline:3px solid var(--teal);outline-offset:3px}

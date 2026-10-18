@@ -2,7 +2,6 @@ package com.example.devcoast.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Sort;
@@ -328,22 +327,12 @@ public class PageController {
         return "talento-perfil";
     }
 
-    // CV para imprimir o exportar a PDF, sin librerías externas
+    // el CV imprimible ahora vive en Currículum ("Descargar PDF" imprime la hoja)
     @GetMapping("/perfil/exportar-pdf")
-    public String exportarPerfilPDF(HttpSession session, Model model) {
+    public String exportarPerfilPDF(HttpSession session) {
         if (RoleGuard.sinSesion(session) || RoleGuard.esEmpresa(session))
             return "redirect:/perfil";
-
-        String id = RoleGuard.getId(session);
-        Usuario usuario = usuarioRepository.findById(id).orElse(null);
-        if (usuario == null) return "redirect:/perfil";
-
-        List<com.example.devcoast.model.Proyecto> proyectos =
-                proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
-
-        model.addAttribute("usuario",   usuario);
-        model.addAttribute("proyectos", proyectos);
-        return "perfil-cv";
+        return "redirect:/curriculum";
     }
 
     private void cargarUsuario(HttpSession session, Model model) {

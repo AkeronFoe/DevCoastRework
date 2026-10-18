@@ -1,420 +1,222 @@
-const REMOVE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-const langState = { es: NIVEL_ES_INICIAL, en: NIVEL_EN_INICIAL };
-const LANG_LABELS    = { 1:'A1 Básico', 2:'A2 Elemental', 3:'B1 Intermedio', 4:'B2 Conversacional', 5:'Nativo' };
-const LANG_LABELS_EN = { 1:'A1 Básico', 2:'A2 Elemental', 3:'B1 Intermedio', 4:'B2 Conversacional', 5:'C1/C2' };
-let softSkills = [...SOFT_SKILLS_INICIALES];
+/* DevCoast · Currículum (diseño náutico).
+   Diálogo "Editar secciones" con pestañas, experiencias y educación que se agregan y se quitan, chips de
+   habilidades blandas, preferencias e idiomas. Guarda con el mismo endpoint de siempre (POST /curriculum/guardar)
+   y recarga la página para que la hoja muestre exactamente lo que quedó guardado. "Descargar PDF" imprime la hoja.
+   En la vista de revisión de la empresa (sin diálogo) solo funcionan el PDF y los avisos. */
+(function () {
+    'use strict';
 
-/* ─── Idiomas ─────────────────────────────────────────────── */
-function updateLangBars(lang, level) {
-    const barsEl = document.getElementById('bars-' + lang);
-    const labelEl = document.getElementById('label-' + lang);
-    if (!barsEl || !labelEl) return;
-    barsEl.querySelectorAll('.cv-lang-bar').forEach((bar, i) => {
-        bar.classList.remove('fill', 'fill-full');
-        if (i < level) bar.classList.add(level === 5 && lang === 'es' ? 'fill-full' : 'fill');
-    });
-    labelEl.textContent = lang === 'es' ? LANG_LABELS[level] : LANG_LABELS_EN[level];
-}
-function initLangButtons() {
-    ['es', 'en'].forEach(lang => {
-        const level = langState[lang];
-        document.querySelector(`.lang-btn[data-lang="${lang}"][data-level="${level}"]`)?.classList.add('selected');
-    });
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang  = btn.dataset.lang;
-            const level = parseInt(btn.dataset.level);
-            langState[lang] = level;
-            document.querySelectorAll(`.lang-btn[data-lang="${lang}"]`).forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            updateLangBars(lang, level);
-        });
-    });
-}
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+    var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-/* ─── Soft skills chips ────────────────────────────────────── */
-function renderSoftChips() {
-    const wrapper = document.getElementById('soft-chips-wrapper');
-    const input   = document.getElementById('soft-chip-input');
-    wrapper.querySelectorAll('.chip-tag').forEach(c => c.remove());
-    softSkills.forEach((skill, i) => {
-        const chip = document.createElement('span');
-        chip.className = 'chip-tag';
-        chip.innerHTML = `${skill} <button onclick="removeChip(${i})" type="button" style="display:inline-flex;align-items:center;">${REMOVE_ICON_SVG}</button>`;
-        wrapper.insertBefore(chip, input);
-    });
-}
-function removeChip(idx) { softSkills.splice(idx, 1); renderSoftChips(); }
-
-document.getElementById('soft-chip-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        const val = this.value.trim().replace(/,$/, '');
-        if (val && !softSkills.includes(val)) { softSkills.push(val); renderSoftChips(); }
-        this.value = '';
-    }
-});
-document.getElementById('soft-chips-wrapper').addEventListener('click', () =>
-    document.getElementById('soft-chip-input').focus());
-
-/* ─── Tabs del modal ───────────────────────────────────────── */
-function activarPanel(tab) {
-    document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.edit-panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-}
-document.querySelectorAll('.edit-tab').forEach(tab => {
-    tab.addEventListener('click', () => activarPanel(tab));
-});
-
-/* ─── Preferencias chips ───────────────────────────────────── */
-function initPrefChips() {
-    const normalize = val => (val || '').toString().toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_]/g, ' ').trim();
-    const modalidadInicial = (MODALIDAD_INICIAL || '').split(',').map(v => v.trim()).filter(Boolean);
-    const disponibInicial  = (DISPONIB_INICIAL  || '').split(',').map(v => v.trim()).filter(Boolean);
-    const modalidadNorm = modalidadInicial.map(normalize);
-    const disponibNorm  = disponibInicial.map(normalize);
-    document.querySelectorAll('#pref-modalidad .pref-chip-toggle').forEach(btn => {
-        if (modalidadNorm.includes(normalize(btn.dataset.val))) btn.classList.add('selected');
-        btn.addEventListener('click', () => btn.classList.toggle('selected'));
-    });
-    document.querySelectorAll('#pref-contrato .pref-chip-toggle').forEach(btn => {
-        if (disponibNorm.includes(normalize(btn.dataset.val))) btn.classList.add('selected');
-        btn.addEventListener('click', () => btn.classList.toggle('selected'));
-    });
-}
-
-/* ─── Experiencias ─────────────────────────────────────────── */
-function removeExpItem(btn) {
-    btn.closest('.edit-timeline-item').remove();
-    document.querySelectorAll('#exp-items-container .edit-timeline-item').forEach((item, i) => {
-        item.querySelector('.edit-item-label').textContent = `Experiencia ${i + 1}`;
-    });
-}
-document.getElementById('btn-add-exp').addEventListener('click', () => {
-    const container = document.getElementById('exp-items-container');
-    const idx = container.querySelectorAll('.edit-timeline-item').length;
-    const div = document.createElement('div');
-    div.className = 'edit-timeline-item';
-    div.innerHTML = `
-        <button class="btn-remove-item" onclick="removeExpItem(this)" title="Eliminar">${REMOVE_ICON_SVG}</button>
-        <div class="edit-item-label">Experiencia ${idx + 1}</div>
-        <div class="edit-grid-2">
-            <div class="edit-field"><label>Cargo</label><input type="text" class="exp-cargo" placeholder="Tu cargo"></div>
-            <div class="edit-field"><label>Empresa</label><input type="text" class="exp-empresa" placeholder="Nombre empresa"></div>
-        </div>
-        <div class="edit-grid-2">
-            <div class="edit-field"><label>Período</label><input type="text" class="exp-periodo" placeholder="2025 – hoy"></div>
-            <div class="edit-field"><label>Modalidad</label><input type="text" class="exp-modalidad" placeholder="Remoto / Híbrido"></div>
-        </div>
-        <div class="edit-field"><label>Descripción</label><textarea class="exp-desc" rows="2" placeholder="Describe tus responsabilidades..."></textarea></div>`;
-    container.appendChild(div);
-});
-
-/* ─── Educaciones ──────────────────────────────────────────── */
-function removeEduItem(btn) {
-    btn.closest('.edit-timeline-item').remove();
-    document.querySelectorAll('#edu-items-container .edit-timeline-item').forEach((item, i) => {
-        item.querySelector('.edit-item-label').textContent = `Educación ${i + 1}`;
-    });
-}
-document.getElementById('btn-add-edu').addEventListener('click', () => {
-    const container = document.getElementById('edu-items-container');
-    const idx = container.querySelectorAll('.edit-timeline-item').length;
-    const div = document.createElement('div');
-    div.className = 'edit-timeline-item';
-    div.innerHTML = `
-        <button class="btn-remove-item" onclick="removeEduItem(this)" title="Eliminar">${REMOVE_ICON_SVG}</button>
-        <div class="edit-item-label">Educación ${idx + 1}</div>
-        <div class="edit-grid-2">
-            <div class="edit-field"><label>Institución</label><input type="text" class="edu-institucion" placeholder="Universidad / Bootcamp"></div>
-            <div class="edit-field"><label>Título / Carrera</label><input type="text" class="edu-titulo" placeholder="Ingeniería de Sistemas"></div>
-        </div>
-        <div class="edit-grid-2">
-            <div class="edit-field"><label>Período</label><input type="text" class="edu-periodo" placeholder="2020 – 2024"></div>
-            <div class="edit-field"><label>Descripción (opcional)</label><input type="text" class="edu-descripcion" placeholder="Especialización en..."></div>
-        </div>`;
-    container.appendChild(div);
-});
-
-/* ─── Modal open/close ─────────────────────────────────────── */
-/* bloqueamos el scroll en <html> también, no solo en <body> — acá el que
-   scrollea de verdad es <html> por el sticky del sidebar, así que si no
-   el fondo se seguía moviendo con el modal abierto */
-function openModal(tabName) {
-    document.getElementById('edit-overlay').classList.add('is-open');
-    document.documentElement.classList.add('dc-scroll-lock');
-    if (tabName) {
-        const tab = document.querySelector('.edit-tab[data-tab="' + tabName + '"]');
-        if (tab) activarPanel(tab);
-    }
-    renderSoftChips();
-}
-function closeModal() {
-    document.getElementById('edit-overlay').classList.remove('is-open');
-    document.documentElement.classList.remove('dc-scroll-lock');
-}
-
-document.getElementById('btn-editar-secciones').addEventListener('click', () => openModal('perfil'));
-document.getElementById('btn-cerrar-modal').addEventListener('click', closeModal);
-document.getElementById('btn-cancelar-modal').addEventListener('click', closeModal);
-document.getElementById('edit-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.getElementById('link-editar-bio')?.addEventListener('click', e => { e.preventDefault(); openModal('perfil'); });
-
-/* ─── Toast ────────────────────────────────────────────────── */
-function showToast(msg, type = 'ok') {
-    if (window.UIFeedback?.toast) { window.UIFeedback.toast(msg, type); return; }
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-/* ─── Bio char counter ─────────────────────────────────────── */
-const bioInput   = document.getElementById('inp-bio');
-const bioCounter = document.getElementById('bio-char-counter');
-const BIO_MAX    = 400;
-function updateBioCounter() {
-    if (!bioInput || !bioCounter) return;
-    const left = BIO_MAX - bioInput.value.length;
-    bioCounter.textContent = left + ' caracteres restantes';
-    bioCounter.classList.toggle('near-limit', left <= 80 && left > 20);
-    bioCounter.classList.toggle('at-limit',   left <= 20);
-}
-bioInput?.addEventListener('input', updateBioCounter);
-updateBioCounter();
-
-/* ─── Guardar ──────────────────────────────────────────────── */
-document.getElementById('btn-guardar-modal').addEventListener('click', async () => {
-    const btn = document.getElementById('btn-guardar-modal');
-    btn.classList.add('btn-saving');
-    btn.textContent = 'Guardando...';
-
-    const bulletsRaw  = document.getElementById('inp-bullets').value.trim();
-    const cvBullets   = bulletsRaw ? bulletsRaw.split('\n').map(l => l.trim()).filter(Boolean) : [];
-
-    const cvExperiencias = [];
-    document.querySelectorAll('#exp-items-container .edit-timeline-item').forEach(item => {
-        const cargo   = item.querySelector('.exp-cargo')?.value.trim() || '';
-        const empresa = item.querySelector('.exp-empresa')?.value.trim() || '';
-        if (!cargo && !empresa) return;
-        cvExperiencias.push({
-            cargo, empresa,
-            periodo:    item.querySelector('.exp-periodo')?.value.trim()   || '',
-            modalidad:  item.querySelector('.exp-modalidad')?.value.trim() || '',
-            descripcion:item.querySelector('.exp-desc')?.value.trim()      || ''
-        });
+    /* ── descargar PDF: se imprime solo la hoja (las reglas @media print del CSS esconden el resto) ── */
+    var pdf = $('#btnPdf');
+    if (pdf) pdf.addEventListener('click', function () {
+        var antes = document.title;
+        var nombre = ($('.cv-name') || {}).textContent;
+        document.title = nombre && nombre.trim() ? nombre.trim() + ' – CV' : 'CV DevCoast';
+        window.print();
+        document.title = antes;
     });
 
-    const cvEducaciones = [];
-    document.querySelectorAll('#edu-items-container .edit-timeline-item').forEach(item => {
-        const institucion = item.querySelector('.edu-institucion')?.value.trim() || '';
-        const titulo      = item.querySelector('.edu-titulo')?.value.trim()      || '';
-        if (!institucion && !titulo) return;
-        cvEducaciones.push({
-            institucion, titulo,
-            periodo:     item.querySelector('.edu-periodo')?.value.trim()     || '',
-            descripcion: item.querySelector('.edu-descripcion')?.value.trim() || ''
-        });
-    });
-
-    const modalidadSel = [...document.querySelectorAll('#pref-modalidad .pref-chip-toggle.selected')].map(b => b.dataset.val).join(', ');
-    const disponibSel  = [...document.querySelectorAll('#pref-contrato .pref-chip-toggle.selected')].map(b => b.dataset.val).join(', ');
-
-    const payload = {
-        nombre:         document.getElementById('inp-nombre')?.value.trim()     || '',
-        rolTitulo:      document.getElementById('inp-rol')?.value.trim()         || '',
-        bio:            document.getElementById('inp-bio')?.value.trim()         || '',
-        cvBullets,
-        emailContacto:  document.getElementById('inp-email')?.value.trim()       || '',
-        telefono:       document.getElementById('inp-telefono')?.value.trim()    || '',
-        portfolioUrl:   document.getElementById('inp-portafolio')?.value.trim()  || '',
-        linkedinUrl:    document.getElementById('inp-linkedin')?.value.trim()    || '',
-        githubUrl:      document.getElementById('inp-github')?.value.trim()      || '',
-        ubicacion:      document.getElementById('inp-ubicacion')?.value.trim()   || '',
-        modalidad:      modalidadSel,
-        disponibilidad: disponibSel,
-        salarioEsperado:document.getElementById('inp-salario')?.value.trim()     || '',
-        especialidad:   document.getElementById('inp-especialidad')?.value.trim()|| '',
-        nivelEspanol:   langState.es,
-        nivelIngles:    langState.en,
-        habilidadesBlandas: softSkills,
-        cvExperiencias,
-        cvEducaciones
-    };
-
+    /* aviso que quedó pendiente de antes de recargar */
     try {
-        const res  = await fetch('/curriculum/guardar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.ok) {
-            actualizarVistaCv(payload);
-            closeModal();
-            showToast('✓ Cambios guardados', 'ok');
-        } else {
-            showToast('Error: ' + (data.error || 'No se pudo guardar'), 'err');
+        if (sessionStorage.getItem('dc-cv-guardado') === '1') {
+            sessionStorage.removeItem('dc-cv-guardado');
+            toast('Cambios guardados.');
         }
-    } catch {
-        showToast('Error de red. Intenta de nuevo.', 'err');
-    } finally {
-        btn.classList.remove('btn-saving');
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar cambios`;
+    } catch (e) { /* sin sessionStorage */ }
+
+    var dlg = $('#dlgCv');
+    if (!dlg) return;   // vista de revisión: no hay edición
+
+    /* ── pestañas ── */
+    var tabs = $$('.cv-tab', dlg);
+    function activar(nombre) {
+        var existe = false;
+        tabs.forEach(function (t) {
+            var on = t.getAttribute('data-tab') === nombre;
+            if (on) existe = true;
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.tabIndex = on ? 0 : -1;
+        });
+        if (!existe) return;
+        $$('.cv-panel', dlg).forEach(function (p) { p.hidden = p.id !== 'panel-' + nombre; });
     }
-});
+    tabs.forEach(function (t) {
+        t.addEventListener('click', function () { activar(t.getAttribute('data-tab')); });
+        t.addEventListener('keydown', function (e) {
+            var i = tabs.indexOf(t), n = null;
+            if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+            else if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+            if (n) { e.preventDefault(); activar(n.getAttribute('data-tab')); n.focus(); }
+        });
+    });
 
-/* ─── Actualizar vista del CV sin recargar ─────────────────── */
-function actualizarVistaCv(p) {
-    const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
-    const setLink = (id, url, display) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.href = url && url.trim() ? url : '#';
-        const span = el.querySelector('span');
-        if (span) span.textContent = display && display.trim() ? display : el.querySelector('span')?.textContent || '';
-    };
-
-    if (p.nombre) { set('cv-nombre', p.nombre); set('cv-avatar', p.nombre.charAt(0).toUpperCase()); }
-    set('cv-rol', p.rolTitulo);
-    set('cv-bio', p.bio);
-    set('cv-email', p.emailContacto);
-    set('cv-telefono', p.telefono);
-    set('cv-portafolio', p.portfolioUrl);
-    set('cv-ubicacion', p.ubicacion);
-
-    const modalidadChip = document.getElementById('cv-modalidad-chip');
-    if (modalidadChip) modalidadChip.textContent = p.modalidad?.trim() || 'Remoto';
-    const disponibilidadChip = document.getElementById('cv-disponibilidad-chip');
-    if (disponibilidadChip) disponibilidadChip.textContent = p.disponibilidad?.trim() || 'Full-time';
-    const availabilityText = document.getElementById('cv-availability-text');
-    if (availabilityText) availabilityText.textContent = p.modalidad?.trim() ? `Abierto a ofertas ${p.modalidad}` : 'Abierto a ofertas remotas';
-
-    setLink('cv-linkedin-link', p.linkedinUrl, p.linkedinUrl);
-    setLink('cv-portfolio-link', p.portfolioUrl, p.portfolioUrl || 'Portafolio');
-
-    // GitHub
-    const ghLink = document.getElementById('cv-github-link');
-    const ghText = document.getElementById('cv-github-text');
-    if (ghLink) {
-        ghLink.href  = p.githubUrl?.trim() ? p.githubUrl : '#';
-        ghLink.style.opacity = p.githubUrl?.trim() ? '' : '0.4';
-        ghLink.style.pointerEvents = p.githubUrl?.trim() ? '' : 'none';
+    function abrir(tab) {
+        activar(tab || 'perfil');
+        var err = $('#cvErr', dlg); if (err) err.hidden = true;
+        if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
     }
-    if (ghText) ghText.textContent = p.githubUrl?.trim() ? p.githubUrl : 'GitHub';
+    function cerrar() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
 
-    // Bullets
-    const bulletsList = document.getElementById('cv-bullets-list');
-    if (bulletsList) {
-        bulletsList.innerHTML = p.cvBullets?.length
-            ? p.cvBullets.map(b => `<li>${b}</li>`).join('')
-            : '<li>Agrega tus logros principales en <a href="#" class="cv-inline-link" onclick="openModal(\'perfil\');return false;">Editar secciones</a>.</li>';
+    var editar = $('#btnEditar');
+    if (editar) editar.addEventListener('click', function () { abrir('perfil'); });
+    // los enlaces "Editar secciones" de la hoja abren la pestaña que corresponde
+    document.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-abrir]') : null;
+        if (b) { e.preventDefault(); abrir(b.getAttribute('data-abrir')); }
+    });
+    $('#cvCerrar').addEventListener('click', cerrar);
+    $('#cvCancelar').addEventListener('click', cerrar);
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) cerrar(); });
+
+    /* ── resumen: contador de caracteres y logros (una línea cada uno) ── */
+    var bio = $('#inBio'), bioCount = $('#bioCount'), BIO_MAX = 400;
+    function contarBio() {
+        if (!bio || !bioCount) return;
+        bioCount.textContent = (BIO_MAX - bio.value.length) + ' caracteres restantes';
     }
+    if (bio) { bio.addEventListener('input', contarBio); contarBio(); }
 
-    // Experiencias
-    const expDisplay = document.getElementById('cv-experiencia-display');
-    if (expDisplay) {
-        expDisplay.innerHTML = p.cvExperiencias?.length
-            ? p.cvExperiencias.map((exp, i) => `
-                <div class="cv-timeline-item">
-                    <span class="cv-timeline-dot ${i === 0 ? 'is-active' : ''}"></span>
-                    <div>
-                        <strong>${exp.cargo || '—'}</strong><span class="text-accent" style="font-weight:600;"> · ${exp.empresa || '—'}</span>
-                        <div class="chip-row" style="margin:6px 0;">
-                            ${i === 0 ? '<span class="badge-open">Actual</span>' : ''}
-                            ${exp.periodo   ? `<span class="chip">${exp.periodo}</span>`   : ''}
-                            ${exp.modalidad ? `<span class="chip">${exp.modalidad}</span>` : ''}
-                        </div>
-                        ${exp.descripcion ? `<p class="muted" style="font-size:.85rem;">${exp.descripcion}</p>` : ''}
-                    </div>
-                </div>`).join('')
-            : '<p class="muted" style="font-size:.85rem;">Agrega tu experiencia en <a href="#" class="cv-inline-link" onclick="openModal(\'experiencia\');return false;">Editar secciones</a>.</p>';
+    var logros = $('#inBullets');
+    if (logros) {
+        var crudo = logros.getAttribute('data-lineas') || '';
+        logros.value = crudo ? crudo.split('||').join('\n') : '';
     }
 
-    // Educaciones
-    const eduDisplay = document.getElementById('cv-educacion-display');
-    if (eduDisplay) {
-        eduDisplay.innerHTML = p.cvEducaciones?.length
-            ? p.cvEducaciones.map(edu => `
-                <div class="resume-row">
-                    <strong>${edu.institucion || '—'}</strong>
-                    <span class="text-accent" style="font-weight:600;">${edu.titulo || '—'}</span>
-                    ${edu.periodo    ? `<span class="muted">${edu.periodo}</span>` : ''}
-                    ${edu.descripcion? `<p class="muted" style="font-size:.82rem;margin:2px 0 0;">${edu.descripcion}</p>` : ''}
-                </div>`).join('')
-            : '<p class="muted" style="font-size:.85rem;">Agrega tu educación en <a href="#" class="cv-inline-link" onclick="openModal(\'educacion\');return false;">Editar secciones</a>.</p>';
+    /* ── opciones de varias respuestas (modalidad, contrato) ── */
+    function normalizar(v) {
+        return (v || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-_]/g, ' ').trim();
     }
-
-    // Especialidad y salario
-    const espDisplay = document.getElementById('cv-especialidad-display');
-    if (espDisplay) {
-        espDisplay.textContent = p.especialidad || '';
-        espDisplay.style.display = p.especialidad?.trim() ? '' : 'none';
+    function iniciarMulti(sel, inicial) {
+        var ini = (inicial || '').split(',').map(function (v) { return normalizar(v); }).filter(Boolean);
+        $$(sel + ' button', dlg).forEach(function (b) {
+            b.setAttribute('aria-pressed', ini.indexOf(normalizar(b.getAttribute('data-val'))) >= 0 ? 'true' : 'false');
+            b.addEventListener('click', function () {
+                b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+            });
+        });
     }
-    const salDisplay = document.getElementById('cv-salario-display');
-    const salPill = document.getElementById('cv-salario-pill');
-    if (salDisplay) {
-        salDisplay.textContent = p.salarioEsperado || '';
+    function elegidos(sel) {
+        return $$(sel + ' button[aria-pressed="true"]', dlg).map(function (b) { return b.getAttribute('data-val'); }).join(', ');
     }
-    if (salPill) {
-        salPill.style.display = p.salarioEsperado?.trim() ? 'inline-flex' : 'none';
+    iniciarMulti('#prefMod', dlg.getAttribute('data-mod'));
+    iniciarMulti('#prefCon', dlg.getAttribute('data-disp'));
+
+    /* ── idiomas: un solo nivel por idioma ── */
+    var nivel = { es: parseInt(dlg.getAttribute('data-es'), 10) || 5, en: parseInt(dlg.getAttribute('data-en'), 10) || 4 };
+    function iniciarIdioma(sel, clave) {
+        var botones = $$(sel + ' button', dlg);
+        var pintar = function () {
+            botones.forEach(function (b) { b.setAttribute('aria-pressed', parseInt(b.getAttribute('data-level'), 10) === nivel[clave] ? 'true' : 'false'); });
+        };
+        botones.forEach(function (b) {
+            b.addEventListener('click', function () { nivel[clave] = parseInt(b.getAttribute('data-level'), 10); pintar(); });
+        });
+        pintar();
     }
-    const espSalHint = document.getElementById('cv-especialidad-salario-hint');
-    if (espSalHint) {
-        espSalHint.style.display = (p.especialidad?.trim() || p.salarioEsperado?.trim()) ? 'none' : '';
+    iniciarIdioma('#langEs', 'es');
+    iniciarIdioma('#langEn', 'en');
+
+    /* ── experiencias y educación: se clonan desde <template> y se quitan con "Quitar" ── */
+    function renumerar(lista, etiqueta) {
+        $$('.cv-item', lista).forEach(function (it, i) {
+            var l = $('.cv-item-l', it); if (l) l.textContent = etiqueta + ' ' + (i + 1);
+        });
     }
-
-    // Soft skills
-    const softWrap = document.getElementById('cv-soft-skills');
-    if (softWrap) {
-        softWrap.innerHTML = softSkills.length
-            ? softSkills.map(s => `<span class="pill-soft">${s}</span>`).join('')
-            : '<span class="pill-soft">Liderazgo</span><span class="pill-soft">Trabajo en equipo</span>';
+    function iniciarLista(listaSel, tplSel, btnSel, etiqueta) {
+        var lista = $(listaSel, dlg), tpl = $(tplSel, dlg), btn = $(btnSel, dlg);
+        renumerar(lista, etiqueta);
+        btn.addEventListener('click', function () {
+            lista.appendChild(tpl.content.cloneNode(true));
+            renumerar(lista, etiqueta);
+            var ult = lista.lastElementChild; var f = ult && $('input', ult); if (f) f.focus();
+        });
+        lista.addEventListener('click', function (e) {
+            var q = e.target.closest ? e.target.closest('[data-quitar]') : null;
+            if (!q) return;
+            var it = q.closest('.cv-item'); if (it) it.remove();
+            renumerar(lista, etiqueta);
+        });
     }
+    iniciarLista('#expLista', '#tplExp', '#expAgregar', 'Experiencia');
+    iniciarLista('#eduLista', '#tplEdu', '#eduAgregar', 'Educación');
 
-    // Idiomas
-    updateLangBars('es', langState.es);
-    updateLangBars('en', langState.en);
+    /* ── habilidades blandas: chips (Enter o coma agregan; × quita) ── */
+    var softWrap = $('#softWrap', dlg), softIn = $('#softIn', dlg);
+    function valoresSoft() { return $$('.cv-chip', softWrap).map(function (c) { return c.getAttribute('data-v'); }); }
+    function agregarSoft(v) {
+        v = (v || '').trim().replace(/,$/, '');
+        if (!v || valoresSoft().indexOf(v) >= 0) return;
+        var chip = document.createElement('span'); chip.className = 'cv-chip'; chip.setAttribute('data-v', v);
+        var t = document.createElement('span'); t.textContent = v;
+        var x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Quitar ' + v);
+        chip.appendChild(t); chip.appendChild(x);
+        softWrap.insertBefore(chip, softIn);
+    }
+    softIn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); agregarSoft(softIn.value); softIn.value = ''; }
+        else if (e.key === 'Backspace' && !softIn.value) { var ch = $$('.cv-chip', softWrap).pop(); if (ch) ch.remove(); }
+    });
+    softIn.addEventListener('blur', function () { if (softIn.value.trim()) { agregarSoft(softIn.value); softIn.value = ''; } });
+    softWrap.addEventListener('click', function (e) {
+        var x = e.target.closest ? e.target.closest('.cv-chip button') : null;
+        if (x) { x.closest('.cv-chip').remove(); softIn.focus(); }
+        else if (e.target === softWrap) softIn.focus();
+    });
 
-    // Stats y completitud (estimación client-side post-guardado)
-    const newExp  = p.cvExperiencias?.length || 0;
-    const newSkills = document.querySelectorAll('.stack-chip, .skill-chip').length || STAT_SKILLS;
-    set('cv-stat-exp', newExp);
+    /* ── guardar ── */
+    function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    function texto(it, c) { var el = $(c, it); return el ? el.value.trim() : ''; }
 
-    const fieldsLlenos = [
-        p.nombre, p.rolTitulo, p.bio, p.emailContacto, p.ubicacion,
-        p.modalidad, p.portfolioUrl, p.linkedinUrl, p.githubUrl
-    ].filter(v => v?.trim()).length
-        + (newExp > 0 ? 1 : 0)
-        + (p.cvEducaciones?.length > 0 ? 1 : 0);
-    const nuevaComp = Math.min(100, Math.round((fieldsLlenos / 12) * 100));
+    $('#cvGuardar').addEventListener('click', function () {
+        var btn = this, err = $('#cvErr', dlg);
+        agregarSoft(softIn.value); softIn.value = '';
 
-    const fillEl  = document.getElementById('cv-completeness-fill');
-    const pctEl   = document.getElementById('cv-completeness-pct');
-    const pillEl  = document.getElementById('cv-completeness-pill');
-    const statEl  = document.getElementById('cv-stat-completeness');
-    if (fillEl)  fillEl.style.width   = nuevaComp + '%';
-    if (pctEl)   pctEl.textContent    = nuevaComp + '%';
-    if (pillEl)  pillEl.textContent   = nuevaComp + '%';
-    if (statEl)  statEl.textContent   = nuevaComp + '%';
-}
+        var cvExperiencias = [];
+        $$('#expLista .cv-item', dlg).forEach(function (it) {
+            var cargo = texto(it, '.exp-cargo'), empresa = texto(it, '.exp-empresa');
+            if (!cargo && !empresa) return;
+            cvExperiencias.push({ cargo: cargo, empresa: empresa, periodo: texto(it, '.exp-periodo'),
+                modalidad: texto(it, '.exp-modalidad'), descripcion: texto(it, '.exp-desc') });
+        });
+        var cvEducaciones = [];
+        $$('#eduLista .cv-item', dlg).forEach(function (it) {
+            var institucion = texto(it, '.edu-institucion'), titulo = texto(it, '.edu-titulo');
+            if (!institucion && !titulo) return;
+            cvEducaciones.push({ institucion: institucion, titulo: titulo, periodo: texto(it, '.edu-periodo'),
+                descripcion: texto(it, '.edu-descripcion') });
+        });
+        var lineas = logros.value.trim();
 
-/* ─── Descargar PDF (print) ────────────────────────────────── */
-document.getElementById('btn-descargar-pdf')?.addEventListener('click', () => {
-    document.title = document.getElementById('cv-nombre')?.textContent?.trim()
-        ? document.getElementById('cv-nombre').textContent.trim() + ' – CV'
-        : 'CV DevCoast';
-    window.print();
-});
+        var payload = {
+            nombre: val('inNombre'), rolTitulo: val('inRol'), bio: val('inBio'),
+            cvBullets: lineas ? lineas.split('\n').map(function (l) { return l.trim(); }).filter(Boolean) : [],
+            emailContacto: val('inEmail'), telefono: val('inTel'), portfolioUrl: val('inWeb'),
+            linkedinUrl: val('inLi'), githubUrl: val('inGh'), ubicacion: val('inUbi'),
+            modalidad: elegidos('#prefMod'), disponibilidad: elegidos('#prefCon'),
+            salarioEsperado: val('inSal'), especialidad: val('inEsp'),
+            nivelEspanol: nivel.es, nivelIngles: nivel.en,
+            habilidadesBlandas: valoresSoft(), cvExperiencias: cvExperiencias, cvEducaciones: cvEducaciones
+        };
 
-/* ─── Init ─────────────────────────────────────────────────── */
-initLangButtons();
-initPrefChips();
-renderSoftChips();
-updateLangBars('es', langState.es);
-updateLangBars('en', langState.en);
+        btn.disabled = true; btn.textContent = 'Guardando…';
+        fetch('/curriculum/guardar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d && d.ok) {
+                    try { sessionStorage.setItem('dc-cv-guardado', '1'); } catch (e) { /* ignora */ }
+                    window.location.reload();
+                } else {
+                    err.textContent = (d && d.error) || 'No se pudo guardar. Intenta de nuevo.'; err.hidden = false;
+                    btn.disabled = false; btn.textContent = 'Guardar cambios';
+                }
+            })
+            .catch(function () {
+                err.textContent = 'Error de red. Intenta de nuevo.'; err.hidden = false;
+                btn.disabled = false; btn.textContent = 'Guardar cambios';
+            });
+    });
+})();

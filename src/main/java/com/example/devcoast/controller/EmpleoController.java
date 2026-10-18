@@ -3,7 +3,6 @@ package com.example.devcoast.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,11 +45,6 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class EmpleoController {
-
-    // 11 = 1 card destacada/mejor-match a ancho completo + 10 en pares de 2
-    // columnas — así la grilla siempre cierra en filas completas en vez de
-    // dejar una card sola con un hueco vacío al lado
-    private static final int EMPLEOS_POR_PAGINA_DEFAULT = 11;
 
     private final EmpleoRepository empleoRepository;
     private final MongoTemplate mongoTemplate;
@@ -248,8 +242,12 @@ public class EmpleoController {
         return v == null ? -1 : v;
     }
 
+    // Guardados: los mismos pases que Empleos (con match y habilidades) de las ofertas que el talento marcó.
+    // ?filtro=alta|pendientes &orden=recientes|match; "recientes" = la última guardada primero.
     @GetMapping("/empleos/guardados")
-    public String empleosGuardados(Model model, HttpSession session, RedirectAttributes ra) {
+    public String empleosGuardados(@RequestParam(required = false) String filtro,
+            @RequestParam(required = false) String orden,
+            Model model, HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
@@ -260,8 +258,8 @@ public class EmpleoController {
         }
 
         Usuario usuario = obtenerUsuario(session);
+        boolean tieneStack = usuario != null && usuario.getStack() != null && !usuario.getStack().isEmpty();
         List<Empleo> guardados = new ArrayList<>();
-        Map<String, Integer> scores = new LinkedHashMap<>();
 
         if (usuario != null && usuario.getEmpleosFavoritos() != null
                 && !usuario.getEmpleosFavoritos().isEmpty()) {
@@ -270,31 +268,53 @@ public class EmpleoController {
             List<String> ids = new ArrayList<>(usuario.getEmpleosFavoritos());
             java.util.Collections.reverse(ids);
 
-            for (String id : ids) {
-                empleoRepository.findById(id).ifPresent(e -> {
-                    guardados.add(e);
-                    scores.put(e.getId(), calcularScore(usuario, e));
-                });
-            }
+            for (String id : ids)
+                empleoRepository.findById(id).ifPresent(guardados::add);
         }
 
-        Map<String, Boolean> yaAplico = new HashMap<>();
+        // cuáles de las guardadas ya tienen solicitud del talento (una sola consulta)
+        Set<String> solicitadas = new java.util.HashSet<>();
         String userId = RoleGuard.getId(session);
-        for (Empleo e : guardados) {
-            yaAplico.put(e.getId(),
-                    solicitudRepository.findByUsuarioIdAndEmpleoId(userId, e.getId()).isPresent());
+        if (userId != null && !guardados.isEmpty()) {
+            List<String> ids = guardados.stream().map(Empleo::getId).toList();
+            solicitudRepository.findByUsuarioIdAndEmpleoIdIn(userId, new ArrayList<>(ids))
+                    .forEach(sol -> solicitadas.add(sol.getEmpleoId()));
         }
 
-        long altaCompat = guardados.stream()
-                .filter(e -> scores.getOrDefault(e.getId(), 0) >= 70).count();
-        long yaAplicoCount = yaAplico.values().stream().filter(Boolean::booleanValue).count();
+        java.util.Date ahora = new java.util.Date();
+        List<EmpleoVista> todas = new ArrayList<>();
+        for (Empleo e : guardados)
+            todas.add(EmpleoVista.de(e, MatchEmpleo.calcular(usuario, e), solicitadas.contains(e.getId()), false, null, ahora));
 
-        model.addAttribute("guardados", guardados);
-        model.addAttribute("scores", scores);
-        model.addAttribute("yaAplico", yaAplico);
-        model.addAttribute("guardTotal", guardados.size());
+        long altaCompat = todas.stream().filter(v -> v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO).count();
+        long yaSolicitadas = todas.stream().filter(EmpleoVista::isSolicitada).count();
+        boolean matchDisponible = todas.stream().anyMatch(v -> v.getMatch() != null);
+
+        String filtroSel = "alta".equals(filtro) && matchDisponible ? "alta" : "pendientes".equals(filtro) ? "pendientes" : "";
+        String ordenSel = "match".equals(orden) && matchDisponible ? "match" : "recientes";
+
+        List<EmpleoVista> lista = new ArrayList<>(todas.stream()
+                .filter(v -> filtroSel.isEmpty()
+                        || ("alta".equals(filtroSel) && v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO)
+                        || ("pendientes".equals(filtroSel) && !v.isSolicitada() && !v.isCerrada()))
+                .toList());
+        // sort() es estable: a igual match conserva el orden "última guardada primero"
+        if ("match".equals(ordenSel))
+            lista.sort((x, y) -> Integer.compare(y.getMatch() == null ? -1 : y.getMatch(), x.getMatch() == null ? -1 : x.getMatch()));
+
+        model.addAttribute("tarjetas", lista);
+        model.addAttribute("guardTotal", todas.size());
         model.addAttribute("guardAltaCompat", altaCompat);
-        model.addAttribute("guardYaAplico", yaAplicoCount);
+        model.addAttribute("guardYaAplico", yaSolicitadas);
+        model.addAttribute("totalMostradas", lista.size());
+        model.addAttribute("filtro", filtroSel);
+        model.addAttribute("filtroP", filtroSel.isEmpty() ? null : filtroSel);
+        model.addAttribute("orden", ordenSel);
+        model.addAttribute("hayFiltros", !filtroSel.isEmpty());
+        model.addAttribute("matchDisponible", matchDisponible);
+        model.addAttribute("talentoSinStack", !tieneStack);
+        model.addAttribute("esTalento", true);
+        model.addAttribute("enGuardados", true);
         agregarSesion(session, model);
         return "empleos-guardados";
     }
@@ -346,14 +366,17 @@ public class EmpleoController {
                 logoUrl = ref.getLogoUrl();
         }
 
-        Map<String, Integer> scores = new HashMap<>();
-        if (RoleGuard.esTalento(session)) {
-            Usuario usu = obtenerUsuario(session);
-            if (usu != null && usu.getStack() != null && !usu.getStack().isEmpty()) {
-                for (Empleo e : empleosActivos)
-                    scores.put(e.getId(), calcularScore(usu, e));
-            }
-        }
+        // las ofertas activas con el mismo pase de Empleos: match con el talento (si tiene stack) y si ya postuló
+        Usuario talento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
+        Set<String> solicitadas = new java.util.HashSet<>();
+        if (talento != null && !empleosActivos.isEmpty())
+            solicitudRepository.findByUsuarioIdAndEmpleoIdIn(talento.getId(),
+                    empleosActivos.stream().map(Empleo::getId).toList())
+                    .forEach(sol -> solicitadas.add(sol.getEmpleoId()));
+        java.util.Date ahora = new java.util.Date();
+        List<EmpleoVista> tarjetas = new ArrayList<>();
+        for (Empleo e : empleosActivos)
+            tarjetas.add(EmpleoVista.de(e, MatchEmpleo.calcular(talento, e), solicitadas.contains(e.getId()), false, null, ahora));
 
         String inicial = (nombreEmpresa != null && !nombreEmpresa.isBlank())
                 ? nombreEmpresa.substring(0, 1).toUpperCase()
@@ -367,7 +390,10 @@ public class EmpleoController {
         model.addAttribute("logoUrl", logoUrl);
         model.addAttribute("inicial", inicial);
         model.addAttribute("empleosActivos", empleosActivos);
-        model.addAttribute("scores", scores);
+        model.addAttribute("tarjetas", tarjetas);
+        // el pase de oferta pregunta por esto: con el talento sin stack avisa que no hay match
+        model.addAttribute("esTalento", talento != null);
+        model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
         model.addAttribute("empresaId", empresaId);
         agregarSesion(session, model);
         return "empresa-perfil";
@@ -390,6 +416,7 @@ public class EmpleoController {
 
         boolean usuarioYaAplico = false;
         int score = 0;
+        Usuario talento = null;
 
         if (RoleGuard.esTalento(session)) {
             usuarioYaAplico = solicitudRepository
@@ -398,9 +425,9 @@ public class EmpleoController {
                     .findByUsuarioIdOrderByCreadoEnDesc(usuarioId);
             model.addAttribute("misProyectos", misProyectos);
 
-            Usuario usu = obtenerUsuario(session);
-            if (usu != null && usu.getStack() != null && !usu.getStack().isEmpty()) {
-                score = calcularScore(usu, empleo);
+            talento = obtenerUsuario(session);
+            if (talento != null && talento.getStack() != null && !talento.getStack().isEmpty()) {
+                score = calcularScore(talento, empleo);
             }
         }
 
@@ -411,9 +438,20 @@ public class EmpleoController {
             model.addAttribute("totalSolicitudesEmpleo", solicitudesEmpleo.size());
         }
 
+        // el encabezado de la ficha es un pase como los de Empleos: match, habilidades que tiene y que le faltan
+        Long postulantes = esEmpresaPropietaria ? solicitudRepository.countByEmpleoId(id) : null;
+        EmpleoVista vista = EmpleoVista.de(empleo, MatchEmpleo.calcular(talento, empleo), usuarioYaAplico, true,
+                postulantes, new java.util.Date());
+        boolean esFavorito = talento != null && talento.getEmpleosFavoritos() != null
+                && talento.getEmpleosFavoritos().contains(id);
+
         model.addAttribute("empleo", empleo);
+        model.addAttribute("v", vista);
         model.addAttribute("usuarioYaAplico", usuarioYaAplico);
         model.addAttribute("esEmpresaPropietaria", esEmpresaPropietaria);
+        model.addAttribute("esTalento", RoleGuard.esTalento(session));
+        model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
+        model.addAttribute("esFavorito", esFavorito);
         model.addAttribute("score", score);
         agregarSesion(session, model);
         return "detalles-empleo";

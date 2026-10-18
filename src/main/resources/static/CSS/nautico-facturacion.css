@@ -1,0 +1,13 @@
+/* DevCoast · Facturación: cada cobro es un recibo con forma de pase. Requiere nautico.css y nautico-pase.css. */
+.fa-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; margin: 24px 0 0; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.fa-nums > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; background: var(--panel); padding: 18px 22px; }
+.fa-nums dt { font: 700 11px var(--font-mono); letter-spacing: .08em; color: var(--mute); }
+.fa-nums dd { margin: 0; font-size: clamp(32px, 3.6vw, 44px); font-weight: 700; letter-spacing: -.04em; line-height: 1; }
+.fa-note { font: 500 13px/1.55 var(--font-mono); color: var(--mute); max-width: 75ch; margin: 16px 0 24px; }
+.fa-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 20px; }
+.fa-rc .jt-main { gap: 6px; }
+.fa-rc .jt-t { font-size: 22px; }
+.fa-rc .co { margin-top: 0; color: #2B2E36; font-weight: 400; font-size: 14.5px; }
+.fa-rc .jt-stub { width: 150px; justify-content: center; gap: 6px; }
+.fa-rc .fa-m { font-size: 26px; }
+@media (max-width: 480px) { .fa-rc .jt-stub { width: 118px; } .fa-rc .fa-m { font-size: 21px; } }

@@ -40,11 +40,9 @@ import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 
 @Controller
-@RequiredArgsConstructor
 public class SolicitudController {
 
     private final SolicitudRepository solicitudRepository;
@@ -57,6 +55,19 @@ public class SolicitudController {
     private final EmpresaRepository empresaRepository;
     private final CobroRepository cobroRepository;
     private final PlanService planService;
+
+    public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository, UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository, CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository, PlanService planService) {
+        this.solicitudRepository = solicitudRepository;
+        this.empleoRepository = empleoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.proyectoRepository = proyectoRepository;
+        this.invitacionRepository = invitacionRepository;
+        this.notificacionRepository = notificacionRepository;
+        this.cleanupService = cleanupService;
+        this.empresaRepository = empresaRepository;
+        this.cobroRepository = cobroRepository;
+        this.planService = planService;
+    }
 
     // Solicitudes y invitaciones del talento como pases de abordaje.
     // ?estado=todas|proceso|aceptadas|cerradas|invitaciones &orden=recientes|estado &q=
@@ -164,7 +175,16 @@ public class SolicitudController {
         if (solicitud.isEmpty())
             return "redirect:/solicitudes";
 
-        model.addAttribute("solicitud", solicitud.get());
+        Solicitud sol = solicitud.get();
+        // el encabezado es el mismo pase que en la lista de Solicitudes (etapas, siguiente paso, estado)
+        Usuario talento = usuarioRepository.findById(usuarioId).orElse(null);
+        List<Proyecto> adjuntos = new ArrayList<>();
+        if (sol.getProyectosIds() != null)
+            sol.getProyectosIds().forEach(pId -> proyectoRepository.findById(pId).ifPresent(adjuntos::add));
+
+        model.addAttribute("solicitud", sol);
+        model.addAttribute("v", SolicitudVista.de(sol, talento, new java.util.Date()));
+        model.addAttribute("proyectosAdjuntos", adjuntos);
         agregarSesion(session, model);
         return "solicitud-detalle";
     }
@@ -358,10 +378,12 @@ public class SolicitudController {
         return new ResultadoAplicacion(Salida.CREADA, guardada, descartadoPorScreening);
     }
 
+    // Postulaciones de una oferta: los mismos pases de candidato que /candidatos, para una sola oferta.
+    // ?estado=revision|aceptadas|rechazadas (también acepta los valores de antes: aprobada, rechazada, descartado)
     @GetMapping("/empleos/{empleoId}/postulaciones")
     public String listarPostulaciones(
             @PathVariable String empleoId,
-            @RequestParam(required = false, defaultValue = "todas") String estado,
+            @RequestParam(required = false) String estado,
             Model model, HttpSession session) {
 
         if (RoleGuard.soloEmpresa(session)) return "redirect:/login";
@@ -373,26 +395,49 @@ public class SolicitudController {
         if (!Objects.equals(empleo.getEmpresaId(), RoleGuard.getId(session)))
             return "redirect:/misEmpleos";
 
+        String filtro = estado == null ? "" : estado.trim().toLowerCase();
+        filtro = switch (filtro) {
+            case "aprobada" -> "aceptadas";
+            case "rechazada", "descartado" -> "rechazadas";
+            case "revision", "aceptadas", "rechazadas" -> filtro;
+            default -> "";
+        };
+
         List<Solicitud> todas = solicitudRepository.findByEmpleoIdOrderByFechaSolicitudDesc(empleoId);
+        Map<String, Usuario> candidatos = new java.util.HashMap<>();
+        java.util.Set<String> usuarioIds = new java.util.HashSet<>();
+        for (Solicitud s : todas)
+            if (s.getUsuarioId() != null)
+                usuarioIds.add(s.getUsuarioId());
+        if (!usuarioIds.isEmpty())
+            usuarioRepository.findAllById(usuarioIds).forEach(u -> candidatos.put(u.getId(), u));
 
-        List<Solicitud> filtradas = "todas".equals(estado) ? todas
-                : todas.stream().filter(s -> estado.equals(s.getEstado())).toList();
+        java.util.Date ahora = new java.util.Date();
+        List<SolicitudVista> vistas = new ArrayList<>();
+        for (Solicitud s : todas)
+            vistas.add(SolicitudVista.de(s, candidatos.get(s.getUsuarioId()), ahora));
+        final String f = filtro;
+        List<SolicitudVista> filtradas = vistas.stream().filter(v -> switch (f) {
+            case "revision" -> "revision".equals(v.getEstado());
+            case "aceptadas" -> "aprobada".equals(v.getEstado());
+            case "rechazadas" -> "rechazada".equals(v.getEstado()) || "descartado".equals(v.getEstado());
+            default -> true;
+        }).toList();
 
-        long totalRevision   = todas.stream().filter(s -> "revision".equals(s.getEstado())).count();
-        long totalAprobadas  = todas.stream().filter(s -> "aprobada".equals(s.getEstado())).count();
-        long totalRechazadas = todas.stream().filter(s -> "rechazada".equals(s.getEstado())).count();
-        long totalDescartados = todas.stream().filter(s -> "descartado".equals(s.getEstado())).count();
+        com.example.devcoast.service.AreaEmpleo.Area area = com.example.devcoast.service.AreaEmpleo.de(empleo.getCategoria());
+        PostulacionesOfertaVista grupo = PostulacionesOfertaVista.de(empleo.getId(), empleo.getTitulo(), empleo.getCategoriaMostrar(),
+                area == com.example.devcoast.service.AreaEmpleo.Area.PROGRAMACION ? "p"
+                        : area == com.example.devcoast.service.AreaEmpleo.Area.DISENO ? "d" : "o",
+                !"CERRADO".equalsIgnoreCase(empleo.getEstado()), vistas, filtradas);
 
         model.addAttribute("empleo", empleo);
-        model.addAttribute("solicitudes", filtradas);
-        model.addAttribute("estadoFiltro", estado);
-        model.addAttribute("totalTodas",      todas.size());
-        model.addAttribute("totalRevision",   totalRevision);
-        model.addAttribute("totalAprobadas",  totalAprobadas);
-        model.addAttribute("totalRechazadas", totalRechazadas);
-        model.addAttribute("totalDescartados",totalDescartados);
+        model.addAttribute("g", grupo);
+        model.addAttribute("estadoSel", filtro);
+        model.addAttribute("hayFiltros", !filtro.isEmpty());
         model.addAttribute("fasesReclutamiento",
                 List.of("ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA", "CERRADO_PROCESO"));
+        // con el plan Gratis, aceptar una postulación registra la tarifa de colocación
+        model.addAttribute("cobraColocacion", !planService.esPro(empresaRepository.findById(RoleGuard.getId(session)).orElse(null)));
         agregarSesion(session, model);
         return "postulaciones-empleo";
     }

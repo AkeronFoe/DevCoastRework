@@ -28,6 +28,9 @@
     <th:block th:fragment="assets">
         <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
         <link rel="stylesheet" th:href="@{/CSS/nautico.css}">
+        <link rel="stylesheet" th:href="@{/CSS/nautico-temas.css}">
+        <!-- sin defer: fija tema y preferencias en <html> antes del primer pintado -->
+        <script th:src="@{/JS/preferencias.js}"></script>
         <script th:src="@{/JS/i18n.js}"></script>
         <script th:src="@{/JS/nautico.js}" defer></script>
     </th:block>

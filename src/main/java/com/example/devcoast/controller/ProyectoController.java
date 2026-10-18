@@ -101,26 +101,15 @@ public class ProyectoController {
                 .replaceAll("\\p{M}+", "").toLowerCase().trim();
     }
 
-    // a dónde se vuelve después de guardar o eliminar: la nueva página del portafolio o la lista de siempre
+    // a dónde se vuelve después de guardar o eliminar: el portafolio
     private static String destino(String volver) {
-        return "proyectos".equals(volver) ? "redirect:/proyectos" : "redirect:/misProyectos";
+        return "redirect:/proyectos";
     }
 
+    // la lista de siempre ahora es el portafolio
     @GetMapping("/misProyectos")
-    public String listarProyectos(Model model, HttpSession session, RedirectAttributes ra) {
-        if (RoleGuard.soloTalento(session)) {
-            if (RoleGuard.sinSesion(session))
-                return "redirect:/login";
-            ra.addFlashAttribute("flashMessage",
-                    "Las empresas no tienen proyectos. ¿Querías ver tus empleos publicados?");
-            ra.addFlashAttribute("flashType", "info");
-            return "redirect:/misEmpleos";
-        }
-        List<Proyecto> proyectos = proyectoRepository
-                .findByUsuarioIdOrderByCreadoEnDesc(RoleGuard.getId(session));
-        model.addAttribute("proyectos", proyectos);
-        agregarSesion(session, model);
-        return "misProyectos";
+    public String listarProyectos(HttpSession session) {
+        return "redirect:/proyectos";
     }
 
     @GetMapping("/subirProyecto")
@@ -140,7 +129,7 @@ public class ProyectoController {
             if (existente.isEmpty()) {
                 ra.addFlashAttribute("flashMessage", "No tienes permiso para editar ese proyecto");
                 ra.addFlashAttribute("flashType", "error");
-                return "redirect:/misProyectos";
+                return "redirect:/proyectos";
             }
             proyecto = existente.get();
         }
@@ -247,8 +236,9 @@ public class ProyectoController {
         Optional<Proyecto> proyecto = proyectoRepository
                 .findByIdAndUsuarioId(id, RoleGuard.getId(session));
         if (proyecto.isEmpty())
-            return "redirect:/misProyectos";
+            return "redirect:/proyectos";
         model.addAttribute("proyecto", proyecto.get());
+        model.addAttribute("v", ProyectoVista.de(proyecto.get()));
         agregarSesion(session, model);
         return "detalle-proyecto";
     }

@@ -4,73 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevCoast | Error del servidor</title>
-    <link rel="stylesheet" th:href="@{/CSS/styles.css}">
-    <script th:src="@{/JS/themes.js}"></script>
-    <style>
-        .error-shell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: var(--bg);
-        }
-
-        .error-card {
-            text-align: center;
-            max-width: 440px;
-            padding: 3rem 2.5rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-        }
-
-        .error-code {
-            font-size: 6rem;
-            font-weight: 800;
-            color: #e53e3e;
-            line-height: 1;
-            margin-bottom: .5rem;
-            letter-spacing: -4px;
-        }
-
-        .error-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: .75rem;
-        }
-
-        .error-desc {
-            font-size: .95rem;
-            color: var(--muted);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .error-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-    </style>
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
+    <meta name="color-scheme" content="dark">
+    <title>Error del servidor | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-temas.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-error.css}">
+    <script th:src="@{/JS/preferencias.js}"></script>
 </head>
 
-<body data-theme="light">
-    <div class="error-shell">
-        <div class="error-card">
-            <div class="error-code">500</div>
-            <div class="error-title">Error interno del servidor</div>
-            <p class="error-desc">Algo salió mal en el servidor. Intenta recargar la página o vuelve en unos momentos.
-            </p>
-            <div class="error-actions">
-                <a href="/dashboard" class="btn btn-primary">Ir al Dashboard</a>
-                <a href="javascript:location.reload()" class="btn btn-outline">Recargar</a>
+<body class="er">
+    <main class="er-main" id="contenido">
+        <div class="er-card">
+            <div class="er-code" aria-hidden="true">500</div>
+            <h1 class="er-t">Error interno del servidor</h1>
+            <p class="er-d">Algo salió mal en el servidor. Intenta recargar la página o vuelve en unos momentos.</p>
+            <div class="er-acts">
+                <a class="btn-o" th:href="@{/dashboard}">Ir al dashboard</a>
+                <a class="btn-d" href="javascript:location.reload()">Recargar</a>
             </div>
         </div>
+    </main>
+    <div class="er-sea" aria-hidden="true">
+        <th:block th:replace="~{fragments/nautico :: boat('hullclip-er')}"></th:block>
+        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
     </div>
 </body>
 
