@@ -36,7 +36,7 @@ public class NotificacionInterceptor implements HandlerInterceptor {
     // del menú lateral, para no gastar consultas en las páginas que todavía tienen el shell viejo.
     // Al migrar una página al shell nuevo, agregar aquí el nombre de su vista.
     private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa",
-            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum");
+            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto");
 
     public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {

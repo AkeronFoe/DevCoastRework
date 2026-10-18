@@ -6,10 +6,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.devcoast.config.SecurityConfig;
+import com.example.devcoast.model.Cobro;
 import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.CobroRepository;
@@ -148,5 +151,48 @@ class AjustesPageRenderTest {
     void sinSesionRedirigeAlLogin() throws Exception {
         mockMvc.perform(get("/ajustes"))
                 .andExpect(status().is3xxRedirection());
+    }
+    // ===== Facturación (cuenta de empresa): los cobros como recibos =====
+
+    @Test
+    void facturacionMuestraLosCobrosComoRecibosConElTotal() throws Exception {
+        Cobro c1 = new Cobro();
+        c1.setEmpleoTitulo("Backend Java");
+        c1.setMonto(5.0);
+        c1.setMotivo("Tarifa de colocación (plan Gratis)");
+        c1.setFecha(new Date(1_800_000_000_000L));
+        Cobro c2 = new Cobro();
+        c2.setEmpleoTitulo("DevOps");
+        c2.setMonto(5.0);
+        c2.setMotivo("Tarifa de colocación (plan Gratis)");
+        c2.setFecha(new Date(1_800_100_000_000L));
+        when(cobroRepository.findByEmpresaIdOrderByFechaDesc("e1")).thenReturn(List.of(c1, c2));
+
+        mockMvc.perform(get("/facturacion").session(sesion("e1", "empresa", "Astillero Digital")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("facturacion"))
+                .andExpect(content().string(containsString("// historial de cobros")))
+                .andExpect(content().string(containsString("$10.00")))
+                .andExpect(content().string(containsString("Backend Java")))
+                .andExpect(content().string(containsString("DevOps")))
+                .andExpect(content().string(containsString("MONTO")))
+                .andExpect(content().string(not(containsString("Sin cobros."))));
+    }
+
+    @Test
+    void facturacionSinCobrosMuestraElEstadoVacio() throws Exception {
+        when(cobroRepository.findByEmpresaIdOrderByFechaDesc("e1")).thenReturn(List.of());
+
+        mockMvc.perform(get("/facturacion").session(sesion("e1", "empresa", "Astillero Digital")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Sin cobros.")))
+                .andExpect(content().string(containsString("$0.00")));
+    }
+
+    @Test
+    void facturacionEsSoloParaEmpresas() throws Exception {
+        mockMvc.perform(get("/facturacion").session(sesion("t1", "talento", "Valentina Ríos")).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/dashboard"));
     }
 }

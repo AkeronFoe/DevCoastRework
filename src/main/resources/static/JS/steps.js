@@ -120,7 +120,7 @@ document.querySelectorAll('.currency-btn').forEach(btn => {
     });
 });
 
-const form = document.querySelector('form');
+const form = document.querySelector('form[action$="/empleos/guardar"]');
 if (form) {
     form.setAttribute('novalidate', 'novalidate');
     form.addEventListener('submit', (e) => {

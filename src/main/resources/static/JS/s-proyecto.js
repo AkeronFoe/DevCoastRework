@@ -96,6 +96,10 @@ document.getElementById('sig-2').addEventListener('click', () => { if (validarPa
 document.getElementById('at-3').addEventListener('click', () => irAPaso(2));
 
 function showProjectToast(message, type) {
+    if (window.DevCoast && typeof window.DevCoast.toast === 'function') {
+        window.DevCoast.toast(message);
+        return;
+    }
     if (window.UIFeedback && typeof window.UIFeedback.toast === 'function') {
         window.UIFeedback.toast(message, type || 'info');
         return;
@@ -105,7 +109,7 @@ function showProjectToast(message, type) {
     }
 }
 
-document.getElementById('btn-borrador').addEventListener('click', () => showProjectToast('Borrador guardado localmente.', 'success'));
+document.getElementById('btn-borrador')?.addEventListener('click', () => showProjectToast('Borrador guardado localmente.', 'success'));
 document.getElementById('btn-borrador-2').addEventListener('click', () => showProjectToast('Borrador guardado localmente.', 'success'));
 
 document.querySelectorAll('.banner-opt').forEach(opt => {
