@@ -1,23 +1,9 @@
-/**
- * polish.js — DevCoast
- * Tres micro-features de UI: tooltips personalizados,
- * contadores animados y timestamps relativos.
- *
- * Coloca en: src/main/resources/static/JS/polish.js
- * Añade al <head> de cada template (después de styles.css):
- *   <script th:src="@{/JS/polish.js}" defer></script>
- */
 (function () {
     'use strict';
 
-    /* ══════════════════════════════════════════════════════════
-       1.  TOOLTIPS PERSONALIZADOS
-           Lee el atributo [title], lo reemplaza con un tooltip
-           animado acorde al diseño de DevCoast.
-    ══════════════════════════════════════════════════════════ */
     function initTooltips() {
         var tip       = null;
-        var currentEl = null;  /* elemento que tiene el tooltip abierto */
+        var currentEl = null;
 
         function getTip() {
             if (!tip) {
@@ -43,7 +29,6 @@
         }
 
         function showTip(el) {
-            /* Evita redibujar si ya está abierto para este mismo elemento */
             if (currentEl === el) return;
             currentEl = el;
 
@@ -70,7 +55,6 @@
             if (!el) return;
             currentEl = null;
 
-            /* Restaura title para que la próxima vez vuelva a funcionar */
             if (el.hasAttribute('data-dc-tip')) {
                 el.setAttribute('title', el.getAttribute('data-dc-tip'));
                 el.removeAttribute('data-dc-tip');
@@ -80,54 +64,38 @@
                 tip.style.opacity   = '0';
                 tip.style.transform = 'translateY(4px)';
                 setTimeout(function () {
-                    /* Solo oculta si nadie abrió otro tooltip mientras */
                     if (!currentEl && tip) tip.style.display = 'none';
                 }, 150);
             }
         }
 
-        /* mouseover: activa al entrar en un elemento con [title] */
         document.addEventListener('mouseover', function (e) {
             var el = e.target.closest('[title]');
             if (el) { showTip(el); return; }
 
-            /* Si el mouse se movió a un hijo del elemento actual,
-               el hijo no tiene [title] pero el padre sí (como data-dc-tip).
-               En ese caso no hacemos nada — mouseout lo manejará. */
         });
 
-        /* mouseout: oculta SOLO cuando el mouse sale del elemento
-           (no cuando se mueve entre hijos del mismo botón/ícono) */
         document.addEventListener('mouseout', function (e) {
             var el = e.target.closest('[data-dc-tip]');
             if (!el) return;
 
-            /* relatedTarget = elemento al que va el mouse.
-               Si sigue dentro del mismo botón (un hijo), no ocultar. */
             if (el.contains(e.relatedTarget)) return;
 
             hideTip(el);
         });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       2.  CONTADORES ANIMADOS
-           Anima de 0 al valor final los elementos con clase
-           .empresa-stat-num, .postul-stat-num o .dc-counter.
-           Usa IntersectionObserver para activarse al entrar
-           en el viewport (no antes).
-    ══════════════════════════════════════════════════════════ */
     function initCounters() {
         var sel = '.empresa-stat-num, .postul-stat-num, .dc-counter';
         var els = document.querySelectorAll(sel);
         if (!els.length) return;
 
         function easeOut(t) {
-            return 1 - Math.pow(1 - t, 3);   /* cubic ease-out */
+            return 1 - Math.pow(1 - t, 3);
         }
 
         function animate(el, target, duration) {
-            if (target === 0) return;          /* no animar ceros */
+            if (target === 0) return;
             var start = null;
             el.textContent = '0';
 
@@ -138,19 +106,17 @@
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 } else {
-                    el.textContent = target;   /* asegura valor exacto */
+                    el.textContent = target;
                 }
             }
             requestAnimationFrame(step);
         }
 
-        /* IntersectionObserver: anima solo cuando el elemento
-           es visible (evita animar elementos fuera del fold) */
         var observer = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
                 if (!entry.isIntersecting) return;
                 var el = entry.target;
-                observer.unobserve(el);        /* solo una vez */
+                observer.unobserve(el);
 
                 var raw    = parseInt(el.textContent.replace(/\D/g, ''), 10);
                 var target = isNaN(raw) ? 0 : raw;
@@ -161,12 +127,6 @@
         els.forEach(function (el) { observer.observe(el); });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       3.  TIMESTAMPS RELATIVOS
-           Lee [data-ts] (epoch en ms), reemplaza el texto
-           por "hace X", y deja el texto original como tooltip.
-           Se refresca cada minuto.
-    ══════════════════════════════════════════════════════════ */
     function relativeTime(ts) {
         var diff = Date.now() - ts;
         var s    = Math.floor(diff / 1000);
@@ -198,9 +158,7 @@
 
             var rel = relativeTime(ts);
 
-            /* Guarda la fecha exacta como tooltip (la mostrará initTooltips) */
             if (!el.hasAttribute('title') && !el.hasAttribute('data-dc-tip')) {
-                /* Genera fecha formateada a partir del timestamp */
                 var d = new Date(ts);
                 var fmt = d.toLocaleDateString('es-CO', {
                     day:   '2-digit', month: '2-digit', year: 'numeric'
@@ -216,23 +174,9 @@
 
     function initRelativeTime() {
         updateTimestamps();
-        /* Refresca cada minuto para que los "hace X min" sean precisos */
         setInterval(updateTimestamps, 60 * 1000);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       4.  BOTON EN "CARGANDO..." AL ENVIAR UN FORMULARIO
-           Antes, al darle a "Guardar" no pasaba nada visible hasta
-           que la pagina recargaba — la gente le daba doble click
-           pensando que no funcionó. Esto apaga el boton y le pone
-           un spinner mientras se procesa el submit.
-
-           Ojo: si una pagina ya maneja su propio submit con fetch
-           (y hace preventDefault), esto no se mete — solo actua
-           cuando el formulario de verdad se va a enviar solo.
-           Si algun form necesita quedar fuera si o si, ponerle
-           data-no-loading y listo.
-    ══════════════════════════════════════════════════════════ */
     function initFormLoading() {
         document.addEventListener('submit', function (e) {
             var form = e.target;
@@ -252,8 +196,6 @@
             btn.innerHTML = '<span class="dc-btn-dots" aria-hidden="true"><span></span><span></span><span></span></span>' +
                 '<span>' + (btn.dataset.loadingText || 'Un momento') + '</span>';
 
-            /* por si la navegación no llega a pasar (form raro, error de red, etc),
-               que no se quede pegado el boton para siempre */
             setTimeout(function () {
                 if (btn.dataset.dcOriginalHtml) {
                     btn.disabled = false;
@@ -265,14 +207,6 @@
         });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       5.  PESTAÑA DE EDITOR EN EL TOPBAR
-           Le pone a cada página un chip mono con los puntitos
-           rojo/ámbar/verde + la ruta actual (estilo pestaña de
-           VS Code) arriba del título. Puramente decorativo/
-           orientativo — por eso aria-hidden, el <h1> de al lado
-           ya dice de qué página se trata.
-    ══════════════════════════════════════════════════════════ */
     function initTopbarTab() {
         var titleBox = document.querySelector('.topbar .topbar-title');
         if (!titleBox || titleBox.querySelector('.topbar-tab')) return;
@@ -304,12 +238,6 @@
         titleBox.insertBefore(wrap, titleBox.firstChild);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       6.  CHROME EN ESTADOS VACIOS
-           Los .dc-empty (sin resultados, sin guardados, etc.) llevan
-           el mismo puntito rojo/ambar/verde que la pestaña del topbar,
-           para que se sientan parte de la misma familia visual.
-    ══════════════════════════════════════════════════════════ */
     function initEmptyStateChrome() {
         document.querySelectorAll('.dc-empty').forEach(function (el) {
             if (el.querySelector('.win-chrome')) return;
@@ -321,12 +249,6 @@
         });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       7.  ATAJO Ctrl/Cmd+K PARA EL BUSCADOR
-           Como en cualquier herramienta de developer (GitHub, Linear,
-           VS Code): salta al buscador principal del topbar sin tocar
-           el mouse, con su pastilla de hint correspondiente.
-    ══════════════════════════════════════════════════════════ */
     function initSearchShortcut() {
         var search = document.querySelector('.topbar .search');
         if (!search) return;
@@ -350,17 +272,11 @@
         });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       Estilos
-    ══════════════════════════════════════════════════════════ */
     function injectStyles() {
         if (document.getElementById('dc-polish-style')) return;
         var s = document.createElement('style');
         s.id  = 'dc-polish-style';
         s.textContent = [
-            /* Tooltip */
-            /* mismo chrome oscuro que la pestaña del topbar y los estados
-               vacios — la familia "siempre oscura" del sistema */
             '.dc-tip{',
             '  position:fixed;',
             '  z-index:99990;',
@@ -378,7 +294,6 @@
             '  box-shadow:0 4px 12px rgba(0,0,0,.25);',
             '  transition:opacity .15s ease,transform .15s ease;',
             '}',
-            /* Timestamps relativos */
             '[data-ts]{',
             '  cursor:default;',
             '  border-bottom:1px dashed rgba(100,116,139,.4);',
@@ -387,7 +302,6 @@
             '[data-ts]:hover{',
             '  border-bottom-color:var(--accent);',
             '}',
-            /* Boton cargando */
             '.dc-btn-loading{',
             '  display:inline-flex;align-items:center;gap:8px;',
             '  opacity:.85;cursor:not-allowed;',
@@ -404,8 +318,6 @@
             '  border-top-color:var(--accent);',
             '}',
             '@keyframes dcSpin{to{transform:rotate(360deg)}}',
-            /* Puntos "escribiendo" — se sienten mas a sistema procesando
-               un comando que un spinner generico */
             '.dc-btn-dots{display:inline-flex;gap:3px;align-items:center;}',
             '.dc-btn-dots span{',
             '  width:4px;height:4px;border-radius:50%;',
@@ -419,9 +331,6 @@
         document.head.appendChild(s);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       Init
-    ══════════════════════════════════════════════════════════ */
     function ready(fn) {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', fn);

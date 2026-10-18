@@ -1,11 +1,6 @@
-/* DevCoast · formulario por pasos de Publicar oferta (diseño náutico). Conserva las clases y ids que usa steps.js
-   (stepper, paso-panel, tags, iconos, vista previa) y las viste con los tokens náuticos; funciona en los tres temas.
-   Requiere nautico.css. */
 .fm{max-width:1040px}
 .fm .req{color:var(--orange);margin-left:2px}
 .fm .muted{color:var(--mute)}
-
-/* ───── pasos ───── */
 .fm .stepper{display:flex;align-items:center;gap:0;margin:26px 0 24px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .fm .step-item{display:flex;align-items:center;gap:10px;cursor:default}
 .fm .step-item.clickable{cursor:pointer}
@@ -20,8 +15,6 @@
 .fm .paso-panel{animation:fm-in .25s ease}
 @keyframes fm-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .fm .step-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
-
-/* ───── tarjetas y campos ───── */
 .fm .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;min-width:0}
 .fm .card+.card{margin-top:16px}
 .fm .section-title{display:flex;align-items:center;gap:10px;margin:0 0 16px;font:700 17px var(--font-display);letter-spacing:-.01em}
@@ -41,8 +34,6 @@
 .fm .form-input.error,.fm .form-select.error,.fm .form-textarea.error{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,123,79,.25)}
 .fm .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
 .fm .grid-2>div{display:grid;gap:16px;min-width:0}
-
-/* ───── botones ───── */
 .fm .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:12px;font:700 15px var(--font-display);cursor:pointer;border:2px solid transparent;transition:transform .2s ease}
 .fm .btn:hover{transform:translateY(-2px)}
 .fm .btn svg{width:17px;height:17px}
@@ -50,8 +41,6 @@
 .fm .btn-ghost{background:none;border-color:var(--line2);color:var(--ink)}
 .fm .btn-ghost:hover{border-color:var(--mute)}
 .fm .btn[disabled]{opacity:.55;cursor:default;transform:none}
-
-/* ───── ícono, color y logo ───── */
 .fm .icon-preview-wrap{display:flex;align-items:center;gap:14px;margin-bottom:6px}
 .fm .icon-preview{width:52px;height:52px;border-radius:14px;background:var(--teal-d);display:grid;place-items:center;color:#fff;flex-shrink:0;transition:background .25s ease}
 .fm .icon-preview svg{width:24px;height:24px}
@@ -69,16 +58,12 @@
 .fm .upload-area:hover{border-color:var(--acc)}
 .fm .upload-icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--acc)}
 .fm .upload-icon svg{width:18px;height:18px}
-
-/* ───── salario ───── */
 .fm .currency-group{display:flex;gap:8px;flex-wrap:wrap}
 .fm .currency-btn{height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line2);background:none;color:var(--mute);font:500 13px var(--font-mono);cursor:pointer;transition:background .15s ease,color .15s ease}
 .fm .currency-btn:hover{border-color:var(--mute);color:var(--ink)}
 .fm .currency-btn.active{background:var(--paper);border-color:var(--paper);color:var(--paper-ink);font-weight:700}
 .fm .salary-inputs{display:flex;align-items:center;gap:10px}
 .fm .salary-sep{color:var(--mute)}
-
-/* ───── etiquetas (stack, habilidades) ───── */
 .fm .tags-field{border:1px solid var(--line2);border-radius:10px;background:var(--panel2);padding:7px 10px;min-height:44px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color .15s ease}
 .fm .tags-field:hover{border-color:var(--mute)}
 .fm .tags-field:focus-within{border-color:var(--acc)}
@@ -89,8 +74,6 @@
 .fm .tag-input::placeholder{color:var(--mute);opacity:.8}
 .fm .chip-row{display:flex;flex-wrap:wrap;gap:6px}
 .fm .chip{display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;border:1px solid var(--line2);color:var(--ink);font:500 12.5px var(--font-mono)}
-
-/* ───── interruptores ───── */
 .fm .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
 .fm .toggle-row:last-child{border-bottom:0;padding-bottom:0}
 .fm .toggle-info strong{display:block;font:700 15px var(--font-display);margin-bottom:2px}
@@ -104,8 +87,6 @@
 .fm .toggle-switch input:focus-visible+.toggle-track{outline:3px solid var(--acc);outline-offset:3px}
 .fm .toggle-switch input:disabled{cursor:not-allowed}
 .fm .toggle-switch input:disabled+.toggle-track{opacity:.4}
-
-/* ───── revisión y calidad del anuncio ───── */
 .fm .review-section{display:grid;gap:6px;padding:14px 0;border-bottom:1px solid var(--line)}
 .fm .review-section:last-child{border-bottom:0;padding-bottom:0}
 .fm .review-header{display:flex;align-items:center;justify-content:space-between}
@@ -121,8 +102,6 @@
 .fm .score-pct.lo{color:var(--orange)}
 .fm .progress-track{height:7px;border-radius:999px;background:var(--line2);overflow:hidden}
 .fm .progress-fill{height:100%;border-radius:999px;background:var(--acc)}
-
-/* ───── vista previa: un pase como los de Empleos ───── */
 .fm .preview-job-card{background:var(--paper);color:var(--paper-ink);border-radius:14px;padding:18px;display:grid;gap:12px}
 .fm .preview-job-card .job-header{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo info" "salary salary";gap:12px 14px;align-items:center}
 .fm .logo-tile{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:6px;grid-area:logo;flex-shrink:0;overflow:hidden}
@@ -153,8 +132,6 @@
 @media(prefers-reduced-motion:reduce){
     .fm .paso-panel{animation:none}
 }
-
-/* ───── tema claro: texto sobre el acento en tinta oscura y acentos con contraste suficiente ───── */
 html[data-theme="light"] .fm :is(.btn-primary,.step-num.done){color:#101114}
 html[data-theme="light"] .fm .toggle-switch input:checked+.toggle-track::after{background:#101114}
 html[data-theme="light"] .fm .currency-btn.active{background:#101114;border-color:#101114;color:#F3F4F8}
@@ -163,15 +140,11 @@ html[data-theme="light"] .fm .preview-job-card .btn-ghost{color:#101114}
 html[data-theme="light"] .fm :is(.step-num.active,.tag-chip,.icon-opt.active,.upload-icon,.section-title svg,.review-edit,.score-pct.hi,#rv-salario){color:#0F766E}
 html[data-theme="light"] .fm :is(.step-num.active,.tag-chip,.icon-opt.active){border-color:#0F766E}
 html[data-theme="light"] .fm .req{color:var(--orange-ink)}
-
-/* ───── Cambiar contraseña: formulario corto de una sola tarjeta ───── */
 .fm.estrecho{max-width:620px}
 .fm .head .acts{display:flex;align-items:center;gap:10px}
 .fm .cp{margin-top:26px}
 .fm .cp-err{margin:0;font:700 12.5px var(--font-mono);color:var(--orange)}
 html[data-theme="light"] .fm .cp-err{color:var(--orange-ink)}
-
-/* pantallas muy angostas (320 px): el indicador de pasos se compacta para no salirse del borde */
 @media (max-width: 420px) {
     .fm .step-line { margin: 0 6px; min-width: 6px; }
     .fm .step-item { gap: 6px; }

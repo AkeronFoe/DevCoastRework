@@ -1,13 +1,9 @@
-/* DevCoast · login y registro (docs/diseno/DEVCOAST-LOGIN-MOTION.md y DEVCOAST-REGISTER-MOTION.md).
-   Solo interfaz: gaviota, validación de ayuda visual, medidor de contraseña y la animación de zarpar.
-   El servidor valida todo otra vez; aquí el envío es un POST normal (form.submit()), nada se simula. Vanilla. */
 (function () {
     'use strict';
 
     var $ = function (s, r) { return (r || document).querySelector(s); };
     var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
     var clamp = function (v, a, b) { return v < a ? a : (v > b ? b : v); };
-    // textos de ayuda pasan por el i18n del proyecto (si no hay traducción, quedan en español)
     var T = function (t) { return typeof window.translateText === 'function' ? window.translateText(t) : t; };
     var rmq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -24,7 +20,6 @@
     function activeForm() { return forms.filter(function (f) { return !f.hidden; })[0] || forms[0]; }
     function pwFields(f) { return $$('[data-pw]', f || activeForm()); }
 
-    /* ── la gaviota mira al campo activo o al cursor; con la contraseña se tapa los ojos ── */
     function aim() {
         pend = false;
         var a = 0;
@@ -47,7 +42,6 @@
         if (ms) sayT = setTimeout(function () { say.classList.remove('on'); }, ms);
     }
     function sayOff() { clearTimeout(sayT); clearTimeout(afterT); say.classList.remove('on'); }
-    // frase corta que vuelve al estado anterior ("no estoy mirando" si sigue en la contraseña)
     function sayThenShy(txt, ms) {
         sayNow(txt, ms);
         afterT = setTimeout(function () { if (gull.classList.contains('shy')) sayNow('no estoy mirando'); }, ms + 60);
@@ -70,7 +64,6 @@
         later(function () { g.classList.remove('hop'); }, 950);
     }
 
-    /* ── ver / ocultar contraseña(s): cada formulario trae su botón .eye ── */
     $$('.eye').forEach(function (eye) {
         eye.addEventListener('click', function () {
             var fields = pwFields(eye.form), show = fields[0] && fields[0].type === 'password';
@@ -84,7 +77,6 @@
         });
     });
 
-    /* ── errores bajo cada campo (aria-describedby + aria-invalid) ── */
     function errEl(control) {
         var id = (control.getAttribute('aria-describedby') || '').split(' ')[0];
         return id ? document.getElementById(id) : null;
@@ -97,7 +89,6 @@
     }
     var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // reglas declaradas en el HTML: data-req, data-email, data-min (+data-min-msg), data-same (+data-same-msg), grupos con data-group-req
     function validate(f) {
         var first = null;
         function mark(el, bad) { if (bad && !first) first = el; }
@@ -141,7 +132,6 @@
         sayNow('así no te dejo pasar', 2600);
     }
 
-    /* ── registro: talento o empresa ── */
     var passTitle = $('#passTitle');
     function setRole(r) {
         pass.setAttribute('data-role', r);
@@ -149,7 +139,6 @@
         var f = activeForm();
         if (passTitle) passTitle.textContent = T(r === 'talento' ? 'PASE · TALENTO' : 'PASE · EMPRESA');
         go.setAttribute('form', f.id);
-        // las contraseñas vuelven a estar ocultas al cambiar de formulario
         $$('.eye').forEach(function (e) { e.textContent = T('ver'); e.setAttribute('aria-pressed', 'false'); e.setAttribute('aria-label', T('Mostrar contraseñas')); });
         $$('[data-pw]').forEach(function (i) { i.type = 'password'; });
         formErr.textContent = '';
@@ -161,7 +150,6 @@
         });
     });
 
-    /* ── medidor de seguridad (solo ayuda visual) ── */
     var labels = ['fuerza de la contraseña', 'débil', 'regular', 'buena', 'fuerte'];
     var quips = ['', 'no miro, pero suena débil.', 'va mejorando.', 'esa ya aguanta oleaje.', 'esa aguanta temporal.'];
     function strength(v) {
@@ -180,9 +168,6 @@
         });
     });
 
-    /* ── envío: validar y, si todo está bien, zarpar ──
-       El POST es el normal del formulario: se lanza de inmediato y la animación corre mientras el servidor responde.
-       Si el servidor devuelve error, la página se recarga con el mensaje (formErr) y la animación de error. */
     function board(f) {
         busy = true; formErr.textContent = '';
         go.disabled = true; goTxt.textContent = T(go.getAttribute('data-busy') || 'Zarpando…');
@@ -191,7 +176,6 @@
         hop(gull); sayNow('¡a bordo!');
         later(function () { zone.classList.add('torn'); }, 350);
         later(function () { zone.classList.add('gone'); boatWrap.classList.add('away'); }, 950);
-        // si el servidor tarda, no se queda la pantalla vacía: aparece un aviso y una salida
         later(function () { if (ok) { zone.classList.add('done'); if (okBack) okBack.focus({ preventScroll: true }); } }, 4200);
         f.submit();
     }
@@ -204,7 +188,6 @@
         });
     });
 
-    /* vuelve al formulario (aviso de "entrando" o regreso con el botón Atrás del navegador) */
     function reset() {
         clearTimers(); sayOff(); busy = false;
         zone.classList.remove('torn', 'gone', 'done');
@@ -217,7 +200,6 @@
     if (okBack) okBack.addEventListener('click', reset);
     window.addEventListener('pageshow', function (e) { if (e.persisted) reset(); });
 
-    /* ── frases al azar de la gaviota (y al hacerle clic) ── */
     var lines = registro
         ? ['¿tienes pan? es por curiosidad.', 'sin prisa, el barco espera.', 'mejor una contraseña larga que una rara.', '¿talento o empresa? los dos caben a bordo.', 'psst… revisa bien tu correo.', 'yo vigilo el muelle.', 'no me mires tanto, que me da pena.', 'cuac. no, espera, ese es el pato.', '¿ya pensaste tu contraseña?']
         : ['¿tienes pan? es por curiosidad.', 'hoy hay buen viento.', 'yo vigilo el muelle.', 'psst… revisa bien tu correo.', 'yo no me sé tu contraseña, lo juro.', '¿primera vez por aquí? crea tu cuenta arriba.', 'no me mires tanto, que me da pena.', 'sube, que la marea no espera.', 'esa vela es un cursor, ¿ya lo notaste?', 'cuac. no, espera, ese es el pato.', '¿ya desayunaste?'];
@@ -234,7 +216,6 @@
         sayNow(randomLine(), 4200); hop(gull);
     });
 
-    /* ── si el servidor devolvió un error, se anima igual que un error del cliente ── */
     if (pass.hasAttribute('data-error')) {
         later(function () {
             nope();

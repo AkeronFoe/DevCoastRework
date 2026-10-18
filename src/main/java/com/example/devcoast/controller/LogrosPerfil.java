@@ -5,13 +5,11 @@ import java.util.List;
 
 import com.example.devcoast.model.Usuario;
 
-/** Los 12 logros de Mi perfil. Se calculan al abrir la página con lo que el talento ya tiene; no se guardan. */
 final class LogrosPerfil {
 
     private LogrosPerfil() {
     }
 
-    /** {@code progreso}: lo que falta para desbloquearlo (vacío si ya está desbloqueado). */
     record Logro(String nombre, String descripcion, boolean desbloqueado, String progreso) {
     }
 

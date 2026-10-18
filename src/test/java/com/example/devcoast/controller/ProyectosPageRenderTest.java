@@ -42,7 +42,6 @@ import com.example.devcoast.repository.MensajeRepository;
 import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.ProyectoRepository;
 
-// ronda 4 del rediseño náutico: /proyectos como portafolio (tarjetas, interruptor, diálogo) y sus endpoints
 @WebMvcTest(ProyectoController.class)
 @Import(SecurityConfig.class)
 class ProyectosPageRenderTest {
@@ -107,39 +106,30 @@ class ProyectosPageRenderTest {
         Files.writeString(dir.resolve(nombre), r.getResponse().getContentAsString());
     }
 
-    // ───────── la página ─────────
     @Test
     void portafolioMuestraTarjetasPortadasEnlacesYElInterruptor() throws Exception {
         MvcResult r = mockMvc.perform(get("/proyectos").session(sesion("talento")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("3 proyectos · 2 públicos")))
                 .andExpect(content().string(containsString("App de tareas")))
-                // portada de código con datos reales (nombre y herramientas)
                 .andExpect(content().string(containsString("cv code")))
-                // portada subida por el talento
                 .andExpect(content().string(containsString("data:image/png;base64,iVBORw0KGgo=")))
-                // enlace seguro con rel/target; el javascript: se descarta
                 .andExpect(content().string(containsString("href=\"https://github.com/vale/tareas\"")))
                 .andExpect(content().string(containsString("rel=\"noopener noreferrer\"")))
                 .andExpect(content().string(not(containsString("javascript:alert"))))
-                // ya no hay enlace "Código" (el modelo no tiene repositorio)
                 .andExpect(content().string(not(containsString(">Código<"))))
-                // interruptor con estado, nombre accesible y texto
                 .andExpect(content().string(containsString("role=\"switch\"")))
                 .andExpect(content().string(containsString("aria-checked=\"true\"")))
                 .andExpect(content().string(containsString("aria-checked=\"false\"")))
                 .andExpect(content().string(containsString("Proyecto público: App de tareas")))
                 .andExpect(content().string(containsString("OCULTO")))
                 .andExpect(content().string(containsString("pj in off")))
-                // acciones: editar (editor completo como respaldo) y eliminar con confirmación visible
                 .andExpect(content().string(containsString("/subirProyecto?editar=p1")))
                 .andExpect(content().string(containsString("¿Eliminar este proyecto?")))
                 .andExpect(content().string(containsString("/proyectos/eliminar/p1")))
-                // diálogo
                 .andExpect(content().string(containsString("<dialog")))
                 .andExpect(content().string(containsString("value=\"Motion / Animacion\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
-                // shell
                 .andExpect(content().string(containsString("aria-current=\"page\"")))
                 .andExpect(content().string(containsString("Tus proyectos públicos aparecen en tu perfil")))
                 .andReturn();
@@ -191,7 +181,6 @@ class ProyectosPageRenderTest {
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
     }
 
-    // ───────── visibilidad ─────────
     @Test
     void visibilidadResponderJsonYGuarda() throws Exception {
         mockMvc.perform(post("/proyectos/p1/visibilidad").param("publicado", "false").accept(MediaType.APPLICATION_JSON)
@@ -225,7 +214,6 @@ class ProyectosPageRenderTest {
         verify(proyectoRepository, never()).save(any());
     }
 
-    // ───────── crear, editar, eliminar desde el portafolio ─────────
     @Test
     void crearDesdeElDialogoVuelveAlPortafolio() throws Exception {
         mockMvc.perform(post("/proyectos/guardar").param("nombre", "Landing").param("categoria", "Frontend")
@@ -278,7 +266,6 @@ class ProyectosPageRenderTest {
         org.junit.jupiter.api.Assertions.assertEquals("App de tareas v2", g.getNombre());
         org.junit.jupiter.api.Assertions.assertEquals(List.of("Java", "Spring"), g.getStack());
         org.junit.jupiter.api.Assertions.assertNull(g.getLinkProyecto());
-        // lo que el diálogo no toca se conserva
         org.junit.jupiter.api.Assertions.assertEquals("Desarrollador principal", g.getRol());
         org.junit.jupiter.api.Assertions.assertEquals("1 – 3 meses", g.getDuracion());
         org.junit.jupiter.api.Assertions.assertEquals("Texto largo", g.getDescripcionExtendida());

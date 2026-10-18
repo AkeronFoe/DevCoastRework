@@ -8,23 +8,22 @@ import com.example.devcoast.service.AreaEmpleo;
 
 import lombok.Getter;
 
-/** Una tarjeta del portafolio: datos ya preparados y validados (enlaces http/https, imagen http/https o data:image). */
 @Getter
 public class ProyectoVista {
 
     private String id;
     private String nombre;
-    private String areaClave;     // p | d | o
+    private String areaClave;
     private String categoria;
     private String tipo;
     private String anio;
     private String descripcion;
     private List<String> herramientas = new ArrayList<>();
-    private String enlace;        // null si no hay o no es http(s)
+    private String enlace;
     private boolean publicado;
-    private String portada;       // imagen subida por el talento, o null
-    private int variante;         // 0-2: composición de la portada de diseño cuando no hay imagen
-    private String nombreCorto;   // para la portada tipo editor (programación)
+    private String portada;
+    private int variante;
+    private String nombreCorto;
 
     public static ProyectoVista de(Proyecto p) {
         ProyectoVista v = new ProyectoVista();
@@ -46,12 +45,10 @@ public class ProyectoVista {
         if (v.portada == null)
             v.portada = imagenSegura(p.getImagenUrl());
         v.variante = p.getId() == null ? 0 : Math.floorMod(p.getId().hashCode(), 3);
-        // portada de código: el nombre y las herramientas reales del proyecto, no un código inventado
         v.nombreCorto = v.nombre == null ? "" : v.nombre.length() > 26 ? v.nombre.substring(0, 26) + "…" : v.nombre;
         return v;
     }
 
-    /** Solo http(s). Cualquier otro esquema (javascript:, data:, etc.) se descarta. */
     public static String urlSegura(String url) {
         if (url == null)
             return null;

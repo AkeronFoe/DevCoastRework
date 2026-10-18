@@ -38,8 +38,6 @@ public class ProyectoController {
         this.proyectoRepository = proyectoRepository;
     }
 
-    // Portafolio del talento: sus proyectos (públicos u ocultos) como tarjetas.
-    // ?area=programacion|diseno|otras &vis=1|0 &q=   (la lista es del propio usuario, así que se filtra en memoria)
     @GetMapping("/proyectos")
     public String vitrinaProyectos(
             Model model, HttpSession session, RedirectAttributes ra,
@@ -101,12 +99,10 @@ public class ProyectoController {
                 .replaceAll("\\p{M}+", "").toLowerCase().trim();
     }
 
-    // a dónde se vuelve después de guardar o eliminar: el portafolio
     private static String destino(String volver) {
         return "redirect:/proyectos";
     }
 
-    // la lista de siempre ahora es el portafolio
     @GetMapping("/misProyectos")
     public String listarProyectos(HttpSession session) {
         return "redirect:/proyectos";
@@ -266,8 +262,6 @@ public class ProyectoController {
         return destino(volver);
     }
 
-    // Edición rápida desde el diálogo del portafolio: solo toca los campos del diálogo
-    // (el editor completo, /subirProyecto, sigue siendo el único que cambia banner, rol, duración, etc.)
     @PostMapping("/proyectos/{id}/actualizar")
     public String actualizar(@PathVariable String id,
             @RequestParam String nombre, @RequestParam String categoria, @RequestParam String tipo,
@@ -313,8 +307,6 @@ public class ProyectoController {
         return destino(volver);
     }
 
-    // Interruptor PÚBLICO / OCULTO. Con Accept: application/json (el interruptor de la página) responde JSON;
-    // el formulario sin JavaScript recibe una redirección.
     @PostMapping("/proyectos/{id}/visibilidad")
     public Object visibilidad(@PathVariable String id, @RequestParam boolean publicado,
             @RequestHeader(value = "Accept", required = false) String accept,

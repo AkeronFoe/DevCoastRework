@@ -38,7 +38,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Ficha de una oferta con el shell náutico: pase con match, detalle, diálogo de postulación y vista de la empresa dueña
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class DetalleEmpleoRenderTest {
@@ -126,7 +125,7 @@ class DetalleEmpleoRenderTest {
                 .andExpect(view().name("detalles-empleo"))
                 .andExpect(content().string(containsString("<h1 class=\"jt-t\"")))
                 .andExpect(content().string(containsString("Backend Java")))
-                .andExpect(content().string(containsString("MATCH MEDIO")))   // 2 de 3 habilidades = 67 %
+                .andExpect(content().string(containsString("MATCH MEDIO")))
                 .andExpect(content().string(containsString("TU PERFIL VS. LA OFERTA")))
                 .andExpect(content().string(containsString("(lo tienes)")))
                 .andExpect(content().string(containsString("(te falta)")))
@@ -152,7 +151,7 @@ class DetalleEmpleoRenderTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Ya aplicaste")))
                 .andExpect(content().string(containsString("Ver mi solicitud")))
-                .andExpect(content().string(containsString("Guardada ✓")))   // estaba entre sus favoritos
+                .andExpect(content().string(containsString("Guardada ✓")))
                 .andExpect(content().string(not(containsString("id=\"btnAplicar\""))))
                 .andExpect(content().string(not(containsString("id=\"dlgAplicar\""))));
     }

@@ -8,7 +8,6 @@ import com.example.devcoast.model.Solicitud;
 
 import lombok.Getter;
 
-/** Una oferta de la cuenta de Empresa (Mis ofertas): los datos del pase más el conteo de sus postulaciones por estado. */
 @Getter
 public class OfertaEmpresaVista {
 
@@ -37,7 +36,7 @@ public class OfertaEmpresaVista {
             else if ("rechazada".equals(estado))
                 v.rechazadas++;
             else
-                v.enRevision++;   // "revision" y las que no tienen estado (documentos viejos)
+                v.enRevision++;
         }
         return v;
     }

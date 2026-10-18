@@ -34,7 +34,6 @@ import com.mongodb.client.MongoClients;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
-/** La limpieza borra lo que dejó el seeder anterior (y lo que colgaba de eso) y deja intactas las cuentas reales. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LimpiezaSeederAntiguoTest {
 

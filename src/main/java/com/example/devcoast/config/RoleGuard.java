@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpSession;
 
+// el portero de la app: dice si quien entra es talento, empresa, o si ni siquiera ha iniciado sesión
 @Component
 public class RoleGuard {
 

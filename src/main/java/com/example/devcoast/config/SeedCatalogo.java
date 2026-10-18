@@ -4,17 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Catálogos de datos de ejemplo para el {@link DataSeeder}. Los valores de modalidad, disponibilidad,
- * especialidad, categoría, seniority, etc. son exactamente los que guardan los formularios de la app,
- * para que filtros, etiquetas y el cálculo de match funcionen igual con datos sembrados que con datos reales.
- */
+// aquí están las listas de nombres, ciudades, stacks y textos que usa el seeder para inventar gente y ofertas creíbles
 final class SeedCatalogo {
 
     private SeedCatalogo() {
     }
 
-    /** Un perfil profesional: de aquí salen los talentos (rol, stack, especialidad) y las ofertas (categoría, stack). */
     record Arq(String grupo, String clave, String[] roles, String[] stack, String categoria, String icono) {
     }
 
@@ -27,7 +22,6 @@ final class SeedCatalogo {
     }
 
     static final List<Arq> ARQUETIPOS = List.of(
-            // frontend
             arq("frontend", "frontend", a("Frontend Developer", "Desarrollador Frontend", "UI Engineer"),
                     a("React", "TypeScript", "Next.js", "Tailwind CSS", "Vite", "Jest", "Storybook"), "Programacion · Frontend", "globe"),
             arq("frontend", "frontend", a("Frontend Developer", "Desarrollador Frontend"),
@@ -36,7 +30,6 @@ final class SeedCatalogo {
                     a("Angular", "TypeScript", "RxJS", "NgRx", "Cypress", "Sass"), "Programacion · Frontend", "globe"),
             arq("frontend", "frontend", a("Frontend Engineer", "Web Developer"),
                     a("Svelte", "SvelteKit", "TypeScript", "Vite", "Playwright", "CSS"), "Programacion · Frontend", "globe"),
-            // backend
             arq("backend", "backend", a("Backend Developer", "Desarrollador Backend", "Java Developer"),
                     a("Java", "Spring Boot", "PostgreSQL", "Kafka", "Docker", "JUnit"), "Programacion · Backend", "cpu"),
             arq("backend", "backend", a("Backend Developer", "Node.js Developer"),
@@ -53,7 +46,6 @@ final class SeedCatalogo {
                     a("PHP", "Laravel", "MySQL", "Redis", "Docker", "PHPUnit"), "Programacion · Backend", "cpu"),
             arq("backend", "backend", a("Backend Engineer", "Rust Developer"),
                     a("Rust", "Axum", "PostgreSQL", "Docker", "Tokio", "gRPC"), "Programacion · Backend", "cpu"),
-            // full stack
             arq("fullstack", "fullstack", a("Full Stack Developer", "Desarrollador Full Stack"),
                     a("React", "Node.js", "TypeScript", "MongoDB", "Docker", "Git"), "Programacion · Full Stack", "code"),
             arq("fullstack", "fullstack", a("Full Stack Developer", "Full Stack Engineer"),
@@ -64,7 +56,6 @@ final class SeedCatalogo {
                     a("Python", "Django", "React", "PostgreSQL", "Docker", "Redis"), "Programacion · Full Stack", "code"),
             arq("fullstack", "fullstack", a("Full Stack Developer", "Laravel Developer"),
                     a("Vue.js", "Laravel", "MySQL", "Docker", "Tailwind CSS", "Git"), "Programacion · Full Stack", "code"),
-            // mobile
             arq("mobile", "mobile", a("Mobile Developer", "Flutter Developer"),
                     a("Flutter", "Dart", "Firebase", "Riverpod", "Git", "Figma"), "Programacion · Mobile", "terminal"),
             arq("mobile", "mobile", a("Android Developer", "Mobile Engineer"),
@@ -73,7 +64,6 @@ final class SeedCatalogo {
                     a("Swift", "SwiftUI", "iOS", "Combine", "Xcode", "Firebase"), "Programacion · Mobile", "terminal"),
             arq("mobile", "mobile", a("React Native Developer", "Mobile Developer"),
                     a("React Native", "TypeScript", "Expo", "Redux", "Firebase", "Jest"), "Programacion · Mobile", "terminal"),
-            // data
             arq("data", "data", a("Data Engineer", "Ingeniero de Datos"),
                     a("Python", "SQL", "Airflow", "dbt", "Spark", "BigQuery"), "Data / Analytics", "chart"),
             arq("data", "data", a("Data Scientist", "Machine Learning Engineer"),
@@ -84,14 +74,12 @@ final class SeedCatalogo {
                     a("Python", "Databricks", "Delta Lake", "Spark", "Snowflake", "Terraform"), "Data / Analytics", "chart"),
             arq("data", "data", a("AI Engineer", "Ingeniero de IA"),
                     a("Python", "LangChain", "OpenAI API", "FastAPI", "Pinecone", "Docker"), "Data / Analytics", "chart"),
-            // diseño ui/ux
             arq("ui-ux", "ui-ux", a("UX/UI Designer", "Diseñador UX/UI"),
                     a("Figma", "Design Systems", "Prototipado", "User Research", "Accesibilidad", "Maze"), "Diseño · UI/UX", "layers"),
             arq("ui-ux", "ui-ux", a("Product Designer", "Diseñador de Producto"),
                     a("Figma", "FigJam", "Design Systems", "UX Writing", "Pruebas de usabilidad", "Notion"), "Diseño · UI/UX", "layers"),
             arq("ui-ux", "ui-ux", a("UI Designer", "Diseñador de Interfaces"),
                     a("Figma", "Framer", "Principle", "Lottie", "Tipografía", "Sistemas de color"), "Diseño · UI/UX", "layers"),
-            // diseño gráfico / motion / 3d
             arq("diseno-grafico", "diseno-grafico", a("Diseñador Gráfico", "Brand Designer"),
                     a("Illustrator", "Photoshop", "InDesign", "Branding", "Tipografía", "Figma"), "Diseño · Grafico", "layers"),
             arq("diseno-grafico", "diseno-grafico", a("3D Artist", "Artista 3D"),
@@ -100,7 +88,6 @@ final class SeedCatalogo {
                     a("After Effects", "Premiere Pro", "Lottie", "Rive", "Cinema 4D", "Illustrator"), "Diseño · Motion", "layers"),
             arq("diseno-grafico", "diseno-grafico", a("Ilustrador Digital", "Illustrator"),
                     a("Procreate", "Illustrator", "Photoshop", "Ilustración", "Color", "Storyboard"), "Diseño · Grafico", "layers"),
-            // devops (talento: especialidad backend)
             arq("devops", "backend", a("DevOps Engineer", "Cloud Engineer", "SRE"),
                     a("AWS", "Terraform", "Kubernetes", "GitHub Actions", "Docker", "Prometheus"), "DevOps / Infraestructura", "terminal"),
             arq("devops", "backend", a("DevOps Engineer", "Platform Engineer"),
@@ -108,7 +95,6 @@ final class SeedCatalogo {
             arq("devops", "backend", a("Cloud Engineer", "DevSecOps Engineer"),
                     a("GCP", "Terraform", "Linux", "GitLab CI", "Docker", "Vault"), "DevOps / Infraestructura", "terminal"));
 
-    /** Perfiles que solo existen como ofertas (la app no tiene esa especialidad de talento). clave = null. */
     static final List<Arq> SOLO_OFERTAS = List.of(
             arq("producto", null, a("Product Manager", "Product Owner", "Product Analyst"),
                     a("Discovery", "Roadmapping", "Jira", "Scrum", "Analítica de producto", "SQL"), "Producto / UX", "layers"),
@@ -121,11 +107,9 @@ final class SeedCatalogo {
             arq("escritura", null, a("Redactor Creativo", "UX Writer", "Copywriter"),
                     a("Copywriting", "UX Writing", "SEO", "Storytelling", "Edición", "Notion"), "Escritura / Contenido", "layers"));
 
-    /** Cuántos talentos nacen de cada grupo (el orden es el de {@link #GRUPOS_TALENTO}). */
     static final String[] GRUPOS_TALENTO = { "frontend", "backend", "fullstack", "mobile", "data", "ui-ux", "diseno-grafico", "devops" };
     static final int[] PESO_GRUPOS_TALENTO = { 19, 21, 16, 9, 12, 10, 7, 6 };
 
-    /** Qué grupos de oferta publica cada sector de empresa (los repetidos pesan más). */
     static final Map<String, String[]> GRUPOS_POR_SECTOR = Map.ofEntries(
             Map.entry("SaaS / Software", a("frontend", "backend", "backend", "fullstack", "mobile", "data", "devops", "ui-ux", "producto")),
             Map.entry("Fintech", a("backend", "backend", "fullstack", "mobile", "data", "devops", "frontend", "producto")),
@@ -151,7 +135,6 @@ final class SeedCatalogo {
     static final String[] TIMEZONES = { "Latam · UTC-5", "USA · EST / PST", "Europa · CET", "Flexible · +/- 3h" };
     static final String[] INGLES = { "Basico (A1/A2)", "Intermedio (B1/B2)", "Avanzado (C1/C2)" };
 
-    // ── empresas ──
     static final String[] EMPRESA_A = { "Andina", "Costa", "Pacífico", "Cumbre", "Tayrona", "Nexo", "Aurora", "Faro", "Marea", "Brújula",
             "Delta", "Horizonte", "Zafiro", "Cóndor", "Ceiba", "Quimbaya", "Sierra", "Caribe", "Muisca", "Orinoco", "Magdalena", "Cauca",
             "Atrato", "Nevado", "Páramo", "Colibrí", "Jaguar", "Manglar", "Arrecife", "Bahía", "Isla", "Puerto", "Brisa", "Velero",
@@ -223,7 +206,6 @@ final class SeedCatalogo {
             Map.entry("Marketing", a("campañas de performance para e-commerce", "estrategias de contenido y SEO", "paneles de analítica para clientes")),
             Map.entry("Otro", a("herramientas internas para operaciones", "software de logística y trazabilidad", "tableros de analítica para la gerencia")));
 
-    // ── ofertas ──
     static final String[] REQUISITOS_DESEABLES = {
             "Experiencia previa en equipos ágiles, buena comunicación escrita y ganas de aprender. Un plus: haber trabajado con integración y despliegue continuos.",
             "Valoramos que hayas participado en code reviews, que documentes lo que construyes y que tengas portafolio o proyectos propios para mostrar.",
@@ -241,7 +223,6 @@ final class SeedCatalogo {
 
     static final String[] COLORES = { "#FF7B4F", "#2DD4BF", "#CDD1DB", "#CC4B27", "#1F8F82", "#8B5CF6", "#F59E0B", "#3B82F6", "#EC4899", "#10B981" };
 
-    // ── talentos ──
     static final String[] NOMBRES_F = { "Camila", "Valentina", "Sofía", "Mariana", "Daniela", "Laura", "Natalia", "Juliana", "Paula", "Andrea",
             "Carolina", "Isabela", "Luisa", "Manuela", "Sara", "Gabriela", "Alejandra", "Catalina", "María", "Ana", "Lucía", "Valeria",
             "Verónica", "Karen", "Lina", "Diana", "Tatiana", "Sandra", "Ximena", "Estefanía", "Jimena", "Renata", "Antonia", "Fernanda" };

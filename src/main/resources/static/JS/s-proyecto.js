@@ -1,10 +1,4 @@
 let paso = 0;
-// el banner sí tiene selector (.banner-opt) y define qué dibujito se
-// pinta en la card (ver pintarCard/STYLE_BUILDERS en proyectos-render.js)
-// — el color de acento sigue siendo aparte; el ícono clásico (forma SVG)
-// ya no tiene selector — se sacó por completo, así que queda fijo en su
-// valor por defecto; el guardado real preserva el que ya tenía el
-// proyecto vía la precarga de edición más abajo
 let coverActual = 'cover-terminal';
 let iconSVGHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>';
 let iconKey = 'layers';
@@ -45,8 +39,6 @@ function irAPaso(n) {
 
     document.getElementById('side-preview').style.display = paso === 3 ? 'none' : '';
 
-    // la vista previa (canvas código/diseño, resumen) es cosmética — si algo
-    // ahí revienta, no puede impedir que el paso realmente cambie de página
     try {
         if (paso === 3) construirResumen();
         actualizarPreviewLateral();
@@ -120,8 +112,6 @@ document.querySelectorAll('.banner-opt').forEach(opt => {
         bannerSubido = false;
         document.getElementById('btn-quitar-banner').style.display = 'none';
         document.getElementById('banner-upload-label').textContent = 'Subir imagen de banner (opcional)';
-        // el banner elegido define qué dibujito se pinta en la card
-        // (y su mini vista previa acá) — ver pintarCard()
         actualizarPreviewLateral();
     });
 });
@@ -130,9 +120,6 @@ document.getElementById('banner-img-input').addEventListener('change', function 
     if (!this.files[0]) return;
     const reader = new FileReader();
     reader.onload = e => {
-        // la imagen subida solo se ve en la mini vista previa y en "Mis
-        // proyectos" — el dibujito de la card sigue siendo el del último
-        // banner de degradado elegido (coverActual no cambia acá)
         bannerDataUrl = e.target.result;
         document.querySelectorAll('.banner-opt').forEach(o => o.classList.remove('sel'));
         document.getElementById('banner-upload-label').textContent = this.files[0].name;
@@ -267,10 +254,6 @@ function setupTags(inputId, fieldId, array) {
 setupTags('stack-input', 'stack-field', stackTags);
 setupTags('tags-input', 'tags-field', extraTags);
 
-// pinta el mismo componente .proj-card que usa la vitrina real (canvas
-// del Estilo elegido, avatar, swatches, tags) — comparte el motor con
-// proyectos-vitrina.js vía window.ProyectosRender en vez de tener acá una
-// vista previa "aparte" que pueda desincronizarse de cómo se ve de verdad
 function pintarCard(prefix) {
   try {
     const PR = window.ProyectosRender;
@@ -280,9 +263,6 @@ function pintarCard(prefix) {
     const nombre = v('f-nombre') || 'Nombre del proyecto';
     const cat = v('f-categoria');
     const tipo = v('f-tipo');
-    // el color de acento tiñe tanto el dibujito código/diseño como el
-    // avatar de la card — el Estilo (banner) define el patrón/dibujo, no
-    // el color
     const accent = iconColor || '#1f8f8f';
     const ink = PR.inkFor(accent);
     const seed = PR.hashStr(nombre || 'preview');
@@ -321,15 +301,10 @@ function pintarCard(prefix) {
         modeBadge.textContent = built.discLabel;
     }
   } catch (err) {
-    // la vista previa es cosmética — un error acá nunca debe trabar el
-    // wizard (guardar/avanzar/atrás tienen que seguir funcionando siempre)
     console.error('pintarCard(' + prefix + ') falló:', err);
   }
 }
 
-// pinta una miniatura real de cada Estilo del picker (con PR.buildCanvas,
-// semilla fija por estilo — no por nombre, para que el tile no cambie de
-// forma mientras escribís) en vez de mostrar solo un chip de color plano
 function pintarEstiloTiles() {
     const PR = window.ProyectosRender;
     if (!PR) return;

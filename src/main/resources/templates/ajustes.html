@@ -26,7 +26,6 @@
                 <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
-                <!-- ===== banner con el barco ===== -->
                 <section class="aj-hello" aria-label="Ajustes">
                     <div class="aj-hello-t">
                         <div class="eyebrow">// ajustes</div>
@@ -39,7 +38,6 @@
                     </div>
                 </section>
 
-                <!-- ===== tu cuenta, como pase ===== -->
                 <article class="jt aj-id" aria-label="Tu cuenta">
                     <div class="jt-main">
                         <span class="k">TU CUENTA</span>
@@ -71,7 +69,6 @@
                     </div>
                 </article>
 
-                <!-- ===== secciones ===== -->
                 <nav class="filters aj-tabs" aria-label="Secciones de ajustes">
                     <div class="chs" id="ajTabs">
                         <button class="ch" type="button" data-sec="cuenta" aria-pressed="true">Cuenta</button>
@@ -84,7 +81,6 @@
                     <button class="ch dg" type="button" data-sec="peligro" aria-pressed="false">Zona de peligro</button>
                 </nav>
 
-                <!-- CUENTA -->
                 <div class="aj-stack" id="sec-cuenta" data-panel="cuenta">
                     <section class="aj-pn" aria-labelledby="h-info">
                         <h2 id="h-info">Información <span>2 datos</span></h2>
@@ -114,7 +110,6 @@
                     </section>
                 </div>
 
-                <!-- PLAN (solo empresa) -->
                 <div class="aj-stack" id="sec-plan" data-panel="plan" th:if="${esEmpresa}" hidden>
                     <section class="aj-pn" aria-labelledby="h-plan">
                         <h2 id="h-plan">Tu plan <span th:text="${plan == 'PRO'} ? 'Pro' : 'Gratis'">Gratis</span></h2>
@@ -160,7 +155,6 @@
                     </section>
                 </div>
 
-                <!-- APARIENCIA -->
                 <div class="aj-stack" id="sec-apariencia" data-panel="apariencia" hidden>
                     <section class="aj-pn" aria-labelledby="h-tema">
                         <h2 id="h-tema">Tema <span>se recuerda en este navegador</span></h2>
@@ -223,7 +217,6 @@
                     </section>
                 </div>
 
-                <!-- PRIVACIDAD (solo talento: el servidor rechaza estas opciones a las empresas) -->
                 <div class="aj-stack" id="sec-privacidad" data-panel="privacidad" th:unless="${esEmpresa}" hidden>
                     <section class="aj-pn" aria-labelledby="h-vis">
                         <h2 id="h-vis">Visibilidad <span>quién te ve</span></h2>
@@ -253,7 +246,6 @@
                     </section>
                 </div>
 
-                <!-- NOTIFICACIONES -->
                 <div class="aj-stack" id="sec-notificaciones" data-panel="notificaciones" hidden>
                     <section class="aj-pn" aria-labelledby="h-al">
                         <h2 id="h-al">Alertas <span>qué quieres que te avisemos</span></h2>
@@ -276,7 +268,6 @@
                     </section>
                 </div>
 
-                <!-- ACCESIBILIDAD -->
                 <div class="aj-stack" id="sec-accesibilidad" data-panel="accesibilidad" hidden>
                     <section class="aj-pn" aria-labelledby="h-a11y">
                         <h2 id="h-a11y">Lectura y percepción <span>pruébalos: cambian esta página</span></h2>
@@ -293,7 +284,6 @@
                     </section>
                 </div>
 
-                <!-- PELIGRO -->
                 <div class="aj-stack" id="sec-peligro" data-panel="peligro" hidden>
                     <p class="aj-dznote">// zona de peligro: aquí las acciones te sacan de tu cuenta o no tienen vuelta atrás.</p>
                     <article class="jt aj-dz">
@@ -327,7 +317,6 @@
         </div>
     </div>
 
-    <!-- ===== diálogo: cambiar correo ===== -->
     <dialog class="aj-dlg" id="dlgCorreo" aria-labelledby="t-correo">
         <form class="aj-dlg-f" method="dialog" novalidate>
             <h2 id="t-correo">Cambiar correo electrónico</h2>
@@ -347,7 +336,6 @@
         </form>
     </dialog>
 
-    <!-- ===== diálogo: eliminar cuenta ===== -->
     <dialog class="aj-dlg danger" id="dlgEliminar" aria-labelledby="t-del">
         <form class="aj-dlg-f" method="post" th:action="@{/cuenta/eliminar}" id="formEliminar">
             <h2 id="t-del">Eliminar cuenta</h2>

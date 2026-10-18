@@ -1,8 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-/* ===================================
-              VARIABLES
-======================================*/
 :root {
     --bg: #f6f9ff;
     --bg-2: #eaf2fb;
@@ -47,16 +43,12 @@
     --analytics-blue: #3b82f6;
     --section-gap: 24px;
     --card: var(--surface);
-
-    /* Tokens usados por el rework visual del Dashboard (mockup devcoast-prompt-dashboard.md) */
     --accent-on: #ffffff;
     --border-strong: rgba(15, 23, 42, 0.16);
     --text-faint: #94a3b8;
     --font-display: "Space Grotesk", "Sora", sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     --radius-card: 12px;
-
-    /* Paleta categórica — siempre el mismo color para la misma categoría, no cambia con el tema */
     --cat-dev: #3B8EEA;
     --cat-dev-tint: rgba(59, 142, 234, .16);
     --cat-dev-text: #3B8EEA;
@@ -76,16 +68,9 @@
     --cat-error: #DE5B5B;
     --cat-error-tint: rgba(222, 91, 91, .16);
     --cat-error-text: #c73f3f;
-
-    /* Chrome de terminal — SIEMPRE oscuro, no se reasigna en themes.js,
-       asi la barra de comando se ve igual sin importar el tema activo */
     --term-chrome-bg: #0b0f14;
     --term-chrome-text: #c9d6e0;
     --term-chrome-border: rgba(0, 217, 255, 0.18);
-
-    /* Chrome "mas oscuro que el resto" — SI se reasigna por tema en
-       themes.js (a diferencia de --term-chrome-*), para que contraste
-       con la pagina sin quedar desconectado del resto de los colores */
     --chrome-dark: #1b2333;
     --chrome-dark-text: #e7ecf3;
     --chrome-dark-border: rgba(255, 255, 255, 0.08);
@@ -95,10 +80,6 @@
     0%, 100% { opacity: 1; }
     50%      { opacity: 0; }
 }
-
-/* ===================================
-                RESET
-======================================*/
 * {
     box-sizing: border-box;
     margin: 0;
@@ -191,10 +172,6 @@ input,
 textarea {
     caret-color: var(--accent);
 }
-
-/* ===================================
-               ICONS
-======================================*/
 .icon {
     width: 18px;
     height: 18px;
@@ -241,10 +218,6 @@ textarea {
     align-items: center;
     gap: 8px;
 }
-
-/* ===================================
-               LAYOUT
-======================================*/
 .app-shell {
     position: relative;
     z-index: 1;
@@ -349,10 +322,6 @@ textarea {
 .landing-main>* {
     min-width: 0;
 }
-
-/* ===================================
-              SIDEBAR
-======================================*/
 .sidebar {
     position: sticky;
     top: 0;
@@ -384,9 +353,6 @@ textarea {
     overflow: hidden;
     flex-shrink: 0;
 }
-
-/* el img del logo a veces trae width/height fijo desde el HTML (o ninguno),
-   esto lo obliga a llenar el cuadrito bien sin importar el tamaño real del PNG */
 .brand-mark img {
     width: 100%;
     height: 100%;
@@ -479,9 +445,6 @@ textarea {
     min-width: 18px;
     text-align: center;
     line-height: 1.5;
-    /* algo nuevo entro — un anillo que se expande una sola vez, no un loop
-       infinito (eso ya se sentiria como notificacion molesta).
-       box-shadow (no un ::after) para no taparle el numero al badge. */
     animation: dcPing 1.6s cubic-bezier(0, 0, 0.2, 1) 1;
 }
 
@@ -545,9 +508,6 @@ textarea {
     background-position: center !important;
     background-repeat: no-repeat !important;
 }
-
-/* punto de "sesion activa" — como el indicador de proceso corriendo en una
-   terminal (htop, docker ps), no solo decorativo */
 .profile-avatar::after {
     content: "";
     position: absolute;
@@ -611,12 +571,6 @@ textarea {
     border-radius: 2px;
     transition: width 0.5s ease;
 }
-
-/* ===================================
-      SIGNATURE: IDE TAB CHROME
-   (inyectado por polish.js en .topbar-title
-    de cada pagina — ver initTopbarTab)
-======================================*/
 .win-chrome {
     display: inline-flex;
     gap: 6px;
@@ -677,10 +631,6 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
     .topbar-tab .topbar-tab-cursor { animation: none; opacity: .6; }
 }
-
-/* ===================================
-             MAIN/TOPBAR
-======================================*/
 .main {
     display: flex;
     flex-direction: column;
@@ -754,10 +704,6 @@ textarea {
     min-width: 84px;
     padding: 7px 12px;
 }
-
-/* ===================================
-          FORMS & BUTTONS
-======================================*/
 .search {
     display: flex;
     align-items: center;
@@ -1074,10 +1020,6 @@ textarea {
     background: var(--accent);
     box-shadow: 0 0 0 4px var(--accent-soft);
 }
-
-/* ===================================
-            CARDS & TEXT
-======================================*/
 .card {
     background: var(--surface);
     position: relative;
@@ -1116,10 +1058,6 @@ textarea {
 .space-top {
     margin-top: 12px;
 }
-
-/* ===================================
-         DASHBOARD WIDGETS
-======================================*/
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1277,18 +1215,10 @@ textarea {
 .dashboard-activity-link:hover {
     text-decoration: underline;
 }
-
-/* ===================================
-      DASHBOARD REWORK (mockup 2026)
-======================================*/
-
-/* Números, salarios, fechas, tags → siempre monoespaciada */
 .dc-mono {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
 }
-
-/* Icon-pill circular para métricas — nunca franja de color al lado del número */
 .dc-icon-pill {
     width: 34px;
     height: 34px;
@@ -1310,8 +1240,6 @@ textarea {
 .dc-icon-pill--success { background: var(--cat-success-tint); color: var(--cat-success); }
 .dc-icon-pill--error { background: var(--cat-error-tint); color: var(--cat-error); }
 .dc-icon-pill--neutral { background: var(--surface-2); color: var(--text-faint); }
-
-/* Badge/pastilla de estado — pastilla chica, fondo categórico al 16%, sin borde */
 .dc-status-pill {
     display: inline-flex;
     align-items: center;
@@ -1328,8 +1256,6 @@ textarea {
 .dc-status-pill--data { background: var(--cat-data-tint); color: var(--cat-data-text); }
 .dc-status-pill--success { background: var(--cat-success-tint); color: var(--cat-success-text); }
 .dc-status-pill--error { background: var(--cat-error-tint); color: var(--cat-error-text); }
-
-/* Franja de métricas — layout tipo tarjeta con icon-pill, separado por gaps, no franjas */
 .dc-metric-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1363,8 +1289,6 @@ textarea {
     font-size: 0.78rem;
     color: var(--muted);
 }
-
-/* ── Módulo "Perfil destacado" — elemento con más peso visual de la pantalla ── */
 .dc-profile-hero {
     display: flex;
     align-items: center;
@@ -1431,8 +1355,6 @@ textarea {
 .dc-profile-hero-chip:hover {
     background: color-mix(in srgb, var(--cat-design) 26%, transparent);
 }
-
-/* ── Empleos / proyectos — cards ── */
 .dc-job-row {
     display: flex;
     align-items: center;
@@ -1532,8 +1454,6 @@ textarea {
     color: var(--cat-dev-text);
     font-weight: 600;
 }
-
-/* ── Estado vacío ── */
 .dc-empty {
     position: relative;
     text-align: center;
@@ -1567,15 +1487,10 @@ textarea {
     font-size: 0.86rem;
     margin-bottom: 14px;
 }
-
-/* nomas para que no se sienta tan brusco cuando aparece un empty state
-   (por ejemplo al filtrar y quedar sin resultados) */
 @keyframes dcEmptyIn {
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
-/* ── Prioridades de hoy ── */
 .dc-priority-item {
     display: flex;
     align-items: center;
@@ -1628,8 +1543,6 @@ textarea {
     background: var(--cat-success-tint);
     font-size: 0.82rem;
 }
-
-/* ── Avatares de empresa (iniciales) ── */
 .dc-avatar-badge {
     width: 36px;
     height: 36px;
@@ -1642,8 +1555,6 @@ textarea {
     font-size: 0.82rem;
     color: #fff;
 }
-
-/* ── Enlace corto "Ver →" en tarjetas de métrica ── */
 .dc-mini-link {
     font-size: 0.7rem;
     color: var(--accent);
@@ -1664,20 +1575,12 @@ textarea {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
-
-/* ===================================
-                GRIDS
-======================================*/
 .grid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
     align-items: start;
 }
-
-/* ===================================
-            FILTERS/CHIPS
-======================================*/
 .chip-row {
     display: flex;
     flex-wrap: wrap;
@@ -1709,9 +1612,6 @@ textarea {
     background: var(--accent-soft);
     cursor: pointer;
 }
-
-/* Chips de categoría (filtros de Empleos): al pasar el mouse o cuando están activos,
-   toman el color categórico correspondiente en vez del acento genérico. */
 .chip[data-filter="Programacion"]:hover { border-color: var(--cat-dev); color: var(--cat-dev); background: var(--cat-dev-tint); }
 .chip[data-filter="Diseño"]:hover { border-color: var(--cat-design); color: var(--cat-design); background: var(--cat-design-tint); }
 .chip.active[data-filter="Programacion"] { background: var(--cat-dev); border-color: var(--cat-dev); color: #fff; }
@@ -1844,10 +1744,6 @@ textarea {
     border-color: var(--cat-data);
     color: #fff;
 }
-
-/* ===================================
-               JOBS
-======================================*/
 .job-card {
     display: grid;
     gap: 18px;
@@ -2153,10 +2049,6 @@ textarea {
     background: var(--surface-2);
     color: var(--text-faint, var(--muted));
 }
-
-/* ===================================
-               TABLE
-======================================*/
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -2191,10 +2083,6 @@ textarea {
 .table tbody tr.solicitud-row:hover td {
     background: var(--surface-2);
 }
-
-/* ===================================
-              TALENTS
-======================================*/
 .talentos-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2394,10 +2282,6 @@ textarea {
     font-size: 0.72rem;
     padding: 4px 10px;
 }
-
-/* ===================================
-              PROJECTS
-======================================*/
 .project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -2733,12 +2617,6 @@ textarea {
 .cover-forest {
     --project-banner-bg: linear-gradient(135deg, #15803d 0%, #047857 100%);
 }
-
-/* set nuevo, pensado a propósito para la estética workspace del resto del
-   sitio (canvas oscuro + acentos cian/magenta/menta/ámbar) en vez de los
-   degradados arcoíris genéricos de arriba — son los que ofrece el picker
-   de "Banner" de subirProyecto.html; los de arriba se mantienen solo por
-   compatibilidad con proyectos ya guardados */
 .cover-terminal {
     --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #123449 100%);
 }
@@ -2778,10 +2656,6 @@ textarea {
 .cover-orbit {
     --project-banner-bg: linear-gradient(135deg, #0d0f13 0%, #1c1633 55%, #4a3f9e 100%);
 }
-
-/* ===================================
-              DETAILS
-======================================*/
 .detail-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
@@ -2970,10 +2844,6 @@ textarea {
 .project-detail-tags {
     margin-top: 4px;
 }
-
-/* ===================================
-               PROFILE
-======================================*/
 .profile-hero {
     display: grid;
     gap: 16px;
@@ -3187,10 +3057,6 @@ textarea {
     border-radius: 99px;
     transition: width 0.6s ease;
 }
-
-/* ===================================
-              SETTINGS
-======================================*/
 .settings-hero {
     display: flex;
     align-items: center;
@@ -3287,10 +3153,6 @@ textarea {
 .switch input:checked+.switch-slider::after {
     transform: translateX(20px);
 }
-
-/* ===================================
-                FORMS
-======================================*/
 .form-grid {
     display: grid;
     gap: 16px;
@@ -3647,10 +3509,6 @@ textarea {
     margin-top: 3px;
     transition: color 0.2s;
 }
-
-/* ===================================
-            LANDING/BLOCKS
-======================================*/
 .hero {
     position: relative;
     overflow: hidden;
@@ -3714,7 +3572,6 @@ textarea {
     width: fit-content;
 }
 
-
 .hero-actions {
     display: flex;
     gap: 12px;
@@ -3731,9 +3588,6 @@ textarea {
     box-shadow: 0 8px 28px rgba(29, 127, 208, 0.38);
     transform: translateY(-2px);
 }
-
-/* brillito que cruza el boton al pasar el mouse, nada de gradiente,
-   es solo una franja solida semi-transparente que se desliza */
 .hero-actions .btn-primary,
 .cta-actions .btn-white {
     position: relative;
@@ -3908,8 +3762,6 @@ textarea {
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
-
-/* esquinita tipo visor de camara/terminal, fija, se ve en cualquier foto */
 .feature-card::after {
     content: "";
     position: absolute;
@@ -4979,10 +4831,6 @@ textarea {
     font-size: 0.78rem;
     color: var(--muted);
 }
-
-/* ===================================
-               LOGIN
-======================================*/
 .content-login {
     display: flex;
     flex-direction: row;
@@ -5260,10 +5108,6 @@ textarea {
     border-radius: 20px;
     padding: 0 6px;
 }
-
-/* ===================================
-         REGISTER OPTIONS
-======================================*/
 .register-options {
     display: flex;
     flex-direction: column;
@@ -5516,10 +5360,6 @@ textarea {
     border-color: rgba(168, 85, 247, 0.56);
     box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.24), 0 14px 32px rgba(2, 6, 23, 0.4);
 }
-
-/* ===================================
-         REGISTER FORMS
-======================================*/
 .register-page {
     position: relative;
     z-index: 1;
@@ -6098,8 +5938,6 @@ textarea {
     color: rgba(226, 232, 240, 0.66);
     font-size: 0.85rem;
 }
-
-/* ── Registro: wizard, contraseña, feedback en vivo ─────────────────── */
 .register-field input.error,
 .register-field select.error,
 .register-field textarea.error {
@@ -6242,10 +6080,6 @@ textarea {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.28);
 }
-
-/* ===================================
-            CURRICULUM
-======================================*/
 .resume-section {
     display: grid;
     gap: 12px;
@@ -6456,10 +6290,6 @@ textarea {
     background: var(--badge-open-text);
     animation: cv-pulse 2s infinite;
 }
-
-/* ===================================
-            CV BUILDER
-======================================*/
 .cv-specialties {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6793,10 +6623,6 @@ textarea {
     color: var(--accent-strong);
     transform: translateY(-1px);
 }
-
-/* ===================================
-               STEPPER
-======================================*/
 .stepper {
     display: flex;
     align-items: center;
@@ -6852,10 +6678,6 @@ textarea {
     border-top: 1px solid var(--border);
     margin-top: 8px;
 }
-
-/* ===================================
-            ICON PICKER
-======================================*/
 .icon-preview-wrap,
 .icon-picker-wrap {
     display: flex;
@@ -6963,10 +6785,6 @@ textarea {
     border-color: var(--text);
     transform: scale(1.1);
 }
-
-/* ===================================
-            SUBIRPROYECTOS
-======================================*/
 .banner-picker {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -7153,10 +6971,6 @@ textarea {
 .score-fill.lo {
     background: #ea580c;
 }
-
-/* ===================================
-            EDIT MODAL
-======================================*/
 .edit-overlay {
     display: none;
     position: fixed;
@@ -7445,10 +7259,6 @@ textarea {
     letter-spacing: 0.05em;
     margin-bottom: 10px;
 }
-
-/* ===================================
-              MODALS
-======================================*/
 .confirm-overlay {
     position: fixed;
     inset: 0;
@@ -7538,10 +7348,6 @@ textarea {
 .inline-confirm strong {
     font-weight: 700;
 }
-
-/* ===================================
-               TOASTS
-======================================*/
 .toast-container {
     position: fixed;
     right: 20px;
@@ -7818,10 +7624,6 @@ textarea {
 .toast-item.info .toast-progress-fill {
     background: var(--accent);
 }
-
-/* ===================================
-            TAB SWITCHER
-======================================*/
 .solicitudes-page .sol-tabs {
     margin-bottom: 18px;
 }
@@ -7989,10 +7791,6 @@ textarea {
     background: var(--cat-data);
     color: #fff;
 }
-
-/* ===================================
-        SOLICITUD DETALLE
-======================================*/
 .solicitud-detail-page .detail-panel {
     display: grid;
     gap: 14px;
@@ -8099,10 +7897,6 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
-
-/* ===================================
-         INVITATION CARDS
-======================================*/
 .inv-card {
     position: relative;
     border: 1.5px solid var(--border);
@@ -8423,10 +8217,6 @@ textarea {
 .inv-estado-final.rechazada {
     color: var(--muted);
 }
-
-/* ===================================
-         MIS EMPLEOS (EMPRESA)
-======================================*/
 .empresa-header {
     background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
     border: 1px solid var(--border);
@@ -8714,9 +8504,6 @@ textarea {
     gap: 5px;
     margin-top: 10px;
 }
-
-/* el stack de tecnologias se lee como un array de codigo, no como
-   una fila cualquiera de chips */
 .job-stack-row::before,
 .job-stack-row::after {
     font-family: var(--font-mono);
@@ -8920,10 +8707,6 @@ textarea {
     background: var(--accent-soft);
     color: var(--accent);
 }
-
-/* ===================================
-             SKELETON / STATES
-======================================*/
 .skeleton {
     background: var(--border);
     border-radius: 6px;
@@ -9086,10 +8869,6 @@ textarea {
     background: linear-gradient(90deg, var(--accent), #7c3aed);
     transition: width 0.4s ease;
 }
-
-/* ===================================
-              REVEAL
-======================================*/
 .reveal {
     opacity: 0;
     transform: translateY(20px);
@@ -9116,10 +8895,6 @@ textarea {
 .rd4 {
     transition-delay: 0.28s;
 }
-
-/* ===================================
-            ANIMATIONS
-======================================*/
 @keyframes fade-in {
     from {
         opacity: 0;
@@ -9183,10 +8958,6 @@ textarea {
         transform: scale(1.4);
     }
 }
-
-/* ===================================
-      ACCESSIBILITY & DENSITY
-======================================*/
 html[data-text-size="small"] {
     font-size: 15px;
 }
@@ -9354,10 +9125,6 @@ html[data-reduce-motion="true"] *::after {
 .tab-panel.active .job-mgmt-card:nth-child(5) {
     animation-delay: 0.16s;
 }
-
-/* ===================================
-              RESPONSIVE
-======================================*/
 @media (max-height: 820px) {
     .sidebar {
         height: auto;
@@ -10114,12 +9881,6 @@ html[data-reduce-motion="true"] *::after {
     background: color-mix(in srgb, var(--analytics-blue) 15%, transparent);
     color: var(--analytics-blue);
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   MEJORAS DEVCOAST – AÑADIDAS
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ── Preview banner (talento-perfil en modo preview) ────────────── */
 .preview-banner {
     position: sticky;
     top: 0;
@@ -10142,8 +9903,6 @@ html[data-reduce-motion="true"] *::after {
 .preview-banner .btn {
     pointer-events: all;
 }
-
-/* ── Talentos: barra de filtros ─────────────────────────────────── */
 .talento-filter-bar {
     display: flex;
     align-items: center;
@@ -10153,8 +9912,6 @@ html[data-reduce-motion="true"] *::after {
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
 }
-
-/* ── Talentos: empty state ──────────────────────────────────────── */
 .talento-empty-state {
     display: flex;
     flex-direction: column;
@@ -10193,8 +9950,6 @@ html[data-reduce-motion="true"] *::after {
     height: 28px;
     color: var(--muted);
 }
-
-/* ── Kanban: toggle de vista ────────────────────────────────────── */
 .kan-view-toggle {
     display: flex;
     gap: 4px;
@@ -10229,8 +9984,6 @@ html[data-reduce-motion="true"] *::after {
     color: var(--text);
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
 }
-
-/* ── Kanban: board ──────────────────────────────────────────────── */
 .kan-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -10369,8 +10122,6 @@ html[data-reduce-motion="true"] *::after {
     margin: 0;
     opacity: .6;
 }
-
-/* ── Onboarding modal ───────────────────────────────────────────── */
 .onboarding-overlay {
     position: fixed;
     inset: 0;
@@ -10533,12 +10284,6 @@ html[data-reduce-motion="true"] *::after {
     border-top: 1px solid var(--border);
 }
 
-/* ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   ONBOARDING WIZARD — PROGRESS BAR
-   ═══════════════════════════════════════════════════════════════════ */
-
 .onboarding-progress-bar {
     width: 100%;
     height: 4px;
@@ -10554,10 +10299,6 @@ html[data-reduce-motion="true"] *::after {
     border-radius: 2px;
     transition: width 0.35s ease;
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   ONBOARDING WIZARD — STEPPER
-   ═══════════════════════════════════════════════════════════════════ */
 
 .onboarding-stepper {
     display: flex;
@@ -10627,10 +10368,6 @@ html[data-reduce-motion="true"] *::after {
     transition: background 0.25s;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ONBOARDING WIZARD — FORM FIELDS
-   ═══════════════════════════════════════════════════════════════════ */
-
 .ob-field {
     display: flex;
     flex-direction: column;
@@ -10679,10 +10416,6 @@ html[data-reduce-motion="true"] *::after {
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ONBOARDING WIZARD — TECH CHIPS
-   ═══════════════════════════════════════════════════════════════════ */
-
 .ob-chips-grid {
     display: flex;
     flex-wrap: wrap;
@@ -10728,10 +10461,6 @@ html[data-reduce-motion="true"] *::after {
     color: var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ONBOARDING WIZARD — SUCCESS SUMMARY
-   ═══════════════════════════════════════════════════════════════════ */
-
 .ob-success-chips {
     display: flex;
     flex-wrap: wrap;
@@ -10755,10 +10484,6 @@ html[data-reduce-motion="true"] *::after {
     color: #92400e;
     border-color: rgba(245, 158, 11, 0.4);
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   POSTULACIONES — STATS ROW
-   ═══════════════════════════════════════════════════════════════════ */
 
 .postul-stat-row {
     display: flex;
@@ -10820,10 +10545,6 @@ html[data-reduce-motion="true"] *::after {
     text-transform: uppercase;
     letter-spacing: .03em;
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   POSTULACIONES — CANDIDATE CARDS GRID
-   ═══════════════════════════════════════════════════════════════════ */
 
 .postul-grid {
     display: flex;
@@ -10910,10 +10631,6 @@ html[data-reduce-motion="true"] *::after {
     border: 1px solid var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   POSTULACIONES — ESTADO BADGES
-   ═══════════════════════════════════════════════════════════════════ */
-
 .postul-estado-wrap {
     display: flex;
     align-items: center;
@@ -10946,10 +10663,6 @@ html[data-reduce-motion="true"] *::after {
     border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   POSTULACIONES — ACTION ROW
-   ═══════════════════════════════════════════════════════════════════ */
-
 .postul-actions {
     display: flex;
     flex-direction: column;
@@ -10974,12 +10687,6 @@ html[data-reduce-motion="true"] *::after {
         width: 100%;
     }
 }
-
-/* ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   SOLICITUD — HISTORIAL DE ESTADOS (TIMELINE)
-   ═══════════════════════════════════════════════════════════════════ */
 
 .sol-timeline {
     display: flex;
@@ -11062,10 +10769,6 @@ html[data-reduce-motion="true"] *::after {
     opacity: .7;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   KANBAN — DRAG AND DROP VISUAL FEEDBACK
-   ═══════════════════════════════════════════════════════════════════ */
-
 .kan-card {
     cursor: grab;
     user-select: none;
@@ -11090,8 +10793,6 @@ html[data-reduce-motion="true"] *::after {
 .kan-col.drag-over .kan-col-header {
     background: transparent;
 }
-
-/* Split inner link from the chat icon */
 .kan-card-inner {
     display: flex;
     align-items: center;
@@ -11116,10 +10817,6 @@ html[data-reduce-motion="true"] *::after {
     color: var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   CANDIDATOS — PÁGINA GLOBAL
-   ═══════════════════════════════════════════════════════════════════ */
-
 .cand-page {
     padding: 24px 28px;
     display: flex;
@@ -11128,10 +10825,6 @@ html[data-reduce-motion="true"] *::after {
     overflow-y: auto;
     flex: 1;
 }
-
-/* ── Stats: ver .dc-metric-grid / .dc-icon-pill compartidos ──────── */
-
-/* ── Filters ────────────────────────────────────────────────────── */
 .cand-filters {
     display: flex;
     align-items: center;
@@ -11205,8 +10898,6 @@ html[data-reduce-motion="true"] *::after {
     color: var(--accent-strong);
     font-weight: 700;
 }
-
-/* ── Empty state ────────────────────────────────────────────────── */
 .cand-empty-page {
     display: flex;
     flex-direction: column;
@@ -11234,8 +10925,6 @@ html[data-reduce-motion="true"] *::after {
     font-size: .85rem;
     color: var(--muted);
 }
-
-/* ── Sections ───────────────────────────────────────────────────── */
 #cand-sections {
     display: flex;
     flex-direction: column;
@@ -11253,8 +10942,6 @@ html[data-reduce-motion="true"] *::after {
 .cand-section:hover {
     box-shadow: 0 4px 18px rgba(0, 0, 0, .07);
 }
-
-/* Header */
 .cand-section-hdr {
     display: flex;
     align-items: center;
@@ -11384,8 +11071,6 @@ html[data-reduce-motion="true"] *::after {
     height: 17px;
     transition: transform .24s ease;
 }
-
-/* ── Section body collapse (CSS-only, reliable) ─────────────────── */
 .cand-section-body {
     max-height: 2000px;
     overflow: hidden;
@@ -11397,8 +11082,6 @@ html[data-reduce-motion="true"] *::after {
     max-height: 0;
     opacity: 0;
 }
-
-/* ── Kanban board ───────────────────────────────────────────────── */
 .cand-kan-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -11421,8 +11104,6 @@ html[data-reduce-motion="true"] *::after {
     outline-offset: -4px;
     border-radius: 4px;
 }
-
-/* Column headers */
 .cand-kan-col-hdr {
     display: flex;
     align-items: center;
@@ -11484,16 +11165,12 @@ html[data-reduce-motion="true"] *::after {
     background: var(--surface-2, var(--border));
     color: var(--muted);
 }
-
-/* Cards container */
 .cand-kan-cards {
     display: flex;
     flex-direction: column;
     gap: 7px;
     min-height: 50px;
 }
-
-/* Candidate card */
 .cand-card {
     background: var(--surface-2, var(--surface));
     border: 1px solid var(--border);
@@ -11606,8 +11283,6 @@ html[data-reduce-motion="true"] *::after {
     height: 13px;
     pointer-events: none;
 }
-
-/* Drop zone placeholder */
 .cand-drop-zone {
     font-size: .72rem;
     color: var(--muted);
@@ -11630,18 +11305,9 @@ html[data-reduce-motion="true"] *::after {
     color: #b91c1c;
 }
 
-/* ═══════════════════════════════════════════════════════════════════ *//* ============================================================
-   MENSAJERÍA — pegar al FINAL de styles.css
-   ============================================================ */
-
-
-/* ── Inbox (/mensajes) ─────────────────────────────────────── */
-
 .mensajes-page {
     gap: 16px;
 }
-
-/* Badge de "no leídos" junto al H1 del topbar */
 .topbar-msg-badge {
     display: inline-flex;
     align-items: center;
@@ -11657,15 +11323,11 @@ html[data-reduce-motion="true"] *::after {
     vertical-align: middle;
     margin-left: 8px;
 }
-
-/* Lista de conversaciones */
 .conv-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
-
-/* Cada conversación */
 .conv-item {
     display: flex;
     align-items: center;
@@ -11692,8 +11354,6 @@ html[data-reduce-motion="true"] *::after {
     border-left-color: var(--accent);
     background: linear-gradient(90deg, rgba(29,127,208,.035) 0%, var(--surface) 100%);
 }
-
-/* Ícono del empleo */
 .conv-icon-wrap {
     width: 46px;
     height: 46px;
@@ -11710,8 +11370,6 @@ html[data-reduce-motion="true"] *::after {
     width: 20px;
     height: 20px;
 }
-
-/* Cuerpo central */
 .conv-body {
     flex: 1;
     min-width: 0;
@@ -11753,8 +11411,6 @@ html[data-reduce-motion="true"] *::after {
     font-weight: 600;
     color: var(--text);
 }
-
-/* Columna derecha: hora + badge */
 .conv-right {
     display: flex;
     flex-direction: column;
@@ -11780,18 +11436,11 @@ html[data-reduce-motion="true"] *::after {
     text-align: center;
     line-height: 1.7;
 }
-
-
-/* ── Chat (/chat/{id}) ─────────────────────────────────────── */
-
-/* Fija altura total de body + grid en la página de chat */
 body.chat-shell,
 body.chat-shell .app-shell {
     height: 100vh;
     overflow: hidden;
 }
-
-/* Resetea el .main para layout flex de chat */
 .main.chat-page {
     padding: 0;
     gap: 0;
@@ -11801,8 +11450,6 @@ body.chat-shell .app-shell {
     display: flex;
     flex-direction: column;
 }
-
-/* Header fijo del chat */
 .chat-header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -11814,8 +11461,6 @@ body.chat-shell .app-shell {
     box-shadow: 0 2px 10px rgba(15,23,42,.06);
     z-index: 10;
 }
-
-/* Botón volver */
 .chat-back-btn {
     width: 34px;
     height: 34px;
@@ -11837,8 +11482,6 @@ body.chat-shell .app-shell {
     border-color: var(--accent);
     color: var(--accent);
 }
-
-/* Avatar circular del header */
 .chat-header-avatar {
     width: 38px;
     height: 38px;
@@ -11850,8 +11493,6 @@ body.chat-shell .app-shell {
     color: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
-
-/* Info del header */
 .chat-header-info {
     flex: 1;
     min-width: 0;
@@ -11879,8 +11520,6 @@ body.chat-shell .app-shell {
 .chat-header-estado {
     flex-shrink: 0;
 }
-
-/* Área de mensajes (scrollable) */
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -11891,13 +11530,9 @@ body.chat-shell .app-shell {
     background: var(--bg);
     scroll-behavior: smooth;
 }
-
-/* Scrollbar fina */
 .chat-messages::-webkit-scrollbar       { width: 4px; }
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-/* Empty state del chat */
 .chat-empty-state {
     margin: auto;
     display: flex;
@@ -11918,8 +11553,6 @@ body.chat-shell .app-shell {
     font-size: 0.87rem;
     line-height: 1.6;
 }
-
-/* Separador de fecha */
 .chat-date-sep {
     display: flex;
     align-items: center;
@@ -11939,8 +11572,6 @@ body.chat-shell .app-shell {
     height: 1px;
     background: var(--border);
 }
-
-/* Fila de mensaje */
 .chat-msg-row {
     display: flex;
     width: 100%;
@@ -11949,16 +11580,12 @@ body.chat-shell .app-shell {
 
 .chat-msg-row.own   { justify-content: flex-end; }
 .chat-msg-row.other { justify-content: flex-start; }
-
-/* Wrap que contiene burbuja + meta */
 .chat-msg-wrap {
     display: flex;
     flex-direction: column;
     max-width: 65%;
     min-width: 80px;
 }
-
-/* Burbuja */
 .chat-bubble {
     padding: 10px 14px;
     border-radius: 18px;
@@ -11982,8 +11609,6 @@ body.chat-shell .app-shell {
     border-bottom-left-radius: 4px;
     box-shadow: var(--shadow-card);
 }
-
-/* Meta debajo de la burbuja */
 .chat-msg-meta {
     display: flex;
     align-items: center;
@@ -12002,8 +11627,6 @@ body.chat-shell .app-shell {
     font-weight: 600;
     color: var(--accent);
 }
-
-/* Tick de leído */
 .chat-read-tick {
     display: flex;
     align-items: center;
@@ -12015,8 +11638,6 @@ body.chat-shell .app-shell {
     color: var(--accent);
     opacity: 1;
 }
-
-/* Barra de input */
 .chat-input-bar {
     background: var(--surface);
     border-top: 1px solid var(--border);
@@ -12054,8 +11675,6 @@ body.chat-shell .app-shell {
 }
 
 .chat-input-field::placeholder { color: var(--muted); opacity: .7; }
-
-/* Botón enviar */
 .chat-send-btn {
     width: 42px;
     height: 42px;
@@ -12081,8 +11700,6 @@ body.chat-shell .app-shell {
 .chat-send-btn:active {
     transform: scale(.97);
 }
-
-/* ── Responsive móvil ─────────────────────────────────────── */
 @media (max-width: 768px) {
     .conv-item     { padding: 12px 14px; gap: 10px; }
     .conv-icon-wrap { width: 40px; height: 40px; border-radius: 10px; }
@@ -12092,12 +11709,6 @@ body.chat-shell .app-shell {
     .chat-msg-wrap { max-width: 82%; }
     .main.chat-page { height: calc(100vh - 56px); }
 }
-
-/* ============================================================
-   MEJORAS v2 — avatares chat, botón chat tabla, cargar más
-   ============================================================ */
-
-/* ── Avatar en burbujas del chat ───────────────────────────── */
 .chat-msg-row.other {
     gap: 8px;
     align-items: flex-end;
@@ -12116,7 +11727,7 @@ body.chat-shell .app-shell {
     justify-content: center;
     flex-shrink: 0;
     align-self: flex-end;
-    margin-bottom: 22px;   /* alinea con la línea de meta */
+    margin-bottom: 22px;
     box-shadow: 0 1px 4px rgba(0,0,0,.15);
     overflow: hidden;
 }
@@ -12124,8 +11735,6 @@ body.chat-shell .app-shell {
 .chat-msg-avatar span {
     line-height: 1;
 }
-
-/* ── Botón "Cargar mensajes anteriores" ────────────────────── */
 .chat-load-more {
     display: flex;
     justify-content: center;
@@ -12158,8 +11767,6 @@ body.chat-shell .app-shell {
     opacity: .5;
     cursor: not-allowed;
 }
-
-/* ── Botón chat en tabla de solicitudes ────────────────────── */
 .btn-chat-sol {
     display: inline-flex;
     align-items: center;
@@ -12186,17 +11793,9 @@ body.chat-shell .app-shell {
     width: 14px;
     height: 14px;
 }
-
-/* ── Bell en topbar: pequeño gap visual ────────────────────── */
 #bell-widget-host {
     margin-right: 4px;
 }
-
-/* ============================================================
-   FEATURES v3: guardados, empresa-perfil, score, password reset
-   ============================================================ */
-
-/* ── Score badge de compatibilidad ────────────────────────── */
 .score-badge {
     display: inline-flex;
     align-items: center;
@@ -12211,8 +11810,6 @@ body.chat-shell .app-shell {
 .score-high  { background: rgba(34,197,94,.15);  color: #16a34a; }
 .score-mid   { background: rgba(234,179,8,.15);   color: #b45309; }
 .score-low   { background: rgba(148,163,184,.12); color: var(--muted); }
-
-/* ── Guardados grid ────────────────────────────────────────── */
 .guardados-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -12314,8 +11911,6 @@ body.chat-shell .app-shell {
     padding-top: 12px;
     border-top: 1px solid var(--border);
 }
-
-/* ── Empresa perfil ────────────────────────────────────────── */
 .empresa-page { gap: 20px; }
 
 .empresa-hero { padding: 28px; }
@@ -12472,8 +12067,6 @@ body.chat-shell .app-shell {
     .empresa-avatar { width: 60px; height: 60px; font-size: 1.4rem; border-radius: 14px; }
     .guardados-grid { grid-template-columns: 1fr; }
 }
-
-/* ── Analytics: plataforma footer ───────────────────────────────────────── */
 .analytics-plat {
     display: flex;
     align-items: center;
@@ -12526,8 +12119,6 @@ body.chat-shell .app-shell {
     height: 28px;
     background: var(--border);
 }
-
-/* ── Analytics: empty cell ───────────────────────────────────────────────── */
 .analytics-empty-cell {
     padding: 1.5rem 0 !important;
     text-align: center;
@@ -12535,8 +12126,6 @@ body.chat-shell .app-shell {
     font-size: .82rem;
     border-bottom: none !important;
 }
-
-/* ── Analytics: consejo card ─────────────────────────────────────────────── */
 .analytics-tip-card {
     display: flex;
     flex-direction: column;

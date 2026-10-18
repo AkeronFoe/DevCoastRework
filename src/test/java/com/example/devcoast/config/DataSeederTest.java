@@ -38,7 +38,6 @@ import com.mongodb.client.MongoClients;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
-/** Siembra una muestra pequeña sobre MongoDB en memoria y comprueba que los datos son coherentes con lo que la app espera. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DataSeederTest {
 

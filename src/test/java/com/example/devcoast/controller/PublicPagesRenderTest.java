@@ -37,7 +37,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// ronda 2 del rediseño náutico: landing, login y registro renderizan con los mockups nuevos
 @WebMvcTest({ PageController.class, AuthController.class, RegistroController.class })
 @Import(SecurityConfig.class)
 class PublicPagesRenderTest {
@@ -86,7 +85,6 @@ class PublicPagesRenderTest {
         return e;
     }
 
-    // ───────── landing ─────────
     @Test
     void landingMuestraLasTresOfertasRealesComoPases() throws Exception {
         when(mongoTemplate.find(any(Query.class), eq(Empleo.class))).thenReturn(List.of(
@@ -99,7 +97,6 @@ class PublicPagesRenderTest {
                 .andExpect(content().string(containsString("Desarrollo Backend")))
                 .andExpect(content().string(containsString("Estudio Lumen")))
                 .andExpect(content().string(containsString("ÁREA · DISEÑO · UI/UX")))
-                // la categoría guardada sin tilde se muestra con tilde
                 .andExpect(content().string(containsString("ÁREA · PROGRAMACIÓN · BACKEND")))
                 .andExpect(content().string(containsString("id=\"pases\"")))
                 .andExpect(content().string(containsString("hullclip")))
@@ -121,7 +118,6 @@ class PublicPagesRenderTest {
                 .andExpect(content().string(containsString("id=\"crear\"")));
     }
 
-    // ───────── login ─────────
     @Test
     void loginTieneLosCamposYElCsrfDelServidor() throws Exception {
         var res = mockMvc.perform(get("/login").with(csrf()))
@@ -155,7 +151,6 @@ class PublicPagesRenderTest {
                 .andExpect(content().string(containsString("Cuenta creada. Ya puedes iniciar sesión.")));
     }
 
-    // ───────── registro ─────────
     @Test
     void registroTraeLosDosFormulariosYLasEspecialidadesReales() throws Exception {
         var res = mockMvc.perform(get("/register-options").with(csrf()))
@@ -196,7 +191,6 @@ class PublicPagesRenderTest {
         volcar("register-error.html", res.getResponse().getContentAsString());
     }
 
-    // ───────── páginas de error con el barco (no dependen de la sesión) ─────────
     @Autowired
     private org.thymeleaf.spring6.view.ThymeleafViewResolver viewResolver;
 

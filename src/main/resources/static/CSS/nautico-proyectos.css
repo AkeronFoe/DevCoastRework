@@ -1,5 +1,3 @@
-/* DevCoast · Proyectos (portafolio). Fuente: docs/diseno/devcoast-proyectos-motion.html. Requiere nautico.css y nautico-pase.css. */
-/* ===== Proyectos (portafolio) ===== */
 .head .acts{display:flex;align-items:center;gap:10px}
 .note{margin-top:14px;font:500 13px/1.5 var(--font-mono);color:var(--mute);max-width:70ch}
 .pjs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:22px}
@@ -56,9 +54,6 @@
 .pj.in,.add.in{animation:rise .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 55ms)}
 }
 @media (prefers-reduced-motion:reduce){.pj,.add,.swt i,.swt i:after{transition:none !important}}
-
-
-/* ───── ronda 4: enlaces de la tarjeta, acciones y confirmación a la vista ───── */
 .cv img{display:block;width:100%;height:100%;object-fit:cover}
 .pj-t a{color:inherit}
 .pj-t a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
@@ -82,8 +77,6 @@ a.add{text-decoration:none}
 .two-c{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:480px){.two-c{grid-template-columns:1fr}}
 .dlg .acts-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-
-/* ===== Detalle de un proyecto (vista privada) ===== */
 .pd{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start;margin-top:26px}
 .pd-main{background:var(--paper);color:var(--paper-ink);border-radius:14px;overflow:hidden}
 .pd-main .cv{height:230px}

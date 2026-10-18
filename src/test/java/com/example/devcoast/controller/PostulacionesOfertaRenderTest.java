@@ -43,7 +43,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Postulaciones de una sola oferta con el shell náutico: los mismos pases que /candidatos, fase del proceso y filtros
 @WebMvcTest(SolicitudController.class)
 @Import(SecurityConfig.class)
 class PostulacionesOfertaRenderTest {
@@ -138,11 +137,9 @@ class PostulacionesOfertaRenderTest {
                 .andExpect(content().string(containsString("Camila Ortiz")))
                 .andExpect(content().string(containsString("id=\"cTotal\">3<")))
                 .andExpect(content().string(containsString("href=\"/empleos/emp1/postulaciones/s1\"")))
-                // fase del proceso: la de la oferta queda marcada
                 .andExpect(content().string(containsString("data-fase=\"ENTREVISTAS\" aria-pressed=\"true\"")))
                 .andExpect(content().string(containsString("data-fase=\"ABIERTO\" aria-pressed=\"false\"")))
                 .andExpect(content().string(matchesPattern("(?s).*/JS/postulaciones-fase(-[0-9a-f]{32})?\\.js.*")))
-                // ya no hay tablero kanban ni el shell anterior
                 .andExpect(content().string(not(containsString("pe-board"))))
                 .andExpect(content().string(not(containsString("ws-top"))));
     }

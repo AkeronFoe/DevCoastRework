@@ -1,5 +1,3 @@
-/* DevCoast · Postulaciones de una oferta: fase del proceso de reclutamiento. Cada botón cambia la fase con el mismo
-   endpoint de siempre (POST /empleos/{oferta}/fase?fase=…) y avisa; si falla, deja la fase anterior. */
 (function () {
     'use strict';
 

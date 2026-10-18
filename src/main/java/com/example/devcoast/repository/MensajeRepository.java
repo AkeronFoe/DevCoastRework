@@ -18,13 +18,10 @@ public interface MensajeRepository extends MongoRepository<Mensaje, String> {
 
     long countByDestinatarioIdAndLeidoFalse(String destinatarioId);
 
-    // trae el último mensaje del hilo, para el inbox
     Optional<Mensaje> findFirstBySolicitudIdOrderByFechaEnvioDesc(String solicitudId);
 
-    // trae los mensajes de varios hilos a la vez, para armar el inbox sin 1 consulta por conversación
     List<Mensaje> findBySolicitudIdInOrderByFechaEnvioDesc(List<String> solicitudIds);
 
-    // ojo, esto va en DESC y el controller lo invierte antes de pintarlo
     Page<Mensaje> findBySolicitudIdOrderByFechaEnvioDesc(String solicitudId, Pageable pageable);
 
     List<Mensaje> findBySolicitudIdAndFechaEnvioBeforeOrderByFechaEnvioDesc(

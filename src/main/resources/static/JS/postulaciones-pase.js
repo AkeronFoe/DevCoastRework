@@ -1,6 +1,3 @@
-/* DevCoast · Postulaciones de la cuenta de Empresa. Los botones "Aceptar", "No avanza" y "A revisión" son formularios que
-   funcionan sin JavaScript (redirigen a la postulación). Con JavaScript cambian el estado en el sitio con el mismo endpoint
-   que usaba el tablero (/empleos/{oferta}/postulaciones/{id}/estado), ajustan los contadores y avisan con "Deshacer". */
 (function () {
     'use strict';
 
@@ -36,7 +33,6 @@
         var r = parseInt(sec.getAttribute('data-rev'), 10), a = parseInt(sec.getAttribute('data-ace'), 10), n = parseInt(sec.getAttribute('data-no'), 10);
         var c = $('.ofg-c', sec);
         if (c) c.textContent = r + ' ' + T('en revisión') + ' · ' + plural(a, T('aceptada'), T('aceptadas')) + ' · ' + plural(n, T('no avanzó'), T('no avanzaron'));
-        // insignia "Postulaciones" del menú: cuenta las que están en revisión en ofertas activas
         if (sec.getAttribute('data-activa') === 'true' && (desde === 'revision' || hasta === 'revision')) {
             var link = $('.menu a[href$="/candidatos"]');
             if (link) {
@@ -64,7 +60,6 @@
             .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
             .then(function (res) {
                 if (!(res.ok && res.d.ok)) { toast(T('No se pudo actualizar. Inténtalo de nuevo.')); return; }
-                // deshacer una tarjeta que ya salió de la lista filtrada: se recarga para que vuelva a aparecer
                 if (deshacer === false && !document.body.contains(art)) { window.location.reload(); return; }
                 var sec = art.closest('.ofg');
                 art.setAttribute('data-estado', nuevo);
@@ -76,7 +71,6 @@
                 $$('details[open]', art).forEach(function (d) { d.open = false; });
                 ajustarContadores(sec, desde, nuevo);
 
-                // con un filtro de estado activo, la tarjeta que ya no cumple sale de la lista
                 if (filtro && FILTRO_DE[filtro] !== nuevo) {
                     art.classList.add('saliendo');
                     setTimeout(function () {
@@ -86,7 +80,6 @@
                 }
                 var msg = nuevo === 'aprobada' ? T('Aceptaste a') + ' ' + nombre + '.'
                     : nuevo === 'rechazada' ? nombre + ' ' + T('no avanza.') : nombre + ' ' + T('volvió a revisión.');
-                // aceptar puede registrar la tarifa de colocación, así que ese cambio no se ofrece como "Deshacer"
                 toast(msg, nuevo === 'aprobada' || deshacer === false ? undefined : { undo: function () { mover(art, desde, false); } });
             })
             .catch(function () { toast(T('Sin conexión. Inténtalo de nuevo.')); })

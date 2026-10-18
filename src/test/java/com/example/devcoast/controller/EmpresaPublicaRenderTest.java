@@ -36,7 +36,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Página de una empresa con el shell náutico: ficha y ofertas activas como pases
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class EmpresaPublicaRenderTest {

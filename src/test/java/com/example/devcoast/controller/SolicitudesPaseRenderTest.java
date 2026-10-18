@@ -49,7 +49,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// ronda 4 del rediseño náutico: /solicitudes con pases de estado, pestañas, invitaciones y retirar
 @WebMvcTest(SolicitudController.class)
 @Import(SecurityConfig.class)
 class SolicitudesPaseRenderTest {
@@ -152,14 +151,12 @@ class SolicitudesPaseRenderTest {
         MvcResult r = mockMvc.perform(get("/solicitudes").session(sesion("talento")).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("4 solicitudes · 1 en proceso · 1 invitación por responder")))
-                // talones
                 .andExpect(content().string(containsString("jt-stub s-rev")))
                 .andExpect(content().string(containsString("jt-stub s-ace")))
                 .andExpect(content().string(containsString("jt-stub s-rec")))
                 .andExpect(content().string(containsString("En revisión")))
                 .andExpect(content().string(containsString("Aceptada")))
                 .andExpect(content().string(containsString("No avanzó")))
-                // línea de progreso con texto oculto y etapa actual
                 .andExpect(content().string(containsString("aria-current=\"step\"")))
                 .andExpect(content().string(containsString("(etapa actual)")))
                 .andExpect(content().string(containsString("(aquí terminó)")))
@@ -168,20 +165,15 @@ class SolicitudesPaseRenderTest {
                 .andExpect(content().string(containsString("ACEPTADA")))
                 .andExpect(content().string(containsString("NO AVANZÓ")))
                 .andExpect(content().string(containsString("MATCH 67%")))
-                // retirar solo en revisión, con confirmación a la vista
                 .andExpect(content().string(containsString("Retirar solicitud de Desarrollo Backend")))
                 .andExpect(content().string(containsString("/solicitudes/s1/delete")))
                 .andExpect(content().string(not(containsString("/solicitudes/s2/delete"))))
                 .andExpect(content().string(containsString("Sí, retirar")))
-                // ver oferta para las que ya no se pueden retirar
                 .andExpect(content().string(containsString("/empleos/e-s2")))
-                // aviso de acción pendiente real + pestañas
                 .andExpect(content().string(containsString("Tienes 1 invitación por responder.")))
-                // el contador de Invitaciones cuenta solo las pendientes (hay 2 invitaciones, 1 pendiente)
                 .andExpect(content().string(containsString("Invitaciones <b>1</b>")))
                 .andExpect(content().string(containsString("Todas <b>4</b>")))
                 .andExpect(content().string(containsString("Cerradas <b>2</b>")))
-                // shell
                 .andExpect(content().string(containsString("aria-current=\"page\"")))
                 .andReturn();
         volcar(r, "solicitudes-talento.html");
@@ -228,7 +220,6 @@ class SolicitudesPaseRenderTest {
                 .andExpect(content().string(containsString("/invitaciones/i1/rechazar")))
                 .andExpect(content().string(not(containsString("/invitaciones/i2/aceptar"))))
                 .andExpect(content().string(containsString("COP 4.000.000 – 6.000.000")))
-                // en esta pestaña no se repite el aviso
                 .andExpect(content().string(not(containsString("Tienes 1 invitación por responder."))))
                 .andReturn();
         volcar(r, "solicitudes-invitaciones.html");
@@ -284,7 +275,6 @@ class SolicitudesPaseRenderTest {
         s.setUsuarioId("t1");
         when(solicitudRepository.findById("s1")).thenReturn(Optional.of(s));
 
-        // es lo que usan el "Deshacer" de Empleos y el "Retirar" de Solicitudes: la página ya muestra su toast
         mockMvc.perform(post("/solicitudes/s1/delete").accept(org.springframework.http.MediaType.APPLICATION_JSON)
                 .session(sesion("talento")).with(csrf()))
                 .andExpect(status().isOk())
@@ -318,7 +308,6 @@ class SolicitudesPaseRenderTest {
                 .andExpect(status().is3xxRedirection());
         verify(solicitudRepository, never()).deleteById("s9");
     }
-    // ===== detalle de una solicitud (/solicitudes/{id}) con el pase de la lista =====
 
     @Test
     void elDetalleDeUnaSolicitudMuestraElPaseElHistorialYLosProyectosAdjuntos() throws Exception {

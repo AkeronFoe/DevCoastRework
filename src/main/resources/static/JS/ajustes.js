@@ -1,7 +1,3 @@
-/* DevCoast · Ajustes (diseño náutico).
-   Secciones como chips, preferencias de interfaz que se aplican y recuerdan al instante (tema, densidad, texto,
-   contraste, movimiento: las gestiona preferencias.js), privacidad y plan contra los mismos endpoints de siempre,
-   y los diálogos de correo y de eliminar cuenta. Vanilla, sin librerías. */
 (function () {
     'use strict';
 
@@ -14,7 +10,6 @@
     function setSwitch(btn, on) { if (btn) btn.setAttribute('aria-checked', on ? 'true' : 'false'); }
     function isOn(btn) { return btn.getAttribute('aria-checked') === 'true'; }
 
-    /* ── secciones: un solo panel visible, con #hash para llegar directo (p. ej. /ajustes#apariencia) ── */
     var tabs = $$('[data-sec]');
     var panels = $$('[data-panel]');
 
@@ -35,7 +30,6 @@
         if (s) mostrar(s, false);
     });
 
-    /* ── preferencias de interfaz ── */
     function marcar(sel, attr, valor) {
         $$(sel).forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute(attr) === valor ? 'true' : 'false'); });
     }
@@ -90,7 +84,6 @@
     });
     document.addEventListener('dc:prefs-changed', pintarPrefs);
 
-    /* ── privacidad (solo cuentas de talento) ── */
     var priv = {
         perfilPublico: !!AJ.perfilPublico,
         mostrarCorreo: !!AJ.mostrarCorreo,
@@ -145,12 +138,11 @@
     });
     pintarVisibilidad();
 
-    /* ── notificaciones (solo en este navegador: no hay endpoint) ── */
     var NOTIF_KEY = 'dc-notif';
     function leerNotif() {
         try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}') || {}; } catch (e) { return {}; }
     }
-    function guardarNotif(o) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } }
+    function guardarNotif(o) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(o)); } catch (e) { } }
     var NOTIF_DEF = { invitaciones: true, solicitudes: true, producto: false };
     var NOTIF_MSG = {
         invitaciones: ['Avisos de invitaciones desactivados', 'Avisos de invitaciones activados'],
@@ -171,14 +163,12 @@
         });
     });
 
-    /* ── diálogos ── */
     function abrir(d) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
     function cerrar(d) { if (d.close) d.close(); else d.removeAttribute('open'); }
     function cerrarAlClicFuera(d) {
         d.addEventListener('click', function (e) { if (e.target === d) cerrar(d); });
     }
 
-    /* cambiar correo */
     var dlgCorreo = $('#dlgCorreo');
     if (dlgCorreo) {
         var inCorreo = $('#inCorreo'), inPassCorreo = $('#inPassCorreo'), errCorreo = $('#errCorreo');
@@ -217,7 +207,6 @@
         });
     }
 
-    /* eliminar cuenta: el botón se activa solo con la palabra y la contraseña */
     var dlgDel = $('#dlgEliminar');
     if (dlgDel) {
         var inConf = $('#inConfirmar'), inPassDel = $('#inPassDel'), okDel = $('#okEliminar');
@@ -234,7 +223,6 @@
         inPassDel.addEventListener('input', revisarDel);
     }
 
-    /* ── plan: actualizar a Pro (cuentas de empresa) ── */
     var btnPro = $('#btnPro');
     if (btnPro) btnPro.addEventListener('click', function () {
         btnPro.textContent = 'Actualizando…'; btnPro.disabled = true;

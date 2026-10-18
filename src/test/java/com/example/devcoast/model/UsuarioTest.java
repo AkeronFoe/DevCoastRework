@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-// test chiquito y sin Spring de por medio, para que sirva de ejemplo de como probar logica
-// pura sin tener que levantar toda la app (eso lo hacemos aparte con los @WebMvcTest)
 class UsuarioTest {
 
     @Test
@@ -37,7 +35,6 @@ class UsuarioTest {
 
     @Test
     void perfilAMedioLlenarDaUnPuntoIntermedio() {
-        // solo llenamos 6 de los 12 campos que cuentan -> 50%
         Usuario u = new Usuario();
         u.setNombre("Luis Pérez");
         u.setRolTitulo("QA");

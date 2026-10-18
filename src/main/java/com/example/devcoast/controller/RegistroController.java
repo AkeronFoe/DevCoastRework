@@ -39,8 +39,6 @@ public class RegistroController {
     }
 
     @GetMapping("/register/talento")
-    // putIfAbsent: si venimos de un error, los flash attributes con lo que escribió la persona ya están en el
-    // modelo y no hay que pisarlos con vacíos
     public String registrarTalentoPage(Model model) {
         model.asMap().putIfAbsent("fNombre", "");
         model.asMap().putIfAbsent("fRolTitulo", "");
@@ -144,11 +142,6 @@ public class RegistroController {
         return "redirect:/dashboard";
     }
 
-    /*
-     * ─────────────────────────────────────────────────────────
-     * GET /register/disponible — chequeo de correo en vivo (AJAX)
-     * ─────────────────────────────────────────────────────────
-     */
     @GetMapping(value = "/register/disponible", produces = "application/json")
     @ResponseBody
     public Map<String, Object> correoDisponible(@RequestParam(required = false) String correo) {

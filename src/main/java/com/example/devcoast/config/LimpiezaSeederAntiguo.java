@@ -24,12 +24,8 @@ import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
 
-/**
- * Oigan, esto de acá borra los datos de mentiritas que dejó el seeder viejo (los de la versión anterior, ya
- * desactualizados) para que no se mezclen con los nuevos. Solo borra lo que reconoce por "huellas" que ese seeder
- * dejaba (por ejemplo, portfolio.xxx.dev o sus 15 descripciones de empresa) y lo que colgaba de eso. Cuentas
- * creadas por personas de verdad no se tocan.
- */
+// oigan, esto de acá borra los datos de mentiritas de la versión vieja para que no se mezclen con los nuevos.
+// Las cuentas de personas reales ni las toca.
 final class LimpiezaSeederAntiguo {
 
     private static final Logger log = LoggerFactory.getLogger(LimpiezaSeederAntiguo.class);
@@ -58,7 +54,6 @@ final class LimpiezaSeederAntiguo {
         this.mongo = mongo;
     }
 
-    /** @return cuántos documentos se borraron por colección (vacío si no había nada viejo). */
     Map<String, Long> limpiar() {
         Map<String, Long> borrados = new LinkedHashMap<>();
 
@@ -75,7 +70,6 @@ final class LimpiezaSeederAntiguo {
         for (List<String> lote : trozos(empresas))
             mongo.find(new Query(Criteria.where("empresaId").in(lote)), Empleo.class).forEach(e -> empleos.add(e.getId()));
 
-        // solicitudes de talentos viejos o a ofertas viejas
         List<Solicitud> solicitudes = new ArrayList<>();
         for (List<String> lote : trozos(usuarios))
             solicitudes.addAll(mongo.find(new Query(Criteria.where("usuarioId").in(lote)), Solicitud.class));
@@ -90,7 +84,6 @@ final class LimpiezaSeederAntiguo {
             borrados.merge("mensajes", mongo.remove(new Query(Criteria.where("solicitudId").in(lote)), Mensaje.class).getDeletedCount(), Long::sum);
             borrados.merge("solicitudes", mongo.remove(new Query(Criteria.where("id").in(lote)), Solicitud.class).getDeletedCount(), Long::sum);
         }
-        // avisos de otras personas que apuntaban a solicitudes que ya no existen
         for (List<String> lote : trozos(solicitudesDeOtros)) {
             String alternativas = String.join("|", lote.stream().map(Pattern::quote).toList());
             borrados.merge("notificaciones", mongo.remove(new Query(Criteria.where("url").regex(alternativas)), Notificacion.class).getDeletedCount(), Long::sum);
@@ -109,7 +102,6 @@ final class LimpiezaSeederAntiguo {
             borrados.merge("cobros", mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Cobro.class).getDeletedCount(), Long::sum);
             borrados.merge("empleos", mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Empleo.class).getDeletedCount(), Long::sum);
         }
-        // favoritos de personas que siguen existiendo y apuntaban a ofertas borradas
         for (List<String> lote : trozos(empleos))
             mongo.updateMulti(new Query(Criteria.where("empleosFavoritos").in(lote)), new Update().pullAll("empleosFavoritos", lote.toArray()), Usuario.class);
 
@@ -122,7 +114,6 @@ final class LimpiezaSeederAntiguo {
         return borrados;
     }
 
-    /** Talentos del seeder viejo: portfolio.<usuario>.dev + linkedin.com/in/<usuario>, o su cuenta demo de entonces. */
     private Query usuariosViejos() {
         Criteria generados = new Criteria().andOperator(
                 Criteria.where("portfolioUrl").regex("^https://portfolio\\.[a-z0-9]+\\.dev$"),
@@ -133,7 +124,6 @@ final class LimpiezaSeederAntiguo {
         return new Query(new Criteria().orOperator(generados, demo));
     }
 
-    /** Empresas del seeder viejo: una de sus 15 descripciones exactas con correo contacto@..., o su empresa demo. */
     private Query empresasViejas() {
         Criteria generadas = new Criteria().andOperator(
                 Criteria.where("descripcion").in(DESCRIPCIONES_EMPRESA_VIEJAS),

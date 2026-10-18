@@ -31,7 +31,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Analytics con el shell náutico: una versión para Talento ("Mi actividad") y otra para Empresa
 @WebMvcTest(PageController.class)
 @Import(SecurityConfig.class)
 class AnalyticsRenderTest {

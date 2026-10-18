@@ -48,7 +48,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// ronda 3 del rediseño náutico: /empleos con el shell nuevo, pases de abordaje y match
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class EmpleosPageRenderTest {
@@ -158,7 +157,6 @@ class EmpleosPageRenderTest {
 
         MvcResult r = mockMvc.perform(get("/empleos").session(sesion("talento")).with(csrf()))
                 .andExpect(status().isOk())
-                // destacado = mayor match (Backend Java: 100 %), con etiqueta dentro del ticket
                 .andExpect(content().string(containsString("DESTACADO · MEJOR MATCH")))
                 .andExpect(content().string(containsString("jt in feat")))
                 .andExpect(content().string(containsString("MATCH ALTO")))
@@ -170,15 +168,12 @@ class EmpleosPageRenderTest {
                 .andExpect(content().string(containsString("$5–7 M")))
                 .andExpect(content().string(containsString("SALARIO · COP/MES")))
                 .andExpect(content().string(containsString("Programación · Frontend")))
-                // contador, leyenda y filtros
                 .andExpect(content().string(containsString("Mostrando 4 de 4 ofertas · 1 con match alto")))
                 .andExpect(content().string(containsString("cuánto de lo que pide la oferta ya está en tu perfil")))
                 .andExpect(content().string(containsString("Alto (85%+)")))
-                // postular: formulario real con CSRF y endpoint JSON
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
                 .andExpect(content().string(containsString("/empleos/" + lista.get(0).getId() + "/aplicar")))
                 .andExpect(content().string(containsString("data-postular=\"/empleos/" + lista.get(0).getId() + "/postular\"")))
-                // shell: menú con la página actual y las insignias reales
                 .andExpect(content().string(containsString("aria-current=\"page\"")))
                 .andExpect(content().string(containsString("4 ofertas activas")))
                 .andExpect(content().string(containsString("2 invitaciones pendientes")))

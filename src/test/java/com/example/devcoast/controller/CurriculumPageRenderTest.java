@@ -37,9 +37,6 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 
-// smoke test temporal de la migracion de curriculum.html al layout ws-: cubre
-// el propio CV en modo edicion (con datos y recien creado) y el modo lectura
-// que usa una empresa para revisar la postulacion de un candidato
 @WebMvcTest(controllers = { PageController.class, SolicitudController.class })
 @Import(SecurityConfig.class)
 class CurriculumPageRenderTest {
@@ -214,7 +211,6 @@ class CurriculumPageRenderTest {
         mockMvc.perform(get("/empleos/emp1/postulaciones/s2").session(sesionEmpresa()).with(csrf()))
                 .andExpect(status().isOk());
     }
-    // ===== rediseño náutico: la hoja de CV, el diálogo de edición y la revisión de la empresa =====
 
     @Test
     void elDuenoVeLaHojaConSusDatosElDialogoYLaCompletitud() throws Exception {
@@ -244,14 +240,12 @@ class CurriculumPageRenderTest {
                 .andExpect(content().string(containsString("Nordic Labs")))
                 .andExpect(content().string(containsString("Reduje el tiempo de deploy un 40%.")))
                 .andExpect(content().string(containsString("B2 Conversacional")))
-                // el diálogo trae sus datos: la experiencia existente, el molde de una nueva y los logros para el textarea
                 .andExpect(content().string(containsString("id=\"dlgCv\"")))
                 .andExpect(content().string(containsString("value=\"Nordic Labs\"")))
                 .andExpect(content().string(containsString("id=\"tplExp\"")))
                 .andExpect(content().string(containsString("data-lineas=\"Reduje el tiempo de deploy un 40%.||Lideré el rediseño.\"")))
                 .andExpect(content().string(containsString("Completitud")))
                 .andExpect(content().string(matchesPattern("(?s).*/JS/curriculum-editor(-[0-9a-f]{32})?\\.js.*")))
-                // el currículum del dueño no muestra acciones de empresa
                 .andExpect(content().string(not(containsString("Aceptar"))));
     }
 
@@ -285,7 +279,6 @@ class CurriculumPageRenderTest {
                 .andExpect(content().string(containsString("/empleos/emp1/postulaciones/s1/rechazar")))
                 .andExpect(content().string(containsString("Sí, aceptar")))
                 .andExpect(content().string(containsString("Volver al empleo")))
-                // la empresa solo lee: sin diálogo de edición ni completitud
                 .andExpect(content().string(not(containsString("id=\"dlgCv\""))))
                 .andExpect(content().string(not(containsString("Editar secciones"))));
     }

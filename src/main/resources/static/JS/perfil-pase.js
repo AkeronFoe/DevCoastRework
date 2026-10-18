@@ -1,6 +1,3 @@
-/* DevCoast · Mi perfil (talento y empresa). Pase vertical con el formulario de siempre.
-   Guarda con POST /perfil/guardar (JSON), sube la foto a /perfil/foto y el interruptor "Destacar" usa /ajustes/privacidad.
-   Después de guardar, trae /perfil otra vez y reemplaza las partes calculadas por el servidor (vista previa, pendientes, logros). */
 (function () {
     'use strict';
 
@@ -15,7 +12,6 @@
     var esEmpresa = P.tipo === 'empresa';
     var status = $('#pfStatus'), saveBtn = $('#pfSave');
 
-    /* ── chips de stack y habilidades (solo talento) ── */
     var listas = { stack: (P.stack || []).slice(), hab: (P.hab || []).slice() };
     var maximos = { stack: 50, hab: 30 };
     function pintar(clave) {
@@ -59,15 +55,12 @@
                 listas[clave].pop(); pintar(clave); marcar();
             }
         });
-        // lo que quedó escrito sin Enter también cuenta al salir del campo
         input.addEventListener('blur', function () { if (input.value.trim() && agregar(clave, input.value)) { input.value = ''; marcar(); } });
     });
 
-    /* ── contador de la biografía ── */
     var bio = $('#pfBio'), cnt = $('#pfBioC');
     if (bio && cnt) bio.addEventListener('input', function () { cnt.textContent = bio.value.length; });
 
-    /* ── enlaces: solo http(s) ── */
     function urlValida(input) {
         var v = input.value.trim();
         var ok = v === '' || /^https?:\/\/\S+$/i.test(v);
@@ -76,8 +69,6 @@
         if (err) err.hidden = ok;
         return ok;
     }
-    // el error se muestra al enviar y se quita mientras se corrige (nunca al salir del campo: un cambio de altura
-    // justo al pulsar "Guardar" movería el botón y se perdería el clic)
     $$('[data-url]').forEach(function (i) {
         i.addEventListener('input', function () { if (i.getAttribute('aria-invalid') === 'true') urlValida(i); });
     });
@@ -86,7 +77,6 @@
         if (nombreIn.value.trim()) { nombreIn.setAttribute('aria-invalid', 'false'); var e = $('#pfNombreE'); if (e) e.hidden = true; }
     });
 
-    /* ── carga útil según el tipo de cuenta ── */
     function val(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
     function carga() {
         if (esEmpresa) return {
@@ -121,7 +111,6 @@
         status.classList.toggle('err', !!error);
     }
 
-    /* ── guardar ── */
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         var nombre = $('#pfNombre'), eNombre = $('#pfNombreE');
@@ -152,7 +141,6 @@
             .then(function () { saveBtn.disabled = false; saveBtn.textContent = T('Guardar cambios'); });
     });
 
-    /* ── trae /perfil y reemplaza lo que calcula el servidor ── */
     function refrescar() {
         fetch('/perfil', { headers: { 'Accept': 'text/html' } })
             .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
@@ -168,10 +156,9 @@
                 var av = $('.user .av'), avN = $('.user .av', doc);
                 if (av && avN) av.replaceWith(document.importNode(avN, true));
             })
-            .catch(function () { /* si falla, la página sigue siendo válida: se actualiza al recargar */ });
+            .catch(function () { });
     }
 
-    /* ── foto (talento y empresa) ── */
     var file = $('#pfFile'), avatar = $('#pfAvatar'), quitar = $('#pfQuitar');
     function abrirFoto() { if (file) file.click(); }
     if (avatar) avatar.addEventListener('click', abrirFoto);
@@ -210,7 +197,6 @@
             .catch(function () { toast(T('No se pudo quitar la foto.')); });
     });
 
-    /* ── "Destacar mi perfil" (se guarda al instante, como los interruptores de Ajustes) ── */
     document.addEventListener('click', function (e) {
         var sw = e.target.closest ? e.target.closest('#pfDestacar') : null;
         if (!sw) return;

@@ -1,5 +1,3 @@
-/* Bandeja de mensajes: fechas relativas, búsqueda + filtro de no leídos,
-   y el conteo animado de los dos gauges del resumen. */
 (function () {
   const reduceMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
     localStorage.getItem('dc-reduce-motion') === 'true'

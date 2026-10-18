@@ -68,7 +68,6 @@
                 <th:block th:if="${guardTotal > 0 and totalMostradas == 0}">
                     <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Ninguna de tus ofertas guardadas cumple ese filtro.', '/empleos/guardados', 'Ver todas')}"></div>
                 </th:block>
-                <!-- lo muestra guardados.js cuando se quita la última oferta de la lista -->
                 <div id="guardadosVacio" hidden>
                     <div th:replace="~{fragments/nautico :: empty('Nada guardado todavía.', 'Marca una oferta en Empleos y la encuentras aquí, con su match, cuando quieras decidir.', '/empleos', 'Explorar empleos')}"></div>
                 </div>

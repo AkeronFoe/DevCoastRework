@@ -44,7 +44,6 @@
                     </form>
                 </div>
 
-                <!-- acción pendiente real: invitaciones de empresas sin responder -->
                 <div class="alertbar" role="status" th:if="${invPendientes > 0 and estadoSel != 'invitaciones'}">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>
                     <div class="txt"><b th:text="${invPendientes == 1 ? 'Tienes 1 invitación por responder.' : 'Tienes ' + invPendientes + ' invitaciones por responder.'}">Tienes 1 invitación por responder.</b>

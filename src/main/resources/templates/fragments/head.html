@@ -2,10 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <!-- pedazo de <head> que se repetía en TODAS las paginas, ahora vive aca solo -->
     <th:block th:fragment="meta">
         <meta charset="UTF-8">
-        <!-- esto es pal token del CSRF, si lo quitan de una pagina los POST/fetch de esa pagina van a tirar 403 -->
         <meta name="_csrf" th:content="${_csrf.token}">
         <meta name="_csrf_header" th:content="${_csrf.headerName}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

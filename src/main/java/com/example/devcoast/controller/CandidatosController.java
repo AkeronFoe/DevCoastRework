@@ -28,10 +28,6 @@ import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Postulaciones de la cuenta de Empresa: las postulaciones de todas sus ofertas, agrupadas por oferta.
- * ?estado=revision|aceptadas|rechazadas &amp;q= (nombre o cargo del candidato).
- */
 @Controller
 public class CandidatosController {
 
@@ -70,7 +66,6 @@ public class CandidatosController {
         List<String> empleoIds = empleos.stream().map(Empleo::getId).collect(Collectors.toList());
         List<Solicitud> todas = empleoIds.isEmpty() ? List.of() : solicitudRepository.findByEmpleoIdIn(empleoIds);
 
-        // candidatos para calcular el match de cada uno con el stack de la oferta
         Map<String, Usuario> candidatos = new HashMap<>();
         Set<String> usuarioIds = todas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
         if (!usuarioIds.isEmpty())
@@ -119,7 +114,6 @@ public class CandidatosController {
         model.addAttribute("nAceptadas", aceptadas);
         model.addAttribute("nNoAvanzaron", noAvanzaron);
         model.addAttribute("hayFiltros", !filtro.isEmpty() || !busqueda.isEmpty());
-        // con el plan Gratis, aceptar una postulación registra la tarifa de colocación (ver SolicitudController)
         model.addAttribute("cobraColocacion", !planService.esPro(empresa));
         agregarSesion(session, model);
         return "candidatos";

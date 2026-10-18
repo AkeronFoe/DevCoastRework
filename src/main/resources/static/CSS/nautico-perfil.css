@@ -1,12 +1,7 @@
-/* DevCoast · Mi perfil, perfil de empresa, Mis ofertas y Postulaciones (ronda 6). Sin mockup propio:
-   sigue "Perfil" y "cuenta de Empresa" de DEVCOAST-SISTEMA-VISUAL.md (formulario en un pase vertical con barra de progreso).
-   Requiere nautico.css y nautico-pase.css. */
 :root{--field:#FBFBFD;--field-line:#B5B9C4}
 .pf-acts{display:flex;align-items:center;gap:10px}
 .pf{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:26px;align-items:start;margin-top:26px}
 .pf-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-
-/* ───── pase vertical ───── */
 .pass{display:flex;flex-direction:column;min-width:0}
 .pass-main{--r:11px;position:relative;background:var(--paper);color:var(--paper-ink);border-radius:16px 16px 0 0;padding:24px 26px 22px;display:flex;flex-direction:column;gap:22px;
   -webkit-mask:radial-gradient(circle var(--r) at 0 100%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle var(--r) at 100% 100%,#0000 98%,#000) right/51% 100% no-repeat;
@@ -31,8 +26,6 @@
 .go[disabled]{cursor:default;transform:none;opacity:.75}
 .bars{flex:none;display:block}
 @media (max-width:420px){.bars{display:none}}
-
-/* ───── campos (sobre papel) ───── */
 .pf-id{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap}
 .pf-photo{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .pf-av{width:88px;height:88px;border:0;padding:0;border-radius:16px;background:var(--acc);color:var(--paper-ink);overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font:700 38px var(--font-display);transition:transform .2s ease}
@@ -76,13 +69,10 @@ body.empresa .grp legend{color:var(--teal-d)}
 .pill button{width:20px;height:20px;border:0;border-radius:50%;background:none;color:var(--paper-ink);font:700 12px var(--font-mono);cursor:pointer;line-height:1}
 .pill button:hover{background:var(--paper-ink);color:var(--paper)}
 .pill button:focus-visible{outline:2px solid var(--paper-ink);outline-offset:1px}
-
-/* ───── columna derecha ───── */
 .pf-side .pn h2{align-items:center}
 .pf-side .talento,.pf-side .tc{margin-top:2px}
 .pn .note{font:500 12.5px/1.5 var(--font-mono);color:var(--mute);margin:0}
 .pn .note a{color:var(--teal);font:inherit}
-/* el nombre de la tarjeta no debe heredar el estilo de enlace de los títulos de panel */
 .pf-side .tc-n{display:block;font-size:21px;letter-spacing:-.01em}
 .pf-side .tc-n a{font:inherit;color:inherit;text-decoration:none;white-space:normal}
 .pf-side .tc-n a:hover{text-decoration:underline;text-decoration-color:var(--orange-ink);text-underline-offset:4px}

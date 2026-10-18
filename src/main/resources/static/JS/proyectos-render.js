@@ -1,18 +1,9 @@
-/* DevCoast — motor de presentación del dibujito de card compartido.
-   Convierte datos reales de un proyecto (categoria, colorIcono, el Estilo
-   elegido) en el canvas de la vitrina — código, diseño, señal, vacío,
-   onda o mesa — usado tanto por la grilla real (proyectos-vitrina.js)
-   como por la vista previa en vivo del formulario de subir/editar
-   proyecto (s-proyecto.js), para que ambos muestren exactamente el mismo
-   componente en vez de dos previews distintas que puedan
-   desincronizarse entre sí. */
 (function (global) {
 
     function escapeHtml(s) {
         return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     }
 
-    // hash determinístico simple (djb2) — mismo proyecto, mismo dibujo siempre
     function hashStr(s) {
         let h = 5381
         for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0
@@ -36,15 +27,12 @@
         const c = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')
         return `#${c(r)}${c(g)}${c(b)}`
     }
-    // mezcla hacia blanco (amt>0) o negro (amt<0) — variantes de un único
-    // color real (colorIcono) en vez de inventar una paleta de 4 colores
     function shade(hex, amt) {
         const { r, g, b } = hexToRgb(hex)
         const t = amt > 0 ? 255 : 0
         const k = Math.abs(amt)
         return rgbToHex(r + (t - r) * k, g + (t - g) * k, b + (t - b) * k)
     }
-    // color de texto legible sobre cualquier acento real, por luminancia
     function inkFor(hex) {
         const { r, g, b } = hexToRgb(hex)
         const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
@@ -141,8 +129,6 @@
         return { modeClass: 'mode-design', shapeClass: '', discLabel: 'diseño', bar, stage }
     }
 
-    // pulsos concéntricos tipo radar/señal, emitiendo desde un punto — la
-    // única de las seis con movimiento real (ver @keyframes projSignalPing)
     function buildSignalCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const cx = (28 + rnd() * 44).toFixed(1)
@@ -162,8 +148,6 @@
         return { modeClass: 'mode-signal', shapeClass: '', discLabel: 'señal', bar, stage }
     }
 
-    // puntos dispersos tipo starfield — algunos titilan lento, la mayoría
-    // quieta (ver @keyframes projVoidTwinkle)
     function buildVoidCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const tone = shade(accent, .85)
@@ -185,8 +169,6 @@
         return { modeClass: 'mode-void', shapeClass: '', discLabel: 'vacío', bar, stage }
     }
 
-    // barras de ecualizador — reutiliza .proj-eq/.proj-eq-bar, que ya
-    // existían en el CSS de una versión anterior de la vitrina
     function buildWaveCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         let bars = ''
@@ -204,9 +186,6 @@
         return { modeClass: 'mode-wave', shapeClass: '', discLabel: 'onda', bar, stage }
     }
 
-    // grilla + marcas de esquina tipo mesa de trabajo (Figma/Illustrator) —
-    // el contraste de las líneas sigue la luminancia del acento, no un
-    // color fijo, para que se lea igual con cualquier color elegido
     function buildArtboardCanvas({ categoria, accent, seed }) {
         const ink = inkFor(accent)
         const line = ink === '#0a1826' ? 'rgba(10,24,38,.35)' : 'rgba(255,255,255,.35)'
@@ -225,8 +204,6 @@
         return { modeClass: 'mode-artboard', shapeClass: '', discLabel: 'mesa', bar, stage }
     }
 
-    // grafo de nodos — cada nodo se conecta a uno anterior random, así
-    // siempre da un árbol conexo (no un caos de líneas cruzadas)
     function buildMeshCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const w = 240, h = 100
@@ -251,8 +228,6 @@
         return { modeClass: 'mode-mesh', shapeClass: '', discLabel: 'grafo', bar, stage }
     }
 
-    // boceto — barras de ancho variable apiladas, tipo wireframe/skeleton
-    // de contenido (el lenguaje visual estándar de un mockup de layout)
     function buildSketchCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const tone = shade(accent, .8)
@@ -271,8 +246,6 @@
         return { modeClass: 'mode-sketch', shapeClass: '', discLabel: 'boceto', bar, stage }
     }
 
-    // grilla de celdas rellenas con opacidad al azar, tipo heatmap/mosaico
-    // de píxeles — la contraparte "sólida" de la grilla de líneas de mesa
     function buildPixelCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const cols = 10, rows = 4
@@ -291,8 +264,6 @@
         return { modeClass: 'mode-pixel', shapeClass: '', discLabel: 'mosaico', bar, stage }
     }
 
-    // anillos orbitales elípticos con un "planeta" en cada uno — la
-    // contraparte estática/cósmica del pulso concéntrico de señal
     function buildOrbitCanvas({ categoria, accent, seed }) {
         const rnd = mulberry32(seed)
         const w = 240, h = 100
@@ -317,9 +288,6 @@
         return { modeClass: 'mode-orbit', shapeClass: '', discLabel: 'órbita', bar, stage }
     }
 
-    // el Estilo elegido en el formulario (banner/coverActual) define qué
-    // dibujito se pinta — classifyMode(categoria) queda solo de fallback
-    // para proyectos viejos guardados con un banner de la tanda anterior
     const STYLE_BUILDERS = {
         'cover-terminal': buildCodeCanvas,
         'cover-artboard': buildArtboardCanvas,

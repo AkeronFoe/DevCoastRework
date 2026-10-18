@@ -20,9 +20,6 @@
             c.id = 'toast-system';
             document.body.appendChild(c);
         }
-        /* algunas paginas ya traen el div #toast-system vacio en su HTML
-           (para reservar el lugar) — hay que posicionarlo e inyectar los
-           estilos igual, no solo cuando lo creamos nosotros nuevo */
         c.setAttribute('aria-live', 'polite');
         c.setAttribute('aria-atomic', 'true');
         c.style.cssText = 'position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column-reverse;gap:10px;z-index:5000;pointer-events:none;';

@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Getter;
 import lombok.Setter;
 
-// los índices son para: paginar por solicitudId+fecha, y contar no leídos por destinatario rápido
 @Getter
 @Setter
 @CompoundIndexes({

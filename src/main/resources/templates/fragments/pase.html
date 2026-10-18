@@ -3,7 +3,8 @@
 
 <body>
 
-    <!-- ===== Pase de abordaje (ticket). v = EmpleoVista; feat = destacado; i = orden de entrada ===== -->
+    <!-- esto de acá dibuja las tarjetas tipo "pase de abordaje" que se ven en empleos, solicitudes y el directorio -->
+
     <article th:fragment="ticket(v, feat, i)" class="jt in"
         th:classappend="${(feat ? 'feat ' : '') + (v.solicitada ? 'sent' : '') + (v.cerrada ? ' closed' : '')}" th:attr="data-id=${v.id}"
         th:style="'--i:' + ${i}">
@@ -25,7 +26,6 @@
                     <span class="tag" th:if="${v.cerrada}">CERRADA</span>
                     <span class="tag" th:if="${v.nueva and !v.cerrada}">NUEVA</span><span th:if="${v.hace != null}" th:text="${v.hace}">hace 3 días</span>
                 </span>
-                <!-- solo en Guardados (enGuardados): quita la oferta de los marcadores -->
                 <button class="unsave" type="button" th:if="${enGuardados != null and enGuardados}" th:attr="data-empleo-id=${v.id},aria-label='Quitar ' + ${v.titulo} + ' de guardados'">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>Quitar
                 </button>
@@ -93,7 +93,6 @@
         </div>
     </article>
 
-    <!-- ===== Pase de solicitud (v = SolicitudVista). Etapas reales: Enviada, En revisión, Decisión ===== -->
     <article th:fragment="solicitud(v, i)" class="jt rq in" th:classappend="${v.sello != null} ? 'has-stamp'"
         th:attr="data-id=${v.id}" th:style="'--i:' + ${i}">
         <div class="jt-main">
@@ -152,7 +151,6 @@
         </div>
     </article>
 
-    <!-- ===== Pase de invitación (v = InvitacionVista) ===== -->
     <article th:fragment="invitacion(v, i)" class="jt rq in" th:classappend="${v.sello != null} ? 'has-stamp'"
         th:attr="data-id=${v.id}" th:style="'--i:' + ${i}">
         <div class="jt-main">
@@ -200,7 +198,6 @@
         </div>
     </article>
 
-    <!-- ===== Portada de un proyecto (imagen subida, composición de diseño o editor de código) ===== -->
     <th:block th:fragment="portada(v)">
         <div class="cv" aria-hidden="true" th:if="${v.portada != null}"><img th:src="${v.portada}" alt="" loading="lazy"></div>
         <div class="cv" aria-hidden="true" th:if="${v.portada == null and v.areaClave != 'p'}">
@@ -215,7 +212,6 @@
         </div>
     </th:block>
 
-    <!-- ===== Tarjeta de proyecto del portafolio (v = ProyectoVista) ===== -->
     <article th:fragment="proyecto(v, i)" class="pj in" th:classappend="${!v.publicado} ? 'off'" th:style="'--i:' + ${i}"
         th:attr="data-id=${v.id},data-nombre=${v.nombre},data-categoria=${v.categoria},data-tipo=${v.tipo},data-anio=${v.anio},data-desc=${v.descripcion},data-link=${v.enlace},data-stack=${#strings.listJoin(v.herramientas, ', ')}">
         <th:block th:replace="~{:: portada(${v})}"></th:block>
@@ -246,7 +242,6 @@
                     <input type="hidden" name="publicado" th:value="${!v.publicado}">
                     <button class="swt" type="submit" role="switch" th:attr="aria-checked=${v.publicado}" th:aria-label="|Proyecto público: ${v.nombre}|"><i></i><span th:text="${v.publicado} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span></button>
                 </form>
-                <!-- eliminar con confirmación a la vista (sin confirm()) -->
                 <details class="pj-d">
                     <summary th:aria-label="|Eliminar ${v.nombre}|">Eliminar</summary>
                     <div class="pj-del">
@@ -262,7 +257,6 @@
         </div>
     </article>
 
-    <!-- ===== Carta de navegación del Dashboard (carta = CartaVista). Dibuja el barquito una vez con <symbol> y lo reutiliza ===== -->
     <section th:fragment="carta(carta)" class="carta" th:attr="aria-label=${carta.etiqueta}">
         <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="hullv"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath><symbol id="vessel" viewBox="90 30 470 490"><polygon points="273,52 510,274 408,276" style="fill:var(--s1)" stroke-width="5" stroke-linejoin="round"/><polygon points="273,52 408,274 350,292 274,366" style="fill:var(--s2)"/><polygon points="350,292 406,271 464,396 392,396" style="fill:var(--s3)"/><rect x="260" y="42" width="12" height="356" rx="6" fill="#F3F4F8"/><g clip-path="url(#hullv)"><rect x="100" y="397" width="450" height="15" fill="#F3F4F8"/><rect x="100" y="412" width="450" height="29" fill="#2DD4BF"/><rect x="100" y="441" width="450" height="8" fill="#F3F4F8"/><rect x="100" y="449" width="450" height="45" fill="#CDD1DB"/></g></symbol></defs></svg>
         <div class="zones" th:style="'--zn:' + ${#lists.size(carta.zonas)}">
@@ -283,7 +277,6 @@
         <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
     </section>
 
-    <!-- ===== Mini pase de oferta para "Avistadas" (v = EmpleoVista): todo el pase es un enlace ===== -->
     <a th:fragment="mini(v)" class="jt mini" th:href="@{/empleos/{id}(id=${v.id})}"
         th:aria-label="|${v.titulo}${v.empresaNombre != null ? ', ' + v.empresaNombre : ''}, match ${v.match} por ciento|">
         <div class="jt-main">
@@ -307,7 +300,6 @@
         </div>
     </a>
 
-    <!-- ===== Tarjeta del Directorio (v = TalentoVista): papel sin talón. También es la vista previa de Mi perfil (sin esEmpresa) ===== -->
     <article th:fragment="talento(v, i)" class="tc in" th:classappend="${v.destacado} ? 'feat'"
         th:style="'--i:' + ${i} + ';--av:' + ${v.color}">
         <span class="tc-pill" th:if="${v.destacado}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.8 1.5 7.1L12 17.6 5.7 21.3l1.5-7.1L1.8 9.4 9 8.6z"/></svg>DESTACADO</span>
@@ -363,7 +355,6 @@
         </div>
     </article>
 
-    <!-- ===== Pase de oferta de la cuenta de Empresa (v = OfertaEmpresaVista): el talón cuenta las postulaciones ===== -->
     <article th:fragment="oferta(v, i)" class="jt rq in" th:style="'--i:' + ${i}" th:attr="data-id=${v.oferta.id}">
         <div class="jt-main">
             <div class="jt-top">
@@ -441,8 +432,6 @@
         </div>
     </article>
 
-    <!-- ===== Candidato de una oferta (v = SolicitudVista, vista de Empresa). Los botones de mover usan los endpoints de siempre:
-         sin JavaScript son formularios que redirigen a la postulación; con JavaScript cambian el estado en el sitio ===== -->
     <article th:fragment="candidato(v, i)" class="jt rq cd in" th:style="'--i:' + ${i}"
         th:attr="data-id=${v.id},data-oferta=${v.empleoId},data-estado=${v.estado == 'descartado' ? 'rechazada' : v.estado},data-nombre=${v.candidato}">
         <div class="jt-main">
@@ -487,7 +476,6 @@
         </div>
     </article>
 
-    <!-- ===== Mini pase de candidato para la cuenta de Empresa (v = SolicitudVista) ===== -->
     <a th:fragment="miniCandidato(v)" class="jt mini" th:href="@{/empleos/{e}/postulaciones/{s}(e=${v.empleoId},s=${v.id})}"
         th:aria-label="|${v.candidato}, para ${v.cargo}, match ${v.match} por ciento|">
         <div class="jt-main">

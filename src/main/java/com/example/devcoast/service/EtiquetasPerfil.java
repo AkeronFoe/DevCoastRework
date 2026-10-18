@@ -5,12 +5,6 @@ import java.util.Map;
 
 import com.example.devcoast.service.AreaEmpleo.Area;
 
-/**
- * Textos y filtros de los campos del perfil del talento (modalidad, disponibilidad, especialidad).
- * El registro y el onboarding guardan claves en minúscula ("remoto", "full-time", "ui-ux") y Mi perfil
- * antes guardaba textos con mayúscula ("Remoto", "Full-time"); aquí se unifica al mostrar y al filtrar
- * sin tocar lo que ya está guardado.
- */
 public final class EtiquetasPerfil {
 
     private EtiquetasPerfil() {
@@ -20,7 +14,6 @@ public final class EtiquetasPerfil {
             "frontend", "Frontend", "backend", "Backend", "fullstack", "Full Stack", "ui-ux", "UI / UX",
             "diseno-grafico", "Diseño gráfico", "data", "Data / Analytics", "mobile", "Mobile");
 
-    /** Claves que guarda el registro, en el orden del formulario. */
     public static final java.util.List<String> CLAVES_ESPECIALIDAD =
             java.util.List.of("frontend", "backend", "fullstack", "ui-ux", "diseno-grafico", "data", "mobile");
 
@@ -30,8 +23,6 @@ public final class EtiquetasPerfil {
         return Normalizer.normalize(v, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").toLowerCase().trim();
     }
 
-    // ───────── modalidad ─────────
-    /** remoto | hibrido | presencial, o "" si no es una de las tres (p. ej. "freelance" o vacío). */
     public static String modalidadClave(String v) {
         String b = base(v);
         return b.equals("remoto") || b.equals("hibrido") || b.equals("presencial") ? b : "";
@@ -48,7 +39,6 @@ public final class EtiquetasPerfil {
         };
     }
 
-    /** Expresión regular (sin distinguir mayúsculas) con las variantes guardadas de esa modalidad; null si la clave no vale. */
     public static String modalidadRegex(String clave) {
         return switch (base(clave)) {
             case "remoto" -> "^remoto$";
@@ -58,8 +48,6 @@ public final class EtiquetasPerfil {
         };
     }
 
-    // ───────── disponibilidad ─────────
-    /** full-time | part-time | freelance | practicas, o "". */
     public static String disponibilidadClave(String v) {
         String b = base(v).replace(' ', '-');
         return switch (b) {
@@ -93,8 +81,6 @@ public final class EtiquetasPerfil {
         };
     }
 
-    // ───────── especialidad ─────────
-    /** "ui-ux" → "UI / UX"; un texto libre queda tal cual. */
     public static String especialidad(String v) {
         if (v == null || v.isBlank())
             return null;
@@ -102,7 +88,6 @@ public final class EtiquetasPerfil {
         return t != null ? t : v.trim();
     }
 
-    /** Clave del registro a la que corresponde el valor guardado, o "" si es un texto libre. */
     public static String especialidadClave(String v) {
         String b = base(v);
         if (ESPECIALIDADES.containsKey(b))
@@ -113,7 +98,6 @@ public final class EtiquetasPerfil {
         return "";
     }
 
-    /** Área para el icono y el color de la tarjeta: programación, diseño u otras. */
     public static Area area(String especialidad) {
         return switch (especialidadClave(especialidad)) {
             case "frontend", "backend", "fullstack", "data", "mobile" -> Area.PROGRAMACION;

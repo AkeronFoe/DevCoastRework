@@ -43,7 +43,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// ronda 6: Mis ofertas de la cuenta de Empresa como pases con el conteo de postulaciones
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class MisEmpleosPageRenderTest {
@@ -143,7 +142,6 @@ class MisEmpleosPageRenderTest {
                 .andExpect(content().string(containsString("action=\"/empleos/cerrar/e1\"")))
                 .andExpect(content().string(containsString("href=\"/crearEmpleo?editar=e1\"")))
                 .andExpect(content().string(containsString("Publicar oferta")))
-                // la cerrada no sale en esta pestaña
                 .andExpect(content().string(not(containsString("DevOps"))))
                 .andExpect(content().string(not(containsString("alertbar"))))
                 .andReturn();

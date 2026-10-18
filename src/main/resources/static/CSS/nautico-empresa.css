@@ -1,5 +1,3 @@
-/* DevCoast · cuenta de Empresa: Mis ofertas y Postulaciones (ronda 6). Sin mockup propio: pases horizontales como Solicitudes
-   (talón teal, que es el color de la cuenta de Empresa) y la lista de candidatos por oferta. Requiere nautico.css y nautico-pase.css. */
 .head .acts{display:flex;align-items:center;gap:10px}
 .btn-o.sm{background:var(--acc)}
 .jt.rq .jt-stub.s-act{background:var(--teal)}
@@ -8,8 +6,6 @@
 .oacts a{font:700 13px var(--font-mono);color:var(--paper-ink);text-decoration:underline;text-decoration-color:var(--teal-d);text-underline-offset:4px}
 .oacts a:focus-visible{outline:3px solid var(--paper-ink);outline-offset:3px;border-radius:4px}
 .jt.rq .jt-stub .apply.ghost[type=submit]{height:40px;font-size:14px}
-
-/* ───── Postulaciones: candidatos agrupados por oferta ───── */
 .ofg{margin-top:34px}
 .ofg:first-of-type{margin-top:26px}
 .ofg-h{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px}
@@ -38,7 +34,6 @@
 .mv-l{font:700 13px var(--font-mono);color:var(--paper-ink);text-decoration:underline;text-decoration-color:var(--teal-d);text-underline-offset:4px;margin-left:auto}
 .mv-l+.mv-l{margin-left:0}
 .mv-b[disabled],.mvs [disabled]{opacity:.55;cursor:default}
-/* según el estado actual se esconde el botón que no aplica */
 .cd[data-estado="aprobada"] .mover[data-nuevo="aprobada"],
 .cd[data-estado="rechazada"] .mover[data-nuevo="rechazada"],
 .cd[data-estado="revision"] .mover[data-nuevo="revision"]{display:none}
@@ -47,8 +42,6 @@
 @media (prefers-reduced-motion:reduce){.mv-b,.mvs .ret>summary{transition:none}.mv-b:hover,.mvs .ret>summary:hover{transform:none}.cd.saliendo{transition:none}}
 .jt.rq .jt-top{flex-wrap:wrap;gap:6px 12px}
 .jt.rq .jt-top .when{white-space:normal}
-
-/* ───── Postulaciones de una oferta: fase del proceso ───── */
 .fase{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:22px 0 0}
 .fase-l{font:700 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-right:6px}
 .fase .ch{cursor:pointer}

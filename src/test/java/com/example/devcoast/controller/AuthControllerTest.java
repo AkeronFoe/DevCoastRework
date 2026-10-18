@@ -26,8 +26,6 @@ import com.example.devcoast.repository.MensajeRepository;
 import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 
-// probamos el login como si fueramos el navegador: sin esto, si alguien cambia
-// RoleGuard o el AuthController y rompe el acceso, nadie se entera hasta produccion
 @WebMvcTest(AuthController.class)
 @Import(SecurityConfig.class)
 class AuthControllerTest {
@@ -46,8 +44,6 @@ class AuthControllerTest {
     @MockitoBean
     private EmpresaRepository empresaRepository;
 
-    // el interceptor de notificaciones se mete en TODAS las paginas (menos login/register),
-    // asi que aunque este test no lo use, Spring lo necesita armado igual para arrancar
     @MockitoBean
     private InvitacionRepository invitacionRepository;
 

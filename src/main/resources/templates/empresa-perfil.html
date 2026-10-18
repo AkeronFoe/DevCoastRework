@@ -37,7 +37,6 @@
                 <section class="pn ep-hero" aria-label="Sobre la empresa">
                     <div class="ep-av" aria-hidden="true">
                         <span th:text="${inicial}">E</span>
-                        <!-- si la imagen no carga se quita y queda la inicial -->
                         <img th:if="${logoUrl != null}" th:src="${logoUrl}" alt="" onerror="this.remove()">
                     </div>
                     <div class="ep-info">

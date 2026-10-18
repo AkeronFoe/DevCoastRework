@@ -43,7 +43,6 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.PlanService;
 
-// ronda 6: Postulaciones de la cuenta de Empresa, agrupadas por oferta, con el match de cada candidato
 @WebMvcTest(CandidatosController.class)
 @Import(SecurityConfig.class)
 class PostulacionesPageRenderTest {
@@ -142,17 +141,16 @@ class PostulacionesPageRenderTest {
                 .andExpect(content().string(containsString("Backend Java")))
                 .andExpect(content().string(containsString("DevOps")))
                 .andExpect(content().string(containsString("CERRADA")))
-                // la oferta sin postulaciones no aparece
                 .andExpect(content().string(not(containsString("Sin gente"))))
                 .andExpect(content().string(containsString("1 en revisión · 1 aceptada · 1 no avanzó")))
-                .andExpect(content().string(containsString("Match 50%")))     // Java, Docker de 4
+                .andExpect(content().string(containsString("Match 50%")))
                 .andExpect(content().string(containsString("Match 100%")))
-                .andExpect(content().string(containsString("Sin match")))      // Ana Ríos no tiene perfil cargado
+                .andExpect(content().string(containsString("Sin match")))
                 .andExpect(content().string(containsString("href=\"/empleos/e1/postulaciones/s2\"")))
                 .andExpect(content().string(containsString("action=\"/empleos/e1/postulaciones/s2/aprobar\"")))
                 .andExpect(content().string(containsString("action=\"/empleos/e1/postulaciones/s3/reconsiderar\"")))
                 .andExpect(content().string(containsString("data-url=\"/empleos/e1/postulaciones/s1/estado\"")))
-                .andExpect(content().string(containsString("data-estado=\"rechazada\"")))   // el descartado se agrupa con "no avanzó"
+                .andExpect(content().string(containsString("data-estado=\"rechazada\"")))
                 .andExpect(content().string(containsString("Con el plan Gratis se registra la tarifa de colocación")))
                 .andReturn();
         guardar("postulaciones.html", r);
@@ -174,7 +172,6 @@ class PostulacionesPageRenderTest {
                 .andExpect(content().string(not(containsString("Camila Soto"))))
                 .andExpect(content().string(not(containsString("DevOps"))))
                 .andExpect(content().string(containsString("data-estado=\"aceptadas\"")))
-                // el total y los contadores no cambian con el filtro
                 .andExpect(content().string(containsString("<span id=\"cTotal\">4</span>")));
         mockMvc.perform(get("/candidatos").param("q", "rios").session(sesion("empresa")).with(csrf()))
                 .andExpect(content().string(containsString("Ana Ríos")))

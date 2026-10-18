@@ -9,13 +9,11 @@ import com.example.devcoast.service.EtiquetasPerfil;
 
 import lombok.Getter;
 
-/** Lo que muestra la tarjeta del Directorio (y la vista previa de Mi perfil) de un talento. Solo datos del perfil. */
 @Getter
 public class TalentoVista {
 
     static final int MAX_STACK = 5;
     static final int MAX_BIO = 150;
-    // el avatar de cada talento toma siempre el mismo color de la paleta del sistema
     private static final String[] PALETA = { "#FF7B4F", "#2DD4BF", "#CDD1DB", "#CC4B27", "#1F8F82" };
 
     private String id;
@@ -29,8 +27,8 @@ public class TalentoVista {
     private String modalidad;
     private String disponibilidad;
     private String especialidad;
-    private String areaClave;           // p | d | o
-    private String categoria;           // etiqueta del área para el chip
+    private String areaClave;
+    private String categoria;
     private List<String> stack = new ArrayList<>();
     private int stackExtra;
     private int proyectos;
@@ -79,7 +77,6 @@ public class TalentoVista {
         return s == null || s.isBlank() ? null : s.trim();
     }
 
-    /** Solo http(s): un enlace guardado con otro esquema no se muestra. */
     private static String enlace(String s) {
         if (s == null)
             return null;

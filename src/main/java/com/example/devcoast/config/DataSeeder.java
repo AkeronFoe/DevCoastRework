@@ -46,24 +46,9 @@ import com.example.devcoast.model.Usuario;
 import com.example.devcoast.service.MatchEmpleo;
 import com.example.devcoast.service.PlanService;
 
-/**
- * Siembra datos de ejemplo (miles de talentos, empresas, ofertas, proyectos, solicitudes, chats, notificaciones,
- * invitaciones y cobros) con relaciones coherentes y los mismos valores que guardan los formularios de la app.
- *
- * <ul>
- * <li>Está apagado por defecto: se activa con {@code devcoast.seed.enabled=true} (variable {@code SEED_ENABLED}).</li>
- * <li>Corre en un hilo aparte, por lotes: la app arranca y responde mientras se siembra.</li>
- * <li>Es idempotente: al terminar deja una marca en la colección {@code seed_meta}; si ya existe no vuelve a sembrar.</li>
- * <li>Nunca modifica ni borra datos existentes (salvo que se pida con {@code devcoast.seed.limpiar-antiguos=true},
- * que quita solo lo que sembró el seeder anterior; ver {@link LimpiezaSeederAntiguo}). Si una siembra se interrumpe, no reintenta sola: se reintenta con
- * {@code devcoast.seed.reintentar=true}, que borra solo lo creado después de que empezó esa siembra.</li>
- * <li>No envía correos ni toca servicios externos: las cuentas y direcciones son ficticias.</li>
- * </ul>
- *
- * Cuentas de demo (contraseña {@code demo1234}): demo@devcoast.co, diseno@devcoast.co (talentos),
- * empresa@devcoast.co (plan PRO) y startup@devcoast.co (plan gratis). El resto usa la contraseña {@code devcoast123}.
- */
 @Component
+// oigan, esto de acá llena la base con datos de mentiritas (talentos, empresas, ofertas, chats...) para poder probar todo
+// como si la plataforma ya estuviera en uso. Solo se prende con SEED_ENABLED=true y no toca lo que ya existe.
 @ConditionalOnProperty(name = "devcoast.seed.enabled", havingValue = "true")
 public class DataSeeder implements ApplicationRunner {
 
@@ -117,7 +102,6 @@ public class DataSeeder implements ApplicationRunner {
         hilo.start();
     }
 
-    /** Siembra de forma síncrona. Lo usan {@link #run} y las pruebas. */
     public void sembrar() {
         try {
             if (limpiarAntiguos)
@@ -155,13 +139,10 @@ public class DataSeeder implements ApplicationRunner {
         }
     }
 
-    // ───────────────────────── marca y reintento ─────────────────────────
-
     private static String coleccionDeIds(String coleccion) {
         return "ids-" + coleccion;
     }
 
-    /** Borra exactamente los documentos que la siembra interrumpida había registrado (nada más). */
     private void deshacerParcial() {
         log.warn("[DataSeeder] Reintento: borrando lo que creó la siembra interrumpida...");
         for (String c : COLECCIONES) {
@@ -178,8 +159,6 @@ public class DataSeeder implements ApplicationRunner {
         }
         mongo.remove(new Query(Criteria.where("_id").is(MARCA_ID)), COLECCION_MARCA);
     }
-
-    // ───────────────────────── generación ─────────────────────────
 
     private record EmpleoGen(Empleo e, String grupo) {
     }
@@ -289,7 +268,6 @@ public class DataSeeder implements ApplicationRunner {
                     .append("notificaciones", notificaciones.size()).append("cobros", cobros.size());
         }
 
-        /** Registra los ids antes de insertar (para poder deshacer si se interrumpe) y luego inserta por lotes. */
         <T> void insertar(List<T> lista, Class<T> tipo, String coleccion, Function<T, String> id) {
             List<ObjectId> ids = new ArrayList<>(lista.size());
             for (T t : lista)
@@ -300,12 +278,9 @@ public class DataSeeder implements ApplicationRunner {
             log.info("[DataSeeder]   {}: {} insertados", coleccion, lista.size());
         }
 
-        /** Un ObjectId cuya fecha embebida es la del documento: así "reciente", "nuevo esta semana" y el orden por _id son reales. */
         String idEn(Date fecha) {
             return new ObjectId(fecha).toHexString();
         }
-
-        // ───────── utilidades ─────────
 
         int peso(int... pesos) {
             int total = 0;
@@ -387,8 +362,6 @@ public class DataSeeder implements ApplicationRunner {
             return pick(candidatos);
         }
 
-        // ───────── empresas ─────────
-
         void generarEmpresas() {
             List<Date> fechas = fechasOrdenadas(nEmpresas + 2, 20, 900);
             int f = 0;
@@ -457,8 +430,6 @@ public class DataSeeder implements ApplicationRunner {
             } while (!nombresEmpresa.add(n));
             return n;
         }
-
-        // ───────── ofertas ─────────
 
         void generarEmpleos() {
             for (Empresa em : empresas) {
@@ -607,8 +578,6 @@ public class DataSeeder implements ApplicationRunner {
             }
         }
 
-        // ───────── talentos ─────────
-
         record Nombre(String pila, String completo, String apellido) {
         }
 
@@ -653,7 +622,6 @@ public class DataSeeder implements ApplicationRunner {
                 int tier = peso(28, 34, 28, 10);
                 talentosGen.add(new TalentoGen(talento(arq, grupo, tier, fechas.get(i)), grupo, tier, arq));
             }
-            // favoritos: ofertas activas del mismo grupo
             for (TalentoGen tg : talentosGen) {
                 if (tg.arq() == null)
                     continue;
@@ -698,7 +666,6 @@ public class DataSeeder implements ApplicationRunner {
             List<String> stack = new ArrayList<>(Arrays.asList(arq.stack()));
             Collections.shuffle(stack, rnd);
             stack = new ArrayList<>(stack.subList(0, Math.min(stack.size(), 3 + rnd.nextInt(3))));
-            // el stack principal siempre incluye la primera herramienta del arquetipo (la que define el perfil)
             if (!stack.contains(arq.stack()[0]))
                 stack.set(0, arq.stack()[0]);
             for (int x = rnd.nextInt(3); x > 0; x--) {
@@ -795,8 +762,6 @@ public class DataSeeder implements ApplicationRunner {
             return new ArrayList<>(List.of(e));
         }
 
-        // ───────── proyectos ─────────
-
         void generarProyectos() {
             for (TalentoGen tg : talentosGen) {
                 Usuario u = tg.u();
@@ -851,8 +816,6 @@ public class DataSeeder implements ApplicationRunner {
             return p;
         }
 
-        // ───────── solicitudes ─────────
-
         void generarSolicitudes() {
             for (TalentoGen tg : talentosGen) {
                 if (tg.arq() == null)
@@ -870,7 +833,6 @@ public class DataSeeder implements ApplicationRunner {
             solicitudesDemo();
         }
 
-        /** Crea la solicitud con el estado que corresponde a la fase de la oferta; null si ya existe o no es posible. */
         Solicitud solicitudAutomatica(TalentoGen tg, Empleo e, String estadoForzado) {
             Usuario u = tg.u();
             String par = u.getId() + "|" + e.getId();
@@ -985,8 +947,6 @@ public class DataSeeder implements ApplicationRunner {
             return s.getFechaSolicitud();
         }
 
-        // ───────── invitaciones ─────────
-
         void generarInvitaciones() {
             int objetivo = Math.max(0, nTalentos / 2);
             List<Empresa> conOfertas = empresas.stream().filter(e -> activosPorEmpresa.containsKey(e.getId())).toList();
@@ -1051,8 +1011,6 @@ public class DataSeeder implements ApplicationRunner {
             return i;
         }
 
-        // ───────── mensajes ─────────
-
         final Map<String, List<Mensaje>> hilos = new LinkedHashMap<>();
 
         void generarMensajes() {
@@ -1093,8 +1051,6 @@ public class DataSeeder implements ApplicationRunner {
             }
         }
 
-        // ───────── cobros ─────────
-
         void generarCobros() {
             for (Solicitud s : solicitudes) {
                 if (!"aprobada".equals(s.getEstado()))
@@ -1113,8 +1069,6 @@ public class DataSeeder implements ApplicationRunner {
                 cobros.add(c);
             }
         }
-
-        // ───────── notificaciones ─────────
 
         void generarNotificaciones() {
             Date corte = atras(60);
@@ -1152,10 +1106,8 @@ public class DataSeeder implements ApplicationRunner {
                     notificaciones.add(notif(ultimo.getDestinatarioId(), "NUEVO_MENSAJE", "Nuevo mensaje",
                             ultimo.getRemitenteNombre() + " te escribió", ultimo.getFechaEnvio(), "/chat/" + h.getKey()));
             }
-            // las notificaciones más antiguas de 10 días ya están leídas; el resto, a veces
             for (Notificacion n : notificaciones)
                 n.setLeida(n.getFechaCreacion().before(atras(10)) || prob(0.35));
-            // las que justifican un badge (mensajes sin leer) se quedan sin leer
             for (Notificacion n : notificaciones)
                 if ("NUEVO_MENSAJE".equals(n.getTipo()))
                     n.setLeida(false);
@@ -1173,8 +1125,6 @@ public class DataSeeder implements ApplicationRunner {
             n.setId(idEn(fecha));
             return n;
         }
-
-        // ───────── cuentas de demo ─────────
 
         Usuario talentoDemoPrincipal() {
             Usuario u = new Usuario();
@@ -1307,10 +1257,8 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         void solicitudesDemo() {
-            // ofertas de las empresas de demo
             List<Empleo> deLabs = eDemoEmpresa == null ? List.of() : empleosGen.stream().map(EmpleoGen::e)
                     .filter(e -> eDemoEmpresa.getId().equals(e.getEmpresaId())).toList();
-            // 1) el talento de demo en las primeras ofertas de DevCoast Labs, en cada estado
             if (uDemoTalento != null) {
                 TalentoGen tg = talentoGenPorId.get(uDemoTalento.getId());
                 String[] estados = { "aprobada", "revision", "rechazada" };
@@ -1320,7 +1268,6 @@ public class DataSeeder implements ApplicationRunner {
                     Date f = atras(18 - i * 4);
                     solicitudes.add(construirSolicitud(tg, e, estados[i], f, "revision".equals(estados[i]) ? null : mas(f, 3)));
                 }
-                // 2) postulaciones del demo a ofertas de otras empresas
                 String[] ext = { "revision", "aprobada", "revision", "rechazada", "revision", "aprobada", "revision", "revision" };
                 List<Empleo> afines = new ArrayList<>(activosPorGrupo.getOrDefault("fullstack", List.of()));
                 afines.addAll(activosPorGrupo.getOrDefault("backend", List.of()));
@@ -1336,7 +1283,6 @@ public class DataSeeder implements ApplicationRunner {
                     hechos++;
                 }
             }
-            // 3) la diseñadora de demo
             if (uDemoDiseno != null) {
                 TalentoGen tg = talentoGenPorId.get(uDemoDiseno.getId());
                 List<Empleo> afines = new ArrayList<>(activosPorGrupo.getOrDefault("ui-ux", List.of()));
@@ -1354,7 +1300,6 @@ public class DataSeeder implements ApplicationRunner {
                     hechos++;
                 }
             }
-            // 4) candidatos de talentos al azar en las ofertas de DevCoast Labs y Marea Studio
             int[] porOferta = { 24, 10, 3, 7, 0, 14, 5, 2, 9 };
             List<Empleo> objetivo = new ArrayList<>(deLabs);
             if (eDemoStartup != null)

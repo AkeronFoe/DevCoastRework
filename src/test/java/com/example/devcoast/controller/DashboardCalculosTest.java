@@ -34,7 +34,6 @@ class DashboardCalculosTest {
     @Test
     void pendientesDelPerfilCoincidenConLaCompletitud() {
         Usuario vacio = new Usuario();
-        // el nombre cuenta en la completitud pero nunca falta: 11 pendientes en un perfil vacío
         assertEquals(11, DashboardCalculos.pendientesPerfil(vacio).size());
 
         Usuario u = new Usuario();
@@ -87,7 +86,6 @@ class DashboardCalculosTest {
         assertEquals("Nordic (Backend) aceptó tu solicitud.", ev.get(1).texto());
         assertEquals("t", ev.get(1).tono());
         assertEquals("Enviaste tu solicitud a Nordic (Backend).", ev.get(2).texto());
-        // el tope se respeta
         assertEquals(1, DashboardCalculos.eventosTalento(List.of(s), List.of(i), ahora, 1).size());
     }
 

@@ -41,7 +41,6 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class TalentoController {
 
-    // 12 = 3 columnas por 4 filas
     private static final int TALENTOS_POR_PAGINA = 12;
 
     private final UsuarioRepository usuarioRepository;
@@ -96,7 +95,6 @@ public class TalentoController {
             }
         }
 
-        // los filtros llegan como clave (remoto, hibrido, full-time…) y se buscan con todas las variantes guardadas
         String modalidadClave = EtiquetasPerfil.modalidadClave(modalidad);
         if (!modalidadClave.isEmpty())
             criteriaList.add(Criteria.where("modalidad").regex(EtiquetasPerfil.modalidadRegex(modalidadClave), "i"));
@@ -118,7 +116,6 @@ public class TalentoController {
         listQuery.skip((long) page * pageSize).limit(pageSize);
         List<Usuario> items = mongoTemplate.find(listQuery, Usuario.class);
 
-        // portafolio real por talento de esta página: una sola consulta, agrupada en Java por usuarioId
         Map<String, List<Proyecto>> proyectosPorTalento = new LinkedHashMap<>();
         try {
             List<String> idsPagina = items.stream().map(Usuario::getId).toList();
@@ -126,10 +123,8 @@ public class TalentoController {
                 proyectosPorTalento = proyectoRepository.findByUsuarioIdInAndPublicadoTrueOrderByCreadoEnDesc(idsPagina).stream()
                         .collect(Collectors.groupingBy(Proyecto::getUsuarioId, LinkedHashMap::new, Collectors.toList()));
         } catch (Exception ignored) {
-            // el portafolio es decorativo acá: un fallo no debe tumbar el directorio
         }
 
-        // qué talentos de esta página ya fueron invitados (sin empleo puntual) por la empresa en sesión
         java.util.Set<String> invitados = new java.util.HashSet<>();
         boolean esEmpresa = RoleGuard.esEmpresa(session);
         if (esEmpresa && !items.isEmpty()) {
@@ -138,7 +133,6 @@ public class TalentoController {
                         items.stream().map(Usuario::getId).toList())
                         .forEach(i -> invitados.add(i.getTalentoId()));
             } catch (Exception ignored) {
-                // sin el dato todos se muestran como "Invitar"
             }
         }
 
@@ -151,7 +145,6 @@ public class TalentoController {
                     invitados.contains(t.getId())));
         }
 
-        // cifras del directorio: cada una es decorativa y va envuelta por separado
         Long totalPublico = null;
         Integer pctRemoto = null;
         String especialidadTop = null;
@@ -182,7 +175,6 @@ public class TalentoController {
             nuevosEstaSemana = mongoTemplate.count(new Query(new Criteria().andOperator(basePublico,
                     Criteria.where("_id").gte(haceUnaSemana))), Usuario.class);
         } catch (Exception ignored) {
-            // cifras decorativas: no deben tumbar el listado principal
         }
 
         model.addAttribute("tarjetas", tarjetas);

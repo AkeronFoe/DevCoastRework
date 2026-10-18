@@ -1,6 +1,3 @@
-/* DevCoast · Ajustes. Requiere nautico.css, nautico-temas.css y nautico-pase.css (pases .jt, .apply, .flash). */
-
-/* ───────── banner con el barco ───────── */
 .aj-hello { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 420px); border-radius: 16px; background: var(--sea0); overflow: hidden; color: #F3F4F8; }
 .aj-hello-t { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 30px 32px; }
 .aj-hello h1 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.04; letter-spacing: -.03em; }
@@ -10,8 +7,6 @@
 .aj-sea .boat { position: absolute; left: 50%; bottom: 38px; height: 140px; width: auto; margin-left: -66px; overflow: visible; }
 .aj-sea .wvs { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; overflow: hidden; }
 .aj-sea .wv { position: absolute; left: 0; top: 0; width: 300%; height: 84px; display: block; }
-
-/* ───────── tu cuenta (pase) ───────── */
 .aj-id { margin-top: 22px; }
 .aj-id .jt-t { font-size: clamp(24px, 3vw, 32px); }
 .aj-id .co { margin-top: 0; color: #2B2E36; }
@@ -23,8 +18,6 @@
 .aj-st.sm { font-size: 24px; }
 .aj-go { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .jt-stub .apply { color: #F3F4F8; }
-
-/* ───────── secciones ───────── */
 .aj-tabs .ch.dg { margin-left: auto; }
 .aj-stack { display: flex; flex-direction: column; gap: 20px; }
 .aj-stack[hidden] { display: none; }
@@ -48,16 +41,12 @@
 .aj-btn:hover { border-color: var(--mute); transform: translateY(-2px); }
 .aj-note { font: 500 12.5px/1.55 var(--font-mono); color: var(--mute); padding: 14px 0 16px; border-top: 1px dashed var(--line2); margin: 0; }
 .aj-note b { color: var(--ink); }
-
-/* interruptor */
 .aj-tg { position: relative; width: 52px; height: 30px; flex: none; padding: 0; border: 0; border-radius: 999px; background: var(--line2); cursor: pointer; transition: background .2s ease; }
 .aj-tg::before { content: ""; position: absolute; left: 4px; top: 4px; width: 22px; height: 22px; border-radius: 50%; background: #F3F4F8; transition: transform .2s ease; }
 .aj-tg::after { content: ""; position: absolute; inset: -8px -4px; }
 .aj-tg[aria-checked="true"] { background: var(--teal); }
 .aj-tg[aria-checked="true"]::before { transform: translateX(22px); background: #101114; }
 .aj-tg:disabled { opacity: .5; cursor: progress; }
-
-/* ───────── apariencia ───────── */
 .aj-themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .aj-theme { display: flex; flex-direction: column; gap: 10px; padding: 10px; border: 2px solid var(--line2); border-radius: 14px; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; transition: border-color .15s ease, transform .15s ease; }
 .aj-theme:hover { border-color: var(--mute); transform: translateY(-2px); }
@@ -86,8 +75,6 @@ html[data-theme="light"] .aj-dopt[aria-pressed="true"] { background: #101114; bo
 .aj-pv-k { font: 700 11px var(--font-mono); letter-spacing: .08em; color: var(--teal); }
 .aj-pv-t { font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
 .aj-pv-s { font-size: 15px; color: #BFE9E3; }
-
-/* ───────── privacidad ───────── */
 .aj-vis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); margin: 8px 0 6px; }
 .aj-vi { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-left: 1px solid var(--line); min-width: 0; }
 .aj-vi:first-child { border-left: 0; }
@@ -95,14 +82,10 @@ html[data-theme="light"] .aj-dopt[aria-pressed="true"] { background: #101114; bo
 .aj-vi span { font-size: 14px; color: var(--mute); }
 .aj-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--line2); transition: background .3s ease, box-shadow .3s ease; }
 .aj-dot.on { background: var(--teal); box-shadow: 0 0 0 4px rgba(45, 212, 191, .2); }
-
-/* ───────── peligro ───────── */
 .aj-dznote { font: 500 13px var(--font-mono); color: var(--mute); margin: 0; }
 .aj-dz .jt-main { gap: 6px; }
 .aj-dz .jt-t { font-size: 26px; }
 .aj-errk { color: var(--err); }
-
-/* ───────── diálogos ───────── */
 .aj-dlg { border: 0; padding: 0; background: transparent; width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); color: var(--paper-ink); }
 .aj-dlg::backdrop { background: rgba(6, 17, 19, .78); }
 .aj-dlg-f { background: var(--paper); border-radius: 16px; padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 14px; }

@@ -1,6 +1,3 @@
-/* solicitudes (postulaciones + invitaciones), extiende empleos.css/talentos.css */
-
-/* ============================= tabs ============================= */
 .wsjobs .ws-tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--ws-line); }
 .wsjobs .ws-tab {
   display: inline-flex; align-items: center; gap: 8px; font-family: var(--ws-mono-disp); font-size: .82rem; font-weight: 700;
@@ -14,8 +11,6 @@
 }
 .wsjobs .ws-tab-badge.is-alert { background: var(--ws-rose-dim); color: var(--ws-rose); }
 .wsjobs .ws-tab.active .ws-tab-badge:not(.is-alert) { background: var(--ws-accent-dim); color: var(--ws-accent); }
-
-/* ============================= tabla de solicitudes ============================= */
 .wsjobs .ws-table-wrap { overflow-x: auto; }
 .wsjobs .ws-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
 .wsjobs .ws-table th {
@@ -32,8 +27,6 @@
 }
 .wsjobs .ws-table-chat:hover { color: var(--ws-accent); border-color: var(--ws-accent); }
 .wsjobs .ws-table-chat svg { width: 14px; height: 14px; }
-
-/* ============================= pill de estado ============================= */
 .wsjobs .status-pill {
   display: inline-flex; align-items: center; font-family: var(--ws-mono-disp); font-size: .68rem; font-weight: 700;
   border-radius: 20px; padding: 4px 11px; white-space: nowrap;
@@ -42,8 +35,6 @@
 .wsjobs .status-pill.status-approved { background: var(--ws-mint-dim);  color: var(--ws-mint); }
 .wsjobs .status-pill.status-rejected { background: var(--ws-rose-dim);  color: var(--ws-rose); }
 .wsjobs .status-pill.status-discarded{ background: var(--ws-panel-3);  color: var(--ws-dim-2); }
-
-/* ============================= cards de invitación ============================= */
 .wsjobs .inv-list { display: flex; flex-direction: column; gap: 14px; }
 .wsjobs .inv-card { background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: 10px; padding: 18px 20px; }
 .wsjobs .inv-card-header { display: flex; align-items: flex-start; gap: 12px; }
@@ -84,8 +75,6 @@
 .wsjobs .inv-estado-final.aceptada { color: var(--ws-mint); }
 .wsjobs .inv-estado-final.rechazada { color: var(--ws-dim-2); }
 .wsjobs .inv-copy-btn.is-copied { color: var(--ws-mint); border-color: rgba(123,216,174,.4); }
-
-/* ============================= detalle de solicitud ============================= */
 .wsjobs .detail-hero { display: flex; align-items: center; gap: 16px; }
 .wsjobs .detail-hero-icon {
   width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -112,8 +101,6 @@
 .wsjobs .detail-footer-note { margin: 14px 0 0; font-size: .8rem; }
 .wsjobs .detail-footer-note a { color: var(--ws-accent); font-weight: 600; }
 .wsjobs .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-/* ── estado actual ── */
 .wsjobs .sol-estado-actual { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 10px; border: 1px solid; }
 .wsjobs .sol-estado-actual p { margin: 4px 0 0; font-size: .85rem; }
 .wsjobs .sol-estado-actual strong { font-size: .92rem; color: var(--ws-ink); }
@@ -127,8 +114,6 @@
 .wsjobs .sol-estado-no .sol-estado-icon      { background: rgba(239,123,146,.22); }
 .wsjobs .sol-estado-warn .sol-estado-icon    { background: rgba(242,171,92,.22); }
 .wsjobs .sol-estado-pending .sol-estado-icon { background: rgba(79,160,232,.22); }
-
-/* ── línea de tiempo ── */
 .wsjobs .sol-timeline { display: flex; flex-direction: column; }
 .wsjobs .sol-tl-event { display: flex; gap: 16px; align-items: flex-start; }
 .wsjobs .sol-tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 14px; padding-top: 3px; }
@@ -145,8 +130,6 @@
 .wsjobs .tl-badge-no      { background: var(--ws-rose-dim);  color: var(--ws-rose); }
 .wsjobs .tl-badge-warn    { background: var(--ws-amber-dim); color: var(--ws-amber); }
 .wsjobs .tl-badge-pending { background: var(--ws-cyan-dim);  color: var(--ws-cyan); }
-
-/* ============================= modal de confirmación ============================= */
 .wsjobs .ws-modal-scrim {
   display: none; position: fixed; inset: 0; background: rgba(6,7,10,.75); z-index: 300; align-items: center; justify-content: center; padding: 16px;
 }

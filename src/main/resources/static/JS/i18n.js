@@ -793,7 +793,6 @@ const TRANSLATIONS = {
         'Vista previa del card': 'Preview of the project card',
         'Asi se vera en la pagina de proyectos.': 'This is how it will look on the projects page.',
 
-        // ── sistema visual náutico: shell (menú lateral, barra superior, componentes compartidos) ──
         'Menú principal': 'Main menu',
         'Secciones': 'Sections',
         'Saltar al contenido': 'Skip to content',
@@ -821,7 +820,6 @@ const TRANSLATIONS = {
         'limpiar filtros': 'clear filters',
         'Deshacer': 'Undo',
 
-        // ── landing, login y registro náuticos (los titulares animados van palabra por palabra y quedan en español) ──
         'volver al inicio': 'back to home',
         'crear cuenta': 'create account',
         'ingresar': 'sign in',
@@ -923,7 +921,6 @@ const TRANSLATIONS = {
         'Crear mi perfil': 'Create my profile',
         'hecho en la costa': 'made on the coast',
 
-        // ── Empleos náutico (el contador "Mostrando X de Y" se arma en el servidor y queda en español) ──
         'Busca por cargo o empresa': 'Search by title or company',
         'Buscar ofertas': 'Search jobs',
         '// ofertas': '// jobs',
@@ -975,7 +972,6 @@ const TRANSLATIONS = {
         'No se pudo enviar la solicitud.': 'Could not send the application.',
         'No se pudo enviar. Revisa tu conexión.': 'Could not send. Check your connection.',
 
-        // ── Solicitudes y Proyectos náuticos (los contadores y los avisos con datos se arman en el servidor) ──
         '// solicitudes': '// applications',
         'Buscar solicitudes': 'Search applications',
         'Ver invitaciones': 'View invitations',

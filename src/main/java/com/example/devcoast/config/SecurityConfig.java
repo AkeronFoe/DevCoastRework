@@ -16,6 +16,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // ojo: acá todo queda abierto a propósito. La seguridad de verdad la hace RoleGuard revisando la sesión en cada página
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

@@ -1,6 +1,3 @@
-/* Chat en vivo: envío por fetch (fallback a submit normal si falla),
-   auto-resize del textarea, separadores de fecha, "cargar anteriores",
-   y polling de mensajes nuevos mientras la pestaña está visible. */
 (function () {
   const meta = document.getElementById('chat-meta')
   const solicitudId = meta.getAttribute('data-sol-id')
@@ -207,8 +204,6 @@
         })
       }).catch(() => {
         pollFails++
-        // recién a la 2da falla seguida (~8s) para no parpadear por un
-        // único hipo de red
         if (pollFails >= 2) setLiveOffline(true)
       })
   }

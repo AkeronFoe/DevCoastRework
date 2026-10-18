@@ -50,6 +50,7 @@ public class PlanService {
         return new Date(fecha.getTime() + dias * 24L * 60 * 60 * 1000);
     }
 
+    // cada madrugada baja a plan gratis a las empresas cuyo plan PRO ya se venció
     @Scheduled(cron = "0 0 3 * * *")
     public void degradarPlanesVencidos() {
         Date ahora = new Date();

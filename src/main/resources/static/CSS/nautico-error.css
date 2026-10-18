@@ -1,4 +1,3 @@
-/* DevCoast · páginas de error (404 y 500) con el barco. Autocontenido: no depende de la sesión ni del shell. */
 body.er{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
 .er-main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px var(--gx) 24px}
 .er-card{width:min(100%,520px);text-align:center}
@@ -13,6 +12,5 @@ body.er{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
 .er-sea .boat{position:absolute;left:50%;bottom:38px;height:130px;width:auto;margin-left:-62px;overflow:visible}
 .er-sea .wvs{position:absolute;left:0;right:0;bottom:0;height:84px;overflow:hidden}
 .er-sea .wv{position:absolute;left:0;top:0;width:300%;height:84px;display:block}
-/* "btn-d" es un botón de tinta: sobre el fondo de la página necesita borde para verse */
 body.er .er-acts .btn-d{background:none;border:2px solid var(--line2);color:var(--ink)}
 body.er .er-acts .btn-d:hover{border-color:var(--mute)}

@@ -27,7 +27,6 @@
                 <a class="lnk back" th:href="${esEmpresaPropietaria} ? @{/misEmpleos} : @{/empleos}"
                     th:text="${esEmpresaPropietaria} ? '← Volver a mis ofertas' : '← Volver a empleos'">← Volver a empleos</a>
 
-                <!-- ===== encabezado: el pase de la oferta ===== -->
                 <article class="jt feat jd-hero" th:classappend="${v.cerrada} ? 'closed'" th:attr="data-id=${empleo.id}">
                     <div class="jt-main">
                         <div class="jt-top">
@@ -95,7 +94,6 @@
                             <p class="nomatch" th:if="${esTalento and !talentoSinStack}">La oferta no lista habilidades.</p>
                         </th:block>
 
-                        <!-- talento -->
                         <th:block th:if="${esTalento}">
                             <button class="apply" type="button" id="btnAplicar" th:if="${!usuarioYaAplico and !v.cerrada}"
                                 aria-haspopup="dialog" th:attr="aria-label='Postularme a ' + ${v.titulo}">Postularme</button>
@@ -107,12 +105,10 @@
                             </button>
                         </th:block>
 
-                        <!-- empresa dueña de la oferta -->
                         <th:block th:if="${esEmpresaPropietaria}">
                             <a class="apply" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">Ver candidatos</a>
                             <a class="apply ghost" th:href="@{/crearEmpleo(editar=${empleo.id})}">Editar oferta</a>
                         </th:block>
-                        <!-- otra empresa -->
                         <th:block th:if="${session.usuarioActualTipo == 'empresa' and !esEmpresaPropietaria}">
                             <a class="apply ghost" th:href="@{/talentos}">Ver talentos</a>
                         </th:block>
@@ -121,7 +117,6 @@
 
                 <p class="legend" th:if="${session.usuarioActualTipo == 'empresa' and !esEmpresaPropietaria}"><span>Las empresas no pueden postularse a una oferta. ¿Buscas talento? <a th:href="@{/talentos}">Explora el directorio</a>.</span></p>
 
-                <!-- ===== detalle ===== -->
                 <div class="jd">
                     <div class="jd-main">
                         <section class="pn" aria-labelledby="h-resumen">
@@ -184,7 +179,6 @@
                             </dl>
                         </section>
 
-                        <!-- solo la empresa dueña de la oferta -->
                         <section class="pn" aria-labelledby="h-cand" th:if="${esEmpresaPropietaria}">
                             <h2 id="h-cand">Candidatos</h2>
                             <p class="prose sm"><b th:text="${totalSolicitudesEmpleo}">0</b> postulaciones recibidas.</p>
@@ -206,7 +200,6 @@
         </div>
     </div>
 
-    <!-- ===== diálogo: postularse (mensaje y proyectos opcionales) ===== -->
     <dialog class="ap-dlg" id="dlgAplicar" aria-labelledby="t-aplicar" th:if="${esTalento and !usuarioYaAplico and !v.cerrada}">
         <form class="ap-f" method="post" th:action="@{/empleos/{id}/aplicar(id=${empleo.id})}" id="formAplicar">
             <h2 id="t-aplicar">Postularte a este empleo</h2>

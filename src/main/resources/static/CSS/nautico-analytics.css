@@ -1,9 +1,4 @@
-/* DevCoast · Analytics (diseño náutico), para Talento ("Mi actividad") y Empresa ("Mis analytics").
-   Los colores de las gráficas son de marca y los fija el script de la página; el texto y las rejillas siguen el tema.
-   Requiere nautico.css. */
 .an .head .acts{display:flex;align-items:center;gap:10px}
-
-/* ───── cifras ───── */
 .an .dash-stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:26px 0 22px}
 .an .dash-stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .an .dash-stat-top{display:flex;justify-content:flex-end;margin-bottom:-4px}
@@ -16,8 +11,6 @@
 .an .dash-stat-flag{align-self:flex-start;margin-top:6px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);font:700 11px var(--font-mono);color:var(--ink)}
 .an .dash-stat-flag--amber{border-color:var(--orange);color:var(--orange)}
 .an .dash-stat-flag--mint{border-color:var(--teal);color:var(--teal)}
-
-/* ───── gráficas ───── */
 .an .charts-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
 .an .charts-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
 .an .chart-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
@@ -31,8 +24,6 @@
 .an .legend-item{display:flex;align-items:center;gap:9px;font:500 13px var(--font-mono);color:var(--mute)}
 .an .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .an .legend-val{margin-left:auto;font-weight:700;color:var(--ink)}
-
-/* ───── tabla ───── */
 .an .analytics-table{width:100%;border-collapse:collapse;font-size:14px}
 .an .analytics-table th{text-align:left;font:700 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:8px 10px;border-bottom:1px solid var(--line2)}
 .an .analytics-table td{padding:11px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
@@ -43,8 +34,6 @@
 .an .pill-amber{border-color:var(--orange);color:var(--orange)}
 .an .pill-red{border-color:var(--mute);color:var(--mute)}
 .an .lnk{margin-left:4px}
-
-/* ───── consejo y plataforma ───── */
 .an .analytics-tip{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:12px}
 .an .analytics-tip p{margin:0;font:500 13.5px/1.55 var(--font-mono);color:var(--ink)}
 .an .analytics-tip .btn-o{margin-top:2px;height:40px;font-size:14px}

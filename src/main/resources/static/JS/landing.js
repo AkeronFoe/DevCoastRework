@@ -1,4 +1,4 @@
-/* DevCoast · landing: scroll como historia (docs/diseno/DEVCOAST-LANDING-MOTION.md). Solo transform y opacity; vanilla. */
+// oigan, esto de acá hace que el barco avance y el mar se mueva mientras uno baja con el scroll
 (function(){var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
   var clamp=function(v,a,b){a=a==null?0:a;b=b==null?1:b;return v<a?a:(v>b?b:v)};
   var lerp=function(a,b,t){return a+(b-a)*t};
@@ -8,7 +8,6 @@
   var rm=false, simple=false, H=window.innerHeight, S=0, max=1, force=true, ticking=false;
   var ids=['hero','ruta','pases','gaviota','muelles','crear'].filter(function(id){return document.getElementById(id)}), M={}, last={};
 
-  /* escribe solo si el valor cambió */
   function sty(el,k,v){var c=el.__c||(el.__c={}); if(c[k]===v) return; c[k]=v; el.style[k]=v;}
   function sv(el,k,v){var c=el.__c||(el.__c={}); var key='--'+k; if(c[key]===v) return; c[key]=v; el.style.setProperty(key,v);}
   function changed(id,p){ if(force||last[id]===undefined||Math.abs(last[id]-p)>0.0002){last[id]=p;return true;} return false; }
@@ -17,7 +16,6 @@
     rm=rmq.matches; simple=rm||window.innerWidth<820;
     root.classList.toggle('rm',rm); root.classList.toggle('simple',simple);
   }
-  /* se mide una sola vez (y al cambiar el tamaño), no en cada scroll */
   function measure(){
     H=window.innerHeight; S=window.pageYOffset;
     ids.forEach(function(id){var el=document.getElementById(id), r=el.getBoundingClientRect(); M[id]={top:r.top+S,h:el.offsetHeight};});
@@ -30,7 +28,6 @@
     var m=M[id], total=m.h-H; return total>0?clamp((S-m.top)/total):1;
   }
 
-  /* piezas clonadas: barco de la ruta y gaviota del recuadro (misma geometría que el barco principal) */
   var boat=$('#boatWrap .boat'), gullSrc=boat.querySelector('.gull');
   var mini=boat.cloneNode(true);
   mini.removeAttribute('id'); mini.removeAttribute('class'); mini.removeAttribute('role'); mini.removeAttribute('aria-label'); mini.setAttribute('aria-hidden','true');
@@ -39,7 +36,6 @@
   var tileG=gullSrc.cloneNode(true); tileG.removeAttribute('id'); $('#tileSvg').appendChild(tileG);
   var looks=$$('.gl-look');
 
-  /* la gaviota mira hacia el cursor */
   var mx=window.innerWidth*0.5, my=window.innerHeight*0.5, lookPend=false;
   function lookAt(){
     lookPend=false; if(rm) return;
@@ -53,13 +49,11 @@
   window.addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;if(!lookPend){lookPend=true;requestAnimationFrame(lookAt);}},{passive:true});
   function hop(g){ if(rm) return; g.classList.remove('hop'); void g.getBoundingClientRect(); g.classList.add('hop'); setTimeout(function(){g.classList.remove('hop')},950); }
 
-  /* se pausan las animaciones de lo que no se ve */
   if('IntersectionObserver' in window){
     var io=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('off',!e.isIntersecting)})});
     ['hero','ruta','gaviota'].forEach(function(id){var el=document.getElementById(id); if(el) io.observe(el)});
   }
 
-  /* ruta */
   var base=$('#routeBase'), fill=$('#routeFill'), len=base.getTotalLength();
   fill.style.strokeDasharray=len; fill.style.strokeDashoffset=len;
   var portsF=[0.17,0.5,0.84];
@@ -78,7 +72,6 @@
     ticking=false; S=window.pageYOffset;
     var g=clamp(S/max), heroEnd=M.hero.h-H;
 
-    /* fondo (se cambia solo cuando el color cambia de verdad) y profundidad */
     var bg=clamp((S-heroEnd)/Math.max(1,max-heroEnd));
     var bgs='rgb('+c0.map(function(v,i){return Math.round(lerp(v,c1[i],bg))}).join(',')+')';
     if(bgs!==lastBg){lastBg=bgs; body.style.background=bgs; root.style.setProperty('--bgnow',bgs);}
@@ -87,7 +80,6 @@
     sv(root,'g',g.toFixed(4));
     sty(bub,'opacity',(rm?0:clamp((S-heroEnd*0.7)/(H*0.5))*0.9).toFixed(2));
 
-    /* HERO: el mar sube y te sumerge */
     var p=rm?0:prog('hero');
     if(changed('hero',p)){
       var e=ease(clamp(p/0.88));
@@ -98,7 +90,6 @@
       if(p>0.05&&!hopped){hopped=true;hop(gullSrc);} if(p<0.01) hopped=false;
     }
 
-    /* RUTA */
     var pr=prog('ruta');
     if(changed('ruta',pr)){
       var f=simple?0.98:lerp(0.02,0.98,clamp(pr/0.92));
@@ -114,7 +105,6 @@
       var cr=$('#compassRing'); cr.style.transformBox='view-box'; cr.style.transformOrigin='80px 80px'; cr.style.transform='rotate('+(pr*540).toFixed(1)+'deg)';
     }
 
-    /* PASES */
     var pp=prog('pases');
     if(changed('pases',pp)&&!simple){
       tks.forEach(function(el,i){
@@ -127,7 +117,6 @@
       });
     }
 
-    /* GAVIOTA */
     var gp=prog('gaviota');
     if(changed('gaviota',gp)){
       var k=clamp(gp/0.75)*words.length;
@@ -135,7 +124,6 @@
       if(gp>0.8&&!quoteHop&&!simple){quoteHop=true;hop(tileG);} if(gp<0.5) quoteHop=false;
     }
 
-    /* MUELLES */
     var mp=prog('muelles');
     if(changed('muelles',mp)&&!simple){
       var t2=ease(clamp(mp/0.6));
@@ -144,7 +132,6 @@
       sty($('#muellesH'),'opacity',clamp(mp/0.15).toFixed(2));
     }
 
-    /* FINAL */
     var q=simple?1:clamp((S+H-M.crear.top)/(H*0.8));
     if(changed('crear',q)){
       sty($('#xA'),'transform','rotate(45deg) scaleY('+clamp(q/0.5).toFixed(3)+')');

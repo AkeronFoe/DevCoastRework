@@ -48,7 +48,6 @@ public class AuthController {
         String correoNorm = correo.trim().toLowerCase();
         Usuario usuario = usuarioRepository.findByCorreo(correoNorm);
         if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
-            // regenero la sesión para evitar session fixation
             session.invalidate();
             session = request.getSession(true);
             poblarSesion(session,

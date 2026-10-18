@@ -40,7 +40,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Guardados con el shell náutico: los mismos pases de Empleos (con match) y el botón "Quitar"
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class GuardadosPageRenderTest {
@@ -118,7 +117,6 @@ class GuardadosPageRenderTest {
                 .andExpect(content().string(containsString("2 ofertas guardadas")))
                 .andExpect(content().string(containsString("1 con match alto")))
                 .andExpect(content().string(containsString("1 ya solicitadas")))
-                // última guardada primero: o2 antes que o1
                 .andExpect(content().string(org.hamcrest.Matchers.matchesPattern("(?s).*Plataforma Cloud.*Backend Java.*")))
                 .andExpect(content().string(containsString("data-empleo-id=\"o1\"")))
                 .andExpect(content().string(containsString("Quitar Backend Java de guardados")))

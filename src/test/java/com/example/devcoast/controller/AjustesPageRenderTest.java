@@ -40,7 +40,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Ajustes con el shell náutico: secciones como chips, selector de tema, privacidad solo para talento y plan solo para empresa
 @WebMvcTest(PageController.class)
 @Import(SecurityConfig.class)
 class AjustesPageRenderTest {
@@ -98,20 +97,17 @@ class AjustesPageRenderTest {
                 .andExpect(content().string(containsString("Tu camarote.")))
                 .andExpect(content().string(containsString("Valentina Ríos")))
                 .andExpect(content().string(containsString("cuenta@correo.com")))
-                // selector de tema con las tres opciones
                 .andExpect(content().string(containsString("data-theme-opt=\"dark\"")))
                 .andExpect(content().string(containsString("data-theme-opt=\"light\"")))
                 .andExpect(content().string(containsString("data-theme-opt=\"midnight\"")))
                 .andExpect(content().string(containsString("data-dens=\"compact\"")))
                 .andExpect(content().string(containsString("data-text=\"large\"")))
-                // privacidad solo para talento, con el estado real de cada interruptor
                 .andExpect(content().string(containsString("data-sec=\"privacidad\"")))
                 .andExpect(content().string(containsString("data-priv=\"perfilPublico\"")))
                 .andExpect(content().string(containsString("data-priv=\"mostrarCorreo\"")))
                 .andExpect(content().string(containsString("aria-checked=\"true\"")))
                 .andExpect(content().string(containsString("aria-checked=\"false\"")))
                 .andExpect(content().string(not(containsString("data-sec=\"plan\""))))
-                // diálogos y avisos
                 .andExpect(content().string(containsString("id=\"dlgCorreo\"")))
                 .andExpect(content().string(containsString("action=\"/cuenta/eliminar\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
@@ -142,7 +138,6 @@ class AjustesPageRenderTest {
                 .andExpect(content().string(containsString("4 de 15")))
                 .andExpect(content().string(containsString("1 de 3")))
                 .andExpect(content().string(containsString("href=\"/facturacion\"")))
-                // el servidor rechaza estas opciones a las empresas: no se ofrecen
                 .andExpect(content().string(not(containsString("data-sec=\"privacidad\""))))
                 .andExpect(content().string(not(containsString("data-priv="))))
                 .andExpect(content().string(not(containsString("id=\"btnPro\""))));
@@ -153,7 +148,6 @@ class AjustesPageRenderTest {
         mockMvc.perform(get("/ajustes"))
                 .andExpect(status().is3xxRedirection());
     }
-    // ===== Facturación (cuenta de empresa): los cobros como recibos =====
 
     @Test
     void facturacionMuestraLosCobrosComoRecibosConElTotal() throws Exception {

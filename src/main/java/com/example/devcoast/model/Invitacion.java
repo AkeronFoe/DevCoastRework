@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// el índice es para: contar invitaciones pendientes/aceptadas/rechazadas por talento rápido
 @Getter
 @Setter
 @NoArgsConstructor

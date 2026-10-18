@@ -1,11 +1,3 @@
-/* chat, sobre empleos.css + solicitudes.css. A diferencia del resto del
-   workspace (que scrollea la página entera dentro de .ws-content), acá
-   la vista es de altura fija — como una terminal con `tail -f` — y solo
-   el historial de mensajes scrollea, con el compositor siempre a mano. */
-
-/* a diferencia de toda otra página del workspace (que scrollea la página
-   entera), acá .ws-body se fija a la altura del viewport y solo adentro
-   del chat scrollea el historial — si no, terminás con dos scrollbars */
 .wschat .ws-body { height: calc(100vh - var(--ws-topbar-h) - var(--ws-statusbar-h)); }
 .wschat .ws-main { overflow: hidden; }
 
@@ -40,16 +32,11 @@
 .chat-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ws-mint); box-shadow: 0 0 0 2px rgba(123,216,174,.25); animation: chatLivePulse 2s ease-in-out infinite; transition: background .2s, box-shadow .2s; }
 @keyframes chatLivePulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 @media (prefers-reduced-motion: reduce) { .chat-live-dot { animation: none; } }
-
-/* el polling falló 2 veces seguidas: se distingue de "en pausa por pestaña
-   oculta" (esa solo baja opacidad) con un color de estado real */
 .chat-live.is-offline { color: var(--ws-rose); background: var(--ws-rose-dim); }
 .chat-live.is-offline .chat-live-dot { background: var(--ws-rose); box-shadow: 0 0 0 2px rgba(239,123,146,.25); animation: chatLiveBlink .9s ease-in-out infinite; }
 @keyframes chatLiveBlink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .chat-live.is-offline .chat-live-dot { animation: none; } }
 @media (max-width: 640px) { .chat-top-job, .chat-live .lbl { display: none; } }
-
-/* ============================= historial ============================= */
 .chat-scroll { flex: 1; overflow-y: auto; padding: 18px 20px 10px; display: flex; flex-direction: column; gap: 3px; }
 
 .chat-load-more { display: flex; justify-content: center; margin-bottom: 14px; }
@@ -95,8 +82,6 @@
 .chat-tick { display: inline-flex; color: var(--ws-dim-2); transition: color .2s; }
 .chat-tick svg { width: 13px; height: 13px; }
 .chat-tick.is-read { color: var(--ws-accent); }
-
-/* ============================= compositor ============================= */
 .chat-compose { display: flex; align-items: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--ws-line); background: var(--ws-panel); flex-shrink: 0; }
 .chat-compose-field {
   flex: 1; resize: none; max-height: 120px; min-height: 20px; background: var(--ws-panel-2); border: 1px solid var(--ws-line);

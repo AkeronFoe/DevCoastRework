@@ -23,12 +23,8 @@
         try {
             const url = new URL(href, window.location.origin);
             const path = url.pathname;
-            // /notificaciones/{id}/ir → GET que marca como leída → NO prefetch
-            // /chat/{id}            → GET que marca mensajes como leídos → NO prefetch
             const bloqueados = ['/logout', '/eliminar', '/delete', '/cerrar', '/borrar',
                                 '/notificaciones', '/chat'];
-            // .includes() (no solo startsWith) para cubrir rutas anidadas como
-            // /cuenta/eliminar: un hover ahí no debe disparar la petición GET destructiva.
             return !bloqueados.some(b => path.includes(b));
         } catch (e) {
             return false;

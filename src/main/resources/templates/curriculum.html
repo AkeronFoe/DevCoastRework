@@ -42,7 +42,6 @@
                     </div>
                 </div>
 
-                <!-- ===== revisión de candidatura (solo empresa) ===== -->
                 <section class="pn cv-rev" th:if="${lectura}" aria-labelledby="h-post">
                     <div class="cv-rev-h">
                         <h2 id="h-post">Postulación</h2>
@@ -103,7 +102,6 @@
                     </div>
                 </section>
 
-                <!-- ===== completitud (solo el dueño del CV) ===== -->
                 <section class="pn cv-comp" th:unless="${lectura}" aria-labelledby="h-comp">
                     <h2 id="h-comp">Completitud <span th:text="${usuario != null ? usuario.completitudPerfil : 0} + '%'">80%</span></h2>
                     <div class="pbar big" role="progressbar" aria-label="Completitud del currículum" aria-valuemin="0" aria-valuemax="100"
@@ -124,7 +122,6 @@
                     </dl>
                 </section>
 
-                <!-- ===== la hoja del currículum ===== -->
                 <article class="cv" id="cvHoja" aria-label="Currículum">
                     <header class="cv-top">
                         <div class="cv-av" th:style="${usuario != null and usuario.fotoUrl != null} ? 'background-image:url(' + ${usuario.fotoUrl} + ');color:transparent'" aria-hidden="true"
@@ -259,7 +256,6 @@
         </div>
     </div>
 
-    <!-- ===== diálogo de edición (solo el dueño del CV) ===== -->
     <dialog class="cv-dlg" id="dlgCv" aria-labelledby="t-edit" th:unless="${lectura}"
         th:attr="data-es=${usuario != null and usuario.nivelEspanol != null ? usuario.nivelEspanol : 5},data-en=${usuario != null and usuario.nivelIngles != null ? usuario.nivelIngles : 4},data-mod=${usuario != null and usuario.modalidad != null ? usuario.modalidad : ''},data-disp=${usuario != null and usuario.disponibilidad != null ? usuario.disponibilidad : ''}">
         <div class="cv-dlg-f">
@@ -393,7 +389,6 @@
             </div>
         </div>
 
-        <!-- molde de una experiencia / educación nuevas (no se muestra) -->
         <template id="tplExp">
             <fieldset class="cv-item">
                 <legend class="cv-item-l">Experiencia</legend>

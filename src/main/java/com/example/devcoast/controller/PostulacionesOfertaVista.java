@@ -5,7 +5,6 @@ import java.util.List;
 
 import lombok.Getter;
 
-/** Una oferta de la cuenta de Empresa con las postulaciones que le llegaron (página Postulaciones). */
 @Getter
 public class PostulacionesOfertaVista {
 
@@ -14,11 +13,11 @@ public class PostulacionesOfertaVista {
     private String categoria;
     private String areaClave;
     private boolean activa;
-    private int total;          // todas las postulaciones de la oferta, sin filtrar
+    private int total;
     private int revision;
     private int aceptadas;
-    private int noAvanzaron;    // rechazadas por la empresa o descartadas por el screening
-    private List<SolicitudVista> items = new ArrayList<>();   // las que pasan el filtro de estado y búsqueda
+    private int noAvanzaron;
+    private List<SolicitudVista> items = new ArrayList<>();
 
     public static PostulacionesOfertaVista de(String id, String titulo, String categoria, String areaClave, boolean activa,
             List<SolicitudVista> todas, List<SolicitudVista> filtradas) {

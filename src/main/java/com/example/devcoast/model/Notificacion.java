@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// los índices son para: listar recientes por destinatario+fecha, y contar no leídas por destinatario rápido
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,7 +28,6 @@ public class Notificacion {
     @Field("destinatario_id")
     private String destinatarioId;
 
-    // tipo: NUEVA_SOLICITUD | ESTADO_SOLICITUD | NUEVA_INVITACION
     private String tipo;
 
     private String titulo;

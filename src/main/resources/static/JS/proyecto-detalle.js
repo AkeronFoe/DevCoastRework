@@ -1,4 +1,3 @@
-/* DevCoast · Detalle de un proyecto. "Cancelar" de la confirmación para eliminar (la confirmación es un <details>). */
 (function () {
     'use strict';
     document.addEventListener('click', function (e) {

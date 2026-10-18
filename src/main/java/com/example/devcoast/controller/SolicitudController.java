@@ -69,9 +69,6 @@ public class SolicitudController {
         this.planService = planService;
     }
 
-    // Solicitudes y invitaciones del talento como pases de abordaje.
-    // ?estado=todas|proceso|aceptadas|cerradas|invitaciones &orden=recientes|estado &q=
-    // (tab=invitaciones se conserva porque InvitacionController redirige con ese parámetro)
     @GetMapping("/solicitudes")
     public String listarSolicitudes(
             @RequestParam(required = false) String estado,
@@ -126,7 +123,6 @@ public class SolicitudController {
                 continue;
             lista.add(v);
         }
-        // la lista llega por fecha (más reciente primero); sort() es estable
         if ("estado".equals(ordenSel))
             lista.sort(java.util.Comparator.comparingInt(SolicitudVista::getOrden));
 
@@ -176,7 +172,6 @@ public class SolicitudController {
             return "redirect:/solicitudes";
 
         Solicitud sol = solicitud.get();
-        // el encabezado es el mismo pase que en la lista de Solicitudes (etapas, siguiente paso, estado)
         Usuario talento = usuarioRepository.findById(usuarioId).orElse(null);
         List<Proyecto> adjuntos = new ArrayList<>();
         if (sol.getProyectosIds() != null)
@@ -235,8 +230,6 @@ public class SolicitudController {
         return "redirect:/solicitudes/" + r.solicitud().getId();
     }
 
-    // misma postulación que /aplicar, pero para el botón "Postularme" de la lista de empleos: responde JSON
-    // (con el id de la solicitud, que sirve para deshacerla con /solicitudes/{id}/delete) en vez de redirigir
     @PostMapping(value = "/empleos/{id}/postular", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> postular(@PathVariable String id, HttpSession session) {
@@ -269,7 +262,6 @@ public class SolicitudController {
 
     private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {}
 
-    // crea la solicitud (con el screening automático y la notificación a la empresa); lo comparten /aplicar y /postular
     private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
             List<String> proyectosIds, String mensajeMotivacion) {
         Optional<Empleo> empleoOpt = empleoRepository.findById(id);
@@ -339,7 +331,6 @@ public class SolicitudController {
         try {
             guardada = solicitudRepository.save(solicitud);
         } catch (org.springframework.dao.DuplicateKeyException e) {
-            // dos postulaciones al mismo empleo casi al mismo tiempo, la BD rechazó la segunda
             return new ResultadoAplicacion(Salida.YA_APLICO,
                     solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id).orElse(null), false);
         }
@@ -378,8 +369,6 @@ public class SolicitudController {
         return new ResultadoAplicacion(Salida.CREADA, guardada, descartadoPorScreening);
     }
 
-    // Postulaciones de una oferta: los mismos pases de candidato que /candidatos, para una sola oferta.
-    // ?estado=revision|aceptadas|rechazadas (también acepta los valores de antes: aprobada, rechazada, descartado)
     @GetMapping("/empleos/{empleoId}/postulaciones")
     public String listarPostulaciones(
             @PathVariable String empleoId,
@@ -436,7 +425,6 @@ public class SolicitudController {
         model.addAttribute("hayFiltros", !filtro.isEmpty());
         model.addAttribute("fasesReclutamiento",
                 List.of("ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA", "CERRADO_PROCESO"));
-        // con el plan Gratis, aceptar una postulación registra la tarifa de colocación
         model.addAttribute("cobraColocacion", !planService.esPro(empresaRepository.findById(RoleGuard.getId(session)).orElse(null)));
         agregarSesion(session, model);
         return "postulaciones-empleo";
@@ -493,7 +481,6 @@ public class SolicitudController {
         return cambiarEstado(empleoId, solicitudId, "rechazada", session, ra);
     }
 
-    // para el drag-and-drop del kanban
     @PostMapping(value = "/empleos/{empleoId}/postulaciones/{solicitudId}/estado",
                  produces = "application/json")
     @ResponseBody
@@ -586,9 +573,6 @@ public class SolicitudController {
         return "redirect:/empleos/" + empleoId + "/postulaciones/" + solicitudId;
     }
 
-    // Retira (borra) la solicitud propia. Con Accept: application/json (los botones de Empleos y Solicitudes que
-    // usan fetch) responde JSON y no deja ningún aviso: la página ya muestra su propio toast. Sin JavaScript
-    // redirige a /solicitudes con el aviso "Solicitud retirada."
     @PostMapping("/solicitudes/{id}/delete")
     public Object deleteSolicitud(@PathVariable String id,
             @RequestHeader(value = "Accept", required = false) String accept,
@@ -614,7 +598,6 @@ public class SolicitudController {
         return "redirect:/solicitudes";
     }
 
-    // vuelve a poner en 'revision' a alguien descartado por el screening automático
     @PostMapping("/empleos/{empleoId}/postulaciones/{solicitudId}/reconsiderar")
     public String reconsiderar(@PathVariable String empleoId, @PathVariable String solicitudId,
             HttpSession session, RedirectAttributes ra) {
@@ -639,7 +622,6 @@ public class SolicitudController {
         cobroRepository.save(cobro);
     }
 
-    // pasa si el talento tiene al menos una de las skills requeridas
     private boolean evaluarScreening(Usuario usuario, String keywords) {
         if (usuario == null || usuario.getStack() == null || usuario.getStack().isEmpty())
             return false;

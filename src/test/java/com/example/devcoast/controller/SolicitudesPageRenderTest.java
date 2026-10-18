@@ -29,7 +29,6 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 
-// smoke test temporal de la migracion de solicitudes.html al layout ws-
 @WebMvcTest(SolicitudController.class)
 @Import(SecurityConfig.class)
 class SolicitudesPageRenderTest {

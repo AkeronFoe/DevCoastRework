@@ -1,12 +1,8 @@
-/* chrome compartido del workspace (topbar, sidebar, paleta de comandos,
-   overlay de arranque). Lo saqué de empleos.js/proyectos-vitrina.js,
-   que lo tenían duplicado, para que las páginas nuevas no lo repitan */
 document.addEventListener('DOMContentLoaded', () => {
 
     const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)
     const hasGsap = typeof window.gsap !== 'undefined'
 
-    /* ── Barra de progreso en navegación ── */
     const navBar = document.getElementById('nav-progress')
     if (navBar) {
         document.querySelectorAll('a[href]').forEach(a => {
@@ -27,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    /* ── Reloj en vivo de la barra de estado ── */
     const clockEl = document.getElementById('clock')
     if (clockEl) {
         const pad = x => String(x).padStart(2, '0')
@@ -38,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tick(); setInterval(tick, 1000)
     }
 
-    /* ── Botón volver arriba ── */
     const btt = document.getElementById('back-to-top')
     if (btt) {
         window.addEventListener('scroll', () => {
@@ -47,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
     }
 
-    /* ── Sidebar: colapsar grupos ── */
     document.querySelectorAll('.ws-side-head').forEach(btn => {
         btn.addEventListener('click', () => {
             const group = btn.closest('.ws-side-group')
@@ -56,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
-    /* ── Sidebar: menú móvil ── */
     const side = document.getElementById('side')
     const scrim = document.getElementById('scrim')
     const menuBtn = document.getElementById('menuBtn')
@@ -65,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     menuBtn?.addEventListener('click', () => { side?.classList.contains('is-open') ? closeSide() : openSide() })
     scrim?.addEventListener('click', closeSide)
 
-    /* ── Campana de notificaciones ── */
     const bellBtn = document.getElementById('bellBtn')
     const bellDrop = document.getElementById('bellDrop')
     if (bellBtn && bellDrop) {
@@ -82,10 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    /* ── Numeración del gutter, como el margen de un editor de código ── */
-    // busco el .ws-content dentro del mismo .ws-main que el gutter, no
-    // uno cualquiera con querySelector — así no se confunde si hay otro
-    // .ws-content suelto en un modal
     const gutterEl = document.getElementById('gutterLines')
     const contentEl = gutterEl?.closest('.ws-main')?.querySelector('.ws-content') || document.querySelector('.ws-content')
     if (gutterEl && contentEl) {
@@ -109,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else window.addEventListener('resize', scheduleUpdateGutter)
     }
 
-    /* ── Overlay de arranque ── */
     const boot = document.getElementById('wsBoot')
     if (boot) {
         if (reduce || !hasGsap) {
@@ -128,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* ── Paleta de comandos (⌘K) — lee los enlaces del sidebar ── */
     const paletteScrim = document.getElementById('paletteScrim')
     const paletteInput = document.getElementById('paletteInput')
     const paletteList = document.getElementById('paletteList')
@@ -196,8 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (e.key === 'ArrowDown') { e.preventDefault(); selIndex = Math.min(selIndex + 1, filtered.length - 1); highlight() }
             else if (e.key === 'ArrowUp') { e.preventDefault(); selIndex = Math.max(selIndex - 1, 0); highlight() }
             else if (e.key === 'Enter') { e.preventDefault(); go(selIndex) }
-            // los resultados no son focusables (se navegan con flechas), así
-            // que sin esto Tab se escapa del modal hacia el fondo
             else if (e.key === 'Tab') { e.preventDefault(); paletteInput.focus() }
         })
         function highlight() {
@@ -211,8 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
-    /* ── Dropdown "más filtros" (los chips ya son links reales — esto solo
-       abre/cierra el panel) ── */
     const moreBtn = document.getElementById('btn-more')
     const moreDropdown = document.getElementById('dropdown')
     if (moreBtn && moreDropdown) {

@@ -15,11 +15,9 @@ import com.example.devcoast.service.MatchEmpleo;
 
 import lombok.Getter;
 
-/** Lo que necesita un pase de la lista de solicitudes del talento: estado, etapa, siguiente paso y match. */
 @Getter
 public class SolicitudVista {
 
-    /** Una etapa de la línea de progreso: {@code estado} = hecha | actual | fin | pendiente. */
     public record Etapa(String nombre, String estado, String texto) {
     }
 
@@ -32,25 +30,25 @@ public class SolicitudVista {
     private String empresa;
     private String empresaInicial;
     private String empresaColor;
-    private String candidato;       // quien se postuló (lo usa el Dashboard de la cuenta de Empresa)
+    private String candidato;
     private String candidatoRol;
     private String areaClave;
     private String categoria;
     private String hace;
     private Integer match;
     private String nivel;
-    private String estado;          // revision | aprobada | rechazada | descartado
-    private String claseEstado;     // s-rev | s-ace | s-rec
-    private String estadoTexto;     // En revisión | Aceptada | No avanzó
+    private String estado;
+    private String claseEstado;
+    private String estadoTexto;
     private String detalle;
     private String siguientePaso;
-    private String sello;           // ACEPTADA | NO AVANZÓ | null
-    private String claseSello;      // ok | no
+    private String sello;
+    private String claseSello;
     private boolean retirable;
-    private int orden;              // para "Por estado": en revisión, aceptadas, cerradas
+    private int orden;
     private Date fecha;
-    private Date fechaEnvio;        // la del primer evento del historial (o, sin historial, la de la solicitud)
-    private Date fechaDecision;     // la del evento de la decisión (aceptada o rechazada), si el historial la trae
+    private Date fechaEnvio;
+    private Date fechaDecision;
     private List<Etapa> etapas = new ArrayList<>();
 
     public static SolicitudVista de(Solicitud s, Usuario talento, Date ahora) {
@@ -70,7 +68,6 @@ public class SolicitudVista {
         v.fechaEnvio = primerEvento(s);
         v.hace = hace(s.getFechaSolicitud(), ahora);
 
-        // match con el stack que tenía la oferta cuando se envió la solicitud
         Empleo oferta = new Empleo();
         oferta.setStack(s.getEmpleoStack());
         MatchEmpleo.Resultado m = MatchEmpleo.calcular(talento, oferta);
@@ -137,7 +134,6 @@ public class SolicitudVista {
         return v;
     }
 
-    // fecha del primer evento del historial; sin historial, la fecha de la solicitud
     private static Date primerEvento(Solicitud s) {
         Date f = null;
         if (s.getHistorial() != null)
@@ -161,7 +157,6 @@ public class SolicitudVista {
         return d == null ? "" : " el " + corta(d);
     }
 
-    /** "14 oct" */
     static String corta(Date d) {
         Calendar c = Calendar.getInstance();
         c.setTime(d);

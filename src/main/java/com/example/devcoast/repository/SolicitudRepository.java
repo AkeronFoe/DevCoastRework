@@ -15,7 +15,6 @@ public interface SolicitudRepository extends MongoRepository<Solicitud, String> 
 
     Optional<Solicitud> findByUsuarioIdAndEmpleoId(String usuarioId, String empleoId);
 
-    // para chequear "ya aplicó" de varios empleos a la vez (evita 1 consulta por empleo)
     List<Solicitud> findByUsuarioIdAndEmpleoIdIn(String usuarioId, List<String> empleoIds);
 
     List<Solicitud> findByEmpleoIdOrderByFechaSolicitudDesc(String empleoId);
@@ -28,6 +27,5 @@ public interface SolicitudRepository extends MongoRepository<Solicitud, String> 
 
     long countByEmpleoId(String empleoId);
 
-    // para el inbox de empresa, trae solicitudes de varios empleos a la vez
     List<Solicitud> findByEmpleoIdIn(List<String> empleoIds);
 }

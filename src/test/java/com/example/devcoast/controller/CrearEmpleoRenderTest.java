@@ -35,7 +35,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Publicar / editar oferta con el shell náutico: el formulario por pasos conserva los campos que espera el servidor
 @WebMvcTest(EmpleoController.class)
 @Import(SecurityConfig.class)
 class CrearEmpleoRenderTest {
@@ -85,7 +84,6 @@ class CrearEmpleoRenderTest {
                 .andExpect(content().string(containsString("// publicar vacante")))
                 .andExpect(content().string(containsString("Publicar oferta")))
                 .andExpect(content().string(matchesPattern("(?s).*/CSS/nautico-formulario(-[0-9a-f]{32})?\\.css.*")))
-                // el formulario sigue enviándose al mismo endpoint, con los campos que valida el servidor
                 .andExpect(content().string(containsString("action=\"/empleos/guardar\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
                 .andExpect(content().string(containsString("name=\"empresaNombre\"")))

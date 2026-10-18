@@ -69,8 +69,6 @@ public class PageController {
         return RoleGuard.sinSesion(session) ? "redirect:/about-us" : "redirect:/dashboard";
     }
 
-    // /dashboard lo atiende DashboardController (ronda 5 del rediseño náutico)
-
     @GetMapping("/perfil")
     public String perfil(HttpSession session, Model model) {
         if (RoleGuard.sinSesion(session))
@@ -96,8 +94,6 @@ public class PageController {
         model.addAttribute("statSolicitudesTotal",     solTotal);
         model.addAttribute("statSolicitudesAceptadas", solAcept);
 
-        // vista previa "así te ven en el Directorio": la misma tarjeta del listado, con los colores
-        // reales de hasta 4 proyectos publicados
         List<String> previewColores = proyectosUsuario.stream()
                 .filter(Proyecto::isPublicado)
                 .map(Proyecto::getColorIcono)
@@ -107,8 +103,6 @@ public class PageController {
                 .collect(Collectors.toList());
         long publicados = proyectosUsuario.stream().filter(Proyecto::isPublicado).count();
         if (usuario != null) {
-            // valor actual de cada selector del formulario (claves unificadas); si el guardado es un texto libre
-            // que no está en la lista, se agrega como opción para no perderlo al guardar
             String mod = EtiquetasPerfil.modalidadClave(usuario.getModalidad());
             String disp = EtiquetasPerfil.disponibilidadClave(usuario.getDisponibilidad());
             String esp = EtiquetasPerfil.especialidadClave(usuario.getEspecialidad());
@@ -290,8 +284,6 @@ public class PageController {
         return "register";
     }
 
-    // landing pública: los tres "pases" de la escena de empleos salen de las ofertas activas más recientes
-    // (solo los campos que muestra el pase). Sin ofertas, la plantilla omite esa escena.
     @GetMapping("/about-us")
     public String aboutUs(Model model) {
         Query recientes = new Query(new Criteria().orOperator(
@@ -303,7 +295,6 @@ public class PageController {
         return "aboutUs";
     }
 
-    // vista previa del perfil, tal como lo ven las empresas
     @GetMapping("/perfil/preview")
     public String perfilPreview(HttpSession session, Model model) {
         if (RoleGuard.sinSesion(session))  return "redirect:/login";
@@ -327,7 +318,6 @@ public class PageController {
         return "talento-perfil";
     }
 
-    // el CV imprimible ahora vive en Currículum ("Descargar PDF" imprime la hoja)
     @GetMapping("/perfil/exportar-pdf")
     public String exportarPerfilPDF(HttpSession session) {
         if (RoleGuard.sinSesion(session) || RoleGuard.esEmpresa(session))

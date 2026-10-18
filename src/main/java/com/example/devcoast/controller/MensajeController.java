@@ -94,12 +94,10 @@ public class MensajeController {
         for (Solicitud sol : misSolicitudes)
             solicitudIds.add(sol.getId());
 
-        // traigo todos los mensajes de todas mis conversaciones de una, en vez de 2 consultas por conversación
         List<Mensaje> todosMensajes = solicitudIds.isEmpty()
                 ? List.of()
                 : mensajeRepository.findBySolicitudIdInOrderByFechaEnvioDesc(solicitudIds);
 
-        // vienen ordenados desc por fecha, así que la primera aparición de cada solicitudId ya es la más reciente
         Map<String, Mensaje> ultimoPorSolicitud = new LinkedHashMap<>();
         Map<String, Long> noLeidosPorSolicitud = new HashMap<>();
         for (Mensaje m : todosMensajes) {
@@ -197,7 +195,6 @@ public class MensajeController {
         List<Mensaje> mensajes = new ArrayList<>(pagina.getContent());
         Collections.reverse(mensajes);
 
-        // marco todo como leído de una sola pasada en vez de uno por uno
         Query markQuery = Query.query(
                 Criteria.where("solicitudId").is(solicitudId)
                         .and("destinatarioId").is(userId)
@@ -276,7 +273,6 @@ public class MensajeController {
         return ResponseEntity.ok(resp);
     }
 
-    // fallback por si el JS no cargó
     @PostMapping("/chat/{solicitudId}")
     public String enviarMensaje(@PathVariable String solicitudId,
             @RequestParam String texto,
@@ -289,7 +285,6 @@ public class MensajeController {
         return "redirect:/chat/" + solicitudId;
     }
 
-    // este es el que usa el chat de verdad, para no recargar la página en cada mensaje
     @PostMapping(value = "/chat/{solicitudId}/enviar", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> enviarMensajeAjax(@PathVariable String solicitudId,
@@ -352,7 +347,6 @@ public class MensajeController {
         return ResponseEntity.ok(Map.of("mensajes", items));
     }
 
-    // devuelve null si algo no cuadra
     private Mensaje crearMensaje(String solicitudId, String texto, HttpSession session) {
         if (texto == null || texto.isBlank())
             return null;
