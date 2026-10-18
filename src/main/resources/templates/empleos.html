@@ -28,7 +28,7 @@
                         <div class="eyebrow">// ofertas</div>
                         <h1>Empleos</h1>
                         <p class="sub" aria-live="polite"
-                            th:text="|Mostrando ${totalMostradas} de ${totalActivas} ofertas| + (${matchDisponible} ? | · ${conMatchAlto} con match alto| : '')">Mostrando 8 de 8 ofertas</p>
+                            th:text="(${ventanaLlena} ? |Mostrando las ${limiteVentana} más recientes de ${totalCoincidencias} ofertas · usa la búsqueda o los filtros para ver otras| : |Mostrando ${totalMostradas} de ${totalActivas} ofertas|) + (${matchDisponible} ? | · ${conMatchAlto} con match alto| : '')">Mostrando 8 de 8 ofertas</p>
                     </div>
                     <form class="sort" method="get" th:action="@{/empleos}" id="sortForm">
                         <input type="hidden" name="area" th:value="${area}" th:disabled="${area == ''}">

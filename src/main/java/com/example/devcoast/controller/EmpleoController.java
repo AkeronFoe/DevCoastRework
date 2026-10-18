@@ -115,9 +115,11 @@ public class EmpleoController {
             criterios.add(Criteria.where("modalidad").regex(MODALIDAD_REGEX.get(modSel), "i"));
 
         long totalActivas = mongoTemplate.count(new Query(activas), Empleo.class);
-        Query consulta = new Query(new Criteria().andOperator(criterios.toArray(Criteria[]::new)))
-                .with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
+        Criteria coincidencias = new Criteria().andOperator(criterios.toArray(Criteria[]::new));
+        Query consulta = new Query(coincidencias).with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
         List<Empleo> candidatos = mongoTemplate.find(consulta, Empleo.class);
+        boolean ventanaLlena = candidatos.size() >= CANDIDATOS_LIMITE;
+        long totalCoincidencias = ventanaLlena ? mongoTemplate.count(new Query(coincidencias), Empleo.class) : candidatos.size();
 
         Map<String, MatchEmpleo.Resultado> matches = new HashMap<>();
         List<Empleo> lista = new ArrayList<>();
@@ -194,6 +196,9 @@ public class EmpleoController {
         model.addAttribute("tarjetas", tarjetas);
         model.addAttribute("totalMostradas", lista.size());
         model.addAttribute("totalActivas", totalActivas);
+        model.addAttribute("ventanaLlena", ventanaLlena && totalCoincidencias > CANDIDATOS_LIMITE);
+        model.addAttribute("limiteVentana", CANDIDATOS_LIMITE);
+        model.addAttribute("totalCoincidencias", totalCoincidencias);
         model.addAttribute("conMatchAlto", conMatchAlto);
         model.addAttribute("matchDisponible", matchDisponible);
         model.addAttribute("talentoSinStack", talento != null && !tieneStack);

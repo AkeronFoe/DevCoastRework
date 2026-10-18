@@ -304,4 +304,18 @@ class EmpleosPageRenderTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("El empleo ya no está disponible")));
     }
+
+    @Test
+    void conMasOfertasQueLaVentanaAvisaQueSonLasMasRecientes() throws Exception {
+        List<Empleo> muchas = new java.util.ArrayList<>();
+        for (int i = 0; i < 600; i++)
+            muchas.add(oferta(i % 30, "Oferta " + i, "Empresa " + i, "Programacion · Backend", "Remoto", "Java"));
+        when(mongoTemplate.find(any(Query.class), eq(Empleo.class))).thenReturn(muchas);
+        when(mongoTemplate.count(any(Query.class), eq(Empleo.class))).thenReturn(1835L);
+
+        mockMvc.perform(get("/empleos").session(sesion("talento")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Mostrando las 600 más recientes de 1835 ofertas")))
+                .andExpect(content().string(containsString("usa la búsqueda o los filtros")));
+    }
 }
