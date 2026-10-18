@@ -37,10 +37,8 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.EtiquetasPerfil;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequiredArgsConstructor
 public class TalentoController {
 
     // 12 = 3 columnas por 4 filas
@@ -53,6 +51,16 @@ public class TalentoController {
     private final NotificacionRepository notificacionRepository;
     private final ProyectoRepository proyectoRepository;
     private final MongoTemplate mongoTemplate;
+
+    public TalentoController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository, EmpresaRepository empresaRepository, InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository, ProyectoRepository proyectoRepository, MongoTemplate mongoTemplate) {
+        this.usuarioRepository = usuarioRepository;
+        this.empleoRepository = empleoRepository;
+        this.empresaRepository = empresaRepository;
+        this.invitacionRepository = invitacionRepository;
+        this.notificacionRepository = notificacionRepository;
+        this.proyectoRepository = proyectoRepository;
+        this.mongoTemplate = mongoTemplate;
+    }
 
     @GetMapping("/talentos")
     public String listarTalentos(

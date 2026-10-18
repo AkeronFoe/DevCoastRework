@@ -40,11 +40,9 @@ import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 
 @Controller
-@RequiredArgsConstructor
 public class SolicitudController {
 
     private final SolicitudRepository solicitudRepository;
@@ -57,6 +55,19 @@ public class SolicitudController {
     private final EmpresaRepository empresaRepository;
     private final CobroRepository cobroRepository;
     private final PlanService planService;
+
+    public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository, UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository, CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository, PlanService planService) {
+        this.solicitudRepository = solicitudRepository;
+        this.empleoRepository = empleoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.proyectoRepository = proyectoRepository;
+        this.invitacionRepository = invitacionRepository;
+        this.notificacionRepository = notificacionRepository;
+        this.cleanupService = cleanupService;
+        this.empresaRepository = empresaRepository;
+        this.cobroRepository = cobroRepository;
+        this.planService = planService;
+    }
 
     // Solicitudes y invitaciones del talento como pases de abordaje.
     // ?estado=todas|proceso|aceptadas|cerradas|invitaciones &orden=recientes|estado &q=

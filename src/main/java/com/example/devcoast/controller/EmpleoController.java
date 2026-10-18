@@ -3,7 +3,6 @@ package com.example.devcoast.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,11 +45,6 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class EmpleoController {
-
-    // 11 = 1 card destacada/mejor-match a ancho completo + 10 en pares de 2
-    // columnas — así la grilla siempre cierra en filas completas en vez de
-    // dejar una card sola con un hueco vacío al lado
-    private static final int EMPLEOS_POR_PAGINA_DEFAULT = 11;
 
     private final EmpleoRepository empleoRepository;
     private final MongoTemplate mongoTemplate;
