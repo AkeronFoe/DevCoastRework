@@ -372,14 +372,17 @@ public class EmpleoController {
                 logoUrl = ref.getLogoUrl();
         }
 
-        Map<String, Integer> scores = new HashMap<>();
-        if (RoleGuard.esTalento(session)) {
-            Usuario usu = obtenerUsuario(session);
-            if (usu != null && usu.getStack() != null && !usu.getStack().isEmpty()) {
-                for (Empleo e : empleosActivos)
-                    scores.put(e.getId(), calcularScore(usu, e));
-            }
-        }
+        // las ofertas activas con el mismo pase de Empleos: match con el talento (si tiene stack) y si ya postuló
+        Usuario talento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
+        Set<String> solicitadas = new java.util.HashSet<>();
+        if (talento != null && !empleosActivos.isEmpty())
+            solicitudRepository.findByUsuarioIdAndEmpleoIdIn(talento.getId(),
+                    empleosActivos.stream().map(Empleo::getId).toList())
+                    .forEach(sol -> solicitadas.add(sol.getEmpleoId()));
+        java.util.Date ahora = new java.util.Date();
+        List<EmpleoVista> tarjetas = new ArrayList<>();
+        for (Empleo e : empleosActivos)
+            tarjetas.add(EmpleoVista.de(e, MatchEmpleo.calcular(talento, e), solicitadas.contains(e.getId()), false, null, ahora));
 
         String inicial = (nombreEmpresa != null && !nombreEmpresa.isBlank())
                 ? nombreEmpresa.substring(0, 1).toUpperCase()
@@ -393,7 +396,10 @@ public class EmpleoController {
         model.addAttribute("logoUrl", logoUrl);
         model.addAttribute("inicial", inicial);
         model.addAttribute("empleosActivos", empleosActivos);
-        model.addAttribute("scores", scores);
+        model.addAttribute("tarjetas", tarjetas);
+        // el pase de oferta pregunta por esto: con el talento sin stack avisa que no hay match
+        model.addAttribute("esTalento", talento != null);
+        model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
         model.addAttribute("empresaId", empresaId);
         agregarSesion(session, model);
         return "empresa-perfil";
