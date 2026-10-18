@@ -1,81 +1,71 @@
-/* Ficha de un empleo: modal de aplicar (con selector de proyectos a
-   adjuntar, máx. 3) y micro-animación de entrada del hero. El botón de
-   favorito lo maneja dashboard-extras.js (initFavoritos), igual que en
-   /empleos, así ambas páginas comparten la misma lógica de guardado. */
+/* DevCoast · Ficha de una oferta.
+   Diálogo de postulación (mensaje + hasta 3 proyectos del portafolio) y el marcador "Guardar oferta"
+   (mismo endpoint que Empleos y Guardados: POST /empleos/favorito/{id} alterna el estado). */
 (function () {
-  const reduceMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
-    localStorage.getItem('dc-reduce-motion') === 'true'
-  const hasGsap = typeof window.gsap !== 'undefined'
+    'use strict';
 
-  const overlay = document.getElementById('jd-modal-overlay')
-  const btnAbrir = document.getElementById('btn-abrir-modal-aplicar')
-  const btnCerrar = document.getElementById('btn-cerrar-modal-aplicar')
-  const btnCancelar = document.getElementById('btn-cancelar-aplicar')
-  const counter = document.getElementById('jd-counter-proyectos')
-  const aviso = document.getElementById('jd-max-aviso')
-  const MAX = 3
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+    var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-  function abrirModal() {
-    overlay.classList.add('is-open')
-    document.body.style.overflow = 'hidden'
-    if (hasGsap && !reduceMotion) {
-      gsap.fromTo(overlay.querySelector('.jd-modal'), { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .28, ease: 'power2.out' })
+    /* ── diálogo de postulación ── */
+    var dlg = $('#dlgAplicar');
+    var abrir = $('#btnAplicar');
+    if (dlg && abrir) {
+        var MAX = 3;
+        var checks = $$('.ap-p input[type="checkbox"]', dlg);
+        var cuenta = $('#apCount');
+        var aviso = $('#apMax');
+
+        var refrescar = function () {
+            var n = checks.filter(function (c) { return c.checked; }).length;
+            if (cuenta) cuenta.textContent = n === 0 ? '0 proyectos seleccionados'
+                : n + (n === 1 ? ' proyecto seleccionado' : ' proyectos seleccionados');
+            // al llegar al tope se bloquean las demás casillas; el aviso se oculta mientras haya cupo
+            checks.forEach(function (c) { c.disabled = !c.checked && n >= MAX; });
+            if (aviso) aviso.hidden = n < MAX;
+        };
+        checks.forEach(function (c) { c.addEventListener('change', refrescar); });
+
+        var cerrar = function () { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); };
+        abrir.addEventListener('click', function () {
+            if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+            var t = $('#apMsg'); if (t) t.focus();
+        });
+        $('#apCancel').addEventListener('click', cerrar);
+        // clic en el fondo oscuro = cancelar
+        dlg.addEventListener('click', function (e) { if (e.target === dlg) cerrar(); });
+        refrescar();
     }
-    setTimeout(() => document.querySelector('#jd-form-aplicar textarea')?.focus(), 100)
-  }
-  function cerrarModal() {
-    overlay.classList.remove('is-open')
-    document.body.style.overflow = ''
-  }
 
-  btnAbrir?.addEventListener('click', abrirModal)
-  btnCerrar?.addEventListener('click', cerrarModal)
-  btnCancelar?.addEventListener('click', cerrarModal)
-  overlay?.addEventListener('click', (e) => { if (e.target === overlay) cerrarModal() })
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay?.classList.contains('is-open')) cerrarModal() })
-
-  let seleccionados = 0
-  document.querySelectorAll('.jd-proy-card').forEach(card => {
-    const checkbox = card.querySelector('.jd-proy-checkbox')
-    card.addEventListener('click', () => {
-      const yaSeleccionado = checkbox.checked
-      if (!yaSeleccionado && seleccionados >= MAX) {
-        if (aviso) aviso.style.display = 'block'
-        if (hasGsap && !reduceMotion) gsap.fromTo(card, { x: -4 }, { x: 0, duration: .3, ease: 'elastic.out(1, 0.4)' })
-        return
-      }
-      checkbox.checked = !yaSeleccionado
-      if (aviso) aviso.style.display = 'none'
-      card.classList.toggle('is-selected', checkbox.checked)
-      seleccionados += checkbox.checked ? 1 : -1
-      if (counter) {
-        counter.textContent = seleccionados === 0
-          ? '0 proyectos seleccionados'
-          : seleccionados + (seleccionados === 1 ? ' proyecto seleccionado' : ' proyectos seleccionados')
-      }
-    })
-  })
-
-  /* ── entrada suave del hero y las cards de la ficha ── */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (reduceMotion || !hasGsap) {
-      document.querySelectorAll('.job-ring .prog').forEach(circle => {
-        const pct = parseFloat(circle.dataset.pct) || 0
-        const full = 100.5
-        circle.style.strokeDasharray = String(full)
-        circle.style.strokeDashoffset = String(full * (1 - pct / 100))
-      })
-      return
-    }
-    const chunks = document.querySelectorAll('.jd-reveal')
-    gsap.fromTo(chunks, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out', stagger: .05 })
-
-    document.querySelectorAll('.job-ring .prog').forEach(circle => {
-      const pct = parseFloat(circle.dataset.pct) || 0
-      const full = 100.5
-      const target = full * (1 - pct / 100)
-      gsap.set(circle, { strokeDasharray: full, strokeDashoffset: full })
-      gsap.to(circle, { strokeDashoffset: target, duration: .9, delay: .2, ease: 'power2.out' })
-    })
-  })
-})()
+    /* ── guardar / quitar de guardados ── */
+    var guardar = $('#btnGuardar');
+    if (guardar) guardar.addEventListener('click', function () {
+        if (guardar.disabled) return;
+        var id = guardar.getAttribute('data-empleo-id');
+        var etiqueta = $('span', guardar);
+        var llamar = function () {
+            return fetch('/empleos/favorito/' + encodeURIComponent(id), { method: 'POST' })
+                .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+        };
+        var pintar = function (fav) {
+            guardar.setAttribute('aria-pressed', fav ? 'true' : 'false');
+            if (etiqueta) etiqueta.textContent = fav ? 'Guardada ✓' : 'Guardar oferta';
+        };
+        guardar.disabled = true;
+        llamar().then(function (d) {
+            guardar.disabled = false;
+            if (!(d && d.ok)) throw new Error('respuesta inesperada');
+            pintar(!!d.favorito);
+            toast(d.favorito ? 'Oferta guardada.' : 'Oferta quitada de guardados.', {
+                undo: function () {
+                    llamar().then(function (r) { if (r && r.ok) pintar(!!r.favorito); })
+                        .catch(function () { toast('No se pudo deshacer. Intenta de nuevo.'); });
+                }
+            });
+        }).catch(function () {
+            guardar.disabled = false;
+            toast('No se pudo guardar la oferta. Intenta de nuevo.');
+        });
+    });
+})();

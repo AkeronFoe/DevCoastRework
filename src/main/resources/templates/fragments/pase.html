@@ -5,7 +5,7 @@
 
     <!-- ===== Pase de abordaje (ticket). v = EmpleoVista; feat = destacado; i = orden de entrada ===== -->
     <article th:fragment="ticket(v, feat, i)" class="jt in"
-        th:classappend="${(feat ? 'feat ' : '') + (v.solicitada ? 'sent' : '')}" th:attr="data-id=${v.id}"
+        th:classappend="${(feat ? 'feat ' : '') + (v.solicitada ? 'sent' : '') + (v.cerrada ? ' closed' : '')}" th:attr="data-id=${v.id}"
         th:style="'--i:' + ${i}">
         <div class="jt-main">
             <span class="fpill" th:if="${feat}"
@@ -21,9 +21,14 @@
                     <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
                     <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
                 </span>
-                <span class="when" th:if="${v.hace != null}">
-                    <span class="tag" th:if="${v.nueva}">NUEVA</span><span th:text="${v.hace}">hace 3 días</span>
+                <span class="when" th:if="${v.hace != null or v.cerrada}">
+                    <span class="tag" th:if="${v.cerrada}">CERRADA</span>
+                    <span class="tag" th:if="${v.nueva and !v.cerrada}">NUEVA</span><span th:if="${v.hace != null}" th:text="${v.hace}">hace 3 días</span>
                 </span>
+                <!-- solo en Guardados (enGuardados): quita la oferta de los marcadores -->
+                <button class="unsave" type="button" th:if="${enGuardados != null and enGuardados}" th:attr="data-empleo-id=${v.id},aria-label='Quitar ' + ${v.titulo} + ' de guardados'">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>Quitar
+                </button>
             </div>
 
             <h2 class="jt-t"><a th:href="@{/empleos/{id}(id=${v.id})}" th:text="${v.titulo}">Cargo</a></h2>
@@ -79,9 +84,9 @@
 
             <form th:if="${esTalento}" method="post" th:action="@{/empleos/{id}/aplicar(id=${v.id})}" class="postular"
                 th:attr="data-postular=@{/empleos/{id}/postular(id=${v.id})},data-cargo=${v.titulo},data-empresa=${v.empresaNombre}">
-                <button class="apply" type="submit" th:disabled="${v.solicitada}"
+                <button class="apply" type="submit" th:disabled="${v.solicitada or v.cerrada}"
                     th:aria-label="|Postularme a ${v.titulo}${v.empresaNombre != null ? ' en ' + v.empresaNombre : ''}|"
-                    th:text="${v.solicitada} ? 'Solicitada' : 'Postularme'">Postularme</button>
+                    th:text="${v.solicitada} ? 'Solicitada' : (${v.cerrada} ? 'Cerrada' : 'Postularme')">Postularme</button>
             </form>
             <a class="apply ghost" th:unless="${esTalento}" th:href="@{/empleos/{id}(id=${v.id})}"
                 th:aria-label="|Ver la oferta ${v.titulo}|">Ver oferta</a>

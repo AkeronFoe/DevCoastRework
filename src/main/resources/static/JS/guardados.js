@@ -1,126 +1,74 @@
-/* Guardados: quitar de favoritos anima la salida de la card (exit sutil,
-   solo opacity + un pequeño translateY, más suave que la entrada), filtra
-   por compatibilidad/aplicado, y ordena reciente vs. mayor match. */
+/* DevCoast · Guardados.
+   Filtros y orden los resuelve el servidor (parámetros GET); aquí queda solo lo de interfaz:
+   enviar el orden al cambiar el selector y quitar una oferta de los marcadores (con "Deshacer").
+   El "Postularme" de cada pase lo maneja empleos-pase.js. */
 (function () {
-  const reduceMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
-    localStorage.getItem('dc-reduce-motion') === 'true'
-  const hasGsap = typeof window.gsap !== 'undefined'
+    'use strict';
 
-  /* ── quitar de guardados ── */
-  document.querySelectorAll('.job-save[data-empleo-id]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation()
-      if (btn.disabled) return
-      const empleoId = btn.dataset.empleoId
-      const card = btn.closest('.job-card')
-      btn.disabled = true
-      btn.style.opacity = '.4'
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-      fetch('/empleos/favorito/' + empleoId, { method: 'POST' })
-        .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json() })
-        .then(d => {
-          if (!(d.ok && !d.favorito)) throw new Error('respuesta inesperada')
-          const score = parseInt(card.dataset.score || '0', 10)
-          const yaAplico = card.dataset.aplico === 'true'
-          const removeCard = () => { card.remove(); updateCounts(score, yaAplico) }
-          if (hasGsap && !reduceMotion) {
-            gsap.to(card, { opacity: 0, y: -6, duration: .22, ease: 'power2.out', onComplete: removeCard })
-          } else {
-            card.style.transition = 'opacity .2s'
-            card.style.opacity = '0'
-            setTimeout(removeCard, 200)
-          }
-        })
-        .catch(() => {
-          btn.disabled = false
-          btn.style.opacity = ''
-          if (window.UIFeedback?.toast) window.UIFeedback.toast('No se pudo quitar el empleo. Intenta de nuevo.', 'error')
-        })
-    })
-  })
+    var lista = $('#guardadosLista');
+    var sub = $('#gdSub');
+    var removidas = 0;
 
-  function updateCounts(removedScore, removedAplico) {
-    const grid = document.getElementById('guardados-grid')
-    const remaining = grid ? grid.querySelectorAll('.job-card').length : 0
-    const crumbCount = document.getElementById('guardados-count')
-    if (crumbCount) crumbCount.textContent = remaining
-    const totalMetric = document.getElementById('gd-total-metric')
-    if (totalMetric) totalMetric.textContent = remaining
-    if (removedScore >= 70) {
-      const altaMetric = document.getElementById('gd-alta-metric')
-      if (altaMetric) altaMetric.textContent = Math.max(0, parseInt(altaMetric.textContent, 10) - 1)
+    /* el contador del encabezado se recalcula con lo que queda visible en la lista */
+    function actualizarResumen() {
+        if (!lista || !sub) return;
+        var vivas = Array.prototype.filter.call(lista.querySelectorAll('.jt'), function (a) { return !a.hidden; });
+        var alta = vivas.filter(function (a) { return a.querySelector('.jt-stub.hi') && a.querySelector('.mt-n'); }).length;
+        var sol = vivas.filter(function (a) { return a.classList.contains('sent'); }).length;
+        var total = Math.max(0, parseInt(sub.getAttribute('data-total') || '0', 10) - removidas);
+        var conMatch = sub.getAttribute('data-match') === 'true';
+        var txt = total === 1 ? '1 oferta guardada' : total + ' ofertas guardadas';
+        if (conMatch) txt += ' · ' + alta + ' con match alto';
+        if (sol > 0) txt += ' · ' + sol + ' ya solicitadas';
+        sub.textContent = txt;
+        if (vivas.length === 0) {
+            lista.hidden = true;
+            var vacio = $('#guardadosVacio');
+            if (vacio) vacio.hidden = false;
+        }
     }
-    if (removedAplico) {
-      const aplicoMetric = document.getElementById('gd-aplico-metric')
-      if (aplicoMetric) aplicoMetric.textContent = Math.max(0, parseInt(aplicoMetric.textContent, 10) - 1)
+
+    function llamarFavorito(id) {
+        return fetch('/empleos/favorito/' + encodeURIComponent(id), { method: 'POST' })
+            .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
     }
-    if (remaining === 0) location.reload()
-  }
 
-  /* ── filtros + orden ── */
-  const chips = document.querySelectorAll('[data-guardado-filter]')
-  const grid = document.getElementById('guardados-grid')
-  const empty = document.getElementById('guardados-filter-empty')
-  let active = 'todos'
+    /* quitar de guardados: POST al mismo endpoint que el marcador de Empleos (alterna el estado) */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest ? e.target.closest('.unsave[data-empleo-id]') : null;
+        if (!btn || btn.disabled) return;
+        var art = btn.closest('.jt');
+        var id = btn.getAttribute('data-empleo-id');
+        var titulo = ($('.jt-t', art) || {}).textContent || 'La oferta';
+        btn.disabled = true;
 
-  function applyFilter() {
-    if (!grid) return
-    const cards = grid.querySelectorAll('.job-card')
-    let visible = 0
-    cards.forEach(card => {
-      const score = parseInt(card.dataset.score || '0', 10)
-      const aplico = card.dataset.aplico === 'true'
-      const match = active === 'todos' || (active === 'alta' && score >= 70) || (active === 'sin-aplicar' && !aplico)
-      card.classList.toggle('is-hidden', !match)
-      if (match) visible++
-    })
-    if (empty) empty.hidden = visible !== 0
-    grid.hidden = visible === 0
-  }
-
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chips.forEach(c => c.classList.remove('active'))
-      chip.classList.add('active')
-      active = chip.dataset.guardadoFilter
-      applyFilter()
-    })
-  })
-
-  document.getElementById('guardados-filter-reset')?.addEventListener('click', () => {
-    chips.forEach(c => c.classList.remove('active'))
-    document.querySelector('[data-guardado-filter="todos"]')?.classList.add('active')
-    active = 'todos'
-    applyFilter()
-  })
-
-  document.getElementById('guardado-sort-select')?.addEventListener('change', function () {
-    if (!grid) return
-    const cards = Array.from(grid.querySelectorAll('.job-card'))
-    if (this.value === 'score') {
-      cards.sort((a, b) => (parseInt(b.dataset.score || '0', 10)) - (parseInt(a.dataset.score || '0', 10)))
-    } else {
-      cards.sort((a, b) => (a.dataset.originalOrder | 0) - (b.dataset.originalOrder | 0))
-    }
-    cards.forEach(card => grid.appendChild(card))
-  })
-
-  if (grid) {
-    Array.from(grid.querySelectorAll('.job-card')).forEach((card, i) => { card.dataset.originalOrder = i })
-  }
-
-  /* ── conteo animado de los gauges del resumen ── */
-  document.addEventListener('DOMContentLoaded', () => {
-    const tiles = document.querySelectorAll('.gd-stat')
-    if (hasGsap && !reduceMotion && tiles.length) {
-      gsap.fromTo(tiles, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out', stagger: .06 })
-    }
-    document.querySelectorAll('.gd-stat-num[id]').forEach((el, i) => {
-      const target = parseInt(el.textContent, 10) || 0
-      if (reduceMotion || !hasGsap) return
-      const obj = { v: 0 }
-      el.textContent = '0'
-      gsap.to(obj, { v: target, duration: .6, delay: .1 + i * .05, ease: 'power2.out', onUpdate: () => { el.textContent = String(Math.round(obj.v)) } })
-    })
-  })
-})()
+        llamarFavorito(id).then(function (d) {
+            if (!(d && d.ok && !d.favorito)) throw new Error('respuesta inesperada');
+            art.classList.add('quitando');
+            setTimeout(function () { art.hidden = true; removidas++; actualizarResumen(); }, 230);
+            toast(titulo.trim() + ' ya no está en guardados.', {
+                undo: function () {
+                    llamarFavorito(id).then(function (r) {
+                        if (r && r.ok && r.favorito) {
+                            art.hidden = false;
+                            art.classList.remove('quitando');
+                            btn.disabled = false;
+                            removidas = Math.max(0, removidas - 1);
+                            if (lista) lista.hidden = false;
+                            var vacio = $('#guardadosVacio'); if (vacio) vacio.hidden = true;
+                            actualizarResumen();
+                        } else {
+                            toast('No se pudo deshacer. Vuelve a guardarla desde Empleos.');
+                        }
+                    }).catch(function () { toast('No se pudo deshacer. Vuelve a guardarla desde Empleos.'); });
+                }
+            });
+        }).catch(function () {
+            btn.disabled = false;
+            toast('No se pudo quitar la oferta. Intenta de nuevo.');
+        });
+    });
+})();
