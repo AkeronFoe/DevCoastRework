@@ -47,8 +47,9 @@ public class CloudinaryController {
 
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
-        if (file.isEmpty())
-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "Archivo vacío"));
+        String problema = problemaConArchivo(file);
+        if (problema != null)
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
 
         try {
             String url = cloudinaryService.subirFotoPerfil(file, id);
@@ -111,8 +112,9 @@ public class CloudinaryController {
         String usuarioId = RoleGuard.getId(session);
         if (usuarioId == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
-        if (file.isEmpty())
-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "Archivo vacío"));
+        String problema = problemaConArchivo(file);
+        if (problema != null)
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
 
         Optional<Proyecto> maybe = proyectoRepository.findByIdAndUsuarioId(id, usuarioId);
         if (maybe.isEmpty())
@@ -157,8 +159,9 @@ public class CloudinaryController {
         String id = (String) session.getAttribute("usuarioActualId");
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
-        if (file.isEmpty())
-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "Archivo vacío"));
+        String problema = problemaConArchivo(file);
+        if (problema != null)
+            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
 
         try {
             String url = cloudinaryService.subirImagenProyecto(file);
@@ -167,5 +170,18 @@ public class CloudinaryController {
             return ResponseEntity.status(500)
                     .body(Map.of("ok", false, "error", "Error al subir logo: " + e.getMessage()));
         }
+    }
+
+    private static final long MAX_IMAGEN = 5L * 1024 * 1024;
+
+    private static String problemaConArchivo(MultipartFile file) {
+        if (file.isEmpty())
+            return "Archivo vacío";
+        String tipo = file.getContentType();
+        if (tipo == null || !tipo.toLowerCase().startsWith("image/"))
+            return "El archivo debe ser una imagen";
+        if (file.getSize() > MAX_IMAGEN)
+            return "La imagen pesa más de 5 MB";
+        return null;
     }
 }
