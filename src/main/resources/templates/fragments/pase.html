@@ -200,9 +200,8 @@
         </div>
     </article>
 
-    <!-- ===== Tarjeta de proyecto del portafolio (v = ProyectoVista) ===== -->
-    <article th:fragment="proyecto(v, i)" class="pj in" th:classappend="${!v.publicado} ? 'off'" th:style="'--i:' + ${i}"
-        th:attr="data-id=${v.id},data-nombre=${v.nombre},data-categoria=${v.categoria},data-tipo=${v.tipo},data-anio=${v.anio},data-desc=${v.descripcion},data-link=${v.enlace},data-stack=${#strings.listJoin(v.herramientas, ', ')}">
+    <!-- ===== Portada de un proyecto (imagen subida, composición de diseño o editor de código) ===== -->
+    <th:block th:fragment="portada(v)">
         <div class="cv" aria-hidden="true" th:if="${v.portada != null}"><img th:src="${v.portada}" alt="" loading="lazy"></div>
         <div class="cv" aria-hidden="true" th:if="${v.portada == null and v.areaClave != 'p'}">
                 <svg th:if="${v.variante == 0}" viewBox="0 0 300 152" preserveAspectRatio="xMidYMid slice"><rect width="300" height="152" fill="#FF7B4F"/><circle cx="214" cy="76" r="54" fill="#F3F4F8"/><rect x="40" y="38" width="86" height="86" rx="6" fill="#101114"/><polygon points="40,124 126,124 126,90" fill="#CC4B27"/></svg>
@@ -214,6 +213,12 @@
             <div><span class="a">proyecto</span>: <span class="c" th:text="'&quot;' + ${v.nombreCorto} + '&quot;'">"nombre"</span></div>
             <div th:each="h, st : ${v.herramientas}" th:if="${st.index < 3}"><span class="b">usa</span> <span class="c" th:text="${h}">Java</span></div>
         </div>
+    </th:block>
+
+    <!-- ===== Tarjeta de proyecto del portafolio (v = ProyectoVista) ===== -->
+    <article th:fragment="proyecto(v, i)" class="pj in" th:classappend="${!v.publicado} ? 'off'" th:style="'--i:' + ${i}"
+        th:attr="data-id=${v.id},data-nombre=${v.nombre},data-categoria=${v.categoria},data-tipo=${v.tipo},data-anio=${v.anio},data-desc=${v.descripcion},data-link=${v.enlace},data-stack=${#strings.listJoin(v.herramientas, ', ')}">
+        <th:block th:replace="~{:: portada(${v})}"></th:block>
 
         <div class="pj-b">
             <div class="pj-top">

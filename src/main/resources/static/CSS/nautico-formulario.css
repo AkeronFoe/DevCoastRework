@@ -163,3 +163,10 @@ html[data-theme="light"] .fm .preview-job-card .btn-ghost{color:#101114}
 html[data-theme="light"] .fm :is(.step-num.active,.tag-chip,.icon-opt.active,.upload-icon,.section-title svg,.review-edit,.score-pct.hi,#rv-salario){color:#0F766E}
 html[data-theme="light"] .fm :is(.step-num.active,.tag-chip,.icon-opt.active){border-color:#0F766E}
 html[data-theme="light"] .fm .req{color:var(--orange-ink)}
+
+/* ───── Cambiar contraseña: formulario corto de una sola tarjeta ───── */
+.fm.estrecho{max-width:620px}
+.fm .head .acts{display:flex;align-items:center;gap:10px}
+.fm .cp{margin-top:26px}
+.fm .cp-err{margin:0;font:700 12.5px var(--font-mono);color:var(--orange)}
+html[data-theme="light"] .fm .cp-err{color:var(--orange-ink)}

@@ -46,6 +46,7 @@ html[data-theme="light"] .fpill svg { fill: #101114; }
 html[data-theme="light"] :is(.hello, .carta, .hello-sea) { color: #F3F4F8; }
 html[data-theme="light"] :is(.hello p b, .vs, .todo-sea) { color: #F3F4F8; }
 html[data-theme="light"] .apply { color: #F3F4F8; }
+html[data-theme="light"] .btn-d { color: #F3F4F8; }
 html[data-theme="light"] .cv.code { color: #A6ABB8; }
 html[data-theme="light"] .cv.code .c { color: #F3F4F8; }
 

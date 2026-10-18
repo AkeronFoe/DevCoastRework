@@ -30,7 +30,7 @@
                         <h1 th:text="${proyecto.id != null} ? 'Editar proyecto' : 'Subir proyecto'">Subir proyecto</h1>
                         <p class="sub">Los campos con <span class="req">*</span> son obligatorios.</p>
                     </div>
-                    <div class="acts"><a class="btn-o sm" th:href="@{/misProyectos}">Mis proyectos</a></div>
+                    <div class="acts"><a class="btn-o sm" th:href="@{/proyectos}">Mis proyectos</a></div>
                 </div>
 
                             <form id="proyecto-form" th:action="@{/proyectos/guardar}" method="post">
