@@ -80,6 +80,7 @@
                                 <div th:if="${solicitud.empleoMostrarSalario}"><dt>SALARIO</dt><dd th:text="(${solicitud.empleoSalarioMin != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMin, 1, 'POINT')} : '—') + ' – ' + (${solicitud.empleoSalarioMax != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMax, 1, 'POINT')} : '—') + ' ' + ${solicitud.empleoMoneda}">-</dd></div>
                             </dl>
                             <a class="btn-o" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Ver empleo original</a>
+                            <a class="btn-o sd-chat" th:href="@{/chat/{id}(id=${solicitud.id})}">Escribir a la empresa</a>
                         </section>
 
                         <section class="pn" aria-labelledby="h-post">

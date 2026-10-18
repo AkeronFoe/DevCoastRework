@@ -34,7 +34,7 @@ public class NotificacionInterceptor implements HandlerInterceptor {
     private final MongoTemplate mongoTemplate;
 
     private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa",
-            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics", "empresa-perfil");
+            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics", "empresa-perfil", "mensajes", "chat");
 
     public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {

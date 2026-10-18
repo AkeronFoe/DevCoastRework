@@ -29,3 +29,4 @@
 .sd-aside .btn-o { align-self: flex-start; text-decoration: none; }
 
 @media (max-width: 1000px) { .sd { grid-template-columns: minmax(0, 1fr); } }
+.sd-aside .btn-o + .btn-o { margin-top: 10px; background: none; border: 1.5px solid var(--acc); color: var(--ink); }

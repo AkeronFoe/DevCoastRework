@@ -55,6 +55,7 @@ public class MongoIndexInitializer implements ApplicationRunner {
                 new Index().named("empresa_estado_idx").on("empresaId", Direction.ASC).on("estado", Direction.ASC));
         createIndex("proyectos", "usuario_fecha_idx",
                 new Index().named("usuario_fecha_idx").on("usuarioId", Direction.ASC).on("creadoEn", Direction.DESC));
+        createIndex("mensajes", "remitente_idx", new Index().named("remitente_idx").on("remitenteId", Direction.ASC));
         createIndex("cobros", "empresa_fecha_idx",
                 new Index().named("empresa_fecha_idx").on("empresaId", Direction.ASC).on("fecha", Direction.DESC));
     }
