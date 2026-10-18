@@ -4,28 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.repository.ProyectoRepository;
+import com.example.devcoast.service.AreaEmpleo;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -35,32 +31,21 @@ public class ProyectoController {
     private static final String BANNER_DEFAULT = "cover-terminal";
     private static final String ICONO_DEFAULT = "layers";
     private static final String COLOR_ICONO_DEFAULT = "#1f8f8f";
-    // 8 = grilla de 2 columnas en 4 filas parejas, mismo criterio que el
-    // tamaño de página default de empleos (cerrar filas completas)
-    private static final int PROYECTOS_POR_PAGINA_DEFAULT = 8;
 
     private final ProyectoRepository proyectoRepository;
-    private final MongoTemplate mongoTemplate;
 
-    public ProyectoController(ProyectoRepository proyectoRepository, MongoTemplate mongoTemplate) {
+    public ProyectoController(ProyectoRepository proyectoRepository) {
         this.proyectoRepository = proyectoRepository;
-        this.mongoTemplate = mongoTemplate;
     }
 
-    // vitrina de PROYECTOS PROPIOS — misma data que /misProyectos (solo lo del
-    // usuario logueado, publicado o borrador), con el tablero código/diseño en
-    // vez de la lista simple. Una vitrina cruzando lo público de todos los
-    // usuarios queda pendiente como una sección separada a futuro.
+    // Portafolio del talento: sus proyectos (públicos u ocultos) como tarjetas.
+    // ?area=programacion|diseno|otras &vis=1|0 &q=   (la lista es del propio usuario, así que se filtra en memoria)
     @GetMapping("/proyectos")
     public String vitrinaProyectos(
             Model model, HttpSession session, RedirectAttributes ra,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size,
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String tipo,
-            @RequestParam(defaultValue = "false") boolean destacados,
-            @RequestParam(defaultValue = "recent") String sort) {
+            @RequestParam(required = false) String area,
+            @RequestParam(required = false) String vis,
+            @RequestParam(required = false) String q) {
 
         if (RoleGuard.soloTalento(session)) {
             if (RoleGuard.sinSesion(session))
@@ -71,71 +56,54 @@ public class ProyectoController {
             return "redirect:/misEmpleos";
         }
 
-        page = Math.max(0, page);
-        int pageSize = size > 0 ? Math.min(size, 50) : PROYECTOS_POR_PAGINA_DEFAULT;
-        List<Criteria> criteriaList = new ArrayList<>();
-        criteriaList.add(Criteria.where("usuarioId").is(RoleGuard.getId(session)));
+        AreaEmpleo.Area areaSel = AreaEmpleo.Area.deClave(area);
+        String visSel = "1".equals(vis) || "0".equals(vis) ? vis : "";
+        String qSel = q == null ? "" : q.trim();
+        String qNorm = normalizar(qSel);
 
-        if (q != null && !q.isBlank()) {
-            for (String token : q.trim().split("\\s+")) {
-                if (token.length() < 2)
-                    continue;
-                String rx = ".*" + Pattern.quote(token) + ".*";
-                criteriaList.add(new Criteria().orOperator(
-                        Criteria.where("nombre").regex(rx, "i"),
-                        Criteria.where("categoria").regex(rx, "i"),
-                        Criteria.where("tipo").regex(rx, "i"),
-                        Criteria.where("descripcionCorta").regex(rx, "i"),
-                        Criteria.where("rol").regex(rx, "i"),
-                        Criteria.where("stack").regex(rx, "i"),
-                        Criteria.where("etiquetas").regex(rx, "i")));
-            }
+        List<ProyectoVista> todos = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(RoleGuard.getId(session))
+                .stream().map(ProyectoVista::de).collect(Collectors.toList());
+        List<ProyectoVista> lista = new ArrayList<>();
+        for (ProyectoVista p : todos) {
+            if (areaSel != null && !areaClave(areaSel).equals(p.getAreaClave()))
+                continue;
+            if (!visSel.isEmpty() && ("1".equals(visSel) != p.isPublicado()))
+                continue;
+            if (!qNorm.isEmpty() && !normalizar(p.getNombre() + " " + p.getCategoria() + " " + p.getDescripcion() + " "
+                    + String.join(" ", p.getHerramientas())).contains(qNorm))
+                continue;
+            lista.add(p);
         }
-        if (categoria != null && !categoria.isBlank())
-            criteriaList.add(Criteria.where("categoria").regex("^" + Pattern.quote(categoria) + "$", "i"));
-        if (tipo != null && !tipo.isBlank())
-            criteriaList.add(Criteria.where("tipo").regex("^" + Pattern.quote(tipo) + "$", "i"));
-        if (destacados)
-            criteriaList.add(Criteria.where("destacar").is(true));
 
-        Criteria filtroCriteria = new Criteria().andOperator(criteriaList.toArray(Criteria[]::new));
-        Sort.Direction dir = "oldest".equals(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        long publicos = todos.stream().filter(ProyectoVista::isPublicado).count();
+        boolean hayFiltros = areaSel != null || !visSel.isEmpty() || !qSel.isEmpty();
 
-        Query query = new Query(filtroCriteria);
-        query.with(Sort.by(dir, "creadoEn"));
-        long total = mongoTemplate.count(query, Proyecto.class);
-        query.skip((long) page * pageSize).limit(pageSize);
-        List<Proyecto> items = mongoTemplate.find(query, Proyecto.class);
-        Page<Proyecto> proyectos = new PageImpl<>(items, PageRequest.of(page, pageSize, Sort.by(dir, "creadoEn")),
-                total);
-
-        int totalPages = proyectos.getTotalPages();
-        int currentPage = proyectos.getNumber();
-        int startPage = Math.max(0, currentPage - 5);
-        int endPage = Math.min(Math.max(totalPages - 1, 0), startPage + 9);
-        if (endPage - startPage < 9)
-            startPage = Math.max(0, endPage - 9);
-
-        boolean hayFiltros = (q != null && !q.isBlank()) || (categoria != null && !categoria.isBlank())
-                || (tipo != null && !tipo.isBlank()) || destacados;
-
-        model.addAttribute("proyectos", proyectos);
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("showStartEllipsis", startPage > 0);
-        model.addAttribute("showEndEllipsis", endPage < totalPages - 1);
-        model.addAttribute("q", q);
-        model.addAttribute("categoria", categoria);
-        model.addAttribute("tipo", tipo);
-        model.addAttribute("destacados", destacados);
-        model.addAttribute("sort", sort);
+        model.addAttribute("proyectos", lista);
+        model.addAttribute("totalProyectos", todos.size());
+        model.addAttribute("totalPublicos", publicos);
+        model.addAttribute("area", areaSel == null ? "" : areaSel.clave());
+        model.addAttribute("areaP", areaSel == null ? null : areaSel.clave());
+        model.addAttribute("vis", visSel);
+        model.addAttribute("visP", visSel.isEmpty() ? null : visSel);
+        model.addAttribute("q", qSel.isEmpty() ? null : qSel);
         model.addAttribute("hayFiltros", hayFiltros);
-
+        model.addAttribute("anioActual", java.time.Year.now().getValue());
         agregarSesion(session, model);
         return "proyectos";
+    }
+
+    private static String areaClave(AreaEmpleo.Area a) {
+        return a == AreaEmpleo.Area.PROGRAMACION ? "p" : a == AreaEmpleo.Area.DISENO ? "d" : "o";
+    }
+
+    private static String normalizar(String s) {
+        return java.text.Normalizer.normalize(s == null ? "" : s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").toLowerCase().trim();
+    }
+
+    // a dónde se vuelve después de guardar o eliminar: la nueva página del portafolio o la lista de siempre
+    private static String destino(String volver) {
+        return "proyectos".equals(volver) ? "redirect:/proyectos" : "redirect:/misProyectos";
     }
 
     @GetMapping("/misProyectos")
@@ -204,6 +172,7 @@ public class ProyectoController {
             @RequestParam(defaultValue = "true") boolean publicar,
             @RequestParam(defaultValue = "true") boolean incluirCv,
             @RequestParam(defaultValue = "false") boolean destacar,
+            @RequestParam(required = false) String volver,
             HttpSession session, RedirectAttributes ra) {
 
         if (RoleGuard.soloTalento(session))
@@ -212,7 +181,14 @@ public class ProyectoController {
         if (isBlank(nombre) || isBlank(categoria) || isBlank(tipo) || isBlank(descripcion)) {
             ra.addFlashAttribute("flashMessage", "Completa nombre, categoría, tipo y descripción del proyecto");
             ra.addFlashAttribute("flashType", "error");
-            return "redirect:/subirProyecto" + (id != null && !id.isBlank() ? "?editar=" + id : "");
+            return "proyectos".equals(volver) ? "redirect:/proyectos"
+                    : "redirect:/subirProyecto" + (id != null && !id.isBlank() ? "?editar=" + id : "");
+        }
+        if (!isBlank(linkProyecto) && ProyectoVista.urlSegura(linkProyecto) == null) {
+            ra.addFlashAttribute("flashMessage", "El enlace del proyecto debe empezar con http:// o https://");
+            ra.addFlashAttribute("flashType", "error");
+            return "proyectos".equals(volver) ? "redirect:/proyectos"
+                    : "redirect:/subirProyecto" + (id != null && !id.isBlank() ? "?editar=" + id : "");
         }
 
         String usuarioId = RoleGuard.getId(session);
@@ -224,7 +200,7 @@ public class ProyectoController {
             if (existente.isEmpty()) {
                 ra.addFlashAttribute("flashMessage", "No tienes permiso para editar ese proyecto");
                 ra.addFlashAttribute("flashType", "error");
-                return "redirect:/misProyectos";
+                return destino(volver);
             }
             p = existente.get();
         } else {
@@ -260,7 +236,7 @@ public class ProyectoController {
                 esEdicion ? "Proyecto actualizado correctamente"
                         : (publicar ? "Proyecto publicado correctamente" : "Proyecto guardado como borrador"));
         ra.addFlashAttribute("flashType", "success");
-        return "redirect:/misProyectos";
+        return destino(volver);
     }
 
     @GetMapping("/misProyectos/{id}")
@@ -278,7 +254,8 @@ public class ProyectoController {
     }
 
     @PostMapping("/proyectos/eliminar/{id}")
-    public String eliminar(@PathVariable String id, HttpSession session, RedirectAttributes ra) {
+    public String eliminar(@PathVariable String id, @RequestParam(required = false) String volver,
+            HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.soloTalento(session))
             return "redirect:/login";
         String uid = RoleGuard.getId(session);
@@ -286,17 +263,91 @@ public class ProyectoController {
         if (maybe.isEmpty()) {
             ra.addFlashAttribute("flashMessage", "Proyecto no encontrado");
             ra.addFlashAttribute("flashType", "error");
-            return "redirect:/misProyectos";
+            return destino(volver);
         }
         if (!uid.equals(maybe.get().getUsuarioId())) {
             ra.addFlashAttribute("flashMessage", "No tienes permiso para eliminar este proyecto");
             ra.addFlashAttribute("flashType", "error");
-            return "redirect:/misProyectos";
+            return destino(volver);
         }
         proyectoRepository.deleteById(id);
         ra.addFlashAttribute("flashMessage", "Proyecto eliminado correctamente");
         ra.addFlashAttribute("flashType", "success");
-        return "redirect:/misProyectos";
+        return destino(volver);
+    }
+
+    // Edición rápida desde el diálogo del portafolio: solo toca los campos del diálogo
+    // (el editor completo, /subirProyecto, sigue siendo el único que cambia banner, rol, duración, etc.)
+    @PostMapping("/proyectos/{id}/actualizar")
+    public String actualizar(@PathVariable String id,
+            @RequestParam String nombre, @RequestParam String categoria, @RequestParam String tipo,
+            @RequestParam String descripcion,
+            @RequestParam(required = false) String anio,
+            @RequestParam(required = false) String stack,
+            @RequestParam(required = false) String linkProyecto,
+            @RequestParam(required = false) String volver,
+            HttpSession session, RedirectAttributes ra) {
+        if (RoleGuard.soloTalento(session))
+            return "redirect:/login";
+
+        Optional<Proyecto> existente = proyectoRepository.findByIdAndUsuarioId(id, RoleGuard.getId(session));
+        if (existente.isEmpty()) {
+            ra.addFlashAttribute("flashMessage", "No tienes permiso para editar ese proyecto");
+            ra.addFlashAttribute("flashType", "error");
+            return destino(volver);
+        }
+        if (isBlank(nombre) || isBlank(categoria) || isBlank(tipo) || isBlank(descripcion)) {
+            ra.addFlashAttribute("flashMessage", "Completa nombre, categoría, tipo y descripción del proyecto");
+            ra.addFlashAttribute("flashType", "error");
+            return destino(volver);
+        }
+        if (!isBlank(linkProyecto) && ProyectoVista.urlSegura(linkProyecto) == null) {
+            ra.addFlashAttribute("flashMessage", "El enlace del proyecto debe empezar con http:// o https://");
+            ra.addFlashAttribute("flashType", "error");
+            return destino(volver);
+        }
+
+        Proyecto p = existente.get();
+        p.setNombre(nombre.trim());
+        p.setCategoria(categoria.trim());
+        p.setTipo(tipo.trim());
+        p.setDescripcionCorta(descripcion.trim().length() > 200 ? descripcion.trim().substring(0, 200) : descripcion.trim());
+        p.setAnio(safeTrim(anio));
+        p.setStack(splitCsv(stack));
+        p.setLinkProyecto(safeTrim(linkProyecto));
+        p.setActualizadoEn(new Date());
+        proyectoRepository.save(p);
+
+        ra.addFlashAttribute("flashMessage", "Proyecto actualizado correctamente");
+        ra.addFlashAttribute("flashType", "success");
+        return destino(volver);
+    }
+
+    // Interruptor PÚBLICO / OCULTO. Con Accept: application/json (el interruptor de la página) responde JSON;
+    // el formulario sin JavaScript recibe una redirección.
+    @PostMapping("/proyectos/{id}/visibilidad")
+    public Object visibilidad(@PathVariable String id, @RequestParam boolean publicado,
+            @RequestHeader(value = "Accept", required = false) String accept,
+            HttpSession session, RedirectAttributes ra) {
+        boolean json = accept != null && accept.contains("application/json");
+        if (RoleGuard.sinSesion(session))
+            return json ? ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión.")) : "redirect:/login";
+        if (RoleGuard.soloTalento(session))
+            return json ? ResponseEntity.status(403).body(Map.of("ok", false, "mensaje", "Las empresas no tienen proyectos.")) : "redirect:/dashboard";
+
+        Optional<Proyecto> existente = proyectoRepository.findByIdAndUsuarioId(id, RoleGuard.getId(session));
+        if (existente.isEmpty())
+            return json ? ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "Proyecto no encontrado.")) : "redirect:/proyectos";
+
+        Proyecto p = existente.get();
+        p.setPublicado(publicado);
+        p.setActualizadoEn(new Date());
+        proyectoRepository.save(p);
+        if (json)
+            return ResponseEntity.ok(Map.of("ok", true, "publicado", publicado));
+        ra.addFlashAttribute("flashMessage", publicado ? "Ahora “" + p.getNombre() + "” es público." : "“" + p.getNombre() + "” quedó oculto.");
+        ra.addFlashAttribute("flashType", "success");
+        return "redirect:/proyectos";
     }
 
     private void agregarSesion(HttpSession session, Model model) {

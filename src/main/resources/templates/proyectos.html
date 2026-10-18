@@ -2,485 +2,133 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: meta}"></th:block>
-    <title>DevCoast | Proyectos</title>
-    <th:block th:replace="~{fragments/head :: assets}"></th:block>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
-    <link rel="stylesheet" th:href="@{/CSS/proyectos.css}">
-    <script th:src="@{/JS/ui-feedback.js}"></script>
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
-    <script th:src="@{/JS/polish.js}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script th:src="@{/JS/proyectos-render.js}" defer></script>
-    <script th:src="@{/JS/proyectos-vitrina.js}" defer></script>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Proyectos | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-proyectos.css}">
+    <script th:src="@{/JS/proyectos-pase.js}" defer></script>
 </head>
 
-<body class="wsjobs wsprojects" th:classappend="${usuarioActualTipo == 'empresa'} ? ' is-empresa' : ''">
+<body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
 
-    <div class="ws-boot" id="wsBoot" aria-hidden="true">
-        <div class="ws-boot-box">
-            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
-            <div class="ws-boot-line"><span class="ok">✓</span> indexando proyectos publicados…</div>
-            <div class="ws-boot-line" id="bootLast">$ devcoast run proyectos.json</div>
-            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
-        </div>
-    </div>
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('proyectos')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
 
-    <div id="nav-progress" class="ws-navprogress"></div>
-    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-    </button>
-    <div class="ws-grain" aria-hidden="true"></div>
-    <div class="ws-vignette" aria-hidden="true"></div>
-    <div class="ws-scrim" id="scrim"></div>
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/proyectos', 'Buscar proyectos', 'Busca por título o herramienta', ${q})}"></header>
 
-    <div class="ws-palette-scrim" id="paletteScrim">
-        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-            <div class="ws-palette-input-row">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
-                <kbd>Esc</kbd>
-            </div>
-            <div class="ws-palette-list" id="paletteList"></div>
-        </div>
-    </div>
+            <main class="content" id="contenido">
+                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
+                    th:text="${flashMessage}">Aviso</p>
 
-    <header class="ws-top">
-        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-        <a class="ws-brand" th:href="@{/dashboard}">
-            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
-            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">proyectos</span>
-        </a>
-        <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-
-        <button class="ws-search" id="paletteOpen" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Buscar en el workspace…
-            <kbd>⌘K</kbd>
-        </button>
-
-        <div class="ws-bell" id="bellWrap">
-            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
-            </button>
-            <div class="ws-bell-drop" id="bellDrop">
-                <div class="ws-bell-drop-head">
-                    <span class="ws-bell-drop-title">Notificaciones</span>
-                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
-                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
-                </div>
-                <div class="ws-bell-drop-list">
-                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
-                        Sin notificaciones nuevas
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/subirProyecto}" class="ws-btn ws-btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            <span class="lbl">Subir proyecto</span>
-        </a>
-
-        <div class="ws-avatar" th:title="${usuarioActualNombre}"
-            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
-            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
-    </header>
-
-    <div class="ws-body">
-        <aside class="ws-side" id="side" aria-label="Navegación">
-            <div class="ws-side-bar">
-                <span class="ws-side-bar-title">explorer</span>
-                <span class="ws-side-bar-tools" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
-                </span>
-            </div>
-
-            <div class="ws-side-profile">
-                <div class="ws-side-avatar"
-                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
-                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
-                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
-                </div>
-                <div>
-                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                    <div class="ws-side-profile-role" th:text="${usuarioActualTipo == 'empresa'} ? 'portal empresa' : 'talento creativo'">talento creativo</div>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    general<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/dashboard}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
-                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/empleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
-                        <span class="name">Empleos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/talentos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Talentos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link is-active" th:href="@{/proyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
-                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Guardados</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
-                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
-                        <span class="name">Mis empleos</span>
-                        <span class="ws-side-badge" th:if="${solicitudesPendientesEmpresa != null and solicitudesPendientesEmpresa > 0}" th:text="${solicitudesPendientesEmpresa}">1</span>
-                        <span class="ext" th:if="${solicitudesPendientesEmpresa == null or solicitudesPendientesEmpresa == 0}">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Candidatos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                        <span class="name">Publicar</span> <span class="ext">+</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    cuenta<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/mensajes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Mensajes</span>
-                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
-                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
-                        <span class="name">Solicitudes</span>
-                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
-                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/perfil}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
-                        <span class="name">Perfil</span> <span class="ext">.md</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
-                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/ajustes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        <main class="ws-main">
-            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
-            <div class="ws-content">
-                <div class="ws-crumb">
-                    <span>~</span><span class="sep">/</span>
-                    <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-                    <span class="sep">/</span><span class="cur">proyectos.json</span>
-                </div>
-
-                <div class="ws-page-head">
+                <div class="head">
                     <div>
-                        <p class="ws-eyebrow">// tus proyectos<span class="ws-cursor" aria-hidden="true">▌</span></p>
-                        <h1 class="ws-big-head">
-                            <span class="ws-big-num dc-counter" th:text="${proyectos.totalElements}">0</span>
-                            <span class="ws-big-head-sub">proyectos<br>en tu portafolio</span>
-                        </h1>
-                        <p class="ws-page-sub">Todo lo que subiste, en el mismo tablero código + diseño — filtra por disciplina o tipo, o busca por nombre o herramienta.</p>
+                        <div class="eyebrow">// portafolio</div>
+                        <h1>Proyectos</h1>
+                        <p class="sub" id="conteo" aria-live="polite" th:attr="data-total=${totalProyectos},data-publicos=${totalPublicos}"
+                            th:text="${totalProyectos == 1 ? '1 proyecto' : totalProyectos + ' proyectos'} + ' · ' + ${totalPublicos} + (${totalPublicos} == 1 ? ' público' : ' públicos')">6 proyectos · 5 públicos</p>
                     </div>
-                    <div class="ws-mini-card">
-                        <div class="ws-mini-card-head">
-                            <span class="ficha" th:text="'Portafolio #' + ${#strings.toUpperCase(#strings.substring(usuarioActualId ?: '000000000000', 0, 6))}">Portafolio</span>
-                            <span class="cat">creador</span>
-                        </div>
-                        <div class="ws-mini-card-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                        <div class="ws-mini-card-role" th:text="${usuarioActualCorreo}">correo@ejemplo.com</div>
+                    <div class="acts"><a class="btn-o sm" id="addTop" th:href="@{/subirProyecto}">Añadir proyecto</a></div>
+                </div>
+                <p class="note">Tus proyectos públicos aparecen en tu perfil. Las empresas los ven cuando abren tu tarjeta en el directorio. Los ocultos solo los ves tú.</p>
 
-                        <div class="ws-mini-card-badges">
-                            <span class="ws-mini-badge"><b>✓</b><span>código + diseño en el mismo tablero</span></span>
-                            <span class="ws-mini-badge"><b>✓</b><span>gestión completa en Mis proyectos</span></span>
-                        </div>
-
-                        <div class="ws-mini-stamp">
-                            <b th:text="${proyectos.totalElements}">0</b>
-                            <span>proyectos en tu portafolio</span>
-                        </div>
-
-                        <div class="ws-mini-card-foot">
-                            página <span th:text="${currentPage + 1}">1</span> de <span th:text="${totalPages > 0} ? ${totalPages} : 1">1</span>
-                            · <span th:text="${pageSize}">8</span> por página
+                <div class="filters">
+                    <div class="fg" role="group" aria-labelledby="fArea"><span class="lab" id="fArea">ÁREA</span>
+                        <div class="chs">
+                            <a class="ch" th:href="@{/proyectos(vis=${visP},q=${q})}" th:attr="aria-current=${area == ''} ? 'true'">Todos</a>
+                            <a class="ch" th:href="@{/proyectos(area='programacion',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'programacion'} ? 'true'">Programación</a>
+                            <a class="ch" th:href="@{/proyectos(area='diseno',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'diseno'} ? 'true'">Diseño</a>
+                            <a class="ch" th:href="@{/proyectos(area='otras',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'otras'} ? 'true'">Otras</a>
                         </div>
                     </div>
+                    <div class="fg" role="group" aria-labelledby="fVis"><span class="lab" id="fVis">VISIBILIDAD</span>
+                        <div class="chs">
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},q=${q})}" th:attr="aria-current=${vis == ''} ? 'true'">Todos</a>
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='1',q=${q})}" th:attr="aria-current=${vis == '1'} ? 'true'">Públicos</a>
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='0',q=${q})}" th:attr="aria-current=${vis == '0'} ? 'true'">Ocultos</a>
+                        </div>
+                    </div>
+                    <a class="clear" th:if="${hayFiltros}" th:href="@{/proyectos}">limpiar filtros</a>
                 </div>
 
-                <form method="get" th:action="@{/proyectos}" class="ws-cmdbar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <span class="p">$</span><span class="ws-cmdbar-cmd">devcoast explore</span>
-                    <span class="ws-cmdbar-input-wrap"><input type="text" name="q" id="global-search-input" th:value="${q}" placeholder="proyecto o herramienta…"></span>
-                    <input type="hidden" name="categoria" th:value="${categoria}">
-                    <input type="hidden" name="tipo" th:value="${tipo}">
-                    <input type="hidden" name="destacados" th:value="${destacados}">
-                    <input type="hidden" name="sort" th:value="${sort}">
-                </form>
-                <div class="ws-cmdbar-hint-row">
-                    <p class="ws-cmdbar-hint">// escribe y presiona Enter para buscar — combina chips de disciplina y tipo para acotar tu portafolio</p>
-                    <a th:href="@{/proyectos}" class="ws-clear-filters" th:classappend="${!hayFiltros} ? ' is-hidden' : ''">✕ limpiar filtros</a>
-                </div>
-
-                <section class="card">
-                    <div class="chip-row" th:with="cat=${categoria != null ? categoria : ''}, tp=${tipo != null ? tipo : ''}">
-                        <a class="chip" th:classappend="${cat == ''} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=null, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Todos</a>
-                        <a class="chip" th:classappend="${cat == 'Frontend'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${cat == 'Frontend' ? null : 'Frontend'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Frontend</a>
-                        <a class="chip" th:classappend="${cat == 'Full Stack'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${cat == 'Full Stack' ? null : 'Full Stack'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Full Stack</a>
-                        <a class="chip" th:classappend="${cat == 'UI/UX Design'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${cat == 'UI/UX Design' ? null : 'UI/UX Design'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">UI/UX Design</a>
-                        <a class="chip" th:classappend="${cat == 'Branding'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${cat == 'Branding' ? null : 'Branding'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Branding</a>
-                        <span class="chip-sep" aria-hidden="true" title="elegís uno por grupo"></span>
-                        <a class="chip" th:classappend="${tp == ''} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${categoria}, tipo=null, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Todos los tipos</a>
-                        <a class="chip" th:classappend="${tp == 'Personal'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${categoria}, tipo=${tp == 'Personal' ? null : 'Personal'}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Personal</a>
-                        <a class="chip" th:classappend="${tp == 'Cliente'} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${categoria}, tipo=${tp == 'Cliente' ? null : 'Cliente'}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Cliente</a>
-
-                        <div class="chip-sep" aria-hidden="true"></div>
-                        <div class="chip-more-wrapper">
-                            <span class="chip chip-more" id="btn-more">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                                </svg>
-                                Más filtros
-                                <svg class="arrow" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                                </svg>
-                            </span>
-                            <div class="chip-dropdown" id="dropdown">
-                                <a class="chip" th:classappend="${cat == 'Backend'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Backend' ? null : 'Backend'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Backend</a>
-                                <a class="chip" th:classappend="${cat == 'App movil'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'App movil' ? null : 'App movil'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">App móvil</a>
-                                <a class="chip" th:classappend="${cat == 'Dashboard SaaS'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Dashboard SaaS' ? null : 'Dashboard SaaS'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Dashboard SaaS</a>
-                                <a class="chip" th:classappend="${cat == 'Motion / Animacion'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Motion / Animacion' ? null : 'Motion / Animacion'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Motion / Animación</a>
-                                <a class="chip" th:classappend="${cat == 'Design System'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Design System' ? null : 'Design System'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Design System</a>
-                                <a class="chip" th:classappend="${cat == 'Ilustraciones 3D'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Ilustraciones 3D' ? null : 'Ilustraciones 3D'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Ilustraciones 3D</a>
-                                <a class="chip" th:classappend="${cat == 'Otro'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${cat == 'Otro' ? null : 'Otro'}, tipo=${tipo}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Otro</a>
-                                <span class="chip-dropdown-sep" aria-hidden="true"></span>
-                                <a class="chip" th:classappend="${tp == 'Open source'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${categoria}, tipo=${tp == 'Open source' ? null : 'Open source'}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Open source</a>
-                                <a class="chip" th:classappend="${tp == 'Concepto'} ? ' active' : ''"
-                                    th:href="@{/proyectos(categoria=${categoria}, tipo=${tp == 'Concepto' ? null : 'Concepto'}, q=${q}, destacados=${destacados ? true : null}, sort=${sort})}">Concepto</a>
-                            </div>
-                        </div>
-                        <a class="chip" th:classappend="${destacados} ? ' active' : ''"
-                            th:href="@{/proyectos(categoria=${categoria}, tipo=${tipo}, q=${q}, destacados=${destacados ? null : true}, sort=${sort})}">Solo destacados</a>
-                    </div>
+                <section class="pjs" aria-label="Tus proyectos" th:if="${!#lists.isEmpty(proyectos) or !hayFiltros}">
+                    <a class="add in" id="add" th:href="@{/subirProyecto}" style="--i:0">
+                        <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21"/><path d="M24 15v18M15 24h18"/></svg>
+                        Añadir proyecto<small>Código, diseño o lo que quieras mostrar</small>
+                    </a>
+                    <th:block th:each="v, st : ${proyectos}">
+                        <th:block th:replace="~{fragments/pase :: proyecto(${v}, ${st.count})}"></th:block>
+                    </th:block>
                 </section>
 
-                <div class="ws-results-head">
-                    <span class="comment">// <b th:text="${proyectos.totalElements} + ' resultados'">0 resultados</b>,
-                        ordenados por
-                        <span th:text="${sort == 'oldest'} ? 'más antiguos primero' : 'más recientes primero'">más recientes primero</span></span>
-                    <div class="ws-sort">
-                        <form method="get" th:action="@{/proyectos}">
-                            <input type="hidden" name="q" th:value="${q}">
-                            <input type="hidden" name="categoria" th:value="${categoria}">
-                            <input type="hidden" name="tipo" th:value="${tipo}">
-                            <input type="hidden" name="destacados" th:value="${destacados}">
-                            <label for="proj-sort-select" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Orden</label>
-                            <select id="proj-sort-select" name="sort" class="form-select inv-sort-select" onchange="this.form.submit()">
-                                <option value="recent" th:selected="${sort == null or sort == 'recent'}">Más recientes</option>
-                                <option value="oldest" th:selected="${sort == 'oldest'}">Más antiguos</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
+                <th:block th:if="${#lists.isEmpty(proyectos) and hayFiltros}">
+                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay proyectos con esos filtros.', '/proyectos', 'Limpiar filtros')}"></div>
+                </th:block>
 
-                <div th:if="${#lists.isEmpty(proyectos.content)}" class="empty-state">
-                    <div class="empty-state-code" aria-hidden="true">
-                        <span class="k">proyectos</span><span class="p">.json</span><span class="p">:</span>
-                        <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                    </div>
-                    <strong th:text="${hayFiltros} ? 'Sin resultados para estos filtros' : 'Aún no subiste ningún proyecto'">Sin resultados</strong>
-                    <p th:text="${hayFiltros} ? 'Prueba con otra disciplina, tipo o borra la búsqueda.' : 'Subí el primero y va a aparecer acá, con su tablero de código y diseño.'">Prueba con otros filtros.</p>
-                    <div class="empty-state-actions">
-                        <a th:if="${hayFiltros}" th:href="@{/proyectos}" class="btn btn-ghost">Limpiar filtros</a>
-                        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/subirProyecto}" class="btn btn-primary">Subir proyecto</a>
-                    </div>
-                </div>
-
-                <div id="proyectos-grid" class="proj-grid">
-                    <section th:each="p, pStat : ${proyectos.content}" class="proj-card"
-                        th:classappend="${p.destacar and pStat.first and currentPage == 0} ? ' featured' : ''"
-                        th:attr="data-id=${p.id}, data-name=${p.nombre}, data-color=${p.colorIcono}, data-banner=${p.bannerClase},
-                                 data-categoria=${p.categoria}, data-tipo=${p.tipo}, data-anio=${p.anio}, data-duracion=${p.duracion},
-                                 data-desc-ext=${p.descripcionExtendida},
-                                 data-stack=${#strings.listJoin(p.stack, ',')},
-                                 data-etiquetas=${#strings.listJoin(p.etiquetas, ',')}">
-
-                        <div class="proj-canvas"></div>
-                        <span class="proj-featured-tag" th:if="${p.destacar and pStat.first and currentPage == 0}">★ destacado</span>
-
-                        <div class="proj-avatar">
-                            <img th:if="${p.imagenUrl != null and !#strings.isEmpty(p.imagenUrl)}" th:src="${p.imagenUrl}" alt="">
-                            <img th:if="${(p.imagenUrl == null or #strings.isEmpty(p.imagenUrl)) and p.logoDataUrl != null and !#strings.isEmpty(p.logoDataUrl)}" th:src="${p.logoDataUrl}" alt="">
-                            <span th:if="${(p.imagenUrl == null or #strings.isEmpty(p.imagenUrl)) and (p.logoDataUrl == null or #strings.isEmpty(p.logoDataUrl))}"
-                                th:text="${p.nombre != null and !#strings.isEmpty(p.nombre)} ? ${#strings.toUpperCase(#strings.substring(p.nombre,0,1))} : 'D'">D</span>
+                <dialog class="dlg" id="dlg" aria-labelledby="dlgT">
+                    <form id="pform" method="post" th:action="@{/proyectos/guardar}" novalidate data-crear="/proyectos/guardar">
+                        <input type="hidden" name="volver" value="proyectos">
+                        <div><span class="k" id="dlgK">NUEVO EN TU PORTAFOLIO</span><h2 id="dlgT">Añadir proyecto</h2></div>
+                        <div class="fl"><label class="k" for="pNombre">TÍTULO</label>
+                            <input id="pNombre" name="nombre" type="text" autocomplete="off" maxlength="120" aria-describedby="eNombre" aria-invalid="false">
+                            <p class="err" id="eNombre" hidden></p></div>
+                        <div class="two-c">
+                            <div class="fl"><label class="k" for="pCategoria">CATEGORÍA</label>
+                                <select id="pCategoria" name="categoria" aria-describedby="eCategoria" aria-invalid="false">
+                                    <option value="">Seleccionar</option>
+                                    <optgroup label="Programación">
+                                        <option value="Frontend">Frontend</option>
+                                        <option value="Backend">Backend</option>
+                                        <option value="Full Stack">Full Stack</option>
+                                        <option value="App movil">App móvil</option>
+                                    </optgroup>
+                                    <optgroup label="Diseño">
+                                        <option value="UI/UX Design">UI/UX Design</option>
+                                        <option value="Ilustraciones 3D">Ilustraciones 3D</option>
+                                        <option value="Branding">Branding</option>
+                                        <option value="Motion / Animacion">Motion / Animación</option>
+                                        <option value="Design System">Design System</option>
+                                        <option value="Dashboard SaaS">Dashboard SaaS</option>
+                                    </optgroup>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <p class="err" id="eCategoria" hidden></p></div>
+                            <div class="fl"><label class="k" for="pTipo">TIPO</label>
+                                <select id="pTipo" name="tipo" aria-describedby="eTipo" aria-invalid="false">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Personal">Personal</option>
+                                    <option value="Cliente">Cliente</option>
+                                    <option value="Open source">Open source</option>
+                                    <option value="Concepto">Concepto</option>
+                                </select>
+                                <p class="err" id="eTipo" hidden></p></div>
                         </div>
-
-                        <div class="proj-body">
-                            <div class="proj-content">
-                                <span class="proj-title">
-                                    <span th:text="${p.nombre}">Proyecto</span>
-                                    <span class="proj-title-disc is-draft" th:if="${!p.publicado}">borrador</span>
-                                </span>
-                                <div class="proj-meta-line"
-                                    th:with="tieneRol=${p.rol != null and !#strings.isEmpty(p.rol)}, tieneAnio=${p.anio != null and !#strings.isEmpty(p.anio)}, tieneDur=${p.duracion != null and !#strings.isEmpty(p.duracion)}">
-                                    <span th:if="${tieneRol}" th:text="${p.rol}">Rol</span><th:block th:if="${tieneRol and (tieneAnio or tieneDur)}"> · </th:block><span
-                                        th:if="${tieneAnio}" th:text="${p.anio}">Año</span><th:block th:if="${tieneAnio and tieneDur}"> · </th:block><span
-                                        th:if="${tieneDur}" th:text="${p.duracion}">Duración</span>
-                                </div>
-                                <p class="proj-tagline" th:text="${p.descripcionCorta}">Descripción</p>
-                                <div class="proj-swatches"></div>
-                                <div class="proj-tags">
-                                    <span class="tag-code" th:each="t : ${p.stack}" th:text="${t}">tech</span>
-                                    <span class="tag-tool" th:each="t : ${p.etiquetas}" th:text="${t}">tag</span>
-                                </div>
-                            </div>
-                            <div class="proj-foot">
-                                <div class="proj-foot-l">
-                                    <a th:href="@{/subirProyecto(editar=${p.id})}" class="proj-icon-action" title="Editar proyecto" onclick="event.stopPropagation()">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                                    </a>
-                                    <form th:action="@{/proyectos/eliminar/{id}(id=${p.id})}" method="post"
-                                        data-confirm-message="¿Eliminar este proyecto? No se puede deshacer." data-confirm-title="Confirmar eliminación"
-                                        data-confirm-ok="Eliminar" data-confirm-variant="danger" onclick="event.stopPropagation()">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                        <button type="submit" class="proj-icon-action is-danger" title="Eliminar proyecto">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                                <div class="proj-actions">
-                                    <a th:if="${p.linkProyecto != null and (p.linkProyecto.startsWith('http://') or p.linkProyecto.startsWith('https://'))}"
-                                        th:href="${p.linkProyecto}" target="_blank" rel="noopener" class="btn btn-ghost" onclick="event.stopPropagation()">
-                                        Abrir enlace
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                    </a>
-                                    <button class="btn btn-primary proj-qv-btn" type="button">
-                                        Ver proyecto
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="fl"><label class="k" for="pDesc">DESCRIPCIÓN</label>
+                            <textarea id="pDesc" name="descripcion" rows="3" maxlength="200" placeholder="¿Qué hace o qué problema resuelve?" aria-describedby="eDesc" aria-invalid="false"></textarea>
+                            <p class="err" id="eDesc" hidden></p></div>
+                        <div class="fl"><label class="k" for="pStack">HERRAMIENTAS (SEPARADAS POR COMA)</label>
+                            <input id="pStack" name="stack" type="text" placeholder="Java, Spring Boot, MongoDB"></div>
+                        <div class="two-c">
+                            <div class="fl"><label class="k" for="pLink">ENLACE</label>
+                                <input id="pLink" name="linkProyecto" type="url" inputmode="url" placeholder="https://" aria-describedby="eLink" aria-invalid="false">
+                                <p class="err" id="eLink" hidden></p></div>
+                            <div class="fl"><label class="k" for="pAnio">AÑO</label>
+                                <select id="pAnio" name="anio">
+                                    <option th:each="y : ${#numbers.sequence(anioActual, anioActual - 5, -1)}" th:value="${y}" th:text="${y}">2026</option>
+                                </select></div>
                         </div>
-                    </section>
-                </div>
-
-                <nav class="pagination-tabs" th:if="${totalPages > 1}">
-                    <a class="pagination-tab pagination-arrow" th:classappend="${currentPage == 0} ? ' is-disabled' : ''"
-                        th:href="@{/proyectos(page=${currentPage - 1},size=${pageSize},q=${q},categoria=${categoria},tipo=${tipo},destacados=${destacados},sort=${sort})}">Anterior</a>
-
-                    <a class="pagination-tab" th:if="${startPage > 0}"
-                        th:href="@{/proyectos(page=0,size=${pageSize},q=${q},categoria=${categoria},tipo=${tipo},destacados=${destacados},sort=${sort})}">1</a>
-                    <span class="pagination-ellipsis" th:if="${startPage > 0}">…</span>
-
-                    <a class="pagination-tab" th:each="i : ${#numbers.sequence(startPage, endPage)}"
-                        th:href="@{/proyectos(page=${i},size=${pageSize},q=${q},categoria=${categoria},tipo=${tipo},destacados=${destacados},sort=${sort})}"
-                        th:text="${i + 1}" th:classappend="${i == currentPage} ? ' active' : ''">1</a>
-
-                    <span class="pagination-ellipsis" th:if="${showEndEllipsis}">…</span>
-                    <a class="pagination-tab" th:if="${showEndEllipsis}"
-                        th:href="@{/proyectos(page=${totalPages - 1},size=${pageSize},q=${q},categoria=${categoria},tipo=${tipo},destacados=${destacados},sort=${sort})}"
-                        th:text="${totalPages}">1</a>
-
-                    <a class="pagination-tab pagination-arrow"
-                        th:classappend="${currentPage + 1 >= totalPages} ? ' is-disabled' : ''"
-                        th:href="@{/proyectos(page=${currentPage + 1},size=${pageSize},q=${q},categoria=${categoria},tipo=${tipo},destacados=${destacados},sort=${sort})}">Siguiente</a>
-                </nav>
-            </div>
-        </main>
-    </div>
-
-    <!-- ── Panel de vista rápida ── -->
-    <div class="qv-scrim" id="qvScrim">
-        <div class="qv-panel">
-            <button class="qv-close" type="button" aria-label="Cerrar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
-            </button>
-            <div class="qv-layout">
-                <div class="qv-canvas-col" id="qvCanvasCol"></div>
-                <div class="qv-body">
-                    <p class="qv-eyebrow">// vista rápida</p>
-                    <h2 class="qv-title" id="qvTitle"></h2>
-                    <p class="qv-meta" id="qvMeta"></p>
-                    <div class="qv-specs" id="qvSpecs"></div>
-                    <p class="qv-desc" id="qvDesc"></p>
-                    <p class="qv-section-label">Paleta</p>
-                    <div class="qv-swatches" id="qvSwatches"></div>
-                    <p class="qv-section-label">Herramientas &amp; técnicas</p>
-                    <div class="qv-tags" id="qvTags"></div>
-                    <div class="qv-note" id="qvNote" hidden></div>
-                </div>
-            </div>
+                        <a class="full" id="pFull" th:href="@{/subirProyecto}" hidden>Abrir el editor completo (banner, rol, duración…)</a>
+                        <div class="dacts"><button class="ghostb" id="pCancel" type="button">Cancelar</button><button class="btn-o" id="pSave" type="submit">Guardar proyecto</button></div>
+                    </form>
+                </dialog>
+            </main>
         </div>
     </div>
 
-    <footer class="ws-status">
-        <div class="ws-status-l">
-            <span class="ws-status-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-            </span>
-            <span class="sp">·</span>
-            <span>tu portafolio</span>
-        </div>
-        <div class="ws-status-r">
-            <span class="hide-sm">devcoast v2</span>
-            <span class="sp hide-sm">·</span>
-            <span id="clock">00:00:00</span>
-            <span class="sp">·</span>
-            <a th:href="@{/about-us}">¿Ayuda?</a>
-        </div>
-    </footer>
-
+    <div th:replace="~{fragments/nautico :: toast}"></div>
 </body>
 
 </html>

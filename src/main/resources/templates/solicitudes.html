@@ -2,547 +2,92 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: meta}"></th:block>
-    <title>DevCoast | Solicitudes</title>
-    <th:block th:replace="~{fragments/head :: assets}"></th:block>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
-    <link rel="stylesheet" th:href="@{/CSS/talentos.css}">
-    <link rel="stylesheet" th:href="@{/CSS/solicitudes.css}">
-    <script th:src="@{/JS/ui-feedback.js}"></script>
-    <div id="flash-data" th:if="${flashMessage != null}"
-        th:attr="data-message=${flashMessage}, data-type=${flashType ?: 'info'}" style="display:none"></div>
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
-    <script th:src="@{/JS/polish.js}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script th:src="@{/JS/ws-shell.js}" defer></script>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Solicitudes | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
+    <script th:src="@{/JS/solicitudes-pase.js}" defer></script>
 </head>
 
-<body class="wsjobs">
+<body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
 
-    <div class="ws-boot" id="wsBoot" aria-hidden="true">
-        <div class="ws-boot-box">
-            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
-            <div class="ws-boot-line"><span class="ok">✓</span> revisando tu bandeja…</div>
-            <div class="ws-boot-line" id="bootLast">$ devcoast run solicitudes.json</div>
-            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
-        </div>
-    </div>
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('solicitudes')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
 
-    <div id="nav-progress" class="ws-navprogress"></div>
-    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-    </button>
-    <div class="ws-grain" aria-hidden="true"></div>
-    <div class="ws-vignette" aria-hidden="true"></div>
-    <div class="ws-scrim" id="scrim"></div>
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/solicitudes', 'Buscar solicitudes', 'Busca por cargo o empresa', ${q})}"></header>
 
-    <div class="ws-palette-scrim" id="paletteScrim">
-        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-            <div class="ws-palette-input-row">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
-                <kbd>Esc</kbd>
-            </div>
-            <div class="ws-palette-list" id="paletteList"></div>
-        </div>
-    </div>
+            <main class="content" id="contenido">
+                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
+                    th:text="${flashMessage}">Aviso</p>
 
-    <header class="ws-top">
-        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-        <a class="ws-brand" th:href="@{/dashboard}">
-            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
-            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">solicitudes</span>
-        </a>
-        <span class="ws-role-pill">talento</span>
-
-        <button class="ws-search" id="paletteOpen" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Buscar en el workspace…
-            <kbd>⌘K</kbd>
-        </button>
-
-        <div class="ws-bell" id="bellWrap">
-            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
-            </button>
-            <div class="ws-bell-drop" id="bellDrop">
-                <div class="ws-bell-drop-head">
-                    <span class="ws-bell-drop-title">Notificaciones</span>
-                    <span class="ws-bell-drop-count" th:if="${notifNoLeidas != null and notifNoLeidas > 0}"
-                        th:text="${notifNoLeidas} + ' nueva' + (${notifNoLeidas} == 1 ? '' : 's')"></span>
-                </div>
-                <div class="ws-bell-drop-list">
-                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">
-                        Sin notificaciones nuevas
-                    </div>
-                    <div th:each="n : ${notifRecientes}" class="ws-notif" th:classappend="${!n.leida} ? ' is-unread' : ''">
-                        <a th:href="@{|/notificaciones/${n.id}/ir|}" class="ws-notif-link">
-                            <div class="ws-notif-dot" th:if="${!n.leida}"></div>
-                            <div class="ws-notif-icon">
-                                <svg th:if="${n.tipo == 'NUEVA_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
-                                <svg th:if="${n.tipo == 'ESTADO_SOLICITUD'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-                                <svg th:if="${n.tipo == 'NUEVA_INVITACION'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
-                                <svg th:if="${n.tipo == 'NUEVO_MENSAJE'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            </div>
-                            <div class="ws-notif-body">
-                                <div class="ws-notif-title" th:text="${n.titulo}">Título</div>
-                                <div class="ws-notif-msg" th:text="${n.mensaje}">Mensaje</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <a th:href="@{/empleos}" class="ws-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <span class="lbl">Buscar empleos</span>
-        </a>
-
-        <div class="ws-avatar" th:title="${usuarioActualNombre}"
-            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
-            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
-    </header>
-
-    <div class="ws-body">
-        <aside class="ws-side" id="side" aria-label="Navegación">
-            <div class="ws-side-bar">
-                <span class="ws-side-bar-title">explorer</span>
-                <span class="ws-side-bar-tools" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
-                </span>
-            </div>
-
-            <div class="ws-side-profile">
-                <div class="ws-side-avatar"
-                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
-                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
-                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
-                </div>
-                <div>
-                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                    <div class="ws-side-profile-role">talento creativo</div>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    general<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/dashboard}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
-                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/empleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
-                        <span class="name">Empleos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/talentos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Talentos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/proyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
-                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/empleos/guardados}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Guardados</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/misProyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
-                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    cuenta<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/mensajes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Mensajes</span>
-                        <span class="ws-side-badge" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}">1</span>
-                        <span class="ext" th:if="${mensajesNoLeidos == null or mensajesNoLeidos == 0}">.log</span>
-                    </a>
-                    <a class="ws-side-link is-active" th:href="@{/solicitudes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
-                        <span class="name">Solicitudes</span>
-                        <span class="ws-side-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}" th:text="${invPendienteCount}">1</span>
-                        <span class="ext" th:if="${invPendienteCount == null or invPendienteCount == 0}">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/perfil}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
-                        <span class="name">Perfil</span> <span class="ext">.md</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/curriculum}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
-                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/ajustes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        <main class="ws-main">
-            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
-            <div class="ws-content">
-                <div class="ws-crumb">
-                    <span>~</span><span class="sep">/</span><span>talento</span>
-                    <span class="sep">/</span><span class="cur">solicitudes.json</span>
-                </div>
-
-                <div th:if="${flashMessage != null}" class="flash-banner" th:classappend="${flashType != null ? ' ' + flashType : ''}">
-                    <span th:text="${flashMessage}">Notificacion</span>
-                    <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
-                </div>
-
-                <div class="ws-page-head">
+                <div class="head">
                     <div>
-                        <p class="ws-eyebrow">// tu bandeja<span class="ws-cursor" aria-hidden="true">▌</span></p>
-                        <h1 class="ws-big-head">
-                            <span class="ws-big-num dc-counter" th:text="${totalSolicitudes + (invitaciones != null ? #lists.size(invitaciones) : 0)}">0</span>
-                            <span class="ws-big-head-sub">postulaciones e<br>invitaciones en total</span>
-                        </h1>
-                        <p class="ws-page-sub">Seguimiento de todo lo que enviaste a empleos y de las invitaciones directas que te mandaron empresas.</p>
+                        <div class="eyebrow">// solicitudes</div>
+                        <h1>Solicitudes</h1>
+                        <p class="sub" id="conteo" aria-live="polite" th:with="enProceso=${nProceso}"
+                            th:attr="data-todas=${nTodas},data-proceso=${nProceso}"
+                            th:text="${nTodas == 1 ? '1 solicitud' : nTodas + ' solicitudes'} + ' · ' + ${nProceso} + ' en proceso' + (${invPendientes} > 0 ? ' · ' + ${invPendientes} + (${invPendientes} == 1 ? ' invitación por responder' : ' invitaciones por responder') : '')">7 solicitudes · 5 en proceso</p>
                     </div>
-                    <div class="ws-mini-card">
-                        <div class="ws-mini-card-head">
-                            <span class="ficha" th:text="'Ficha #' + ${#strings.toUpperCase(#strings.substring(#strings.concat(usuarioActualId ?: '', '000000'), 0, 6))}">Ficha</span>
-                            <span class="cat">talento</span>
-                        </div>
-                        <div class="ws-mini-card-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                        <div class="ws-mini-card-role" th:text="${usuarioActualCorreo}">correo@ejemplo.com</div>
-
-                        <div class="ws-mini-card-badges">
-                            <span class="ws-mini-badge"><b>✓</b><span th:text="${aprobadaCount} + ' postulación' + (${aprobadaCount} == 1 ? '' : 'es') + ' aprobada' + (${aprobadaCount} == 1 ? '' : 's')">aprobadas</span></span>
-                            <span class="ws-mini-badge" th:if="${invPendienteCount != null and invPendienteCount > 0}">
-                                <b class="text-amber">!</b><span th:text="${invPendienteCount} + ' invitación' + (${invPendienteCount} == 1 ? '' : 'es') + ' esperando respuesta'">pendientes</span>
-                            </span>
-                        </div>
-
-                        <div class="ws-mini-card-foot">
-                            <span th:text="${totalSolicitudes}">0</span> postulaciones ·
-                            <span th:text="${invitaciones != null ? #lists.size(invitaciones) : 0}">0</span> invitaciones
-                        </div>
-                    </div>
+                    <form class="sort" method="get" th:action="@{/solicitudes}" th:if="${estadoSel != 'invitaciones'}">
+                        <input type="hidden" name="estado" th:value="${estadoSel}" th:disabled="${estadoSel == 'todas'}">
+                        <input type="hidden" name="q" th:value="${q}" th:disabled="${q == null}">
+                        <label class="sort"><span class="lab">ORDEN</span>
+                            <select name="orden" id="sort">
+                                <option value="recientes" th:selected="${ordenSel == 'recientes'}">Más recientes</option>
+                                <option value="estado" th:selected="${ordenSel == 'estado'}">Por estado</option>
+                            </select>
+                        </label>
+                        <noscript><button class="clear" type="submit">aplicar</button></noscript>
+                    </form>
                 </div>
 
-                <nav class="ws-tabs">
-                    <a th:href="@{/solicitudes(tab='solicitudes')}" class="ws-tab" data-tab="solicitudes" th:classappend="${tabActiva == 'solicitudes'} ? ' active' : ''">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
-                        Mis solicitudes
-                        <span class="ws-tab-badge" th:text="${totalSolicitudes}">0</span>
-                    </a>
-                    <a th:href="@{/solicitudes(tab='invitaciones')}" class="ws-tab" data-tab="invitaciones" th:classappend="${tabActiva == 'invitaciones'} ? ' active' : ''">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>
-                        Invitaciones
-                        <span class="ws-tab-badge" id="tab-badge-invitaciones" th:classappend="${invPendienteCount != null and invPendienteCount > 0} ? ' is-alert' : ''"
-                            th:text="${invPendienteCount != null and invPendienteCount > 0} ? ${invPendienteCount} : (${invitaciones != null ? #lists.size(invitaciones) : 0})">0</span>
-                    </a>
-                </nav>
-
-                <form class="ws-cmdbar" onsubmit="return false;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <span class="p">$</span><span class="ws-cmdbar-cmd">devcoast filter</span>
-                    <span class="ws-cmdbar-input-wrap"><input type="text" id="buscar-solicitud" placeholder="empresa, empleo o mensaje…" aria-label="Buscar solicitud"></span>
-                </form>
-                <p class="ws-cmdbar-hint">// escribe para filtrar en vivo — combina con los chips de estado de abajo</p>
-
-                <!-- ============================= tab: mis solicitudes ============================= -->
-                <div id="panel-solicitudes" th:hidden="${tabActiva != 'solicitudes'}">
-                    <div class="insight-row">
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>totales</span>
-                            <span class="insight-tile-val" th:text="${totalSolicitudes}">0</span>
-                            <span class="insight-tile-sub">postulaciones enviadas</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>aprobadas</span>
-                            <span class="insight-tile-val text-mint" th:text="${aprobadaCount}">0</span>
-                            <span class="insight-tile-sub">te aceptaron</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>en revisión</span>
-                            <span class="insight-tile-val text-amber" th:text="${revisionCount}">0</span>
-                            <span class="insight-tile-sub">esperando respuesta</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>rechazadas</span>
-                            <span class="insight-tile-val text-rose" th:text="${rechazadaCount}">0</span>
-                            <span class="insight-tile-sub">no avanzaron</span>
-                        </div>
-                    </div>
-
-                    <section class="card">
-                        <div class="chip-row">
-                            <span class="chip active" data-filter="todas">Todas</span>
-                            <span class="chip" data-filter="revision">En revisión</span>
-                            <span class="chip" data-filter="aprobada">Aprobadas</span>
-                            <span class="chip" data-filter="rechazada">Rechazadas</span>
-                        </div>
-                    </section>
-
-                    <div th:if="${#lists.isEmpty(solicitudes)}" class="empty-state">
-                        <div class="empty-state-code" aria-hidden="true">
-                            <span class="k">solicitudes</span><span class="p">.json</span><span class="p">:</span>
-                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                        </div>
-                        <strong>Aún no has aplicado a ningún empleo</strong>
-                        <p>Cuando apliques, el historial de tus postulaciones va a aparecer acá.</p>
-                        <div class="empty-state-actions">
-                            <a class="btn btn-primary" th:href="@{/empleos}">Ver empleos disponibles</a>
-                        </div>
-                    </div>
-
-                    <div th:unless="${#lists.isEmpty(solicitudes)}">
-                        <section class="card ws-table-wrap" id="sol-table-wrap">
-                            <table class="ws-table">
-                                <thead>
-                                    <tr>
-                                        <th>Empleo</th>
-                                        <th>Empresa</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
-                                        <th style="width:44px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="solicitud : ${solicitudes}" class="solicitud-row"
-                                        tabindex="0" role="link"
-                                        th:aria-label="'Ver postulación a ' + ${solicitud.empleoTitulo}"
-                                        th:attr="data-estado=${solicitud.estado}"
-                                        th:onclick="|window.location='@{/solicitudes/{id}(id=${solicitud.id})}'|"
-                                        th:onkeydown="|if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location='@{/solicitudes/{id}(id=${solicitud.id})}'}|">
-                                        <td>
-                                            <strong th:text="${solicitud.empleoTitulo}">Empleo</strong>
-                                            <div class="muted-cell" th:text="${solicitud.empleoCategoria} + ' · ' + ${solicitud.empleoModalidad}">Cat</div>
-                                        </td>
-                                        <td th:text="${solicitud.empleoEmpresaNombre}">Empresa</td>
-                                        <td class="dc-mono" th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
-                                        <td>
-                                            <span class="status-pill status-review"    th:if="${solicitud.estado == 'revision'}">Revisión</span>
-                                            <span class="status-pill status-approved"  th:if="${solicitud.estado == 'aprobada'}">Aprobada</span>
-                                            <span class="status-pill status-rejected"  th:if="${solicitud.estado == 'rechazada'}">Rechazada</span>
-                                            <span class="status-pill status-discarded" th:if="${solicitud.estado == 'descartado'}">Descartada</span>
-                                        </td>
-                                        <td style="text-align:center;">
-                                            <a th:href="@{|/chat/${solicitud.id}|}" class="ws-table-chat" onclick="event.stopPropagation()" title="Ir al chat con esta empresa" aria-label="Ir al chat con esta empresa">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </section>
-                        <div id="sol-filter-empty" class="empty-state" hidden>
-                            <div class="empty-state-code" aria-hidden="true">
-                                <span class="k">solicitudes</span><span class="p">.json</span><span class="p">:</span>
-                                <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                            </div>
-                            <strong>Sin resultados para ese filtro o búsqueda</strong>
-                            <p>Prueba con otro estado o borra el texto de búsqueda.</p>
-                        </div>
-                    </div>
+                <!-- acción pendiente real: invitaciones de empresas sin responder -->
+                <div class="alertbar" role="status" th:if="${invPendientes > 0 and estadoSel != 'invitaciones'}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>
+                    <div class="txt"><b th:text="${invPendientes == 1 ? 'Tienes 1 invitación por responder.' : 'Tienes ' + invPendientes + ' invitaciones por responder.'}">Tienes 1 invitación por responder.</b>
+                        <span th:if="${primeraPendiente != null}"
+                            th:text="${(primeraPendiente.cargo != null ? primeraPendiente.cargo + ' · ' : '') + (primeraPendiente.empresa != null ? primeraPendiente.empresa : '')}">Cargo · Empresa</span></div>
+                    <a class="btn-o sm" th:href="@{/solicitudes(estado='invitaciones')}">Ver invitaciones</a>
                 </div>
 
-                <!-- ============================= tab: invitaciones ============================= -->
-                <div id="panel-invitaciones" th:hidden="${tabActiva != 'invitaciones'}">
-                    <div class="insight-row">
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.3 1.77.54 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.11a2 2 0 0 1 2.11-.45c.84.24 1.71.42 2.61.54A2 2 0 0 1 22 16.92z"/></svg>totales</span>
-                            <span class="insight-tile-val" th:text="${invitaciones != null ? #lists.size(invitaciones) : 0}">0</span>
-                            <span class="insight-tile-sub">invitaciones recibidas</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>pendientes</span>
-                            <span class="insight-tile-val text-amber" id="inv-stat-pendientes" th:text="${invPendienteCount != null ? invPendienteCount : 0}">0</span>
-                            <span class="insight-tile-sub">sin responder</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>aceptadas</span>
-                            <span class="insight-tile-val text-mint" id="inv-stat-aceptadas" th:text="${invAceptadaCount != null ? invAceptadaCount : 0}">0</span>
-                            <span class="insight-tile-sub">en contacto</span>
-                        </div>
-                        <div class="insight-tile">
-                            <span class="insight-tile-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>rechazadas</span>
-                            <span class="insight-tile-val text-rose" id="inv-stat-rechazadas" th:text="${invRechazadaCount != null ? invRechazadaCount : 0}">0</span>
-                            <span class="insight-tile-sub">declinadas</span>
-                        </div>
-                    </div>
-
-                    <section class="card">
-                        <div class="chip-row" style="justify-content:space-between;">
-                            <div class="chip-row" style="padding:0;">
-                                <span class="chip inv-filter active" data-inv-filter="todas">Todas</span>
-                                <span class="chip inv-filter" data-inv-filter="pendiente">Pendientes</span>
-                                <span class="chip inv-filter" data-inv-filter="aceptada">Aceptadas</span>
-                                <span class="chip inv-filter" data-inv-filter="rechazada">Rechazadas</span>
-                            </div>
-                            <div class="ws-sort">
-                                <label for="inv-sort-select" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Orden</label>
-                                <select id="inv-sort-select" class="form-select inv-sort-select">
-                                    <option value="recent" selected>Más recientes</option>
-                                    <option value="oldest">Más antiguas</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div th:if="${invitaciones == null or #lists.isEmpty(invitaciones)}" class="empty-state">
-                        <div class="empty-state-code" aria-hidden="true">
-                            <span class="k">invitaciones</span><span class="p">.json</span><span class="p">:</span>
-                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                        </div>
-                        <strong>Aún no tienes invitaciones</strong>
-                        <p>Activa tu perfil público en <a th:href="@{/perfil}" class="text-accent">Perfil</a> para que las empresas puedan encontrarte.</p>
-                        <div class="empty-state-actions">
-                            <a th:href="@{/perfil}" class="btn btn-primary">Ir a Perfil</a>
-                        </div>
-                    </div>
-
-                    <div th:unless="${invitaciones == null or #lists.isEmpty(invitaciones)}">
-                        <div class="inv-list">
-                        <div th:each="inv : ${invitaciones}" class="inv-card"
-                            th:attr="data-estado=${inv.estado}, data-date=${inv.fechaEnvio != null ? #dates.format(inv.fechaEnvio, 'yyyy-MM-dd''T''HH:mm:ss') : ''}">
-
-                            <div class="inv-card-header">
-                                <div class="inv-avatar" th:text="${inv.empresaNombre != null and !#strings.isEmpty(inv.empresaNombre)} ? ${#strings.toUpperCase(#strings.substring(inv.empresaNombre,0,1))} : 'E'">E</div>
-                                <div class="inv-header-info">
-                                    <div class="inv-header-top">
-                                        <span class="inv-empresa-name" th:text="${inv.empresaNombre != null ? inv.empresaNombre : 'Empresa'}">Empresa</span>
-                                        <span class="inv-estado-badge" th:classappend="${inv.estado}"
-                                            th:text="${inv.estado == 'pendiente'} ? 'Pendiente' : (${inv.estado == 'aceptada'} ? 'Aceptada' : 'Rechazada')">Estado</span>
-                                    </div>
-                                    <span class="inv-sector" th:text="${(inv.empresaSector != null ? inv.empresaSector : '') + (inv.empresaTamano != null ? ' · ' + inv.empresaTamano : '')}">Sector</span>
-                                </div>
-                                <div class="inv-fecha-header dc-mono" th:if="${inv.fechaEnvio != null}" th:text="${#dates.format(inv.fechaEnvio, 'dd/MM/yyyy')}">Fecha</div>
-                            </div>
-
-                            <div class="inv-card-body">
-                                <div th:if="${inv.empleoId != null}" class="inv-empleo-block">
-                                    <div class="inv-empleo-header">
-                                        <div class="inv-empleo-label">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg>
-                                            Empleo ofrecido
-                                        </div>
-                                        <a th:href="@{|/empleos/${inv.empleoId}|}" class="inv-empleo-link" target="_blank">Ver empleo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
-                                    </div>
-                                    <strong class="inv-empleo-titulo" th:text="${inv.empleoTitulo}">Puesto</strong>
-                                    <div class="inv-chips">
-                                        <span class="inv-chip" th:if="${inv.empleoModalidad != null}" th:text="${inv.empleoModalidad}">Modalidad</span>
-                                        <span class="inv-chip" th:if="${inv.empleoContrato != null}" th:text="${inv.empleoContrato}">Contrato</span>
-                                        <span class="inv-chip" th:if="${inv.empleoCategoria != null}" th:text="${inv.empleoCategoria}">Categoría</span>
-                                        <span class="inv-chip inv-chip-salary" th:if="${inv.empleoMostrarSalario and inv.empleoSalarioMin != null}" th:text="'$ ' + ${inv.empleoSalarioMin} + ' – ' + ${inv.empleoSalarioMax} + ' ' + ${inv.empleoMoneda}">Salario</span>
-                                    </div>
-                                </div>
-                                <div th:if="${inv.empleoId == null}" class="inv-empleo-block" style="display:flex;align-items:center;gap:10px;">
-                                    <svg class="muted" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                    <span class="muted" style="font-size:.83rem;">Invitación de contacto general sin empleo específico.</span>
-                                </div>
-                                <div th:if="${inv.mensaje != null and inv.mensaje != ''}" class="inv-mensaje-block">
-                                    <div class="inv-mensaje-label">Mensaje de la empresa</div>
-                                    <p class="inv-mensaje-texto" th:text="${inv.mensaje}">Mensaje</p>
-                                </div>
-                                <div class="inv-card-footer">
-                                    <div class="inv-footer-left">
-                                        <span class="inv-hora inv-rel-date" th:if="${inv.fechaEnvio != null}"
-                                            th:attr="data-fecha-iso=${#dates.format(inv.fechaEnvio, 'yyyy-MM-dd''T''HH:mm:ss')}">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                            <span class="inv-hora-texto dc-mono" th:text="${#dates.format(inv.fechaEnvio, 'dd/MM/yyyy')}">Fecha</span>
-                                        </span>
-                                        <button type="button" class="btn btn-ghost btn-icon inv-copy-btn"
-                                            th:if="${inv.empleoId != null}"
-                                            th:attr="data-copy-url=@{|/empleos/${inv.empleoId}|}">
-                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                            <span class="inv-copy-label">Copiar enlace</span>
-                                        </button>
-                                    </div>
-                                    <div class="inv-footer-right" th:if="${inv.estado == 'pendiente'}">
-                                        <div class="inv-acciones">
-                                            <button type="button" class="btn btn-ghost btn-rechazar-inv" th:attr="data-inv-id=${inv.id}">Rechazar</button>
-                                            <button type="button" class="btn btn-primary btn-aceptar-inv" th:attr="data-inv-id=${inv.id}">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                                Aceptar invitación
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="inv-footer-right" th:unless="${inv.estado == 'pendiente'}">
-                                        <span th:if="${inv.estado == 'aceptada'}" class="inv-estado-final aceptada">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                                            Aceptaste — la empresa puede contactarte.
-                                        </span>
-                                        <span th:if="${inv.estado == 'rechazada'}" class="inv-estado-final rechazada">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                                            Invitación rechazada.
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                        <div id="inv-filter-empty" class="empty-state" hidden>
-                            <div class="empty-state-code" aria-hidden="true">
-                                <span class="k">invitaciones</span><span class="p">.json</span><span class="p">:</span>
-                                <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                            </div>
-                            <strong>Sin resultados para ese filtro o búsqueda</strong>
-                            <p>Prueba con otro estado o borra el texto de búsqueda.</p>
-                        </div>
-                    </div>
-
-                    <div id="confirm-rechazar-overlay" class="ws-modal-scrim">
-                        <div class="ws-modal-box">
-                            <svg class="warn" width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                            <h3>¿Rechazar invitación?</h3>
-                            <p>Esta acción no se puede deshacer. La empresa no recibirá ninguna notificación.</p>
-                            <div class="ws-modal-actions">
-                                <button id="confirm-rechazar-no" class="btn btn-ghost" type="button">Cancelar</button>
-                                <button id="confirm-rechazar-si" class="btn btn-solid-rose" type="button">Sí, rechazar</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="tabs" role="group" aria-label="Estado de las solicitudes">
+                    <a class="ch" th:href="@{/solicitudes(orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'todas'} ? 'true'">Todas <b th:text="${nTodas}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='proceso',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'proceso'} ? 'true'">En proceso <b th:text="${nProceso}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='aceptadas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b th:text="${nAceptadas}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='cerradas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'cerradas'} ? 'true'">Cerradas <b th:text="${nCerradas}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='invitaciones',q=${q})}" th:attr="aria-current=${estadoSel == 'invitaciones'} ? 'true',title='Invitaciones por responder'">Invitaciones <b th:text="${invPendientes}">0</b></a>
                 </div>
-            </div>
-        </main>
+
+                <section class="reqs" aria-label="Lista de solicitudes" th:if="${estadoSel != 'invitaciones' and !#lists.isEmpty(solicitudes)}">
+                    <th:block th:each="v, st : ${solicitudes}">
+                        <th:block th:replace="~{fragments/pase :: solicitud(${v}, ${st.index})}"></th:block>
+                    </th:block>
+                </section>
+                <section class="reqs" aria-label="Lista de invitaciones" th:if="${estadoSel == 'invitaciones' and !#lists.isEmpty(invitaciones)}">
+                    <th:block th:each="v, st : ${invitaciones}">
+                        <th:block th:replace="~{fragments/pase :: invitacion(${v}, ${st.index})}"></th:block>
+                    </th:block>
+                </section>
+
+                <th:block th:if="${estadoSel != 'invitaciones' and #lists.isEmpty(solicitudes)}">
+                    <th:block th:if="${nTodas == 0}">
+                        <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'Todavía no te has postulado a ninguna oferta.', '/empleos', 'Ver empleos')}"></div>
+                    </th:block>
+                    <th:block th:unless="${nTodas == 0}">
+                        <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes solicitudes en esta categoría.', '/solicitudes', 'Ver todas')}"></div>
+                    </th:block>
+                </th:block>
+                <th:block th:if="${estadoSel == 'invitaciones' and #lists.isEmpty(invitaciones)}">
+                    <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes invitaciones. Cuando una empresa te invite, aparecerá aquí.', '/solicitudes', 'Ver solicitudes')}"></div>
+                </th:block>
+            </main>
+        </div>
     </div>
 
-    <footer class="ws-status">
-        <div class="ws-status-l">
-            <span class="ws-status-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                <span>talento</span>
-            </span>
-            <span class="sp">·</span>
-            <span>bandeja de solicitudes</span>
-        </div>
-        <div class="ws-status-r">
-            <span class="hide-sm">devcoast v2</span>
-            <span class="sp hide-sm">·</span>
-            <span id="clock">00:00:00</span>
-            <span class="sp">·</span>
-            <a th:href="@{/about-us}">¿Ayuda?</a>
-        </div>
-    </footer>
-
-    <script th:src="@{/JS/solicitudes.js}"></script>
+    <div th:replace="~{fragments/nautico :: toast}"></div>
 </body>
 
 </html>

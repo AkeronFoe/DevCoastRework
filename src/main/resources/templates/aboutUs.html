@@ -2,692 +2,145 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: meta}"></th:block>
-    <title>DevCoast | Talento creativo</title>
-    <th:block th:replace="~{fragments/head :: assets}"></th:block>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/CSS/about-us.css}">
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
-    <script th:src="@{/JS/about-us.js}" defer></script>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/landing.css}">
+    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/landing.js}" defer></script>
 </head>
 
-<body class="dc-page">
-    <canvas class="dc-flow-bg" id="dc-flow" aria-hidden="true"></canvas>
-    <div class="dc-grain" aria-hidden="true"></div>
-    <div class="dc-vignette" aria-hidden="true"></div>
+<body>
+<a class="skip" href="#hero">Saltar al contenido</a>
+<!-- HUD de profundidad -->
+<div class="hud" id="hud" aria-hidden="true">
+  <div class="hud-n">−<span id="hudN">0</span> m</div>
+  <div class="hud-bar" id="hudBar"><i></i><span class="hud-t" style="top:0%">0</span><span class="hud-t" style="top:25%">10</span><span class="hud-t" style="top:50%">20</span><span class="hud-t" style="top:75%">30</span><span class="hud-t" style="top:100%">40</span></div>
+</div>
+<div class="bubbles" id="bubbles" aria-hidden="true">
+  <i class="bub" style="left:6%;width:14px;height:14px;--d:0s;--t:13s"></i><i class="bub" style="left:14%;width:9px;height:9px;--d:5s;--t:11s"></i><i class="bub" style="left:30%;width:18px;height:18px;--d:8s;--t:15s"></i><i class="bub" style="left:48%;width:10px;height:10px;--d:2s;--t:12s"></i><i class="bub" style="left:66%;width:16px;height:16px;--d:6s;--t:14s"></i><i class="bub" style="left:82%;width:11px;height:11px;--d:3s;--t:12s"></i><i class="bub" style="left:94%;width:15px;height:15px;--d:9s;--t:16s"></i>
+</div>
 
-    <div class="dc-gutter" aria-hidden="true">
-        <span class="dc-gutter-top">001</span>
-        <div class="dc-gutter-track">
-            <div class="dc-gutter-cursor" id="dc-gutter-cursor"></div>
-        </div>
-        <span class="dc-gutter-readout" id="dc-gutter-readout">LN 001&nbsp;&nbsp;0%</span>
-        <span class="dc-gutter-bottom">EOF</span>
+<!-- ===== HERO ===== -->
+<section class="scene" id="hero" style="height:195vh">
+<div class="stick">
+  <svg width="100%" height="100%" aria-hidden="true" style="position:absolute;left:0;top:0"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+
+  <div class="bar"><span>// carta náutica del talento tech</span><span>rumbo 045° · viento a favor</span></div>
+  <header class="nav fu">
+    <a class="nav-l" href="#hero" aria-label="DevCoast, inicio">
+      <th:block th:replace="~{fragments/nautico :: logo}"></th:block>DevCoast
+    </a>
+    <nav class="nav-r"><a class="nl" href="#ruta">ruta</a><a class="nl" href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a class="nl" href="#muelles">talento / empresas</a><a class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
+  </header>
+
+  <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
+
+  <div class="hero-main">
+    <div class="hero-text" id="heroText">
+      <div class="kicker"><span class="type">&gt; zarpando desde la orilla</span><span class="caret" style="color:var(--orange)">▌</span></div>
+      <h1><span class="mask"><span class="w" style="--d:.4s">Tu</span></span> <span class="mask"><span class="w" style="--d:.5s">próximo</span></span> <span class="mask"><span class="w" style="--d:.6s">trabajo</span></span> <span class="mask"><span class="w" style="--d:.7s">está</span></span> <span class="mask"><span class="w" style="--d:.8s">en</span></span> <span class="mask"><span class="w" style="--d:.9s">la</span></span> <span class="costa"><span class="mask"><span class="w" style="--d:1s">costa</span></span><svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;bottom:-4px"><path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none" stroke="#FF7B4F" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
+      <p class="fu" style="--d:1.2s">Programadores y diseñadores por un lado, empresas que buscan talento por el otro. DevCoast es el puerto donde se encuentran.</p>
+      <div class="cta-row fu" style="--d:1.35s">
+        <a class="btn btn-o pulse" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg>Zarpar ahora</a>
+        <a class="btn btn-g" href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">Ver empleos</a>
+      </div>
     </div>
 
-    <header class="dc-header" id="dc-header">
-        <a class="dc-brand" th:href="@{/about-us}">
-            <img th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast" width="26" height="26">
-            <span class="dc-brand-path">DevCoast</span>
-        </a>
-        <nav class="dc-nav" aria-label="Navegación principal">
-            <a href="#boot">Inicio</a>
-            <a href="#people">Talento</a>
-            <a href="#compare">Empresas</a>
-            <a href="#jobs">Empleos</a>
-            <a href="#faq">FAQ</a>
-        </nav>
-        <div class="dc-actions">
-            <a class="dc-btn dc-btn-ghost" th:href="@{/login}">[ login ]</a>
-            <a class="dc-btn dc-btn-primary" th:href="@{/register-options}">./register</a>
-            <button class="dc-menu-btn" id="dc-menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="dc-mobile-nav">
-                menu <span aria-hidden="true">≡</span>
-            </button>
-        </div>
-    </header>
-
-    <nav class="dc-mobile-nav" id="dc-mobile-nav" aria-label="Navegación móvil">
-        <a href="#boot">Inicio</a>
-        <a href="#people">Talento</a>
-        <a href="#compare">Empresas</a>
-        <a href="#jobs">Empleos</a>
-        <a href="#faq">FAQ</a>
-        <a th:href="@{/login}">Iniciar sesión</a>
-    </nav>
-
-    <div class="dc-shell">
-
-        <section class="dc-hero" id="boot">
-            <div class="dc-boot">
-                <div class="dc-boot-bar">
-                    <span>~/devcoast/landing.tsx</span>
-                    <span><span class="dc-status-dot" aria-hidden="true"></span>live</span>
-                </div>
-                <div class="dc-boot-body">
-                    <span class="dc-prompt"><span class="p">$</span> ./devcoast --init</span>
-                    <p class="dc-boot-line"><span class="k">&gt;</span> cargando talento verificado…</p>
-                    <p class="dc-boot-line"><span class="k">&gt;</span> cargando empresas activas…</p>
-                    <p class="dc-boot-line"><span class="k">&gt;</span> listo.</p>
-
-                    <h1 id="dc-hero-title" aria-label="Encuentra proyectos serios y talento que habla tu idioma.">
-                        <span id="dc-htw-normal" aria-hidden="true"></span><span id="dc-htw-accent" class="accent" aria-hidden="true"></span><span id="dc-htw-cursor" class="cursor" aria-hidden="true"></span>
-                    </h1>
-
-                    <p class="dc-hero-desc">DevCoast combina empleos curados, portafolios vivos y un perfil listo para compartir.
-                        <strong>Sin ruido, sin formularios eternos.</strong></p>
-
-                    <div class="dc-hero-actions">
-                        <a class="dc-btn dc-btn-primary" th:href="@{/register-options}">[ crear cuenta gratis ]</a>
-                        <a class="dc-btn dc-btn-outline" th:href="@{/empleos}">[ explorar empleos ]</a>
-                    </div>
-
-                    <div class="dc-hero-proof">
-                        <div class="dc-avatars" aria-hidden="true">
-                            <span class="dc-avatar a1">JS</span>
-                            <span class="dc-avatar a2">CR</span>
-                            <span class="dc-avatar a3">LV</span>
-                            <span class="dc-avatar a4">AM</span>
-                        </div>
-                        <span>más de <strong th:text="${kpiTalentos}">0</strong> talentos ya están adentro</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dc-stats">
-                <div class="dc-stats-bar">
-                    <span>Actividad en vivo</span>
-                    <span class="dc-stats-live"><span class="dc-status-dot" aria-hidden="true"></span>en vivo</span>
-                </div>
-                <canvas class="dc-net-strip" id="dc-net" th:data-talentos="${kpiTalentos}" aria-hidden="true"></canvas>
-                <div class="dc-stats-body">
-                    <div class="dc-stat-row">
-                        <span class="dc-stat-key">talentos_activos</span>
-                        <span class="dc-stat-val"><span th:data-count="${kpiTalentos}" th:text="${kpiTalentos}">0</span><span class="dc-stat-trend">▲12%</span></span>
-                    </div>
-                    <div class="dc-stat-row">
-                        <span class="dc-stat-key">empresas_creativas</span>
-                        <span class="dc-stat-val"><span th:data-count="${kpiEmpresas}" th:text="${kpiEmpresas}">0</span><span class="dc-stat-trend">▲8%</span></span>
-                    </div>
-                    <div class="dc-stat-row">
-                        <span class="dc-stat-key">empleos_nuevos_hoy</span>
-                        <span class="dc-stat-val"><span th:data-count="${kpiEmpleos}" th:text="${kpiEmpleos}">0</span><span class="dc-stat-trend">▲23%</span></span>
-                    </div>
-                    <div class="dc-stat-row">
-                        <span class="dc-stat-key">tasa_respuesta</span>
-                        <span class="dc-stat-val"><span th:data-count="${kpiTasaRespuesta}" th:text="${kpiTasaRespuesta}">0</span>%<span class="dc-stat-trend">▲5%</span></span>
-                    </div>
-                    <div class="dc-stat-row">
-                        <span class="dc-stat-key">conexiones_logradas</span>
-                        <span class="dc-stat-val"><span th:data-count="${kpiConexiones}" th:text="${kpiConexiones}">0</span><span class="dc-stat-trend">▲15%</span></span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="dc-marquee-wrap">
-            <p class="dc-marquee-label">// stack.soportado — tecnologías y roles activos en DevCoast</p>
-            <div class="dc-marquee">
-                <div class="dc-marquee-track">
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>React</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Vue.js</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>TypeScript</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Node.js</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Spring Boot</span>
-                    <span class="dc-marquee-item cat-design"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Branding</span>
-                    <span class="dc-marquee-item cat-design"><span class="dc-mdot" style="background:var(--dc-violet)"></span>UI / UX</span>
-                    <span class="dc-marquee-item cat-design"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Motion Design</span>
-                    <span class="dc-marquee-item cat-design"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Figma</span>
-                    <span class="dc-marquee-item cat-product"><span class="dc-mdot" style="background:var(--dc-rose)"></span>Product Manager</span>
-                    <span class="dc-marquee-item cat-product"><span class="dc-mdot" style="background:var(--dc-rose)"></span>Scrum Master</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Next.js</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Python</span>
-                    <span class="dc-marquee-item cat-design"><span class="dc-mdot" style="background:var(--dc-violet)"></span>3D / Blender</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Mobile</span>
-                    <span class="dc-marquee-item cat-dev"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>DevOps</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>React</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Vue.js</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>TypeScript</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Node.js</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Spring Boot</span>
-                    <span class="dc-marquee-item cat-design" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Branding</span>
-                    <span class="dc-marquee-item cat-design" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-violet)"></span>UI / UX</span>
-                    <span class="dc-marquee-item cat-design" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Motion Design</span>
-                    <span class="dc-marquee-item cat-design" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-violet)"></span>Figma</span>
-                    <span class="dc-marquee-item cat-product" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-rose)"></span>Product Manager</span>
-                    <span class="dc-marquee-item cat-product" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-rose)"></span>Scrum Master</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Next.js</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Python</span>
-                    <span class="dc-marquee-item cat-design" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-violet)"></span>3D / Blender</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>Mobile</span>
-                    <span class="dc-marquee-item cat-dev" aria-hidden="true"><span class="dc-mdot" style="background:var(--dc-cyan)"></span>DevOps</span>
-                </div>
-            </div>
-        </div>
-
-        <section class="dc-section" id="people">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Audiencia</p>
-                <h2 class="dc-h2">¿Para quién es DevCoast?</h2>
-                <p class="dc-sub">Tres funciones, tres audiencias. Cada una recibe exactamente lo que necesita del ecosistema.</p>
-            </div>
-            <div class="dc-fn-list">
-                <article class="dc-fn-card">
-                    <p class="dc-fn-sig">function <span class="fname">findDevs</span>(tú) {</p>
-                    <h3 class="dc-fn-title">Programadores de producto</h3>
-                    <div class="dc-artifact">
-                        <div class="dc-mini-code" aria-hidden="true">
-                            <div><span class="kw">const</span> match = talent</div>
-                            <div>&nbsp;.filter(<span class="fn">t</span> =&gt; t.stack</div>
-                            <div>&nbsp;&nbsp;.includes(job.stack))</div>
-                            <div>&nbsp;.sort(byFit)</div>
-                        </div>
-                    </div>
-                    <p class="dc-fn-body">Busca equipos que valoran código limpio, escalabilidad y trabajo remoto real. Sin empresas pidiendo 10 años de experiencia en una tecnología de 3.</p>
-                    <p class="dc-fn-return">return {</p>
-                    <div class="dc-tag-row">
-                        <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-cyan)"></i>frontend</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-cyan)"></i>backend</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-cyan)"></i>full stack</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-cyan)"></i>devops</span>
-                    </div>
-                </article>
-                <article class="dc-fn-card dc-fn-card--has-hud">
-                    <h3 class="dc-fn-title--editorial">Diseñadores gráficos</h3>
-                    <div class="dc-artifact">
-                        <div class="dc-paint-chips" aria-hidden="true">
-                            <div class="dc-paint-chip c1"><div class="dc-paint-fill" style="background:var(--dc-cyan)"></div><span class="dc-paint-hex">#4FA0E8</span></div>
-                            <div class="dc-paint-chip c2"><div class="dc-paint-fill" style="background:var(--dc-amber)"></div><span class="dc-paint-hex">#F2AB5C</span></div>
-                            <div class="dc-paint-chip c3"><div class="dc-paint-fill" style="background:var(--dc-violet)"></div><span class="dc-paint-hex">#A78BFA</span></div>
-                            <div class="dc-paint-chip c4 dc-type-chip"><div class="dc-paint-fill">Aa</div><span class="dc-paint-hex">Fraunces 500</span></div>
-                        </div>
-                    </div>
-                    <div class="dc-layers-strip">
-                        <span class="dc-layers-tag">layers</span>
-                        <span class="dc-layer-chip">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                            Logotype
-                        </span>
-                        <span class="dc-layer-chip">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                            Grid · 12col
-                        </span>
-                        <span class="dc-layer-chip dim">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 10.6a2 2 0 1 0 2.8 2.8"/><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 11 8 11 8a17.6 17.6 0 0 1-3.24 4.24M6.1 6.1A17.7 17.7 0 0 0 1 12s4 8 11 8a9.3 9.3 0 0 0 3.9-.84"/></svg>
-                            Fondo
-                        </span>
-                    </div>
-                    <p class="dc-fn-body">Conecta con marcas que buscan identidad visual, motion design y packaging memorable. Tu portafolio pesa más que tu hoja de vida.</p>
-                    <p class="dc-fn-return">return {</p>
-                    <div class="dc-tag-row">
-                        <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>branding</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>ui/ux</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>3d</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>motion</span>
-                    </div>
-                    <div class="dc-cursor-hud" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>
-                        x:186 y:92
-                    </div>
-                </article>
-                <article class="dc-fn-card">
-                    <p class="dc-fn-sig"><span class="fx">ƒx</span> =VACANTE(A2:A14)</p>
-                    <h3 class="dc-fn-title">Equipos y empresas</h3>
-                    <div class="dc-artifact">
-                        <div class="dc-hiring-kanban" aria-hidden="true">
-                            <div class="dc-kanban-col">
-                                <div class="dc-kanban-stack"><i></i><i></i></div>
-                                <p class="dc-kanban-count">128</p>
-                                <p class="dc-kanban-label">Aplicantes</p>
-                            </div>
-                            <div class="dc-kanban-col">
-                                <div class="dc-kanban-stack"><i></i><i></i></div>
-                                <p class="dc-kanban-count">42</p>
-                                <p class="dc-kanban-label">Entrevista</p>
-                            </div>
-                            <div class="dc-kanban-col">
-                                <div class="dc-kanban-stack"><i></i><i></i></div>
-                                <p class="dc-kanban-count">9</p>
-                                <p class="dc-kanban-label">Oferta</p>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="dc-fn-body">Publica vacantes con foco en portafolios reales y habilidades demostrables. Llega a candidatos que ya probaron lo que saben hacer.</p>
-                    <p class="dc-fn-return">return {</p>
-                    <div class="dc-tag-row">
-                        <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-amber)"></i>curado</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-amber)"></i>rápido</span><span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-amber)"></i>verificado</span>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <section class="dc-section" id="portfolio">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Perfil</p>
-                <h2 class="dc-h2">Así se ve tu portafolio</h2>
-                <p class="dc-sub">Título, stack o herramientas y una miniatura por proyecto. Así se arma tu perfil apenas creas tu cuenta.</p>
-            </div>
-            <div class="dc-portfolio-preview">
-                <div class="dc-portfolio-grid" aria-hidden="true">
-                    <div class="dc-portfolio-card">
-                        <div class="dc-portfolio-thumb dc-thumb-code">
-                            <div class="dc-thumb-code-bar">
-                                <span></span><span></span><span></span>
-                                <span class="dc-thumb-code-filename">dashboard.ts</span>
-                            </div>
-                            <div class="dc-thumb-code-split">
-                                <div class="dc-thumb-code-lines">
-                                    <div><span class="kw">function</span> <span class="fn">draw</span>() {</div>
-                                    <div class="indent">ctx.clearRect(0,0,w,h)</div>
-                                    <div class="indent"><span class="tag">requestAnimationFrame</span>(draw)</div>
-                                    <div>}</div>
-                                </div>
-                                <div class="dc-thumb-code-chart" aria-hidden="true">
-                                    <span style="height:36%;background:var(--dc-cyan)"></span>
-                                    <span style="height:64%;background:var(--dc-violet)"></span>
-                                    <span style="height:50%;background:var(--dc-amber)"></span>
-                                    <span style="height:86%;background:var(--dc-cyan)"></span>
-                                    <span style="height:58%;background:var(--dc-violet)"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="dc-portfolio-card-title">Dashboard de métricas en tiempo real</p>
-                        <div class="dc-tag-row">
-                            <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-cyan)"></i>React · Node.js</span>
-                        </div>
-                    </div>
-                    <div class="dc-portfolio-card">
-                        <div class="dc-portfolio-thumb dc-thumb-palette">
-                            <div class="dc-thumb-palette-chips">
-                                <div class="dc-thumb-palette-chip" style="--r:-6deg"><div class="dc-thumb-palette-chip-fill" style="background:var(--dc-violet)"></div><span class="dc-thumb-palette-chip-hex">#A78BFA</span></div>
-                                <div class="dc-thumb-palette-chip" style="--r:4deg"><div class="dc-thumb-palette-chip-fill" style="background:var(--dc-amber)"></div><span class="dc-thumb-palette-chip-hex">#F2AB5C</span></div>
-                                <div class="dc-thumb-palette-chip" style="--r:-3deg"><div class="dc-thumb-palette-chip-fill" style="background:var(--dc-cyan)"></div><span class="dc-thumb-palette-chip-hex">#4FA0E8</span></div>
-                            </div>
-                            <div class="dc-thumb-palette-mark">
-                                <div class="dc-thumb-palette-mark-top">
-                                    <span class="dc-thumb-palette-mark-icon" aria-hidden="true"><i></i><i></i></span>
-                                    <span class="dc-thumb-palette-mark-word" aria-hidden="true"></span>
-                                </div>
-                                <span class="dc-thumb-palette-mark-tagline"></span>
-                            </div>
-                        </div>
-                        <p class="dc-portfolio-card-title">Identidad visual — cafetería de especialidad</p>
-                        <div class="dc-tag-row">
-                            <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>Branding · Figma</span>
-                        </div>
-                    </div>
-                    <div class="dc-portfolio-card">
-                        <div class="dc-portfolio-thumb dc-thumb-type">
-                            <span class="dc-thumb-type-word">Aa</span>
-                            <span class="dc-thumb-type-accent"></span>
-                            <div class="dc-thumb-type-lines"><span></span><span></span></div>
-                        </div>
-                        <p class="dc-portfolio-card-title">Rediseño de app de finanzas personales</p>
-                        <div class="dc-tag-row">
-                            <span class="dc-chip"><i class="dc-chip-dot" style="background:var(--dc-violet)"></i>UI/UX · Figma</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="dc-portfolio-meta">Título, stack o herramientas y una miniatura por proyecto — tú los completas cuando creas tu cuenta.</p>
-            </div>
-        </section>
-
-        <section class="dc-section" id="compare">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">compare.diff</p>
-                <h2 class="dc-h2">¿Talento o empresa? Ambos ganan</h2>
-                <p class="dc-sub">Dos perfiles, un mismo commit. Cada lado obtiene exactamente lo que necesita.</p>
-            </div>
-            <div class="dc-diff">
-                <div class="dc-diff-bar">$ devcoast compare --talento --empresa</div>
-                <div class="dc-diff-grid">
-                    <div class="dc-diff-pane talent">
-                        <p class="dc-diff-file">+++ talento.profile</p>
-                        <p class="dc-diff-tagline">Tu portafolio es tu CV. Ármalo una vez, aplica cientos de veces.</p>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Perfil público con proyectos y stack</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Aplicación con un clic usando tu perfil</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Filtros por modalidad, seniority y salario</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Modo "no disponible" para que no te molesten</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>100% gratis para talentos, siempre</span></div>
-                        <a class="dc-btn dc-btn-outline dc-btn-block" th:href="@{/register/talento}">[ crear perfil de talento ]</a>
-                    </div>
-                    <div class="dc-diff-pane empresa">
-                        <p class="dc-diff-file">+++ empresa.profile</p>
-                        <p class="dc-diff-tagline">Candidatos que ya tienen portafolio. Sin CVs vacíos.</p>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Panel de vacantes activas y cerradas</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Campos detallados: salario, timezone, inglés</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Perfil de empresa con sector y descripción</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Revisión de solicitudes y candidatos</span></div>
-                        <div class="dc-diff-line"><span class="dc-diff-plus">+</span><span>Vacante visible hasta que la cierres</span></div>
-                        <a class="dc-btn dc-btn-amber dc-btn-block" th:href="@{/register/empresa}">[ crear cuenta de empresa ]</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-section" id="pipeline">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Cómo funciona</p>
-                <h2 class="dc-h2">De principio a fin, sin fricción</h2>
-                <p class="dc-sub">Así avanza la experiencia desde que entras hasta que conectas con el proyecto ideal.</p>
-            </div>
-            <div class="dc-pipeline">
-                <div class="dc-pipeline-head">Proceso · 4 pasos</div>
-                <div class="dc-pipe-step">
-                    <div class="dc-pipe-idx">01</div>
-                    <div class="dc-pipe-body">
-                        <h4>Creas tu cuenta</h4>
-                        <p>Como talento o como empresa, en menos de 2 minutos. Sin formularios eternos.</p>
-                    </div>
-                </div>
-                <div class="dc-pipe-step">
-                    <div class="dc-pipe-idx">02</div>
-                    <div class="dc-pipe-body">
-                        <h4>Armas tu perfil</h4>
-                        <p>Stack, portafolio y el rol que buscas — o la vacante que ofreces. Una vez y listo.</p>
-                    </div>
-                </div>
-                <div class="dc-pipe-step">
-                    <div class="dc-pipe-idx">03</div>
-                    <div class="dc-pipe-body">
-                        <h4>Exploras y filtras</h4>
-                        <p>Por modalidad, seniority, salario y tecnologías. Tus datos viajan con un clic.</p>
-                    </div>
-                </div>
-                <div class="dc-pipe-step">
-                    <div class="dc-pipe-idx">04</div>
-                    <div class="dc-pipe-body">
-                        <h4>Conectas</h4>
-                        <p>Las empresas activas responden rápido. Sin blackholes de reclutamiento ni silencio de semanas.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-section" id="peek">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Detrás de escena</p>
-                <h2 class="dc-h2">Así se siente usarlo, para cada lado</h2>
-                <p class="dc-sub">Con el vocabulario real de cada herramienta — no una captura de pantalla inventada.</p>
-            </div>
-            <div class="dc-peek-grid">
-                <div>
-                    <span class="dc-peek-tag dev">para programadores</span>
-                    <div class="dc-peek-term">
-                        <div class="dc-peek-term-bar">$ devcoast --help</div>
-                        <div class="dc-peek-term-body" aria-hidden="true">
-                            <div class="dc-peek-term-line"><span class="dc-peek-prompt">&gt;</span> whoami</div>
-                            <div class="dc-peek-term-out">frontend_dev · react, typescript · remoto</div>
-                            <div class="dc-peek-term-line"><span class="dc-peek-prompt">&gt;</span> ls empleos --match</div>
-                            <div class="dc-peek-term-out">4 resultados · match promedio 89%</div>
-                            <div class="dc-peek-term-line"><span class="dc-peek-prompt">&gt;</span> <span class="dc-peek-cursor"></span></div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <span class="dc-peek-tag design">para diseñadores</span>
-                    <div class="dc-peek-inspector" aria-hidden="true">
-                        <div class="dc-peek-inspector-bar">Inspector — Card / Diseñadores</div>
-                        <div class="dc-peek-inspector-row"><span class="k">Fill</span><span class="v"><i style="background:var(--dc-violet)"></i>#A78BFA</span></div>
-                        <div class="dc-peek-inspector-row"><span class="k">Corner radius</span><span class="v">6px</span></div>
-                        <div class="dc-peek-inspector-row"><span class="k">Type</span><span class="v" style="font-family:var(--dc-editorial);font-style:italic;">Fraunces Italic</span></div>
-                        <div class="dc-peek-inspector-row"><span class="k">Stroke</span><span class="v"><i style="background:var(--dc-line)"></i>#2C333D · 1px</span></div>
-                    </div>
-                </div>
-                <div>
-                    <span class="dc-peek-tag empresa">para empresas</span>
-                    <div class="dc-peek-sheet" aria-hidden="true">
-                        <div class="dc-peek-sheet-bar"><span class="fx">ƒx</span> =RANKING(Frontend Senior)</div>
-                        <div class="dc-peek-inspector-row dc-peek-sheet-row"><span class="k">1. Valentina R.</span><span class="v">94%</span></div>
-                        <div class="dc-peek-inspector-row dc-peek-sheet-row"><span class="k">2. Mateo L.</span><span class="v">89%</span></div>
-                        <div class="dc-peek-inspector-row dc-peek-sheet-row"><span class="k">3. Diego F.</span><span class="v">85%</span></div>
-                        <div class="dc-peek-inspector-row dc-peek-sheet-row"><span class="k">4. Sofía T.</span><span class="v">78%</span></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-section" id="jobs">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Empleos</p>
-                <h2 class="dc-h2">Destacados esta semana</h2>
-                <p class="dc-sub">Las mejores oportunidades activas ahora mismo en DevCoast.</p>
-            </div>
-            <div class="dc-jobs">
-                <div class="dc-ps-bar">
-                    <span class="dc-ps-prompt">PS C:\DevCoast&gt; <span class="dc-ps-cmd">Get-Job</span> -Featured</span>
-                    <span class="dc-ps-count">4 resultados</span>
-                </div>
-                <div class="dc-jobs-head">
-                    <span>rol</span><span>modalidad</span><span>rango</span><span>match</span><span>estado</span>
-                </div>
-                <div class="dc-joblist-row cat-dev">
-                    <button class="dc-job-save" type="button" aria-label="Guardar Frontend React Senior en Aurora Labs" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.5.5 0 0 1-.77.42L12 16.5l-5.73 4.12a.5.5 0 0 1-.77-.42V4a.5.5 0 0 1 .5-.5Z"/></svg>
-                    </button>
-                    <div class="dc-job-role-cell">
-                        <span class="dc-role-swatch" style="background:var(--dc-cyan)"></span>
-                        <div><div class="dc-job-role">Frontend React Senior</div><div class="dc-job-org">Aurora Labs</div></div>
-                    </div>
-                    <div class="dc-job-meta">Remoto</div>
-                    <div class="dc-job-meta">$4k–$6k USD</div>
-                    <span class="dc-job-match"><span class="dc-match-track"><span class="dc-match-fill" style="width:92%"></span></span>92%</span>
-                    <span class="dc-job-badge new">nuevo</span>
-                </div>
-                <div class="dc-joblist-row cat-design">
-                    <button class="dc-job-save" type="button" aria-label="Guardar Diseño de identidad en Estudio Lumen" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.5.5 0 0 1-.77.42L12 16.5l-5.73 4.12a.5.5 0 0 1-.77-.42V4a.5.5 0 0 1 .5-.5Z"/></svg>
-                    </button>
-                    <div class="dc-job-role-cell">
-                        <span class="dc-role-swatch" style="background:var(--dc-violet)"></span>
-                        <div><div class="dc-job-role">Diseño de identidad</div><div class="dc-job-org">Estudio Lumen</div></div>
-                    </div>
-                    <div class="dc-job-meta">Presencial · Bogotá</div>
-                    <div class="dc-job-meta">A convenir</div>
-                    <span class="dc-job-match"><span class="dc-match-track"><span class="dc-match-fill" style="width:87%"></span></span>87%</span>
-                    <span class="dc-job-badge hot">popular</span>
-                </div>
-                <div class="dc-joblist-row cat-design">
-                    <button class="dc-job-save" type="button" aria-label="Guardar Motion Designer en Cápsula Creativa" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.5.5 0 0 1-.77.42L12 16.5l-5.73 4.12a.5.5 0 0 1-.77-.42V4a.5.5 0 0 1 .5-.5Z"/></svg>
-                    </button>
-                    <div class="dc-job-role-cell">
-                        <span class="dc-role-swatch" style="background:var(--dc-violet)"></span>
-                        <div><div class="dc-job-role">Motion Designer</div><div class="dc-job-org">Cápsula Creativa</div></div>
-                    </div>
-                    <div class="dc-job-meta">Remoto · Latam</div>
-                    <div class="dc-job-meta">A convenir</div>
-                    <span class="dc-job-match"><span class="dc-match-track"><span class="dc-match-fill" style="width:81%"></span></span>81%</span>
-                    <span class="dc-job-badge remote">remoto</span>
-                </div>
-                <div class="dc-joblist-row cat-dev">
-                    <button class="dc-job-save" type="button" aria-label="Guardar Backend Python / FastAPI en Nova Studio" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12a.5.5 0 0 1 .5.5v16.2a.5.5 0 0 1-.77.42L12 16.5l-5.73 4.12a.5.5 0 0 1-.77-.42V4a.5.5 0 0 1 .5-.5Z"/></svg>
-                    </button>
-                    <div class="dc-job-role-cell">
-                        <span class="dc-role-swatch" style="background:var(--dc-cyan)"></span>
-                        <div><div class="dc-job-role">Backend Python / FastAPI</div><div class="dc-job-org">Nova Studio</div></div>
-                    </div>
-                    <div class="dc-job-meta">Híbrido · Medellín</div>
-                    <div class="dc-job-meta">A convenir</div>
-                    <span class="dc-job-match"><span class="dc-match-track"><span class="dc-match-fill" style="width:95%"></span></span>95%</span>
-                    <span class="dc-job-badge feat">destacado</span>
-                </div>
-                <div class="dc-jobs-foot">
-                    <a class="dc-btn dc-btn-outline dc-btn-block" th:href="@{/empleos}">[ ver todos los empleos ]</a>
-                </div>
-            </div>
-        </section>
-
-        <div class="dc-trust dc-section">
-            <span class="dc-trust-label">// trusted_by.json</span>
-            <div class="dc-trust-pills">
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-cyan)"></i>Aurora Labs</span>
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-violet)"></i>Estudio Lumen</span>
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-violet)"></i>Cápsula Creativa</span>
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-cyan)"></i>Nova Studio</span>
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-violet)"></i>Pixel Factory</span>
-                <span class="dc-trust-pill"><i class="dc-trust-dot" style="background:var(--dc-cyan)"></i>DataBridge</span>
-            </div>
-        </div>
-
-        <section class="dc-section" id="reviews">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">reviews.log</p>
-                <h2 class="dc-h2">Lo que dicen los que ya están adentro</h2>
-                <p class="dc-sub">Talentos y empresas que encontraron lo que buscaban.</p>
-            </div>
-            <div class="dc-log">
-                <div class="dc-log-bar">$ cat reviews.log</div>
-                <div class="dc-log-entry">
-                    <span class="dc-log-avatar" style="background:var(--dc-cyan)">JS</span>
-                    <div>
-                        <div class="dc-log-stars">★★★★★</div>
-                        <p class="dc-log-quote">"En dos semanas ya tenía tres entrevistas con empresas que de verdad leyeron mi portafolio. Eso no pasa en otras plataformas."</p>
-                        <p class="dc-log-author"><strong>Jorge Salcedo</strong> — Frontend Developer, Bogotá</p>
-                    </div>
-                </div>
-                <div class="dc-log-entry">
-                    <span class="dc-log-avatar" style="background:var(--dc-amber)">LV</span>
-                    <div>
-                        <div class="dc-log-stars">★★★★★</div>
-                        <p class="dc-log-quote">"Contratamos a nuestra diseñadora de identidad a través de DevCoast. El proceso fue rápido y el nivel del talento, impresionante."</p>
-                        <p class="dc-log-author"><strong>Laura Vega</strong> — CEO, Estudio Lumen (Medellín)</p>
-                    </div>
-                </div>
-                <div class="dc-log-entry">
-                    <span class="dc-log-avatar dc-log-avatar--editorial">Cr</span>
-                    <div>
-                        <div class="dc-log-stars">★★★★★</div>
-                        <p class="dc-log-quote editorial">"Mi perfil en DevCoast reemplaza cualquier CV. Los clientes ven mi trabajo antes de hablar conmigo y llegan con mucho mejor contexto."</p>
-                        <p class="dc-log-author"><strong>Camila Ríos</strong> — Motion Designer, remoto (Latam)</p>
-                    </div>
-                </div>
-                <div class="dc-log-entry">
-                    <span class="dc-log-avatar" style="background:var(--dc-amber)">AM</span>
-                    <div>
-                        <div class="dc-log-stars">★★★★★</div>
-                        <p class="dc-log-quote">"Publicamos nuestra vacante y en 48 horas teníamos candidatos con portafolios increíbles. Sin spam, sin CVs vacíos."</p>
-                        <p class="dc-log-author"><strong>Andrés Mora</strong> — CTO, Nova Studio (CDMX)</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-section" id="stack">
-            <div class="dc-section-head">
-                <p class="dc-eyebrow">Tecnologías</p>
-                <h2 class="dc-h2">Lo que vas a encontrar acá</h2>
-                <p class="dc-sub">Tecnologías y roles activos en la plataforma, por categoría.</p>
-            </div>
-            <div class="dc-tree">
-                <div class="dc-tree-dir">
-                    <p class="dc-tree-dir-name">Desarrollo</p>
-                    <div class="dc-tree-files">
-                        <span class="dc-tree-file featured"><i style="background:var(--dc-cyan)"></i>React</span><span class="dc-tree-file featured"><i style="background:var(--dc-cyan)"></i>Vue.js</span><span class="dc-tree-file featured"><i style="background:var(--dc-cyan)"></i>TypeScript</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Node.js</span><span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Python</span><span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Spring Boot</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Next.js</span><span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>DevOps</span><span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Docker</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>FastAPI</span><span class="dc-tree-file"><i style="background:var(--dc-cyan)"></i>Go</span>
-                    </div>
-                </div>
-                <div class="dc-tree-dir">
-                    <p class="dc-tree-dir-name">Diseño</p>
-                    <div class="dc-tree-files">
-                        <span class="dc-tree-file featured"><i style="background:var(--dc-violet)"></i>UI / UX</span><span class="dc-tree-file featured"><i style="background:var(--dc-violet)"></i>Figma</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>Branding</span><span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>Motion</span><span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>3D</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>Ilustración</span><span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>Packaging</span><span class="dc-tree-file"><i style="background:var(--dc-violet)"></i>Tipografía</span>
-                    </div>
-                </div>
-                <div class="dc-tree-dir">
-                    <p class="dc-tree-dir-name">Producto</p>
-                    <div class="dc-tree-files">
-                        <span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>Product Manager</span><span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>Scrum Master</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>UX Research</span><span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>Copywriting</span>
-                        <span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>Estrategia</span><span class="dc-tree-file"><i style="background:var(--dc-rose)"></i>Data Analysis</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-section" id="faq">
-            <div class="dc-man">
-                <div class="dc-man-intro">
-                    <p class="dc-eyebrow">FAQ</p>
-                    <h3>Preguntas frecuentes</h3>
-                    <p>Todo lo que necesitas saber antes de crear tu cuenta. Si no encuentras tu respuesta, escríbenos.</p>
-                    <a class="dc-btn dc-btn-outline" href="#">[ contactar soporte ]</a>
-                </div>
-                <div class="dc-man-list">
-                    <div class="dc-man-entry is-open">
-                        <button class="dc-man-q" type="button" aria-expanded="true">
-                            <span class="dc-man-num">01</span>
-                            <span class="dc-man-q-text">¿DevCoast es gratis para los talentos?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Sí, completamente. Crear tu perfil, armar tu portafolio y aplicar a empleos es 100% gratis para talentos. Las empresas son quienes pagan por publicar vacantes y acceder al directorio.</p></div></div>
-                    </div>
-                    <div class="dc-man-entry">
-                        <button class="dc-man-q" type="button" aria-expanded="false">
-                            <span class="dc-man-num">02</span>
-                            <span class="dc-man-q-text">¿En qué países opera DevCoast?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Está disponible en toda Latinoamérica y España, con foco en Colombia, México, Argentina y Perú. Muchas vacantes son remotas y aceptan talento de cualquier país.</p></div></div>
-                    </div>
-                    <div class="dc-man-entry">
-                        <button class="dc-man-q" type="button" aria-expanded="false">
-                            <span class="dc-man-num">03</span>
-                            <span class="dc-man-q-text">¿Qué tan rápido responden las empresas?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Solo listamos empresas activas. El tiempo promedio de primera respuesta es de 48 horas. Si una vacante lleva más de 7 días sin actividad, la marcamos y notificamos a la empresa.</p></div></div>
-                    </div>
-                    <div class="dc-man-entry">
-                        <button class="dc-man-q" type="button" aria-expanded="false">
-                            <span class="dc-man-num">04</span>
-                            <span class="dc-man-q-text">¿Puedo publicar mi portafolio sin buscar trabajo?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Por supuesto. Puedes crear tu perfil, cargar proyectos y activar el modo "no disponible" para que las empresas vean tu trabajo pero sepan que no estás en búsqueda activa.</p></div></div>
-                    </div>
-                    <div class="dc-man-entry">
-                        <button class="dc-man-q" type="button" aria-expanded="false">
-                            <span class="dc-man-num">05</span>
-                            <span class="dc-man-q-text">¿Qué tipo de empresas publican en DevCoast?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Startups de producto, agencias creativas, estudios de diseño y empresas tech que valoran el trabajo por portafolio sobre el CV tradicional. Todas pasan por verificación antes de publicar.</p></div></div>
-                    </div>
-                    <div class="dc-man-entry">
-                        <button class="dc-man-q" type="button" aria-expanded="false">
-                            <span class="dc-man-num">06</span>
-                            <span class="dc-man-q-text">¿Cómo cierro o elimino una vacante publicada?</span>
-                            <svg class="dc-man-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        </button>
-                        <div class="dc-man-a"><div class="dc-man-a-inner"><p>Desde el panel "Mis Empleos" puedes cerrar una vacante con un clic — deja de verse en el listado público pero queda en tu historial. También puedes eliminarla desde la pestaña de Cerrados.</p></div></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="dc-cta dc-section" id="cta">
-            <p class="dc-cta-prompt"><span class="p">$</span> ./register.sh --role=$TU_ROL</p>
-            <p class="dc-sub" style="margin:0 auto 30px;">Unite a más de <strong th:text="${kpiTalentos}">0</strong> talentos que ya están construyendo su carrera en DevCoast. Gratis para empezar, sin letra chica.</p>
-            <div class="dc-cta-actions">
-                <a class="dc-btn dc-btn-primary" th:href="@{/register-options}">[ crear cuenta gratis ]</a>
-                <a class="dc-btn dc-btn-ghost" href="#pipeline">[ ver cómo funciona ]</a>
-            </div>
-        </section>
-
+    <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast: la vela es un cursor y una gaviota va posada en cubierta">
+      <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
     </div>
+  </div>
 
-    <footer class="dc-footer">
-        <span class="dc-footer-status"><span class="dot" aria-hidden="true"></span>session: pública · devcoast © 2026</span>
-        <nav class="dc-footer-links" aria-label="Enlaces del pie de página">
-            <a th:href="@{/empleos}">empleos</a>
-            <a th:href="@{/login}">iniciar sesión</a>
-            <a th:href="@{/register-options}">crear cuenta</a>
-        </nav>
-    </footer>
+  <!-- mar que sube al hacer scroll -->
+  <div id="sea" aria-hidden="true">
+    <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+    <div class="seabody"></div>
+  </div>
+</div>
+</section>
+
+<main style="position:relative;z-index:1">
+
+<!-- ===== RUTA ===== -->
+<section class="scene" id="ruta" style="height:340vh">
+<div class="stick">
+  <div class="rbox">
+    <div class="sec-h"><div class="eyebrow">// la ruta</div><h2>Tres puertos hasta tu empleo.</h2></div>
+    <div class="route" id="route">
+      <svg viewBox="0 90 1200 250" aria-hidden="true">
+        <path id="routeBase" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205" fill="none" stroke="#1F8F82" stroke-width="3" stroke-dasharray="4 12" stroke-linecap="round"/>
+        <path id="routeFill" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205" fill="none" stroke="#FF7B4F" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <div class="node" id="n0">1</div><div class="node" id="n1">2</div><div class="node" id="n2">3</div>
+      <div class="compass" aria-hidden="true"><svg viewBox="0 0 160 160"><g id="compassRing"><circle cx="80" cy="80" r="70" fill="none" stroke="#2DD4BF" stroke-width="2"/><circle cx="80" cy="80" r="58" fill="none" stroke="#2DD4BF" stroke-width="1" stroke-dasharray="3 5"/></g><polygon class="needle" points="80,10 92,68 150,80 92,92 80,150 68,92 10,80 68,68" fill="none" stroke="#FF7B4F" stroke-width="2.5" stroke-linejoin="round"/><text x="80" y="8" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#F3F4F8">N</text></svg></div>
+      <div class="miniWrap" id="miniWrap" aria-hidden="true"></div>
+    </div>
+    <div class="pcs">
+      <article class="pc" id="pc0">
+        <div class="tag">PUERTO 1 · PERFIL</div><h3>Arma tu bitácora</h3><p>Quién eres, qué sabes hacer y qué has construido. Tu perfil se completa paso a paso.</p>
+        <div class="mini-ui"><span>perfil completo</span><div style="flex-basis:100%;height:8px;background:var(--line);border-radius:4px"><div style="width:60%;height:8px;background:var(--teal);border-radius:4px"></div></div></div>
+      </article>
+      <article class="pc" id="pc1">
+        <div class="tag">PUERTO 2 · EXPLORAR</div><h3>Busca tu rumbo</h3><p>Filtra ofertas, descubre el directorio y deja que las empresas te encuentren a ti.</p>
+        <div class="mini-ui"><span class="chip t">Frontend</span><span class="chip">Backend</span><span class="chip">Diseño</span><span class="chip o">Remoto</span></div>
+      </article>
+      <article class="pc" id="pc2">
+        <div class="tag">PUERTO 3 · LLEGADA</div><h3>Atraca con tu empresa</h3><p>Envía solicitudes o responde a las invitaciones. Un mensaje en botella que sí llega.</p>
+        <div class="mini-ui"><span style="color:var(--ink)">Una empresa</span><span class="chip o" style="margin-left:auto">INVITACIÓN</span><span style="flex-basis:100%">Te invitan a postularte a una oferta.</span></div>
+      </article>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ===== PASES ===== -->
+<section class="scene" id="pases" style="height:320vh" th:if="${!#lists.isEmpty(empleosLanding)}">
+<div class="stick">
+  <div class="sec-h pases-h"><div class="eyebrow">// empleos</div><h2>Cada oferta es un pase de abordaje.</h2></div>
+  <div class="tks">
+    <div class="tk" th:each="e, st : ${empleosLanding}" th:data-rot="${st.index % 3 == 0 ? -3 : (st.index % 3 == 1 ? 2 : -1.5)}" th:data-y="${st.index % 3 == 1 ? 28 : 0}"><div class="tk-in">
+      <div class="tk-main"><div class="tk-top"><span>PASE DE ABORDAJE</span><span>DEVCOAST</span></div><div><div class="tk-k">DESTINO</div><div class="tk-d" th:text="${e.titulo}">Cargo</div></div><div class="tk-r"><div th:if="${e.empresaNombre != null and !#strings.isEmpty(e.empresaNombre)}"><div class="tk-k">EMPRESA</div><div class="tk-v" th:text="${e.empresaNombre}">Empresa</div></div><div th:if="${e.modalidad != null and !#strings.isEmpty(e.modalidad)}"><div class="tk-k">MODALIDAD</div><div class="tk-v" th:text="${e.modalidad}">Remoto</div></div></div><div class="tk-k" th:if="${e.categoria != null and !#strings.isEmpty(e.categoria)}" th:text="|ÁREA · ${#strings.toUpperCase(e.categoriaMostrar)}|">ÁREA</div></div>
+      <div class="stub" th:style="${st.index % 2 == 0} ? 'background:var(--orange)' : 'background:var(--teal)'"><div>SALIDA</div><th:block th:if="${st.index % 3 == 0}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="3" height="60" fill="#101114"/><rect x="7" width="1.5" height="60" fill="#101114"/><rect x="12" width="5" height="60" fill="#101114"/><rect x="21" width="2" height="60" fill="#101114"/><rect x="27" width="4" height="60" fill="#101114"/><rect x="35" width="1.5" height="60" fill="#101114"/><rect x="40" width="5" height="60" fill="#101114"/><rect x="49" width="2" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg></th:block><th:block th:if="${st.index % 3 == 1}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="2" height="60" fill="#101114"/><rect x="6" width="5" height="60" fill="#101114"/><rect x="15" width="1.5" height="60" fill="#101114"/><rect x="20" width="4" height="60" fill="#101114"/><rect x="28" width="2" height="60" fill="#101114"/><rect x="34" width="5" height="60" fill="#101114"/><rect x="43" width="1.5" height="60" fill="#101114"/><rect x="48" width="3" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg></th:block><th:block th:if="${st.index % 3 == 2}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="4" height="60" fill="#101114"/><rect x="8" width="1.5" height="60" fill="#101114"/><rect x="13" width="3" height="60" fill="#101114"/><rect x="20" width="5" height="60" fill="#101114"/><rect x="29" width="1.5" height="60" fill="#101114"/><rect x="34" width="4" height="60" fill="#101114"/><rect x="42" width="2" height="60" fill="#101114"/><rect x="48" width="5" height="60" fill="#101114"/><rect x="57" width="2" height="60" fill="#101114"/></svg></th:block></div>
+      <i class="notch" style="top:-10px"></i><i class="notch" style="bottom:-10px"></i>
+    </div></div>
+  </div>
+</div>
+</section>
+
+<!-- ===== GAVIOTA ===== -->
+<section class="scene" id="gaviota" style="height:190vh">
+<div class="stick">
+  <div class="gq">
+    <div class="tile"><svg id="tileSvg" viewBox="96 270 186 156" aria-label="La gaviota de DevCoast posada en cubierta" role="img"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/></svg></div>
+    <div class="bubble"><p id="quote">Completa tu perfil. Los que no, se quedan en la orilla viendo zarpar a los demás.</p><div class="who">— la gaviota, 6 de la mañana</div></div>
+  </div>
+</div>
+</section>
+
+<!-- ===== MUELLES ===== -->
+<section class="scene" id="muelles" style="height:210vh">
+<div class="stick">
+  <div class="sec-h pases-h" id="muellesH"><div class="eyebrow">// dos muelles</div><h2>Un mismo mar, dos formas de llegar.</h2></div>
+  <div class="docks">
+    <div class="dock dock1" id="dockL"><div class="tagl">// zarpa</div><h3>Para talento</h3><p>Perfil público, logros y empleos en un solo lugar. Tu código y tu diseño merecen ser vistos.</p><a class="btn" th:href="@{/register/talento}" style="align-self:flex-start;background:var(--sky);color:var(--ink);padding:13px 22px;font-size:16px">Crear perfil de talento</a></div>
+    <div class="dock dock2" id="dockR"><div class="tagl" style="color:var(--teal)">// atraca</div><h3>Para empresas</h3><p style="color:var(--mute)">Publica ofertas, explora el directorio e invita a quien quieras en tu tripulación.</p><a class="btn" th:href="@{/register/empresa}" style="align-self:flex-start;background:var(--teal);color:var(--sky);padding:13px 22px;font-size:16px">Registrar mi empresa</a></div>
+  </div>
+</div>
+</section>
+
+<!-- ===== FONDO ===== -->
+<section id="crear">
+  <div class="x-wrap">
+    <div class="xbox" aria-hidden="true"><div class="ring" id="xRing"></div><div class="xb" id="xA" style="transform:rotate(45deg)"></div><div class="xb" id="xB" style="transform:rotate(-45deg)"></div></div>
+    <h2 id="xTitle">La X marca el punto.<br><span style="color:var(--orange)">Aquí empieza tu carrera.</span></h2>
+    <a class="btn btn-o pulse" id="xCta" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg>Crear mi perfil</a>
+  </div>
+  <footer class="foot"><span>DevCoast · <span th:text="${#dates.year(#dates.createNow())}">2026</span> · hecho en la costa</span><nav><a href="#ruta">ruta</a><a href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a href="#muelles">talento / empresas</a><a th:href="@{/login}">ingresar</a></nav></footer>
+</section>
+
+</main>
+
 </body>
 
 </html>

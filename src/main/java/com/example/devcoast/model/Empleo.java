@@ -1,5 +1,8 @@
 package com.example.devcoast.model;
 
+import java.util.Date;
+
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -62,6 +65,24 @@ public class Empleo {
     private String screeningKeywords;
 
     private String logoUrl;
+
+    // se asigna al publicar; las ofertas anteriores no lo tienen (ver getFechaPublicacionEfectiva)
+    private Date fechaPublicacion;
+
+    // para las ofertas que no guardaron fecha: el momento de creación va embebido en el ObjectId del id.
+    // Solo se calcula al leer; nunca se escribe en la base.
+    public Date getFechaPublicacionEfectiva() {
+        if (fechaPublicacion != null)
+            return fechaPublicacion;
+        if (id != null && ObjectId.isValid(id))
+            return new ObjectId(id).getDate();
+        return null;
+    }
+
+    // la categoría tal como se muestra (las guardadas antes del cambio no llevan tilde en "Programacion")
+    public String getCategoriaMostrar() {
+        return com.example.devcoast.service.AreaEmpleo.categoriaVisible(categoria);
+    }
 
     public String getFormattedSalarioMin() {
         return formatSalary(this.salarioMin);

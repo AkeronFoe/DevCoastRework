@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Perfil de empresa | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-perfil.css}">
+    <script th:src="@{/JS/perfil-pase.js}" defer></script>
+</head>
+
+<body class="empresa">
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('perfil')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
+
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}"></header>
+
+            <main class="content" id="contenido">
+                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
+                    th:text="${flashMessage}">Aviso</p>
+
+                <div class="head">
+                    <div>
+                        <div class="eyebrow">// mi empresa</div>
+                        <h1>Perfil de empresa</h1>
+                        <p class="sub" id="pfSub">Así te ven los talentos cuando abren tus ofertas.</p>
+                    </div>
+                    <div class="pf-acts" th:if="${empresa != null}">
+                        <a class="lnk" th:href="@{/empresa/{id}(id=${empresa.id})}">Ver mi página pública</a>
+                    </div>
+                </div>
+
+                <div class="pf" th:if="${empresa != null}">
+
+                    <form class="pass" id="pfForm" novalidate autocomplete="off" aria-label="Editar el perfil de mi empresa">
+                        <div class="pass-main">
+                            <div class="pf-id">
+                                <div class="pf-photo">
+                                    <button class="pf-av" type="button" id="pfAvatar" aria-label="Cambiar el logo de la empresa"
+                                        th:attr="data-inicial=${#strings.toUpperCase(#strings.substring(empresa.nombreEmpresa != null and !#strings.isEmpty(empresa.nombreEmpresa) ? empresa.nombreEmpresa : 'E', 0, 1))}">
+                                        <img th:if="${empresa.fotoUrl != null and !#strings.isEmpty(empresa.fotoUrl)}" th:src="${empresa.fotoUrl}" alt="">
+                                        <b th:if="${empresa.fotoUrl == null or #strings.isEmpty(empresa.fotoUrl)}"
+                                            th:text="${#strings.toUpperCase(#strings.substring(empresa.nombreEmpresa != null and !#strings.isEmpty(empresa.nombreEmpresa) ? empresa.nombreEmpresa : 'E', 0, 1))}">N</b>
+                                    </button>
+                                    <input type="file" id="pfFile" accept="image/*" hidden>
+                                    <div class="pf-photo-b">
+                                        <button class="lnk" type="button" id="pfFoto">Cambiar logo</button>
+                                        <button class="lnk" type="button" id="pfQuitar" th:hidden="${empresa.fotoUrl == null or #strings.isEmpty(empresa.fotoUrl)}">Quitar</button>
+                                    </div>
+                                </div>
+                                <div class="field pf-name">
+                                    <label for="pfNombre">NOMBRE DE LA EMPRESA</label>
+                                    <div class="inp"><input id="pfNombre" type="text" autocomplete="organization" required aria-describedby="pfNombreE"
+                                            placeholder="Nombre de tu empresa" th:value="${empresa.nombreEmpresa}"></div>
+                                    <p class="err" id="pfNombreE" hidden>Escribe el nombre de tu empresa.</p>
+                                </div>
+                            </div>
+
+                            <fieldset class="grp">
+                                <legend>Sobre la empresa</legend>
+                                <div class="fields two">
+                                    <div class="field">
+                                        <label for="pfSector">SECTOR</label>
+                                        <div class="inp"><input id="pfSector" type="text" placeholder="Fintech, Salud, Educación…" th:value="${empresa.sector}"></div>
+                                    </div>
+                                    <div class="field">
+                                        <label for="pfTam">TAMAÑO DEL EQUIPO</label>
+                                        <div class="inp"><select id="pfTam">
+                                                <option value="" th:selected="${empresa.tamano == null or #strings.isEmpty(empresa.tamano)}">Seleccionar</option>
+                                                <option th:each="t : ${#strings.arraySplit('1-10,11-50,51-200,201-500,500+', ',')}" th:value="${t}" th:text="${#strings.replace(t, '-', ' - ')}" th:selected="${empresa.tamano == t}">1 - 10</option>
+                                                <option th:if="${empresa.tamano != null and !#strings.isEmpty(empresa.tamano) and !#strings.contains('|1-10|11-50|51-200|201-500|500+|', '|' + empresa.tamano + '|')}"
+                                                    th:value="${empresa.tamano}" th:text="${empresa.tamano}" selected>Otro</option>
+                                            </select></div>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="pfBio">DESCRIPCIÓN</label>
+                                    <div class="inp"><textarea id="pfBio" rows="5" maxlength="1000" aria-describedby="pfBioN"
+                                            placeholder="A qué se dedica la empresa y cómo es trabajar en ella." th:text="${empresa.descripcion}"></textarea></div>
+                                    <span class="hint" id="pfBioN" aria-live="off"><span id="pfBioC" th:text="${empresa.descripcion != null ? #strings.length(empresa.descripcion) : 0}">0</span> / 1000</span>
+                                </div>
+                                <div class="fields two">
+                                    <div class="field">
+                                        <label for="pfUbi">UBICACIÓN</label>
+                                        <div class="inp"><input id="pfUbi" type="text" autocomplete="address-level2" placeholder="Bogotá, Colombia" th:value="${empresa.ubicacion}"></div>
+                                    </div>
+                                    <div class="field">
+                                        <label for="pfWeb">SITIO WEB</label>
+                                        <div class="inp"><input id="pfWeb" type="url" data-url inputmode="url" placeholder="https://tuempresa.com" aria-describedby="pfWebE" th:value="${empresa.sitioWeb}"></div>
+                                        <p class="err" id="pfWebE" hidden>El enlace debe empezar con http:// o https://.</p>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="grp">
+                                <legend>Contacto</legend>
+                                <div class="fields two">
+                                    <div class="field">
+                                        <label for="pfRep">REPRESENTANTE</label>
+                                        <div class="inp"><input id="pfRep" type="text" autocomplete="name" placeholder="Tu nombre" th:value="${empresa.nombreRepresentante}"></div>
+                                    </div>
+                                    <div class="field">
+                                        <label for="pfCargo">CARGO</label>
+                                        <div class="inp"><input id="pfCargo" type="text" autocomplete="organization-title" placeholder="Talent Lead" th:value="${empresa.cargoRepresentante}"></div>
+                                    </div>
+                                </div>
+                                <div class="fields two">
+                                    <div class="field">
+                                        <label for="pfCorreo">CORREO DE LA CUENTA</label>
+                                        <div class="inp"><input id="pfCorreo" type="email" readonly aria-describedby="pfCorreoH" th:value="${empresa.correo}"></div>
+                                        <span class="hint" id="pfCorreoH">Para cambiarlo, ve a <a class="lnk" th:href="@{/ajustes}">Ajustes</a>.</span>
+                                    </div>
+                                    <div class="field">
+                                        <label for="pfTel">TELÉFONO</label>
+                                        <div class="inp"><input id="pfTel" type="tel" autocomplete="tel" placeholder="+57 300 000 0000" th:value="${empresa.telefono}"></div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="pass-stub">
+                            <div class="stub-l">
+                                <span class="k">EMPRESA</span>
+                                <span class="stub-n" th:text="${empresa.nombreEmpresa != null and !#strings.isEmpty(empresa.nombreEmpresa)} ? ${empresa.nombreEmpresa} : 'Tu empresa'">Nordic Labs</span>
+                            </div>
+                            <div class="stub-r">
+                                <p class="formst" id="pfStatus" role="status" aria-live="polite"></p>
+                                <button class="go" type="submit" id="pfSave">Guardar cambios</button>
+                            </div>
+                            <svg class="bars" viewBox="0 0 60 36" width="60" height="36" aria-hidden="true"><path d="M2 0v36M7 0v36M13 0v36M17 0v36M24 0v36M29 0v36M34 0v36M41 0v36M46 0v36M52 0v36M58 0v36" stroke="#101114" stroke-width="2.4"/></svg>
+                        </div>
+                    </form>
+
+                    <div class="pf-side">
+                        <section class="pn" aria-labelledby="hAct">
+                            <h2 id="hAct">Tu actividad</h2>
+                            <dl class="nums2">
+                                <div><dt>OFERTAS ACTIVAS</dt><dd><a th:href="@{/misEmpleos}" th:text="${nActivas}">0</a></dd></div>
+                                <div><dt>POSTULACIONES EN REVISIÓN</dt><dd><a th:href="@{/candidatos}" th:text="${solicitudesPendientesEmpresa != null} ? ${solicitudesPendientesEmpresa} : 0">0</a></dd></div>
+                            </dl>
+                            <p class="note">Plan <b th:text="${empresa.plan != null} ? ${empresa.plan} : 'GRATIS'">GRATIS</b>.
+                                <a th:href="@{/facturacion}">Ver facturación</a></p>
+                        </section>
+                        <section class="pn" aria-labelledby="hAtajos">
+                            <h2 id="hAtajos">Atajos</h2>
+                            <ul class="todo">
+                                <li><span class="bx" aria-hidden="true"></span><a th:href="@{/crearEmpleo}">Publicar una oferta</a></li>
+                                <li><span class="bx" aria-hidden="true"></span><a th:href="@{/talentos}">Buscar talento en el Directorio</a></li>
+                                <li><span class="bx" aria-hidden="true"></span><a th:href="@{/empresa/{id}(id=${empresa.id})}">Ver cómo se ve tu página pública</a></li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+
+                <th:block th:if="${empresa == null}">
+                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No encontramos el perfil de tu empresa. Cierra sesión y vuelve a entrar.', null, null)}"></div>
+                </th:block>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/nautico :: toast}"></div>
+    <script th:inline="javascript">
+        window.PERFIL = { tipo: 'empresa' };
+    </script>
+</body>
+
+</html>

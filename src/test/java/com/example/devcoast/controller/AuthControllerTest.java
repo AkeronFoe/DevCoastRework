@@ -40,6 +40,8 @@ class AuthControllerTest {
 
     @MockitoBean
     private UsuarioRepository usuarioRepository;
+    @MockitoBean
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     @MockitoBean
     private EmpresaRepository empresaRepository;

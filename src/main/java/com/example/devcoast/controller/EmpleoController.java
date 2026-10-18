@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,11 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -40,10 +37,11 @@ import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.AreaEmpleo;
 import com.example.devcoast.service.CleanupService;
+import com.example.devcoast.service.MatchEmpleo;
 import com.example.devcoast.service.PlanService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -77,233 +75,177 @@ public class EmpleoController {
         this.planService = planService;
     }
 
+    // ofertas por página debajo del destacado
+    private static final int OTRAS_POR_PAGINA = 10;
+    // tope de ofertas que se puntúan y ordenan en memoria (el match no está guardado en la base)
+    private static final int CANDIDATOS_LIMITE = 600;
+
+    // Lista de empleos como pases de abordaje. Filtros, búsqueda y orden se resuelven aquí con parámetros GET:
+    // ?area=programacion|diseno|otras &modalidad=remoto|hibrido|presencial &hi=1 &q= &orden=match|recientes|salario &page=
     @GetMapping("/empleos")
     public String listarEmpleos(
-            Model model, HttpSession session, HttpServletRequest request,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "11") int size,
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String categoria,
+            Model model, HttpSession session,
+            @RequestParam(required = false) String area,
             @RequestParam(required = false) String modalidad,
-            @RequestParam(required = false) String seniority,
-            @RequestParam(required = false) String extras,
-            @RequestParam(defaultValue = "match") String sort,
-            @RequestParam(defaultValue = "false") boolean favoritos) {
+            @RequestParam(required = false) String hi,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String orden,
+            @RequestParam(defaultValue = "0") int page) {
 
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
-        page = Math.max(0, page);
-        int pageSize = size > 0 ? Math.min(size, 100) : EMPLEOS_POR_PAGINA_DEFAULT;
-        List<Criteria> criteriaList = new ArrayList<>();
+        Usuario talento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
+        boolean tieneStack = talento != null && talento.getStack() != null && !talento.getStack().isEmpty();
 
-        // se busca antes de armar el resto de los criterios porque "solo
-        // favoritos" necesita saber contra qué lista de ids filtrar — antes
-        // este toggle escondía cards con display:none en el cliente, lo que
-        // rompía la paginación (favoritos en la página 2 no aparecían nunca
-        // parado en la página 1)
-        Usuario usuarioTalento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
+        AreaEmpleo.Area areaSel = AreaEmpleo.Area.deClave(area);
+        String modSel = modalidadClave(modalidad);
+        boolean soloAlto = "1".equals(hi);
+        String qSel = q == null ? "" : q.trim();
 
-        // tokenizo por espacios y busco en varios campos a la vez
-        if (q != null && !q.isBlank()) {
-            for (String token : q.trim().split("\\s+")) {
-                if (token.length() < 2)
-                    continue;
-                String rx = ".*" + Pattern.quote(token) + ".*";
-                criteriaList.add(new Criteria().orOperator(
-                        Criteria.where("titulo").regex(rx, "i"),
-                        Criteria.where("empresaNombre").regex(rx, "i"),
-                        Criteria.where("descripcionRol").regex(rx, "i"),
-                        Criteria.where("stack").regex(rx, "i"),
-                        Criteria.where("softSkills").regex(rx, "i"),
-                        Criteria.where("categoria").regex(rx, "i"),
-                        Criteria.where("empresaSector").regex(rx, "i"),
-                        Criteria.where("seniority").regex(rx, "i")));
-            }
+        // base de datos: texto libre, modalidad y estado
+        Criteria activas = new Criteria().orOperator(
+                Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false));
+        List<Criteria> criterios = new ArrayList<>();
+        criterios.add(activas);
+        for (String token : qSel.split("\\s+")) {
+            if (token.length() < 2)
+                continue;
+            String rx = ".*" + Pattern.quote(token) + ".*";
+            criterios.add(new Criteria().orOperator(
+                    Criteria.where("titulo").regex(rx, "i"),
+                    Criteria.where("empresaNombre").regex(rx, "i"),
+                    Criteria.where("descripcionRol").regex(rx, "i"),
+                    Criteria.where("stack").regex(rx, "i"),
+                    Criteria.where("softSkills").regex(rx, "i"),
+                    Criteria.where("categoria").regex(rx, "i"),
+                    Criteria.where("empresaSector").regex(rx, "i"),
+                    Criteria.where("seniority").regex(rx, "i")));
+        }
+        if (modSel != null)
+            criterios.add(Criteria.where("modalidad").regex(MODALIDAD_REGEX.get(modSel), "i"));
+
+        long totalActivas = mongoTemplate.count(new Query(activas), Empleo.class);
+        Query consulta = new Query(new Criteria().andOperator(criterios.toArray(Criteria[]::new)))
+                .with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
+        List<Empleo> candidatos = mongoTemplate.find(consulta, Empleo.class);
+
+        // en memoria: área y match (se calculan sobre los candidatos ya filtrados)
+        Map<String, MatchEmpleo.Resultado> matches = new HashMap<>();
+        List<Empleo> lista = new ArrayList<>();
+        for (Empleo e : candidatos) {
+            if (areaSel != null && AreaEmpleo.de(e.getCategoria()) != areaSel)
+                continue;
+            MatchEmpleo.Resultado m = MatchEmpleo.calcular(talento, e);
+            if (m != null)
+                matches.put(e.getId(), m);
+            if (soloAlto && (m == null || m.porcentaje() < MatchEmpleo.NIVEL_ALTO))
+                continue;
+            lista.add(e);
         }
 
-        if (categoria != null && !categoria.isBlank())
-            criteriaList.add(Criteria.where("categoria")
-                    .regex(".*" + Pattern.quote(categoria) + ".*", "i"));
-        if (modalidad != null && !modalidad.isBlank())
-            criteriaList.add(Criteria.where("modalidad")
-                    .regex(".*" + Pattern.quote(modalidad) + ".*", "i"));
-        if (seniority != null && !seniority.isBlank())
-            criteriaList.add(Criteria.where("seniority")
-                    .regex(".*" + Pattern.quote(seniority) + ".*", "i"));
-        if (extras != null && !extras.isBlank()) {
-            for (String ex : extras.split(",")) {
-                if (ex.isBlank())
-                    continue;
-                String r = ".*" + Pattern.quote(ex.trim()) + ".*";
-                criteriaList.add(new Criteria().orOperator(
-                        Criteria.where("stack").regex(r, "i"),
-                        Criteria.where("softSkills").regex(r, "i"),
-                        Criteria.where("contrato").regex(r, "i"),
-                        Criteria.where("empresaSector").regex(r, "i"),
-                        Criteria.where("empresaTamano").regex(r, "i")));
-            }
-        }
+        boolean matchDisponible = !matches.isEmpty();
+        String ordenSel = "salario".equals(orden) ? "salario" : "recientes".equals(orden) ? "recientes"
+                : (matchDisponible ? "match" : "recientes");
+        if ("match".equals(orden) && !matchDisponible)
+            ordenSel = "recientes";
+        // la lista llega por fecha (más reciente primero); sort() es estable, así que el empate conserva ese orden
+        if ("match".equals(ordenSel))
+            lista.sort((x, y) -> Integer.compare(
+                    matches.containsKey(y.getId()) ? matches.get(y.getId()).porcentaje() : -1,
+                    matches.containsKey(x.getId()) ? matches.get(x.getId()).porcentaje() : -1));
+        else if ("salario".equals(ordenSel))
+            lista.sort((x, y) -> Integer.compare(salarioVisible(y), salarioVisible(x)));
 
-        if (favoritos) {
-            List<String> favIds = (usuarioTalento != null && usuarioTalento.getEmpleosFavoritos() != null)
-                    ? usuarioTalento.getEmpleosFavoritos() : List.of();
-            criteriaList.add(Criteria.where("id").in(favIds));
-        }
-
-        criteriaList.add(new Criteria().orOperator(
-                Criteria.where("estado").is("ACTIVO"),
-                Criteria.where("estado").exists(false)));
-
-        Criteria filtroCriteria = new Criteria().andOperator(criteriaList.toArray(Criteria[]::new));
-        Sort.Direction dir = "oldest".equals(sort) ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        boolean tieneStack = usuarioTalento != null && usuarioTalento.getStack() != null
-                && !usuarioTalento.getStack().isEmpty();
-        // "match" solo es un orden real si hay contra qué puntuar — si una empresa
-        // o un talento sin stack lo pide, caemos silenciosamente a "recent"
-        boolean ordenarPorMatch = "match".equals(sort) && tieneStack;
-
-        Page<Empleo> empleos;
-        List<Empleo> items;
-        Map<String, Integer> scores = new HashMap<>();
-
-        if (ordenarPorMatch) {
-            // Mongo no tiene el score guardado para ordenar a nivel de base de datos
-            // (se calcula en Java contra el stack del talento), así que traemos un
-            // lote acotado de los más recientes que ya cumplen el filtro, los
-            // puntuamos y paginamos ese resultado ya ordenado por match. Acotado a
-            // propósito: sin límite, con miles de empleos sembrados, esto es
-            // exactamente lo que dejaba /empleos colgado la primera vez.
-            int candidatosLimite = 600;
-            Query matchQuery = new Query(filtroCriteria);
-            matchQuery.with(Sort.by(Sort.Direction.DESC, "_id")).limit(candidatosLimite);
-            List<Empleo> candidatos = mongoTemplate.find(matchQuery, Empleo.class);
-
-            Map<String, Integer> scoresCandidatos = new HashMap<>();
-            for (Empleo e : candidatos)
-                scoresCandidatos.put(e.getId(), calcularScore(usuarioTalento, e));
-
-            List<Empleo> ordenados = candidatos.stream()
-                    .sorted((a, b) -> scoresCandidatos.get(b.getId()) - scoresCandidatos.get(a.getId()))
-                    .toList();
-
-            int total = ordenados.size();
-            int desde = Math.min(page * pageSize, total);
-            int hasta = Math.min(desde + pageSize, total);
-            items = ordenados.subList(desde, hasta);
-            for (Empleo e : items)
-                scores.put(e.getId(), scoresCandidatos.get(e.getId()));
-
-            empleos = new PageImpl<>(items, PageRequest.of(page, pageSize), total);
+        // destacado: el de mayor match de lo que se ve; sin match, la oferta que la empresa promociona
+        Empleo destacado = null;
+        String destacadoMotivo = null;
+        if (matchDisponible) {
+            for (Empleo e : lista)
+                if (matches.containsKey(e.getId())
+                        && (destacado == null || matches.get(e.getId()).porcentaje() > matches.get(destacado.getId()).porcentaje()))
+                    destacado = e;
+            destacadoMotivo = "match";
         } else {
-            Query query = new Query(filtroCriteria);
-            query.with(Sort.by(dir, "_id"));
-            long total = mongoTemplate.count(query, Empleo.class);
-            query.skip((long) page * pageSize).limit(pageSize);
-            items = mongoTemplate.find(query, Empleo.class);
-            empleos = new PageImpl<>(items, PageRequest.of(page, pageSize, Sort.by(dir, "_id")), total);
+            destacado = lista.stream().filter(Empleo::isDestacar).findFirst().orElse(null);
+            destacadoMotivo = "promocionado";
+        }
+        List<Empleo> otras = new ArrayList<>(lista);
+        if (destacado != null)
+            otras.remove(destacado);
 
-            if (tieneStack) {
-                for (Empleo e : items)
-                    scores.put(e.getId(), calcularScore(usuarioTalento, e));
-            }
+        int totalPaginas = Math.max(1, (int) Math.ceil(otras.size() / (double) OTRAS_POR_PAGINA));
+        int pagina = Math.min(Math.max(0, page), totalPaginas - 1);
+        List<Empleo> pagItems = otras.subList(pagina * OTRAS_POR_PAGINA, Math.min(otras.size(), (pagina + 1) * OTRAS_POR_PAGINA));
+
+        // qué ofertas de esta página ya tienen solicitud del talento
+        Set<String> solicitadas = new java.util.HashSet<>();
+        if (talento != null) {
+            List<String> ids = new ArrayList<>(pagItems.stream().map(Empleo::getId).toList());
+            if (destacado != null && pagina == 0)
+                ids.add(destacado.getId());
+            solicitudRepository.findByUsuarioIdAndEmpleoIdIn(talento.getId(), ids)
+                    .forEach(sol -> solicitadas.add(sol.getEmpleoId()));
         }
 
-        int totalPages = empleos.getTotalPages();
-        int currentPage = empleos.getNumber();
-        int startPage = Math.max(0, currentPage - 5);
-        int endPage = Math.min(totalPages - 1, startPage + 9);
-        if (endPage - startPage < 9)
-            startPage = Math.max(0, endPage - 9);
-
-        Integer avgScore = null;
-        if (!scores.isEmpty()) {
-            avgScore = (int) Math.round(
-                    scores.values().stream().mapToInt(Integer::intValue).average().orElse(0));
+        java.util.Date ahora = new java.util.Date();
+        EmpleoVista destacadoVista = null;
+        if (destacado != null && pagina == 0) {
+            long postulantes = solicitudRepository.countByEmpleoId(destacado.getId());
+            destacadoVista = EmpleoVista.de(destacado, matches.get(destacado.getId()), solicitadas.contains(destacado.getId()),
+                    true, postulantes, ahora);
         }
+        List<EmpleoVista> tarjetas = new ArrayList<>();
+        for (Empleo e : pagItems)
+            tarjetas.add(EmpleoVista.de(e, matches.get(e.getId()), solicitadas.contains(e.getId()), false, null, ahora));
 
-        Map<String, Boolean> yaAplico = new HashMap<>();
-        if (RoleGuard.esTalento(session)) {
-            String userId = RoleGuard.getId(session);
-            List<String> idsPagina = items.stream().map(Empleo::getId).toList();
-            Set<String> empleosAplicados = solicitudRepository
-                    .findByUsuarioIdAndEmpleoIdIn(userId, idsPagina).stream()
-                    .map(Solicitud::getEmpleoId)
-                    .collect(Collectors.toSet());
-            for (Empleo e : items)
-                yaAplico.put(e.getId(), empleosAplicados.contains(e.getId()));
-        } else {
-            // yaAplico[id] tiene que existir para cada empleo, si no Thymeleaf revienta
-            // evaluando "and" contra un null cuando la empresa mira la lista
-            for (Empleo e : items)
-                yaAplico.put(e.getId(), false);
-        }
+        long conMatchAlto = lista.stream()
+                .filter(e -> matches.containsKey(e.getId()) && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_ALTO)
+                .count();
+        boolean hayFiltros = areaSel != null || modSel != null || soloAlto || !qSel.isEmpty();
 
-        // empresas contratando esta semana: última publicación activa por empresa,
-        // más recientes primero — mismo dispositivo de avatares que el dashboard,
-        // pero con datos reales en vez de nombres inventados. Distinct se calcula
-        // en Java sobre una muestra acotada de documentos ya traídos, no con el
-        // comando distinct de Mongo (documentos viejos/sembrados a mano pueden
-        // traer empresaId con tipos mixtos y ese comando revienta ante eso) ni
-        // sobre la colección entera (una consulta sin límite contra Atlas en
-        // cada carga de /empleos es lo que dejaba la página colgada).
-        List<Empleo> empresasContratando = List.of();
-        long extraEmpresas = 0;
-        try {
-            Query empresasQuery = new Query(new Criteria().orOperator(
-                    Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false)));
-            empresasQuery.fields().include("empresaId").include("empresaNombre").include("colorIcono");
-            empresasQuery.with(Sort.by(Sort.Direction.DESC, "_id")).limit(200);
-            List<Empleo> muestraActivos = mongoTemplate.find(empresasQuery, Empleo.class);
-
-            Map<String, Empleo> porEmpresa = new LinkedHashMap<>();
-            for (Empleo e : muestraActivos) {
-                String clave = e.getEmpresaId() != null ? e.getEmpresaId() : e.getEmpresaNombre();
-                if (clave != null)
-                    porEmpresa.putIfAbsent(clave, e);
-            }
-            empresasContratando = porEmpresa.values().stream().limit(6).toList();
-            extraEmpresas = Math.max(0, porEmpresa.size() - empresasContratando.size());
-        } catch (Exception ex) {
-            // no dejamos que el listado de empleos entero se caiga por este dato
-            // decorativo — sin avatares de "contratando esta semana" es aceptable
-        }
-
-        model.addAttribute("empleos", empleos);
-        model.addAttribute("ordenarPorMatch", ordenarPorMatch);
-        model.addAttribute("matchDisponible", tieneStack);
-        model.addAttribute("avgScore", avgScore);
-        model.addAttribute("empresasContratando", empresasContratando);
-        model.addAttribute("extraEmpresas", extraEmpresas);
-        model.addAttribute("yaAplico", yaAplico);
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("showStartEllipsis", startPage > 0);
-        model.addAttribute("showEndEllipsis", endPage < totalPages - 1);
-        model.addAttribute("q", q);
-        model.addAttribute("categoria", categoria);
-        model.addAttribute("modalidad", modalidad);
-        model.addAttribute("seniority", seniority);
-        model.addAttribute("extras", extras);
-        model.addAttribute("sort", sort);
-        model.addAttribute("favoritos", favoritos);
-        model.addAttribute("hayFiltros",
-                (q != null && !q.isBlank()) || (categoria != null && !categoria.isBlank())
-                        || (modalidad != null && !modalidad.isBlank()) || (seniority != null && !seniority.isBlank())
-                        || (extras != null && !extras.isBlank()) || favoritos);
-        model.addAttribute("scores", scores);
+        model.addAttribute("destacado", destacadoVista);
+        model.addAttribute("destacadoMotivo", destacadoMotivo);
+        model.addAttribute("tarjetas", tarjetas);
+        model.addAttribute("totalMostradas", lista.size());
+        model.addAttribute("totalActivas", totalActivas);
+        model.addAttribute("conMatchAlto", conMatchAlto);
+        model.addAttribute("matchDisponible", matchDisponible);
+        model.addAttribute("talentoSinStack", talento != null && !tieneStack);
+        model.addAttribute("esTalento", talento != null);
+        model.addAttribute("area", areaSel == null ? "" : areaSel.clave());
+        model.addAttribute("modalidadSel", modSel == null ? "" : modSel);
+        model.addAttribute("hi", soloAlto ? "1" : "");
+        // los mismos valores como null cuando no hay filtro: así los enlaces no arrastran parámetros vacíos
+        model.addAttribute("areaP", areaSel == null ? null : areaSel.clave());
+        model.addAttribute("modP", modSel);
+        model.addAttribute("hiP", soloAlto ? "1" : null);
+        model.addAttribute("q", qSel.isEmpty() ? null : qSel);
+        model.addAttribute("orden", ordenSel);
+        model.addAttribute("hayFiltros", hayFiltros);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("totalPaginas", totalPaginas);
         agregarSesion(session, model);
+        return "empleos";
+    }
 
-        // la paginación de /empleos pide el fragmento por fetch en vez de
-        // navegar completo — el header lo controla el propio fetch() del
-        // cliente, así que a diferencia de un query param no se puede
-        // falsificar compartiendo/pegando la URL
-        boolean esAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-        return esAjax ? "empleos :: resultadosEmpleos" : "empleos";
+    private static final Map<String, String> MODALIDAD_REGEX = Map.of(
+            "remoto", "remot", "hibrido", "h[ií]brid", "presencial", "presencial");
+
+    private static String modalidadClave(String valor) {
+        if (valor == null)
+            return null;
+        String m = java.text.Normalizer.normalize(valor.trim().toLowerCase(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return MODALIDAD_REGEX.containsKey(m) ? m : null;
+    }
+
+    // para ordenar por salario: solo cuenta el que la empresa decidió mostrar; el resto va al final
+    private static int salarioVisible(Empleo e) {
+        if (!e.isMostrarSalario())
+            return -1;
+        Integer v = e.getSalarioMax() != null ? e.getSalarioMax() : e.getSalarioMin();
+        return v == null ? -1 : v;
     }
 
     @GetMapping("/empleos/guardados")
@@ -539,6 +481,7 @@ public class EmpleoController {
             yaEraDestacado = empleo.isDestacar();
         } else {
             empleo = new Empleo();
+            empleo.setFechaPublicacion(new java.util.Date());
             empleo.setEmpresaId(empresaId);
             empleo.setEmpresaCorreo(RoleGuard.getCorreo(session));
         }
@@ -630,8 +573,9 @@ public class EmpleoController {
         target.setLogoUrl(form.getLogoUrl());
     }
 
+    // Mis ofertas (cuenta de Empresa): ?tab=activas|cerradas
     @GetMapping("/misEmpleos")
-    public String misEmpleos(Model model, HttpSession session, RedirectAttributes ra) {
+    public String misEmpleos(@RequestParam(required = false) String tab, Model model, HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.soloEmpresa(session)) {
             if (RoleGuard.sinSesion(session))
                 return "redirect:/login";
@@ -640,15 +584,37 @@ public class EmpleoController {
             return "redirect:/dashboard";
         }
         String empresaId = RoleGuard.getId(session);
-        model.addAttribute("empleosActivos",
-                empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO"));
-        model.addAttribute("empleosCerrados",
-                empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO"));
-        agregarSesion(session, model);
+        List<Empleo> activos = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO");
+        List<Empleo> cerrados = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO");
+
+        // postulaciones de todas sus ofertas, agrupadas por oferta
+        List<String> ids = new ArrayList<>();
+        activos.forEach(e -> ids.add(e.getId()));
+        cerrados.forEach(e -> ids.add(e.getId()));
+        Map<String, List<Solicitud>> porOferta = new HashMap<>();
+        if (!ids.isEmpty())
+            for (Solicitud s : solicitudRepository.findByEmpleoIdIn(ids))
+                porOferta.computeIfAbsent(s.getEmpleoId(), k -> new ArrayList<>()).add(s);
+
+        Date ahora = new Date();
+        List<OfertaEmpresaVista> vistasActivas = new ArrayList<>();
+        for (Empleo e : activos)
+            vistasActivas.add(OfertaEmpresaVista.de(e, porOferta.getOrDefault(e.getId(), List.of()), ahora));
+        List<OfertaEmpresaVista> vistasCerradas = new ArrayList<>();
+        for (Empleo e : cerrados)
+            vistasCerradas.add(OfertaEmpresaVista.de(e, porOferta.getOrDefault(e.getId(), List.of()), ahora));
 
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
-        model.addAttribute("limiteVacantesActivas", planService.limiteVacantesActivas(empresa));
+        int limite = planService.limiteVacantesActivas(empresa);
 
+        model.addAttribute("ofertas", "cerradas".equals(tab) ? vistasCerradas : vistasActivas);
+        model.addAttribute("tabSel", "cerradas".equals(tab) ? "cerradas" : "activas");
+        model.addAttribute("nActivas", vistasActivas.size());
+        model.addAttribute("nCerradas", vistasCerradas.size());
+        model.addAttribute("limiteActivas", limite);
+        model.addAttribute("puedePublicar", vistasActivas.size() < limite);
+        model.addAttribute("nPostulacionesRevision", vistasActivas.stream().mapToInt(OfertaEmpresaVista::getEnRevision).sum());
+        agregarSesion(session, model);
         return "misEmpleos";
     }
 
@@ -694,7 +660,7 @@ public class EmpleoController {
                 ra.addFlashAttribute("flashType", "success");
             }
         });
-        return "redirect:/misEmpleos";
+        return "redirect:/misEmpleos?tab=cerradas";
     }
 
     @PostMapping(value = "/empleos/{id}/fase", produces = "application/json")
@@ -724,24 +690,10 @@ public class EmpleoController {
         return ResponseEntity.ok(Map.of("ok", true, "fase", fase));
     }
 
-    // cuenta cuántas skills del talento aparecen en el texto del empleo, devuelve 0-100
+    // porcentaje de lo que pide la oferta que el talento ya tiene (0-100); ver MatchEmpleo.
+    // 0 si no se puede calcular (talento o oferta sin stack)
     public static int calcularScore(Usuario usuario, Empleo empleo) {
-        if (usuario == null || usuario.getStack() == null || usuario.getStack().isEmpty())
-            return 0;
-
-        String textoEmpleo = String.join(" ",
-                empleo.getStack() != null ? empleo.getStack() : "",
-                empleo.getSoftSkills() != null ? empleo.getSoftSkills() : "",
-                empleo.getCategoria() != null ? empleo.getCategoria() : "",
-                empleo.getSeniority() != null ? empleo.getSeniority() : "",
-                empleo.getDescripcionRol() != null ? empleo.getDescripcionRol() : "").toLowerCase();
-
-        long matches = usuario.getStack().stream()
-                .filter(s -> s != null && !s.isBlank())
-                .filter(s -> textoEmpleo.contains(s.toLowerCase().trim()))
-                .count();
-
-        return (int) (matches * 100L / usuario.getStack().size());
+        return com.example.devcoast.service.MatchEmpleo.porcentaje(usuario, empleo);
     }
 
     private Usuario obtenerUsuario(HttpSession session) {

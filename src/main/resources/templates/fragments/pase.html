@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<body>
+
+    <!-- ===== Pase de abordaje (ticket). v = EmpleoVista; feat = destacado; i = orden de entrada ===== -->
+    <article th:fragment="ticket(v, feat, i)" class="jt in"
+        th:classappend="${(feat ? 'feat ' : '') + (v.solicitada ? 'sent' : '')}" th:attr="data-id=${v.id}"
+        th:style="'--i:' + ${i}">
+        <div class="jt-main">
+            <span class="fpill" th:if="${feat}"
+                th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.8 1.5 7.1L12 17.6 5.7 21.3l1.5-7.1L1.8 9.4 9 8.6z"/></svg>
+                <span th:text="${destacadoEtiqueta != null} ? ${destacadoEtiqueta} : (${destacadoMotivo == 'match'} ? 'DESTACADO · MEJOR MATCH' : 'DESTACADO · PROMOCIONADO')">DESTACADO · MEJOR MATCH</span>
+            </span>
+
+            <div class="jt-top">
+                <span class="area" th:classappend="${v.areaClave}">
+                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+                </span>
+                <span class="when" th:if="${v.hace != null}">
+                    <span class="tag" th:if="${v.nueva}">NUEVA</span><span th:text="${v.hace}">hace 3 días</span>
+                </span>
+            </div>
+
+            <h2 class="jt-t"><a th:href="@{/empleos/{id}(id=${v.id})}" th:text="${v.titulo}">Cargo</a></h2>
+
+            <div class="co" th:if="${v.empresaNombre != null}">
+                <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')">
+                    <img th:if="${v.logoUrl != null}" th:src="${v.logoUrl}" alt="">
+                    <b th:if="${v.logoUrl == null}" th:text="${v.empresaInicial}">E</b>
+                </span>
+                <span th:text="${v.empresaNombre}">Empresa</span>
+            </div>
+
+            <p class="desc" th:if="${feat and v.descripcionCorta != null}" th:text="${v.descripcionCorta}">Descripción corta.</p>
+
+            <dl class="facts" th:if="${v.modalidad != null or v.seniority != null or v.salarioTexto != null or (feat and v.postulantes != null)}">
+                <div th:if="${v.modalidad != null}"><dt>MODALIDAD</dt><dd th:text="${v.modalidad}">Remoto</dd></div>
+                <div th:if="${v.seniority != null}"><dt>NIVEL</dt><dd th:text="${v.seniority}">Senior</dd></div>
+                <div th:if="${v.salarioTexto != null}"><dt th:text="${v.salarioEtiqueta}">SALARIO</dt><dd th:text="${v.salarioTexto}">$5–7 M</dd></div>
+                <div th:if="${feat and v.postulantes != null}"><dt>POSTULANTES</dt><dd th:text="${v.postulantes}">12</dd></div>
+            </dl>
+
+            <div class="why" th:if="${!#lists.isEmpty(v.habilidades)}">
+                <div class="sk" th:if="${feat}"><span class="k" th:text="${v.match != null} ? 'TU PERFIL VS. LA OFERTA' : 'HABILIDADES QUE PIDE'">TU PERFIL VS. LA OFERTA</span></div>
+                <div class="sk">
+                    <th:block th:each="h : ${v.habilidades}">
+                        <span class="s y" th:if="${h.estado == 'tiene'}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span th:text="${h.nombre}">Java</span><span class="sr"> (lo tienes)</span>
+                        </span>
+                        <span class="s n" th:if="${h.estado == 'falta'}"><span th:text="${h.nombre}">Docker</span><span class="sr"> (te falta)</span></span>
+                        <span class="s nm" th:if="${h.estado == 'neutra'}" th:text="${h.nombre}">Java</span>
+                    </th:block>
+                    <span class="s more" th:if="${v.habilidadesRestantes > 0}" th:text="'+' + ${v.habilidadesRestantes}">+2</span>
+                </div>
+            </div>
+
+            <div class="stamp" aria-hidden="true">SOLICITADA</div>
+        </div>
+
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <th:block th:if="${v.match != null}">
+                <span class="mt-k" th:text="'MATCH ' + ${#strings.toUpperCase(v.nivel)}">MATCH ALTO</span>
+                <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">94</span><small>%</small></div>
+                <div class="mt-bar" aria-hidden="true">
+                    <i th:each="c : ${#numbers.sequence(0, 9)}" th:class="${c < v.cubos} ? 'on'" th:style="${c < v.cubos} ? '--c:' + ${c}"></i>
+                </div>
+            </th:block>
+            <th:block th:if="${v.match == null}">
+                <span class="mt-k">MATCH</span>
+                <p class="nomatch" th:if="${!esTalento}">Es una oferta de otra empresa.</p>
+                <p class="nomatch" th:if="${esTalento and talentoSinStack}">Agrega tu stack para ver tu match.</p>
+                <p class="nomatch" th:if="${esTalento and !talentoSinStack}">La oferta no lista habilidades.</p>
+            </th:block>
+
+            <form th:if="${esTalento}" method="post" th:action="@{/empleos/{id}/aplicar(id=${v.id})}" class="postular"
+                th:attr="data-postular=@{/empleos/{id}/postular(id=${v.id})},data-cargo=${v.titulo},data-empresa=${v.empresaNombre}">
+                <button class="apply" type="submit" th:disabled="${v.solicitada}"
+                    th:aria-label="|Postularme a ${v.titulo}${v.empresaNombre != null ? ' en ' + v.empresaNombre : ''}|"
+                    th:text="${v.solicitada} ? 'Solicitada' : 'Postularme'">Postularme</button>
+            </form>
+            <a class="apply ghost" th:unless="${esTalento}" th:href="@{/empleos/{id}(id=${v.id})}"
+                th:aria-label="|Ver la oferta ${v.titulo}|">Ver oferta</a>
+        </div>
+    </article>
+
+    <!-- ===== Pase de solicitud (v = SolicitudVista). Etapas reales: Enviada, En revisión, Decisión ===== -->
+    <article th:fragment="solicitud(v, i)" class="jt rq in" th:classappend="${v.sello != null} ? 'has-stamp'"
+        th:attr="data-id=${v.id}" th:style="'--i:' + ${i}">
+        <div class="jt-main">
+            <div class="jt-top">
+                <span class="area" th:classappend="${v.areaClave}">
+                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+                </span>
+                <span class="when">
+                    <span class="mtag" th:if="${v.match != null}" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}"
+                        th:text="|MATCH ${v.match}%|">MATCH 94%</span>
+                    <span th:if="${v.hace != null}" th:text="${v.hace}">hace 3 días</span>
+                </span>
+            </div>
+
+            <h2 class="jt-t"><a th:href="@{/solicitudes/{id}(id=${v.id})}" th:text="${v.cargo}">Cargo</a></h2>
+
+            <div class="co" th:if="${v.empresa != null}">
+                <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')"><b th:text="${v.empresaInicial}">E</b></span>
+                <span th:text="${v.empresa}">Empresa</span>
+            </div>
+
+            <ol class="track" aria-label="Progreso de la solicitud" th:style="'--c:' + (${v.estado == 'aprobada'} ? 'var(--teal)' : 'var(--orange)')">
+                <li th:each="e : ${v.etapas}"
+                    th:class="${e.estado == 'hecha' ? 'done' : (e.estado == 'actual' ? 'cur' : (e.estado == 'fin' ? 'end' : ''))}"
+                    th:attr="aria-current=${e.estado == 'actual' or e.estado == 'fin'} ? 'step'">
+                    <span class="n"></span><span class="l"><span th:text="${e.nombre}">Enviada</span><span class="sr" th:text="${e.texto}"> (completado)</span></span>
+                </li>
+            </ol>
+
+            <div class="next"><span class="k">SIGUIENTE PASO</span><p th:text="${v.siguientePaso}">La empresa está revisando tu postulación.</p></div>
+
+            <div class="stamp show" th:if="${v.sello != null}" th:classappend="${v.claseSello}" th:text="${v.sello}" aria-hidden="true">ACEPTADA</div>
+            <div class="stamp" th:if="${v.sello == null}" aria-hidden="true">RETIRADA</div>
+        </div>
+
+        <div class="jt-stub" th:classappend="${v.claseEstado}">
+            <span class="st-k">ESTADO</span>
+            <div><div class="st-v" th:text="${v.estadoTexto}">En revisión</div><div class="st-d" th:text="${v.detalle}">Enviada el 14 oct</div></div>
+
+            <form th:if="${v.retirable}" method="post" th:action="@{/solicitudes/{id}/delete(id=${v.id})}" class="retirar"
+                th:attr="data-cargo=${v.cargo}">
+                <details class="ret">
+                    <summary th:aria-label="|Retirar solicitud de ${v.cargo}|">Retirar</summary>
+                    <div class="ret-box">
+                        <p>Se borrará esta solicitud y su conversación. No se puede deshacer.</p>
+                        <button class="apply" type="submit" th:aria-label="|Sí, retirar la solicitud de ${v.cargo}|">Sí, retirar</button>
+                        <button class="apply ghost" type="button" data-cancelar>Cancelar</button>
+                    </div>
+                </details>
+            </form>
+            <a class="apply" th:unless="${v.retirable}" th:href="@{/empleos/{id}(id=${v.empleoId})}"
+                th:aria-label="|Ver la oferta ${v.cargo}|">Ver oferta</a>
+        </div>
+    </article>
+
+    <!-- ===== Pase de invitación (v = InvitacionVista) ===== -->
+    <article th:fragment="invitacion(v, i)" class="jt rq in" th:classappend="${v.sello != null} ? 'has-stamp'"
+        th:attr="data-id=${v.id}" th:style="'--i:' + ${i}">
+        <div class="jt-main">
+            <div class="jt-top">
+                <span class="area" th:classappend="${v.areaClave}">
+                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>
+                    <span th:text="${v.categoria != null} ? ${v.categoria} : 'Invitación'">Invitación</span>
+                </span>
+                <span class="when"><span class="mtag lo">INVITACIÓN</span><span th:if="${v.hace != null}" th:text="${v.hace}">hace 3 días</span></span>
+            </div>
+
+            <h2 class="jt-t" th:text="${v.cargo != null} ? ${v.cargo} : 'Invitación directa'">Cargo</h2>
+
+            <div class="co" th:if="${v.empresa != null}">
+                <span class="co-t" aria-hidden="true" style="background:#1F8F82"><b th:text="${v.empresaInicial}">E</b></span>
+                <span th:text="${v.empresa}">Empresa</span>
+            </div>
+
+            <dl class="facts" th:if="${v.modalidad != null or v.salarioTexto != null}">
+                <div th:if="${v.modalidad != null}"><dt>MODALIDAD</dt><dd th:text="${v.modalidad}">Remoto</dd></div>
+                <div th:if="${v.salarioTexto != null}"><dt>SALARIO</dt><dd th:text="${v.salarioTexto}">COP 5.000.000</dd></div>
+            </dl>
+
+            <div class="next" th:if="${v.mensaje != null}"><span class="k">MENSAJE DE LA EMPRESA</span><p class="msg" th:text="${v.mensaje}">Nos encantó tu portafolio.</p></div>
+            <div class="next" th:if="${v.mensaje == null and v.estado == 'pendiente'}"><span class="k">SIGUIENTE PASO</span><p>Responde para que la empresa sepa si te interesa.</p></div>
+
+            <div class="stamp show" th:if="${v.sello != null}" th:classappend="${v.claseSello}" th:text="${v.sello}" aria-hidden="true">ACEPTADA</div>
+        </div>
+
+        <div class="jt-stub" th:classappend="${v.claseEstado}">
+            <span class="st-k">ESTADO</span>
+            <div><div class="st-v" th:text="${v.estadoTexto}">Por responder</div><div class="st-d" th:if="${v.estado == 'pendiente'}">Invitación de la empresa</div></div>
+
+            <th:block th:if="${v.estado == 'pendiente'}">
+                <form method="post" th:action="@{/invitaciones/{id}/aceptar(id=${v.id})}">
+                    <button class="apply" type="submit" th:aria-label="|Aceptar la invitación de ${v.empresa}|">Aceptar</button>
+                </form>
+                <form method="post" th:action="@{/invitaciones/{id}/rechazar(id=${v.id})}">
+                    <button class="apply ghost" type="submit" th:aria-label="|Rechazar la invitación de ${v.empresa}|">Rechazar</button>
+                </form>
+            </th:block>
+            <a class="apply" th:if="${v.estado != 'pendiente' and v.empleoId != null}" th:href="@{/empleos/{id}(id=${v.empleoId})}">Ver oferta</a>
+        </div>
+    </article>
+
+    <!-- ===== Tarjeta de proyecto del portafolio (v = ProyectoVista) ===== -->
+    <article th:fragment="proyecto(v, i)" class="pj in" th:classappend="${!v.publicado} ? 'off'" th:style="'--i:' + ${i}"
+        th:attr="data-id=${v.id},data-nombre=${v.nombre},data-categoria=${v.categoria},data-tipo=${v.tipo},data-anio=${v.anio},data-desc=${v.descripcion},data-link=${v.enlace},data-stack=${#strings.listJoin(v.herramientas, ', ')}">
+        <div class="cv" aria-hidden="true" th:if="${v.portada != null}"><img th:src="${v.portada}" alt="" loading="lazy"></div>
+        <div class="cv" aria-hidden="true" th:if="${v.portada == null and v.areaClave != 'p'}">
+                <svg th:if="${v.variante == 0}" viewBox="0 0 300 152" preserveAspectRatio="xMidYMid slice"><rect width="300" height="152" fill="#FF7B4F"/><circle cx="214" cy="76" r="54" fill="#F3F4F8"/><rect x="40" y="38" width="86" height="86" rx="6" fill="#101114"/><polygon points="40,124 126,124 126,90" fill="#CC4B27"/></svg>
+                <svg th:if="${v.variante == 1}" viewBox="0 0 300 152" preserveAspectRatio="xMidYMid slice"><rect width="300" height="152" fill="#2DD4BF"/><rect x="92" y="14" width="116" height="124" rx="14" fill="#101114"/><rect x="104" y="30" width="92" height="12" rx="3" fill="#F3F4F8"/><rect x="104" y="50" width="60" height="8" rx="3" fill="#2DD4BF"/><circle cx="150" cy="100" r="22" fill="#FF7B4F"/></svg>
+                <svg th:if="${v.variante == 2}" viewBox="0 0 300 152" preserveAspectRatio="xMidYMid slice"><rect width="300" height="152" fill="#F3F4F8"/><polygon points="0,152 120,0 240,152" fill="#101114"/><circle cx="222" cy="52" r="34" fill="#FF7B4F"/><rect x="190" y="104" width="110" height="48" fill="#2DD4BF"/></svg>
+        </div>
+        <div class="cv code" aria-hidden="true" th:if="${v.portada == null and v.areaClave == 'p'}">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <div><span class="a">proyecto</span>: <span class="c" th:text="'&quot;' + ${v.nombreCorto} + '&quot;'">"nombre"</span></div>
+            <div th:each="h, st : ${v.herramientas}" th:if="${st.index < 3}"><span class="b">usa</span> <span class="c" th:text="${h}">Java</span></div>
+        </div>
+
+        <div class="pj-b">
+            <div class="pj-top">
+                <span class="area" th:classappend="${v.areaClave}">
+                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    <span th:text="${v.categoria != null} ? ${v.categoria} : 'Proyecto'">Frontend</span>
+                </span>
+                <span class="when" th:if="${v.anio != null}" th:text="${v.anio}">2026</span>
+            </div>
+            <h2 class="pj-t"><a th:href="@{/misProyectos/{id}(id=${v.id})}" th:text="${v.nombre}">Título</a></h2>
+            <p class="pj-d" th:text="${v.descripcion}">Descripción.</p>
+            <div class="tools" th:if="${!#lists.isEmpty(v.herramientas)}">
+                <span class="tool" th:each="h : ${v.herramientas}" th:text="${h}">Java</span>
+            </div>
+            <div class="pj-f">
+                <div class="pj-l">
+                    <a th:if="${v.enlace != null}" th:href="${v.enlace}" target="_blank" rel="noopener noreferrer"
+                        th:aria-label="|${v.areaClave == 'd' ? 'Ver pieza' : 'Ver proyecto'}: ${v.nombre} (se abre en otra pestaña)|"
+                        th:text="${v.areaClave == 'd'} ? 'Ver pieza' : 'Ver proyecto'">Ver proyecto</a>
+                    <a th:href="@{/subirProyecto(editar=${v.id})}" class="editar" th:aria-label="|Editar ${v.nombre}|">Editar</a>
+                </div>
+                <form class="swt-form" method="post" th:action="@{/proyectos/{id}/visibilidad(id=${v.id})}">
+                    <input type="hidden" name="publicado" th:value="${!v.publicado}">
+                    <button class="swt" type="submit" role="switch" th:attr="aria-checked=${v.publicado}" th:aria-label="|Proyecto público: ${v.nombre}|"><i></i><span th:text="${v.publicado} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span></button>
+                </form>
+                <!-- eliminar con confirmación a la vista (sin confirm()) -->
+                <details class="pj-d">
+                    <summary th:aria-label="|Eliminar ${v.nombre}|">Eliminar</summary>
+                    <div class="pj-del">
+                        <span>¿Eliminar este proyecto? No se puede deshacer.</span>
+                        <form method="post" th:action="@{/proyectos/eliminar/{id}(id=${v.id})}">
+                            <input type="hidden" name="volver" value="proyectos">
+                            <button class="go-del" type="submit" th:aria-label="|Sí, eliminar ${v.nombre}|">Sí, eliminar</button>
+                        </form>
+                        <button class="no-del" type="button" data-cancelar-del>Cancelar</button>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </article>
+
+    <!-- ===== Carta de navegación del Dashboard (carta = CartaVista). Dibuja el barquito una vez con <symbol> y lo reutiliza ===== -->
+    <section th:fragment="carta(carta)" class="carta" th:attr="aria-label=${carta.etiqueta}">
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="hullv"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath><symbol id="vessel" viewBox="90 30 470 490"><polygon points="273,52 510,274 408,276" style="fill:var(--s1)" stroke-width="5" stroke-linejoin="round"/><polygon points="273,52 408,274 350,292 274,366" style="fill:var(--s2)"/><polygon points="350,292 406,271 464,396 392,396" style="fill:var(--s3)"/><rect x="260" y="42" width="12" height="356" rx="6" fill="#F3F4F8"/><g clip-path="url(#hullv)"><rect x="100" y="397" width="450" height="15" fill="#F3F4F8"/><rect x="100" y="412" width="450" height="29" fill="#2DD4BF"/><rect x="100" y="441" width="450" height="8" fill="#F3F4F8"/><rect x="100" y="449" width="450" height="45" fill="#CDD1DB"/></g></symbol></defs></svg>
+        <div class="zones" th:style="'--zn:' + ${#lists.size(carta.zonas)}">
+            <section class="zone" th:each="z, zs : ${carta.zonas}" th:attr="aria-label=${z.aria}">
+                <h3><i></i><span th:text="${z.titulo}">EN ALTA MAR</span><em th:text="${z.total}">3</em></h3>
+                <p class="zs" th:text="${z.subtitulo}">EN REVISIÓN</p>
+                <a class="vs" th:each="b : ${z.barcos}" th:href="@{${b.href}}" th:attr="aria-label=${b.aria}"
+                    th:style="'--i:' + ${b.indice} + ';--s1:' + ${b.s1} + ';--s2:' + ${b.s2} + ';--s3:' + ${b.s3}">
+                    <svg viewBox="90 30 470 490" aria-hidden="true"><use href="#vessel"/></svg>
+                    <span class="tx"><b th:text="${b.titulo}">Cargo</b><span th:text="${b.match != null ? b.detalle + ' · ' + b.match + '%' : b.detalle}">Empresa · 72%</span></span>
+                    <span class="ok" th:if="${b.aceptada}" aria-hidden="true">✓</span>
+                </a>
+                <a class="mas" th:if="${z.extra > 0}" th:href="@{${carta.hrefMas}(estado=${z.estadoFiltro})}" th:text="'+' + ${z.extra} + ' más'">+2 más</a>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and !carta.vacia}" th:text="${carta.textoZonaVacia}">Sin solicitudes en esta etapa.</p>
+                <p class="vacia" th:if="${#lists.isEmpty(z.barcos) and carta.vacia and zs.first}" th:text="${carta.textoVacia}">Todavía no has zarpado.</p>
+            </section>
+        </div>
+        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+    </section>
+
+    <!-- ===== Mini pase de oferta para "Avistadas" (v = EmpleoVista): todo el pase es un enlace ===== -->
+    <a th:fragment="mini(v)" class="jt mini" th:href="@{/empleos/{id}(id=${v.id})}"
+        th:aria-label="|${v.titulo}${v.empresaNombre != null ? ', ' + v.empresaNombre : ''}, match ${v.match} por ciento|">
+        <div class="jt-main">
+            <span class="area" th:classappend="${v.areaClave}">
+                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+            </span>
+            <h3 class="jt-t" th:text="${v.titulo}">Cargo</h3>
+            <div class="co" th:if="${v.empresaNombre != null}">
+                <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')"><b th:text="${v.empresaInicial}">E</b></span>
+                <span th:text="${v.empresaNombre}">Empresa</span>
+            </div>
+            <span class="when" th:if="${v.modalidad != null or v.hace != null}"
+                th:text="${(v.modalidad != null ? v.modalidad : '') + (v.modalidad != null and v.hace != null ? ' · ' : '') + (v.hace != null ? v.hace : '')}">Híbrido · hace 2 días</span>
+        </div>
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <span class="mt-k">MATCH</span>
+            <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">88</span><small>%</small></div>
+        </div>
+    </a>
+
+    <!-- ===== Tarjeta del Directorio (v = TalentoVista): papel sin talón. También es la vista previa de Mi perfil (sin esEmpresa) ===== -->
+    <article th:fragment="talento(v, i)" class="tc in" th:classappend="${v.destacado} ? 'feat'"
+        th:style="'--i:' + ${i} + ';--av:' + ${v.color}">
+        <span class="tc-pill" th:if="${v.destacado}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.8 1.5 7.1L12 17.6 5.7 21.3l1.5-7.1L1.8 9.4 9 8.6z"/></svg>DESTACADO</span>
+        <div class="tc-top">
+            <span class="tc-av" aria-hidden="true">
+                <img th:if="${v.fotoUrl != null}" th:src="${v.fotoUrl}" alt="" loading="lazy">
+                <b th:if="${v.fotoUrl == null}" th:text="${v.inicial}">V</b>
+            </span>
+            <div class="tc-id">
+                <h2 class="tc-n"><a th:href="@{/talentos/{id}(id=${v.id})}" th:text="${v.nombre}">Nombre</a></h2>
+                <div class="tc-r" th:if="${v.rol != null or v.ubicacion != null}"
+                    th:text="${(v.rol != null ? v.rol : '') + (v.rol != null and v.ubicacion != null ? ' · ' : '') + (v.ubicacion != null ? v.ubicacion : '')}">Frontend Developer · Santiago</div>
+            </div>
+        </div>
+        <div class="tc-chips" th:if="${v.categoria != null or v.modalidad != null or v.disponibilidad != null}">
+            <span class="area" th:if="${v.categoria != null}" th:classappend="${v.areaClave}">
+                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                <span th:text="${v.categoria}">Frontend</span>
+            </span>
+            <span class="tc-c" th:if="${v.modalidad != null}" th:text="${v.modalidad}">Remoto</span>
+            <span class="tc-c" th:if="${v.disponibilidad != null}" th:text="${v.disponibilidad}">Tiempo completo</span>
+        </div>
+        <p class="tc-b" th:if="${v.bio != null}" th:text="${v.bio}">Bio corta.</p>
+        <div class="tools" th:if="${!#lists.isEmpty(v.stack)}">
+            <span class="tool" th:each="s : ${v.stack}" th:text="${s}">React</span>
+            <span class="tool more" th:if="${v.stackExtra > 0}" th:text="'+' + ${v.stackExtra}">+2</span>
+        </div>
+        <div class="tc-sw" th:if="${v.proyectos > 0}">
+            <span class="sws" aria-hidden="true"><i th:each="c : ${v.coloresProyectos}" th:style="'background:' + ${c}"></i></span>
+            <span th:text="${v.proyectos == 1 ? '1 proyecto en su portafolio' : v.proyectos + ' proyectos en su portafolio'}">3 proyectos en su portafolio</span>
+        </div>
+        <div class="tc-f">
+            <div class="tc-l">
+                <a th:if="${v.portfolioUrl != null}" th:href="${v.portfolioUrl}" target="_blank" rel="noopener noreferrer"
+                    th:aria-label="|Portafolio de ${v.nombre} (se abre en otra pestaña)|">Portafolio</a>
+                <a th:if="${v.linkedinUrl != null}" th:href="${v.linkedinUrl}" target="_blank" rel="noopener noreferrer"
+                    th:aria-label="|LinkedIn de ${v.nombre} (se abre en otra pestaña)|">LinkedIn</a>
+                <a th:if="${v.githubUrl != null}" th:href="${v.githubUrl}" target="_blank" rel="noopener noreferrer"
+                    th:aria-label="|GitHub de ${v.nombre} (se abre en otra pestaña)|">GitHub</a>
+            </div>
+            <div class="tc-a">
+                <a class="tc-ver" th:href="@{/talentos/{id}(id=${v.id})}" th:aria-label="|Ver el perfil de ${v.nombre}|">Ver perfil</a>
+                <th:block th:if="${esEmpresa}">
+                    <form th:if="${!v.invitado and v.aceptaInvitaciones}" method="post" th:action="@{/talentos/{id}/invitar(id=${v.id})}">
+                        <button class="tc-inv" type="submit" th:aria-label="|Invitar a ${v.nombre}|">Invitar</button>
+                    </form>
+                    <span class="tc-ya" th:if="${v.invitado}">✓ Invitado</span>
+                    <span class="tc-ya" th:if="${!v.invitado and !v.aceptaInvitaciones}">No acepta invitaciones</span>
+                </th:block>
+            </div>
+        </div>
+    </article>
+
+    <!-- ===== Pase de oferta de la cuenta de Empresa (v = OfertaEmpresaVista): el talón cuenta las postulaciones ===== -->
+    <article th:fragment="oferta(v, i)" class="jt rq in" th:style="'--i:' + ${i}" th:attr="data-id=${v.oferta.id}">
+        <div class="jt-main">
+            <div class="jt-top">
+                <span class="area" th:classappend="${v.oferta.areaClave}">
+                    <svg th:if="${v.oferta.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                    <svg th:if="${v.oferta.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                    <svg th:if="${v.oferta.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                    <span th:text="${v.oferta.categoria != null} ? ${v.oferta.categoria} : 'Oferta'">Programación</span>
+                </span>
+                <span class="when">
+                    <span class="tag" th:if="${v.destacada}">DESTACADA</span>
+                    <span th:if="${v.oferta.hace != null}" th:text="'publicada ' + ${v.oferta.hace}">publicada hace 3 días</span>
+                </span>
+            </div>
+
+            <h2 class="jt-t"><a th:href="@{/empleos/{id}(id=${v.oferta.id})}" th:text="${v.oferta.titulo}">Cargo</a></h2>
+
+            <dl class="facts" th:if="${v.oferta.modalidad != null or v.oferta.seniority != null or v.contrato != null or v.vacantes != null or v.oferta.salarioTexto != null}">
+                <div th:if="${v.oferta.modalidad != null}"><dt>MODALIDAD</dt><dd th:text="${v.oferta.modalidad}">Remoto</dd></div>
+                <div th:if="${v.oferta.seniority != null}"><dt>NIVEL</dt><dd th:text="${v.oferta.seniority}">Senior</dd></div>
+                <div th:if="${v.contrato != null}"><dt>CONTRATO</dt><dd th:text="${v.contrato}">Indefinido</dd></div>
+                <div th:if="${v.vacantes != null}"><dt>VACANTES</dt><dd th:text="${v.vacantes}">2</dd></div>
+                <div th:if="${v.oferta.salarioTexto != null}"><dt th:text="${v.oferta.salarioEtiqueta}">SALARIO</dt><dd th:text="${v.oferta.salarioTexto}">$5–7 M</dd></div>
+            </dl>
+
+            <div class="why" th:if="${!#lists.isEmpty(v.oferta.habilidades)}">
+                <div class="sk">
+                    <span class="s nm" th:each="h : ${v.oferta.habilidades}" th:text="${h.nombre}">Java</span>
+                    <span class="s more" th:if="${v.oferta.habilidadesRestantes > 0}" th:text="'+' + ${v.oferta.habilidadesRestantes}">+2</span>
+                </div>
+            </div>
+
+            <div class="oacts">
+                <a th:href="@{/empleos/{id}(id=${v.oferta.id})}" th:aria-label="|Ver la oferta ${v.oferta.titulo}|">Ver oferta</a>
+                <a th:if="${v.activa}" th:href="@{/crearEmpleo(editar=${v.oferta.id})}" th:aria-label="|Editar ${v.oferta.titulo}|">Editar</a>
+            </div>
+        </div>
+
+        <div class="jt-stub" th:classappend="${v.activa} ? 's-act' : 's-ret'">
+            <span class="st-k" th:text="${v.activa} ? 'POSTULACIONES' : 'CERRADA'">POSTULACIONES</span>
+            <div>
+                <div class="st-v" th:text="${v.total}">5</div>
+                <div class="st-d" th:if="${v.total == 0}">Aún nadie se ha postulado</div>
+                <div class="st-d" th:if="${v.total > 0}"
+                    th:text="${v.enRevision} + ' en revisión' + (${v.aceptadas} > 0 ? ' · ' + ${v.aceptadas} + (${v.aceptadas} == 1 ? ' aceptada' : ' aceptadas') : '') + (${v.rechazadas} > 0 ? ' · ' + ${v.rechazadas} + (${v.rechazadas} == 1 ? ' rechazada' : ' rechazadas') : '')">3 en revisión</div>
+            </div>
+
+            <a class="apply" th:href="@{/empleos/{id}/postulaciones(id=${v.oferta.id})}" th:aria-label="|Ver las postulaciones de ${v.oferta.titulo}|">Ver postulaciones</a>
+
+            <form th:if="${v.activa}" method="post" th:action="@{/empleos/cerrar/{id}(id=${v.oferta.id})}">
+                <details class="ret">
+                    <summary th:aria-label="|Cerrar la oferta ${v.oferta.titulo}|">Cerrar oferta</summary>
+                    <div class="ret-box">
+                        <p>Dejará de verse en Empleos. Podrás reabrirla desde Cerradas.</p>
+                        <button class="apply" type="submit" th:aria-label="|Sí, cerrar ${v.oferta.titulo}|">Sí, cerrar</button>
+                        <button class="apply ghost" type="button" data-cancelar>Cancelar</button>
+                    </div>
+                </details>
+            </form>
+            <th:block th:unless="${v.activa}">
+                <form method="post" th:action="@{/empleos/reabrir/{id}(id=${v.oferta.id})}">
+                    <button class="apply ghost" type="submit" th:aria-label="|Reabrir ${v.oferta.titulo}|">Reabrir</button>
+                </form>
+                <form method="post" th:action="@{/empleos/eliminar/{id}(id=${v.oferta.id})}">
+                    <details class="ret">
+                        <summary th:aria-label="|Eliminar ${v.oferta.titulo}|">Eliminar</summary>
+                        <div class="ret-box">
+                            <p>Se borran la oferta, sus postulaciones y sus invitaciones. No se puede deshacer.</p>
+                            <button class="apply" type="submit" th:aria-label="|Sí, eliminar ${v.oferta.titulo}|">Sí, eliminar</button>
+                            <button class="apply ghost" type="button" data-cancelar>Cancelar</button>
+                        </div>
+                    </details>
+                </form>
+            </th:block>
+        </div>
+    </article>
+
+    <!-- ===== Candidato de una oferta (v = SolicitudVista, vista de Empresa). Los botones de mover usan los endpoints de siempre:
+         sin JavaScript son formularios que redirigen a la postulación; con JavaScript cambian el estado en el sitio ===== -->
+    <article th:fragment="candidato(v, i)" class="jt rq cd in" th:style="'--i:' + ${i}"
+        th:attr="data-id=${v.id},data-oferta=${v.empleoId},data-estado=${v.estado == 'descartado' ? 'rechazada' : v.estado},data-nombre=${v.candidato}">
+        <div class="jt-main">
+            <div class="jt-top">
+                <span class="co">
+                    <span class="co-t" aria-hidden="true" style="background:#1F8F82"><b th:text="${v.candidato != null and !#strings.isEmpty(v.candidato)} ? ${#strings.toUpperCase(#strings.substring(v.candidato, 0, 1))} : 'C'">N</b></span>
+                    <span class="rol" th:text="${v.candidatoRol != null} ? ${v.candidatoRol} : 'Candidato'">Frontend</span>
+                </span>
+                <span class="when" th:if="${v.hace != null}" th:text="'se postuló ' + ${v.hace}">se postuló hace 2 días</span>
+            </div>
+            <h3 class="jt-t"><a th:href="@{/empleos/{e}/postulaciones/{s}(e=${v.empleoId},s=${v.id})}" th:text="${v.candidato != null} ? ${v.candidato} : 'Candidato'">Nombre</a></h3>
+            <div class="mvs" role="group" th:aria-label="|Mover la postulación de ${v.candidato}|">
+                <form class="mover" method="post" data-nuevo="aprobada" th:action="@{/empleos/{e}/postulaciones/{s}/aprobar(e=${v.empleoId},s=${v.id})}"
+                    th:attr="data-url=@{/empleos/{e}/postulaciones/{s}/estado(e=${v.empleoId},s=${v.id})}">
+                    <details class="ret mv">
+                        <summary th:aria-label="|Aceptar a ${v.candidato}|">Aceptar</summary>
+                        <div class="ret-box">
+                            <p th:text="${cobraColocacion} ? 'Con el plan Gratis se registra la tarifa de colocación. Puedes verla en Facturación.' : 'La persona recibirá un aviso de que fue aceptada.'">Aviso</p>
+                            <button class="apply" type="submit" th:aria-label="|Sí, aceptar a ${v.candidato}|">Sí, aceptar</button>
+                            <button class="apply ghost" type="button" data-cancelar>Cancelar</button>
+                        </div>
+                    </details>
+                </form>
+                <form class="mover" method="post" data-nuevo="rechazada" th:action="@{/empleos/{e}/postulaciones/{s}/rechazar(e=${v.empleoId},s=${v.id})}"
+                    th:attr="data-url=@{/empleos/{e}/postulaciones/{s}/estado(e=${v.empleoId},s=${v.id})}">
+                    <button class="mv-b" type="submit" th:aria-label="|Marcar como no avanza: ${v.candidato}|">No avanza</button>
+                </form>
+                <form class="mover" method="post" data-nuevo="revision" th:action="@{/empleos/{e}/postulaciones/{s}/reconsiderar(e=${v.empleoId},s=${v.id})}"
+                    th:attr="data-url=@{/empleos/{e}/postulaciones/{s}/estado(e=${v.empleoId},s=${v.id})}">
+                    <button class="mv-b" type="submit" th:aria-label="|Volver a revisión: ${v.candidato}|">A revisión</button>
+                </form>
+                <a class="mv-l" th:href="@{/chat/{s}(s=${v.id})}" th:aria-label="|Escribir a ${v.candidato}|">Chat</a>
+                <a class="mv-l" th:href="@{/empleos/{e}/postulaciones/{s}(e=${v.empleoId},s=${v.id})}" th:aria-label="|Ver la postulación de ${v.candidato}|">Ver postulación</a>
+            </div>
+        </div>
+        <div class="jt-stub" th:classappend="${v.claseEstado}">
+            <span class="st-k">ESTADO</span>
+            <div>
+                <div class="st-v" th:text="${v.estado == 'aprobada'} ? 'Aceptada' : (${v.estado == 'revision'} ? 'En revisión' : 'No avanzó')">En revisión</div>
+                <div class="st-d" th:text="${v.match != null} ? ('Match ' + ${v.match} + '%') : 'Sin match'">Match 92%</div>
+            </div>
+        </div>
+    </article>
+
+    <!-- ===== Mini pase de candidato para la cuenta de Empresa (v = SolicitudVista) ===== -->
+    <a th:fragment="miniCandidato(v)" class="jt mini" th:href="@{/empleos/{e}/postulaciones/{s}(e=${v.empleoId},s=${v.id})}"
+        th:aria-label="|${v.candidato}, para ${v.cargo}, match ${v.match} por ciento|">
+        <div class="jt-main">
+            <span class="area" th:classappend="${v.areaClave}">
+                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
+                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
+            </span>
+            <h3 class="jt-t" th:text="${v.candidato != null} ? ${v.candidato} : 'Candidato'">Nombre</h3>
+            <div class="co">
+                <span class="co-t" aria-hidden="true" style="background:#1F8F82"><b th:text="${v.candidato != null and !#strings.isEmpty(v.candidato)} ? ${#strings.toUpperCase(#strings.substring(v.candidato, 0, 1))} : 'C'">N</b></span>
+                <span th:text="'para ' + ${v.cargo}">para Cargo</span>
+            </div>
+            <span class="when" th:if="${v.candidatoRol != null or v.hace != null}"
+                th:text="${(v.candidatoRol != null ? v.candidatoRol : '') + (v.candidatoRol != null and v.hace != null ? ' · ' : '') + (v.hace != null ? v.hace : '')}">Frontend · hace 2 días</span>
+        </div>
+        <div class="jt-stub" th:classappend="${v.nivel == 'alto' ? 'hi' : (v.nivel == 'medio' ? 'md' : 'lo')}">
+            <span class="mt-k">MATCH</span>
+            <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">88</span><small>%</small></div>
+        </div>
+    </a>
+
+</body>
+
+</html>

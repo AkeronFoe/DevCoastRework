@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Dashboard | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
+    <link rel="stylesheet" th:href="@{/CSS/nautico-dashboard.css}">
+    <script th:src="@{/JS/dashboard-pase.js}" defer></script>
+</head>
+
+<body class="empresa">
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('dashboard')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
+
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}"></header>
+
+            <main class="content" id="contenido">
+                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
+                    th:text="${flashMessage}">Aviso</p>
+
+                <!-- ===== saludo y números ===== -->
+                <section class="hello" aria-label="Resumen de hoy">
+                    <div class="hello-t">
+                        <div class="eyebrow">// resumen</div>
+                        <h1 th:text="${nombrePila != ''} ? 'Buen viento, ' + ${nombrePila} + '.' : 'Buen viento.'">Buen viento, [Empresa].</h1>
+                        <p th:if="${nNuevas > 0}">Tienes <b th:text="${nNuevas == 1 ? '1 postulación' : nNuevas + ' postulaciones'}">3 postulaciones</b> en revisión<span th:if="${nCandidatosAltos > 0}">, <b th:text="${nCandidatosAltos == 1 ? '1 con match alto' : nCandidatosAltos + ' con match alto'}">1 con match alto</b></span>.</p>
+                        <p th:if="${nNuevas == 0 and nActivas > 0}">No hay postulaciones por revisar. Tus ofertas siguen navegando.</p>
+                        <p th:if="${nNuevas == 0 and nActivas == 0}">Publica tu primera oferta para empezar a recibir candidatos.</p>
+                        <div class="acts"><a class="btn-o sm" th:href="@{/crearEmpleo}">Publicar oferta</a><a class="lnk" th:href="@{/candidatos}">Ver postulaciones</a></div>
+                    </div>
+                    <div class="hello-sea" aria-hidden="true">
+                        <th:block th:replace="~{fragments/nautico :: boat('hullclip32')}"></th:block>
+                        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+                    </div>
+                    <dl class="nums" aria-label="Tus números">
+                        <div class="nv o"><dt><span>OFERTAS ACTIVAS</span></dt><dd><b th:attr="data-n=${nActivas}" th:text="${nActivas}">3</b></dd></div>
+                        <div class="nv t"><dt><span>POSTULACIONES EN REVISIÓN</span></dt><dd><b th:attr="data-n=${nNuevas}" th:text="${nNuevas}">5</b></dd></div>
+                        <div class="nv"><dt><span>CANDIDATOS CON MATCH ALTO</span></dt><dd><b th:attr="data-n=${nCandidatosAltos}" th:text="${nCandidatosAltos}">2</b></dd></div>
+                        <div class="nv"><dt><span>INVITACIONES ENVIADAS</span></dt><dd><b th:attr="data-n=${nInvitaciones}" th:text="${nInvitaciones}">4</b></dd></div>
+                    </dl>
+                </section>
+
+                <!-- ===== carta de navegación ===== -->
+                <div class="sec2"><h2>Tus candidatos</h2><span>postulaciones recibidas, de la salida al puerto</span>
+                    <span class="lg" aria-hidden="true"><i class="sw" style="background:#FF7B4F"></i>Programación</span>
+                    <span class="lg" aria-hidden="true"><i class="sw" style="background:#2DD4BF"></i>Diseño</span>
+                    <span class="lg" aria-hidden="true"><i class="sw" style="background:#CDD1DB"></i>Otras</span>
+                    <a th:href="@{/candidatos}">ver postulaciones</a></div>
+                <th:block th:replace="~{fragments/pase :: carta(${carta})}"></th:block>
+
+                <!-- ===== Mejores candidatos en revisión ===== -->
+                <th:block th:if="${!#lists.isEmpty(mejores)}">
+                    <div class="sec2"><h2>Mejores candidatos</h2><span>en revisión, con mayor match</span><a th:href="@{/candidatos}">ver todos</a></div>
+                    <div class="minis">
+                        <th:block th:each="v : ${mejores}"><th:block th:replace="~{fragments/pase :: miniCandidato(${v})}"></th:block></th:block>
+                    </div>
+                </th:block>
+
+                <!-- ===== Tu semana ===== -->
+                <div class="sec2"><h2>Tu semana</h2><span>tus ofertas y lo que ha pasado</span></div>
+                <section class="pn" aria-labelledby="hBit">
+                    <h2 id="hBit">Bitácora <span class="lab" th:text="${nActivas} + (${nActivas} == 1 ? ' OFERTA ACTIVA' : ' OFERTAS ACTIVAS')">3 OFERTAS ACTIVAS</span></h2>
+                    <div class="bit">
+                        <div class="bit-l">
+                            <div class="sub-h">POSTULACIONES POR OFERTA</div>
+                            <ul class="ofs" th:if="${!#lists.isEmpty(ofertas)}">
+                                <li th:each="o : ${ofertas}"><a th:href="@{/empleos/{id}/postulaciones(id=${o.id})}" th:text="${o.titulo}">Frontend Developer</a>
+                                    <span th:text="${o.postulaciones == 1 ? '1 postulación' : o.postulaciones + ' postulaciones'}">3 postulaciones</span></li>
+                                <li class="mas" th:if="${ofertasMas > 0}"><a th:href="@{/misEmpleos}" th:text="'y ' + ${ofertasMas} + (${ofertasMas} == 1 ? ' oferta más' : ' ofertas más')">y 2 ofertas más</a></li>
+                            </ul>
+                            <p class="bit-vacio" th:if="${#lists.isEmpty(ofertas)}">Aún no tienes ofertas activas. <a class="lnk" th:href="@{/crearEmpleo}">Publica la primera</a>.</p>
+                        </div>
+                        <div class="bit-r">
+                            <div class="sub-h">ACTIVIDAD RECIENTE</div>
+                            <ol class="tl" th:if="${!#lists.isEmpty(eventos)}">
+                                <li th:each="e : ${eventos}"><span class="mk" th:classappend="${e.tono == 'o'} ? 'o' : (${e.tono == 'g'} ? 'g')"></span>
+                                    <div><span th:text="${e.texto}">Recibiste una postulación.</span><time th:datetime="${#dates.format(e.fecha, 'yyyy-MM-dd')}" th:text="${e.cuando}">hace 2 días</time></div></li>
+                            </ol>
+                            <p class="bit-vacio" th:if="${#lists.isEmpty(eventos)}">Cuando recibas postulaciones o envíes invitaciones, aparecerán aquí.</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/nautico :: toast}"></div>
+</body>
+
+</html>

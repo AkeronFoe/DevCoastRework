@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -57,9 +58,15 @@ public class SolicitudController {
     private final CobroRepository cobroRepository;
     private final PlanService planService;
 
+    // Solicitudes y invitaciones del talento como pases de abordaje.
+    // ?estado=todas|proceso|aceptadas|cerradas|invitaciones &orden=recientes|estado &q=
+    // (tab=invitaciones se conserva porque InvitacionController redirige con ese parámetro)
     @GetMapping("/solicitudes")
     public String listarSolicitudes(
-            @RequestParam(defaultValue = "solicitudes") String tab,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String tab,
+            @RequestParam(required = false) String orden,
+            @RequestParam(required = false) String q,
             Model model, HttpSession session, RedirectAttributes ra) {
 
         if (RoleGuard.soloTalento(session)) {
@@ -72,21 +79,75 @@ public class SolicitudController {
         }
 
         String usuarioId = RoleGuard.getId(session);
-        List<Solicitud> solicitudes = solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId);
-        List<Invitacion> invitaciones = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(usuarioId);
+        Usuario talento = usuarioRepository.findById(usuarioId).orElse(null);
+        java.util.Date ahora = new java.util.Date();
 
-        model.addAttribute("solicitudes", solicitudes);
-        model.addAttribute("totalSolicitudes", solicitudes.size());
-        model.addAttribute("revisionCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "revision"));
-        model.addAttribute("aprobadaCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "aprobada"));
-        model.addAttribute("rechazadaCount", solicitudRepository.countByUsuarioIdAndEstado(usuarioId, "rechazada"));
-        model.addAttribute("invitaciones", invitaciones);
-        model.addAttribute("invPendienteCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "pendiente"));
-        model.addAttribute("invAceptadaCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "aceptada"));
-        model.addAttribute("invRechazadaCount", invitacionRepository.countByTalentoIdAndEstado(usuarioId, "rechazada"));
-        model.addAttribute("tabActiva", tab);
+        List<SolicitudVista> todas = new ArrayList<>();
+        for (Solicitud s : solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId))
+            todas.add(SolicitudVista.de(s, talento, ahora));
+        List<InvitacionVista> invitaciones = new ArrayList<>();
+        for (Invitacion i : invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(usuarioId))
+            invitaciones.add(InvitacionVista.de(i, ahora));
+
+        String sel = estado != null ? estado : ("invitaciones".equals(tab) ? "invitaciones" : "todas");
+        if (!List.of("todas", "proceso", "aceptadas", "cerradas", "invitaciones").contains(sel))
+            sel = "todas";
+        String ordenSel = "estado".equals(orden) ? "estado" : "recientes";
+        String qSel = q == null ? "" : q.trim();
+        String qNorm = normalizar(qSel);
+
+        long nProceso = todas.stream().filter(v -> "revision".equals(v.getEstado())).count();
+        long nAceptadas = todas.stream().filter(v -> "aprobada".equals(v.getEstado())).count();
+        long nCerradas = todas.size() - nProceso - nAceptadas;
+
+        List<SolicitudVista> lista = new ArrayList<>();
+        for (SolicitudVista v : todas) {
+            boolean ok = switch (sel) {
+                case "proceso" -> "revision".equals(v.getEstado());
+                case "aceptadas" -> "aprobada".equals(v.getEstado());
+                case "cerradas" -> "rechazada".equals(v.getEstado()) || "descartado".equals(v.getEstado());
+                case "invitaciones" -> false;
+                default -> true;
+            };
+            if (!ok)
+                continue;
+            if (!qNorm.isEmpty() && !normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+                continue;
+            lista.add(v);
+        }
+        // la lista llega por fecha (más reciente primero); sort() es estable
+        if ("estado".equals(ordenSel))
+            lista.sort(java.util.Comparator.comparingInt(SolicitudVista::getOrden));
+
+        List<InvitacionVista> listaInv = new ArrayList<>();
+        if ("invitaciones".equals(sel))
+            for (InvitacionVista v : invitaciones)
+                if (qNorm.isEmpty() || normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+                    listaInv.add(v);
+
+        long invPendientes = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).count();
+        InvitacionVista primeraPendiente = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).findFirst().orElse(null);
+
+        model.addAttribute("solicitudes", lista);
+        model.addAttribute("invitaciones", listaInv);
+        model.addAttribute("nTodas", todas.size());
+        model.addAttribute("nProceso", nProceso);
+        model.addAttribute("nAceptadas", nAceptadas);
+        model.addAttribute("nCerradas", nCerradas);
+        model.addAttribute("nInvitaciones", invitaciones.size());
+        model.addAttribute("invPendientes", invPendientes);
+        model.addAttribute("primeraPendiente", primeraPendiente);
+        model.addAttribute("estadoSel", sel);
+        model.addAttribute("ordenSel", ordenSel);
+        model.addAttribute("q", qSel.isEmpty() ? null : qSel);
+        model.addAttribute("invPendienteCount", invPendientes);
         agregarSesion(session, model);
         return "solicitudes";
+    }
+
+    private static String normalizar(String s) {
+        return java.text.Normalizer.normalize(s == null ? "" : s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").toLowerCase().trim();
     }
 
     @GetMapping("/solicitudes/{id}")
@@ -123,34 +184,91 @@ public class SolicitudController {
             return "redirect:/empleos/" + id;
         }
 
-        String usuarioId = RoleGuard.getId(session);
+        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session),
+                proyectosIds, mensajeMotivacion);
 
+        switch (r.salida()) {
+            case NO_DISPONIBLE:
+                ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
+                ra.addFlashAttribute("flashType", "error");
+                return "redirect:/empleos";
+            case NO_ACTIVO:
+                ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
+                ra.addFlashAttribute("flashType", "error");
+                return "redirect:/empleos/" + id;
+            case YA_APLICO:
+                ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
+                ra.addFlashAttribute("flashType", "info");
+                return "redirect:/solicitudes/" + (r.solicitud() != null ? r.solicitud().getId() : "");
+            default:
+                break;
+        }
+
+        if (r.descartado()) {
+            ra.addFlashAttribute("flashMessage",
+                    "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa. Puedes mejorar tu perfil e intentarlo con otros empleos.");
+            ra.addFlashAttribute("flashType", "warning");
+        } else {
+            ra.addFlashAttribute("flashMessage", "Postulación enviada correctamente");
+            ra.addFlashAttribute("flashType", "success");
+        }
+        return "redirect:/solicitudes/" + r.solicitud().getId();
+    }
+
+    // misma postulación que /aplicar, pero para el botón "Postularme" de la lista de empleos: responde JSON
+    // (con el id de la solicitud, que sirve para deshacerla con /solicitudes/{id}/delete) en vez de redirigir
+    @PostMapping(value = "/empleos/{id}/postular", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> postular(@PathVariable String id, HttpSession session) {
+        if (RoleGuard.sinSesion(session))
+            return ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión para postularte."));
+        if (RoleGuard.soloTalento(session))
+            return ResponseEntity.status(403).body(Map.of("ok", false, "mensaje", "Las empresas no pueden aplicar a empleos."));
+
+        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session), null, null);
+        switch (r.salida()) {
+            case NO_DISPONIBLE:
+                return ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
+            case NO_ACTIVO:
+                return ResponseEntity.status(409).body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
+            case YA_APLICO:
+                return ResponseEntity.status(409).body(Map.of("ok", false, "yaAplicaste", true,
+                        "mensaje", "Ya aplicaste a este empleo."));
+            default:
+                return ResponseEntity.ok(Map.of("ok", true,
+                        "solicitudId", r.solicitud().getId(),
+                        "estado", r.solicitud().getEstado(),
+                        "descartado", r.descartado(),
+                        "mensaje", r.descartado()
+                                ? "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa."
+                                : "Postulación enviada."));
+        }
+    }
+
+    private enum Salida { NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA }
+
+    private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {}
+
+    // crea la solicitud (con el screening automático y la notificación a la empresa); lo comparten /aplicar y /postular
+    private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
+            List<String> proyectosIds, String mensajeMotivacion) {
         Optional<Empleo> empleoOpt = empleoRepository.findById(id);
-        if (empleoOpt.isEmpty()) {
-            ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
-            ra.addFlashAttribute("flashType", "error");
-            return "redirect:/empleos";
-        }
+        if (empleoOpt.isEmpty())
+            return new ResultadoAplicacion(Salida.NO_DISPONIBLE, null, false);
         String estadoEmpleo = empleoOpt.get().getEstado();
-        if (estadoEmpleo != null && !"ACTIVO".equals(estadoEmpleo)) {
-            ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
-            ra.addFlashAttribute("flashType", "error");
-            return "redirect:/empleos/" + id;
-        }
+        if (estadoEmpleo != null && !"ACTIVO".equals(estadoEmpleo))
+            return new ResultadoAplicacion(Salida.NO_ACTIVO, null, false);
 
         Optional<Solicitud> existente = solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id);
-        if (existente.isPresent()) {
-            ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
-            ra.addFlashAttribute("flashType", "info");
-            return "redirect:/solicitudes/" + existente.get().getId();
-        }
+        if (existente.isPresent())
+            return new ResultadoAplicacion(Salida.YA_APLICO, existente.get(), false);
 
         Empleo empleo = empleoOpt.get();
         Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
 
         Solicitud solicitud = new Solicitud();
         solicitud.setUsuarioId(usuarioId);
-        solicitud.setUsuarioCorreo(RoleGuard.getCorreo(session));
+        solicitud.setUsuarioCorreo(correo);
         if (usuario != null) {
             solicitud.setUsuarioNombre(usuario.getNombre());
             solicitud.setUsuarioRolTitulo(usuario.getRolTitulo());
@@ -202,10 +320,8 @@ public class SolicitudController {
             guardada = solicitudRepository.save(solicitud);
         } catch (org.springframework.dao.DuplicateKeyException e) {
             // dos postulaciones al mismo empleo casi al mismo tiempo, la BD rechazó la segunda
-            Optional<Solicitud> yaExiste = solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id);
-            ra.addFlashAttribute("flashMessage", "Ya aplicaste a este empleo");
-            ra.addFlashAttribute("flashType", "info");
-            return "redirect:/solicitudes/" + yaExiste.map(Solicitud::getId).orElse("");
+            return new ResultadoAplicacion(Salida.YA_APLICO,
+                    solicitudRepository.findByUsuarioIdAndEmpleoId(usuarioId, id).orElse(null), false);
         }
 
         boolean descartadoPorScreening = false;
@@ -239,15 +355,7 @@ public class SolicitudController {
             } catch (Exception ignored) {}
         }
 
-        if (descartadoPorScreening) {
-            ra.addFlashAttribute("flashMessage",
-                    "Postulación enviada, pero tu stack no cumple los requisitos mínimos indicados por la empresa. Puedes mejorar tu perfil e intentarlo con otros empleos.");
-            ra.addFlashAttribute("flashType", "warning");
-        } else {
-            ra.addFlashAttribute("flashMessage", "Postulación enviada correctamente");
-            ra.addFlashAttribute("flashType", "success");
-        }
-        return "redirect:/solicitudes/" + guardada.getId();
+        return new ResultadoAplicacion(Salida.CREADA, guardada, descartadoPorScreening);
     }
 
     @GetMapping("/empleos/{empleoId}/postulaciones")
@@ -433,17 +541,31 @@ public class SolicitudController {
         return "redirect:/empleos/" + empleoId + "/postulaciones/" + solicitudId;
     }
 
+    // Retira (borra) la solicitud propia. Con Accept: application/json (los botones de Empleos y Solicitudes que
+    // usan fetch) responde JSON y no deja ningún aviso: la página ya muestra su propio toast. Sin JavaScript
+    // redirige a /solicitudes con el aviso "Solicitud retirada."
     @PostMapping("/solicitudes/{id}/delete")
-    public String deleteSolicitud(@PathVariable String id, HttpSession session) {
+    public Object deleteSolicitud(@PathVariable String id,
+            @RequestHeader(value = "Accept", required = false) String accept,
+            HttpSession session, RedirectAttributes ra) {
+        boolean json = accept != null && accept.contains("application/json");
         if (RoleGuard.soloTalento(session))
-            return "redirect:/login";
+            return json ? ResponseEntity.status(401).body(Map.of("ok", false)) : "redirect:/login";
         String uid = RoleGuard.getId(session);
+        boolean[] retirada = { false };
         solicitudRepository.findById(id).ifPresent(s -> {
             if (uid.equals(s.getUsuarioId())) {
                 cleanupService.limpiarDatosDeSolicitud(id);
                 solicitudRepository.deleteById(id);
+                retirada[0] = true;
             }
         });
+        if (json)
+            return retirada[0] ? ResponseEntity.ok(Map.of("ok", true)) : ResponseEntity.status(404).body(Map.of("ok", false));
+        if (retirada[0]) {
+            ra.addFlashAttribute("flashMessage", "Solicitud retirada.");
+            ra.addFlashAttribute("flashType", "success");
+        }
         return "redirect:/solicitudes";
     }
 

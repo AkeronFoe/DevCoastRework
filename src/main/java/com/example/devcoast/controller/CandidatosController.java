@@ -1,108 +1,158 @@
 package com.example.devcoast.controller;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empleo;
+import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Solicitud;
+import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.EmpleoRepository;
+import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.SolicitudRepository;
+import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.AreaEmpleo;
+import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Postulaciones de la cuenta de Empresa: las postulaciones de todas sus ofertas, agrupadas por oferta.
+ * ?estado=revision|aceptadas|rechazadas &amp;q= (nombre o cargo del candidato).
+ */
 @Controller
 public class CandidatosController {
 
-    private    final EmpleoRepository    empleoRepository;
+    private final EmpleoRepository empleoRepository;
     private final SolicitudRepository solicitudRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
+    private final PlanService planService;
 
-    // agrupa un empleo con sus solicitudes y las stats ya calculadas
-    public static class EmpleoData {
-        private final Empleo         empleo;
-        private final List<Solicitud> solicitudes;
-        private final long           cntRevision;
-        private final long           cntAprobada;
-        private final long           cntRechazada;
-
-        public EmpleoData(Empleo empleo, List<Solicitud> solicitudes) {
-            this.empleo       = empleo;
-            this.solicitudes  = solicitudes;
-            this.cntRevision  = solicitudes.stream().filter(s -> "revision" .equals(s.getEstado()) || s.getEstado() == null).count();
-            this.cntAprobada  = solicitudes.stream().filter(s -> "aprobada" .equals(s.getEstado())).count();
-            this.cntRechazada = solicitudes.stream().filter(s -> "rechazada".equals(s.getEstado())).count();
-        }
-
-        public Empleo          getEmpleo()       { return empleo;       }
-        public List<Solicitud> getSolicitudes()  { return solicitudes;  }
-        public long            getCntRevision()  { return cntRevision;  }
-        public long            getCntAprobada()  { return cntAprobada;  }
-        public long            getCntRechazada() { return cntRechazada; }
-    }
-
-    public CandidatosController(EmpleoRepository empleoRepository, SolicitudRepository solicitudRepository) {
+    public CandidatosController(EmpleoRepository empleoRepository, SolicitudRepository solicitudRepository,
+            UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, PlanService planService) {
         this.empleoRepository = empleoRepository;
         this.solicitudRepository = solicitudRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.empresaRepository = empresaRepository;
+        this.planService = planService;
     }
 
     @GetMapping("/candidatos")
-    public String candidatos(Model model, HttpSession session) {
-
-        if (RoleGuard.sinSesion(session))   return "redirect:/login";
-        if (RoleGuard.soloEmpresa(session)) return "redirect:/dashboard";
+    public String candidatos(@RequestParam(required = false) String estado, @RequestParam(required = false) String q,
+            Model model, HttpSession session) {
+        if (RoleGuard.sinSesion(session))
+            return "redirect:/login";
+        if (RoleGuard.soloEmpresa(session))
+            return "redirect:/dashboard";
 
         String empresaId = RoleGuard.getId(session);
+        String filtro = estado == null ? "" : estado.trim().toLowerCase();
+        if (!List.of("revision", "aceptadas", "rechazadas").contains(filtro))
+            filtro = "";
+        String busqueda = q == null ? "" : q.trim();
 
-        List<Empleo> empleos = empleoRepository
-                .findByEmpresaIdOrderByIdDesc(empresaId)
-                .stream()
+        List<Empleo> empleos = empleoRepository.findByEmpresaIdOrderByIdDesc(empresaId).stream()
                 .filter(e -> !"eliminado".equalsIgnoreCase(e.getEstado()))
                 .collect(Collectors.toList());
-
         List<String> empleoIds = empleos.stream().map(Empleo::getId).collect(Collectors.toList());
-        List<Solicitud> todasSolicitudes = empleoIds.isEmpty()
-                ? List.of()
-                : solicitudRepository.findByEmpleoIdIn(empleoIds);
-        todasSolicitudes.sort((a, b) -> {
-            if (a.getFechaSolicitud() == null) return 1;
-            if (b.getFechaSolicitud() == null) return -1;
-            return b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
-        });
+        List<Solicitud> todas = empleoIds.isEmpty() ? List.of() : solicitudRepository.findByEmpleoIdIn(empleoIds);
 
-        Map<String, List<Solicitud>> solicitudesPorEmpleo = new HashMap<>();
-        for (Solicitud s : todasSolicitudes)
-            solicitudesPorEmpleo.computeIfAbsent(s.getEmpleoId(), k -> new ArrayList<>()).add(s);
+        // candidatos para calcular el match de cada uno con el stack de la oferta
+        Map<String, Usuario> candidatos = new HashMap<>();
+        Set<String> usuarioIds = todas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        if (!usuarioIds.isEmpty())
+            usuarioRepository.findAllById(usuarioIds).forEach(u -> candidatos.put(u.getId(), u));
 
-        List<EmpleoData> data = empleos.stream()
-                .map(e -> new EmpleoData(e, solicitudesPorEmpleo.getOrDefault(e.getId(), List.of())))
-                .collect(Collectors.toList());
+        Date ahora = new Date();
+        Map<String, List<SolicitudVista>> vistasPorOferta = new HashMap<>();
+        for (Solicitud s : todas) {
+            SolicitudVista v = SolicitudVista.de(s, candidatos.get(s.getUsuarioId()), ahora);
+            vistasPorOferta.computeIfAbsent(s.getEmpleoId(), k -> new ArrayList<>()).add(v);
+        }
 
-        long total      = data.stream().mapToLong(d -> d.getSolicitudes().size()).sum();
-        long revision   = data.stream().mapToLong(EmpleoData::getCntRevision) .sum();
-        long aprobadas  = data.stream().mapToLong(EmpleoData::getCntAprobada) .sum();
-        long rechazadas = data.stream().mapToLong(EmpleoData::getCntRechazada).sum();
+        List<PostulacionesOfertaVista> grupos = new ArrayList<>();
+        int total = 0, revision = 0, aceptadas = 0, noAvanzaron = 0;
+        for (Empleo e : empleos) {
+            List<SolicitudVista> deLaOferta = vistasPorOferta.getOrDefault(e.getId(), List.of());
+            deLaOferta = deLaOferta.stream().sorted((a, b) -> {
+                if (a.getFecha() == null) return 1;
+                if (b.getFecha() == null) return -1;
+                return b.getFecha().compareTo(a.getFecha());
+            }).collect(Collectors.toList());
+            final String f = filtro;
+            final String b = busqueda;
+            List<SolicitudVista> filtradas = deLaOferta.stream()
+                    .filter(v -> coincideEstado(v, f) && coincideBusqueda(v, b))
+                    .collect(Collectors.toList());
+            AreaEmpleo.Area area = AreaEmpleo.de(e.getCategoria());
+            PostulacionesOfertaVista g = PostulacionesOfertaVista.de(e.getId(), e.getTitulo(), e.getCategoriaMostrar(),
+                    area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o",
+                    !"CERRADO".equalsIgnoreCase(e.getEstado()), deLaOferta, filtradas);
+            total += g.getTotal();
+            revision += g.getRevision();
+            aceptadas += g.getAceptadas();
+            noAvanzaron += g.getNoAvanzaron();
+            if (!filtradas.isEmpty())
+                grupos.add(g);
+        }
 
-        model.addAttribute("empleosData",    data);
-        model.addAttribute("statsTotal",     total);
-        model.addAttribute("statsRevision",  revision);
-        model.addAttribute("statsAprobadas", aprobadas);
-        model.addAttribute("statsRechazadas",rechazadas);
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+
+        model.addAttribute("grupos", grupos);
+        model.addAttribute("estadoSel", filtro);
+        model.addAttribute("q", busqueda.isEmpty() ? null : busqueda);
+        model.addAttribute("nTotal", total);
+        model.addAttribute("nRevision", revision);
+        model.addAttribute("nAceptadas", aceptadas);
+        model.addAttribute("nNoAvanzaron", noAvanzaron);
+        model.addAttribute("hayFiltros", !filtro.isEmpty() || !busqueda.isEmpty());
+        // con el plan Gratis, aceptar una postulación registra la tarifa de colocación (ver SolicitudController)
+        model.addAttribute("cobraColocacion", !planService.esPro(empresa));
         agregarSesion(session, model);
         return "candidatos";
     }
 
+    private static boolean coincideEstado(SolicitudVista v, String filtro) {
+        return switch (filtro) {
+            case "revision" -> "revision".equals(v.getEstado());
+            case "aceptadas" -> "aprobada".equals(v.getEstado());
+            case "rechazadas" -> "rechazada".equals(v.getEstado()) || "descartado".equals(v.getEstado());
+            default -> true;
+        };
+    }
+
+    private static boolean coincideBusqueda(SolicitudVista v, String q) {
+        if (q.isEmpty())
+            return true;
+        String pajar = sinTildes((v.getCandidato() == null ? "" : v.getCandidato()) + " " + (v.getCandidatoRol() == null ? "" : v.getCandidatoRol()));
+        for (String token : sinTildes(q).split("\\s+"))
+            if (!token.isEmpty() && !pajar.contains(token))
+                return false;
+        return true;
+    }
+
+    private static String sinTildes(String s) {
+        return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").toLowerCase();
+    }
+
     private void agregarSesion(HttpSession session, Model model) {
-        model.addAttribute("usuarioActualId",      RoleGuard.getId(session));
-        model.addAttribute("usuarioActualCorreo",  RoleGuard.getCorreo(session));
-        model.addAttribute("usuarioActualNombre",  RoleGuard.getNombre(session));
-        model.addAttribute("usuarioActualTipo",    RoleGuard.getTipo(session));
+        model.addAttribute("usuarioActualId", RoleGuard.getId(session));
+        model.addAttribute("usuarioActualCorreo", RoleGuard.getCorreo(session));
+        model.addAttribute("usuarioActualNombre", RoleGuard.getNombre(session));
+        model.addAttribute("usuarioActualTipo", RoleGuard.getTipo(session));
         model.addAttribute("usuarioActualFotoUrl", session.getAttribute("usuarioActualFotoUrl"));
     }
 }

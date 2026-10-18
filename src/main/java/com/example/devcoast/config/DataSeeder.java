@@ -803,6 +803,8 @@ public class DataSeeder implements CommandLineRunner {
                         e.setDestacar(i == 0);
                         e.setNotificacionesEmail(true);
                         e.setEstado("ACTIVO");
+                        // fechas repartidas en los últimos 30 días para que "hace N días" y NUEVA se vean variados
+                        e.setFechaPublicacion(new java.util.Date(System.currentTimeMillis() - (long) ((i * 7 + 1) % 30) * 86_400_000L));
                         e.setIcono(eIconos[i]);
                         e.setColorIcono(eColores[i]);
                         empleosGuardados.add(empleoRepository.save(e));

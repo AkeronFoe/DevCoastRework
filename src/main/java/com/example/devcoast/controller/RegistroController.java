@@ -39,35 +39,37 @@ public class RegistroController {
     }
 
     @GetMapping("/register/talento")
+    // putIfAbsent: si venimos de un error, los flash attributes con lo que escribió la persona ya están en el
+    // modelo y no hay que pisarlos con vacíos
     public String registrarTalentoPage(Model model) {
-        model.addAttribute("fNombre", "");
-        model.addAttribute("fRolTitulo", "");
-        model.addAttribute("fBio", "");
-        model.addAttribute("fStack", "");
-        model.addAttribute("fEspecialidad", "");
-        model.addAttribute("fModalidad", "");
-        model.addAttribute("fSalarioEsperado", "");
-        model.addAttribute("fDisponibilidad", "");
-        model.addAttribute("fCorreo", "");
-        model.addAttribute("fEmailContacto", "");
-        model.addAttribute("fTelefono", "");
-        model.addAttribute("fPortfolioUrl", "");
-        model.addAttribute("fLinkedinUrl", "");
+        model.asMap().putIfAbsent("fNombre", "");
+        model.asMap().putIfAbsent("fRolTitulo", "");
+        model.asMap().putIfAbsent("fBio", "");
+        model.asMap().putIfAbsent("fStack", "");
+        model.asMap().putIfAbsent("fEspecialidad", "");
+        model.asMap().putIfAbsent("fModalidad", "");
+        model.asMap().putIfAbsent("fSalarioEsperado", "");
+        model.asMap().putIfAbsent("fDisponibilidad", "");
+        model.asMap().putIfAbsent("fCorreo", "");
+        model.asMap().putIfAbsent("fEmailContacto", "");
+        model.asMap().putIfAbsent("fTelefono", "");
+        model.asMap().putIfAbsent("fPortfolioUrl", "");
+        model.asMap().putIfAbsent("fLinkedinUrl", "");
         model.addAttribute("tipoPreset", "talento");
         return "register";
     }
 
     @GetMapping("/register/empresa")
     public String registrarEmpresaPage(Model model) {
-        model.addAttribute("fNombreEmpresa", "");
-        model.addAttribute("fNombreRepresentante", "");
-        model.addAttribute("fCargoRepresentante", "");
-        model.addAttribute("fSector", "");
-        model.addAttribute("fTamano", "");
-        model.addAttribute("fSitioWeb", "");
-        model.addAttribute("fCorreo", "");
-        model.addAttribute("fTelefono", "");
-        model.addAttribute("fDescripcion", "");
+        model.asMap().putIfAbsent("fNombreEmpresa", "");
+        model.asMap().putIfAbsent("fNombreRepresentante", "");
+        model.asMap().putIfAbsent("fCargoRepresentante", "");
+        model.asMap().putIfAbsent("fSector", "");
+        model.asMap().putIfAbsent("fTamano", "");
+        model.asMap().putIfAbsent("fSitioWeb", "");
+        model.asMap().putIfAbsent("fCorreo", "");
+        model.asMap().putIfAbsent("fTelefono", "");
+        model.asMap().putIfAbsent("fDescripcion", "");
         model.addAttribute("tipoPreset", "empresa");
         return "register";
     }
