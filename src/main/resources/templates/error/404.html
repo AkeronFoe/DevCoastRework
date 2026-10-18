@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark">
     <title>Página no encontrada | DevCoast</title>
+    <link rel="icon" th:href="@{/favicon.ico}" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/favicon-32.png}">
+    <link rel="apple-touch-icon" th:href="@{/img/apple-touch-icon.png}">
     <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/nautico.css}">
     <link rel="stylesheet" th:href="@{/CSS/nautico-temas.css}">
@@ -32,7 +35,6 @@
     </div>
 
     <script>
-        // una frase al azar para que caer aquí no se sienta tan seco; la primera es la de siempre
         var mensajes404 = [
             { t: 'Página no encontrada', d: 'La página que buscas no existe o fue movida. Verifica la URL o vuelve al inicio.' },
             { t: 'Esto no compila', d: 'Buscamos por todo el proyecto y no encontramos esta página. Ni el debugger la encuentra.' },

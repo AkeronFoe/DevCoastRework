@@ -25,7 +25,6 @@
 
                 <a class="lnk back" th:href="@{/solicitudes}">← Volver a solicitudes</a>
 
-                <!-- el mismo pase de la lista: etapas, siguiente paso y estado -->
                 <th:block th:replace="~{fragments/pase :: solicitud(${v}, 0)}"></th:block>
 
                 <div class="sd">
@@ -72,15 +71,16 @@
                             <h2 id="h-vac">Vacante solicitada</h2>
                             <dl class="rg one">
                                 <div th:if="${solicitud.empleoEmpresaNombre}"><dt>EMPRESA</dt><dd th:text="${solicitud.empleoEmpresaNombre}">-</dd></div>
-                                <div th:if="${solicitud.empleoEmpresaSector}"><dt>SECTOR</dt><dd th:text="${solicitud.empleoEmpresaSector}">-</dd></div>
-                                <div th:if="${solicitud.empleoCategoria}"><dt>CATEGORÍA</dt><dd th:text="${solicitud.empleoCategoria}">-</dd></div>
-                                <div th:if="${solicitud.empleoModalidad}"><dt>MODALIDAD</dt><dd th:text="${solicitud.empleoModalidad}">-</dd></div>
-                                <div th:if="${solicitud.empleoSeniority}"><dt>SENIORITY</dt><dd th:text="${solicitud.empleoSeniority}">-</dd></div>
-                                <div th:if="${solicitud.empleoContrato}"><dt>CONTRATO</dt><dd th:text="${solicitud.empleoContrato}">-</dd></div>
+                                <div th:if="${solicitud.empleoEmpresaSector}"><dt>SECTOR</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoEmpresaSector)}">-</dd></div>
+                                <div th:if="${solicitud.empleoCategoria}"><dt>CATEGORÍA</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoCategoria)}">-</dd></div>
+                                <div th:if="${solicitud.empleoModalidad}"><dt>MODALIDAD</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoModalidad)}">-</dd></div>
+                                <div th:if="${solicitud.empleoSeniority}"><dt>SENIORITY</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoSeniority)}">-</dd></div>
+                                <div th:if="${solicitud.empleoContrato}"><dt>CONTRATO</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoContrato)}">-</dd></div>
                                 <div th:if="${solicitud.empleoVacantes != null}"><dt>VACANTES</dt><dd th:text="${solicitud.empleoVacantes}">-</dd></div>
                                 <div th:if="${solicitud.empleoMostrarSalario}"><dt>SALARIO</dt><dd th:text="(${solicitud.empleoSalarioMin != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMin, 1, 'POINT')} : '—') + ' – ' + (${solicitud.empleoSalarioMax != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMax, 1, 'POINT')} : '—') + ' ' + ${solicitud.empleoMoneda}">-</dd></div>
                             </dl>
                             <a class="btn-o" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Ver empleo original</a>
+                            <a class="btn-o sd-chat" th:href="@{/chat/{id}(id=${solicitud.id})}">Escribir a la empresa</a>
                         </section>
 
                         <section class="pn" aria-labelledby="h-post">

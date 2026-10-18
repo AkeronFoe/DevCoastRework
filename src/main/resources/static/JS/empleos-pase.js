@@ -1,6 +1,3 @@
-/* DevCoast · Empleos (docs/diseno/DEVCOAST-EMPLEOS-MOTION.md).
-   Filtros, búsqueda y orden los resuelve el servidor (parámetros GET); aquí queda solo lo de interfaz:
-   enviar el orden al cambiar el selector y el "Postularme" del ticket (se rasga el talón, sello y aviso). */
 (function () {
     'use strict';
 
@@ -21,7 +18,6 @@
         btn.textContent = T('Postularme');
     }
 
-    /* postular: POST real (JSON); el talón se rasga y sale el aviso con "Deshacer" (cancela la solicitud) */
     document.addEventListener('submit', function (e) {
         var f = e.target.closest ? e.target.closest('form.postular') : null;
         if (!f) return;
@@ -40,7 +36,6 @@
                     if (d.descartado) { toast(d.mensaje); return; }
                     toast(T('Solicitud enviada a') + ' ' + (empresa || T('la empresa')) + ' (' + cargo + ').', {
                         undo: function () {
-                            // la solicitud se cancela con el mismo endpoint que usa "Solicitudes"; con Accept: json no deja avisos pendientes
                             fetch('/solicitudes/' + encodeURIComponent(d.solicitudId) + '/delete', { method: 'POST', headers: { 'Accept': 'application/json' } })
                                 .then(function (r) {
                                     if (r.ok) { restaurar(art, btn); toast(T('Solicitud cancelada.')); }

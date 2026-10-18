@@ -12,8 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Getter;
 import lombok.Setter;
 
-// el índice unique usuario+empleo evita postulaciones duplicadas a nivel de BD,
-// la validación del controller sola no alcanza si llegan dos requests al mismo tiempo
 @Getter
 @Setter
 @CompoundIndexes({

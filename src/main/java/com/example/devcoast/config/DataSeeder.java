@@ -1,1019 +1,1322 @@
-/*
 package com.example.devcoast.config;
 
+import java.text.Normalizer;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.example.devcoast.config.SeedCatalogo.Arq;
+import com.example.devcoast.model.Cobro;
 import com.example.devcoast.model.Empleo;
 import com.example.devcoast.model.Empresa;
+import com.example.devcoast.model.EventoEstado;
 import com.example.devcoast.model.Invitacion;
+import com.example.devcoast.model.Mensaje;
+import com.example.devcoast.model.Notificacion;
 import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
-import com.example.devcoast.repository.EmpleoRepository;
-import com.example.devcoast.repository.EmpresaRepository;
-import com.example.devcoast.repository.InvitacionRepository;
-import com.example.devcoast.repository.ProyectoRepository;
-import com.example.devcoast.repository.SolicitudRepository;
-import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.MatchEmpleo;
+import com.example.devcoast.service.PlanService;
 
 @Component
-public class DataSeeder implements CommandLineRunner {
+// oigan, esto de acá llena la base con datos de mentiritas (talentos, empresas, ofertas, chats...) para poder probar todo
+// como si la plataforma ya estuviera en uso. Solo se prende con SEED_ENABLED=true y no toca lo que ya existe.
+@ConditionalOnProperty(name = "devcoast.seed.enabled", havingValue = "true")
+public class DataSeeder implements ApplicationRunner {
 
-        @Autowired
-        private UsuarioRepository usuarioRepository;
-        @Autowired
-        private EmpresaRepository empresaRepository;
-        @Autowired
-        private EmpleoRepository empleoRepository;
-        @Autowired
-        private ProyectoRepository proyectoRepository;
-        @Autowired
-        private SolicitudRepository solicitudRepository;
-        @Autowired
-        private InvitacionRepository invitacionRepository;
-        @Autowired
-        private BCryptPasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
-        private static final int TOTAL_USUARIOS = 10000;
-        private static final int TOTAL_EMPRESAS = 5500;
+    static final int VERSION = 2;
+    private static final String MARCA_ID = "devcoast-seed";
+    private static final String COLECCION_MARCA = "seed_meta";
+    private static final long SEMILLA = 20260101L;
+    private static final long DIA = 86_400_000L;
+    private static final int LOTE = 1000;
+    private static final String[] COLECCIONES = { "usuarios", "empresas", "empleos", "proyectos", "solicitudes", "invitaciones",
+            "mensajes", "notificaciones", "cobros" };
 
-        private static final String[] NOMBRES = {
-                        "Alejandro", "Andrés", "Camilo", "Carlos", "Daniel", "David", "Diego", "Eduardo",
-                        "Felipe", "Fernando", "Gabriel", "Gustavo", "Héctor", "Iván", "Javier", "Jorge",
-                        "José", "Juan", "Luis", "Manolo", "Martín", "Miguel", "Nicolás", "Oscar", "Pablo",
-                        "Rafael", "Ricardo", "Roberto", "Rodrigo", "Santiago", "Sebastián", "Sergio",
-                        "Tomás", "Valentín", "Víctor", "Ana", "Beatriz", "Carolina", "Catalina", "Clara",
-                        "Daniela", "Elena", "Fernanda", "Gabriela", "Isabel", "Jessica", "Juliana",
-                        "Karen", "Laura", "Lina", "Luisa", "María", "Mariana", "Natalia", "Paola",
-                        "Patricia", "Sofía", "Valentina", "Valeria", "Viviana", "Ximena", "Yolanda"
-        };
+    private static final String DEMO_TALENTO = "demo@devcoast.co";
+    private static final String DEMO_DISENO = "diseno@devcoast.co";
+    private static final String DEMO_EMPRESA = "empresa@devcoast.co";
+    private static final String DEMO_STARTUP = "startup@devcoast.co";
 
-        private static final String[] APELLIDOS = {
-                        "García", "Martínez", "López", "Rodríguez", "Hernández", "González", "Pérez",
-                        "Torres", "Ramírez", "Flores", "Morales", "Jiménez", "Castro", "Vargas", "Ortega",
-                        "Díaz", "Ruiz", "Suárez", "Medina", "Reyes", "Chávez", "Ramos", "Moreno", "Gutiérrez",
-                        "Sánchez", "Mendoza", "Vega", "Herrera", "Aguilar", "Cabrera", "Silva", "Romero",
-                        "Muñoz", "Alvarado", "Castillo", "Espinoza", "Ríos", "Guerrero", "Salazar", "Rojas"
-        };
+    private final MongoTemplate mongo;
+    private final BCryptPasswordEncoder encoder;
+    private final int nTalentos;
+    private final int nEmpresas;
+    private final boolean asincrono;
+    private final boolean reintentar;
+    private final boolean limpiarAntiguos;
 
-        private static final String[] ROLES = {
-                        "Backend Developer", "Frontend Developer", "Full Stack Developer",
-                        "Mobile Developer", "DevOps Engineer", "Data Engineer", "Data Scientist",
-                        "ML Engineer", "UI/UX Designer", "Product Designer", "QA Engineer",
-                        "Cloud Architect", "Security Engineer", "Tech Lead", "Software Architect",
-                        "Android Developer", "iOS Developer", "Game Developer", "Blockchain Developer",
-                        "Embedded Systems Engineer"
-        };
+    public DataSeeder(MongoTemplate mongo, BCryptPasswordEncoder encoder,
+            @Value("${devcoast.seed.talentos:8000}") int nTalentos,
+            @Value("${devcoast.seed.empresas:2000}") int nEmpresas,
+            @Value("${devcoast.seed.async:true}") boolean asincrono,
+            @Value("${devcoast.seed.reintentar:false}") boolean reintentar,
+            @Value("${devcoast.seed.limpiar-antiguos:false}") boolean limpiarAntiguos) {
+        this.mongo = mongo;
+        this.encoder = encoder;
+        this.nTalentos = Math.max(0, nTalentos);
+        this.nEmpresas = Math.max(0, nEmpresas);
+        this.asincrono = asincrono;
+        this.reintentar = reintentar;
+        this.limpiarAntiguos = limpiarAntiguos;
+    }
 
-        private static final String[] ESPECIALIDADES = {
-                        "Desarrollo Web", "Desarrollo Móvil", "Inteligencia Artificial",
-                        "Ciberseguridad", "Cloud Computing", "Bases de Datos", "DevOps",
-                        "Blockchain", "IoT", "Big Data", "Realidad Aumentada", "Videojuegos"
-        };
+    @Override
+    public void run(ApplicationArguments args) {
+        if (!asincrono) {
+            sembrar();
+            return;
+        }
+        Thread hilo = new Thread(this::sembrar, "devcoast-seeder");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
 
-        private static final String[] MODALIDADES = {
-                        "Remoto", "Presencial", "Híbrido"
-        };
-
-        private static final String[] DISPONIBILIDADES = {
-                        "Inmediata", "En 1 mes", "En 3 meses", "Freelance / Por proyectos"
-        };
-
-        private static final String[] SALARIOS = {
-                        "1.000.000 - 2.000.000 COP", "2.000.000 - 3.500.000 COP",
-                        "3.500.000 - 5.000.000 COP", "5.000.000 - 8.000.000 COP",
-                        "8.000.000 - 12.000.000 COP", "+ 12.000.000 COP",
-                        "1.000 - 2.000 USD", "2.000 - 4.000 USD", "4.000 - 7.000 USD"
-        };
-
-        private static final String[][] STACKS = {
-                        { "Java", "Spring Boot", "MySQL" },
-                        { "Python", "Django", "PostgreSQL" },
-                        { "JavaScript", "React", "Node.js" },
-                        { "TypeScript", "Angular", "MongoDB" },
-                        { "Kotlin", "Android", "Firebase" },
-                        { "Swift", "iOS", "Xcode" },
-                        { "Go", "Docker", "Kubernetes" },
-                        { "C#", ".NET", "SQL Server" },
-                        { "PHP", "Laravel", "MySQL" },
-                        { "Vue.js", "Nuxt", "Tailwind CSS" },
-                        { "Python", "TensorFlow", "Pandas" },
-                        { "AWS", "Terraform", "Jenkins" },
-                        { "React Native", "Expo", "Firebase" },
-                        { "Rust", "WebAssembly", "Linux" },
-                        { "Flutter", "Dart", "Firebase" },
-                        { "Ruby", "Rails", "PostgreSQL" },
-                        { "Scala", "Spark", "Hadoop" },
-                        { "Figma", "Adobe XD", "Sketch" },
-                        { "Solidity", "Web3.js", "Ethereum" },
-                        { "C++", "Qt", "Embedded Linux" }
-        };
-
-        private static final String[] CIUDADES_CO = {
-                        "Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Bucaramanga",
-                        "Pereira", "Manizales", "Santa Marta", "Cúcuta", "Ibagué", "Pasto",
-                        "Villavicencio", "Montería", "Neiva", "Armenia", "Sincelejo", "Popayán",
-                        "Valledupar", "Riohacha"
-        };
-
-        private static final String[] EMPRESAS_PREFIJOS = {
-                        "Tech", "Soft", "Dev", "Digital", "Cloud", "Data", "Net", "Code", "Smart", "Cyber",
-                        "Inno", "Nexus", "Apex", "Nova", "Pulse", "Core", "Bit", "Sys", "Pro", "Agile"
-        };
-
-        private static final String[] EMPRESAS_SUFIJOS = {
-                        "Solutions", "Systems", "Labs", "Group", "Hub", "Works", "Studio", "Tech",
-                        "Innovations", "Consulting", "Services", "Digital", "Ventures", "Partners", "Co"
-        };
-
-        private static final String[] SECTORES = {
-                        "Tecnología", "Fintech", "Salud Digital", "E-commerce", "Educación",
-                        "Logística", "Telecomunicaciones", "Entretenimiento", "Ciberseguridad",
-                        "Inteligencia Artificial", "Marketing Digital", "Banca", "Seguros",
-                        "Construcción Tech", "Agricultura Digital"
-        };
-
-        private static final String[] TAMANOS = {
-                        "1-10 empleados", "11-50 empleados", "51-200 empleados",
-                        "201-500 empleados", "501-1000 empleados", "+ 1000 empleados"
-        };
-
-        private static final String[] CARGOS = {
-                        "CEO", "CTO", "COO", "Director de Talento", "Gerente de RRHH",
-                        "Head of Engineering", "VP de Tecnología", "Director de Operaciones",
-                        "Gerente General", "Fundador", "Co-Fundador", "Director Técnico"
-        };
-
-        private static final String[] DESCRIPCIONES_EMPRESA = {
-                        "Empresa líder en soluciones tecnológicas para el sector financiero con más de 10 años de experiencia.",
-                        "Startup de base tecnológica enfocada en transformación digital de PYMEs en Latinoamérica.",
-                        "Compañía especializada en desarrollo de software a medida para clientes corporativos.",
-                        "Firma consultora en ciberseguridad y gestión de riesgos tecnológicos.",
-                        "Plataforma de educación en línea con presencia en más de 15 países de habla hispana.",
-                        "Empresa de inteligencia artificial aplicada a la automatización de procesos empresariales.",
-                        "Agencia de marketing digital y desarrollo de productos digitales.",
-                        "Compañía de logística tecnológica con soluciones de última milla.",
-                        "Startup de salud digital que conecta pacientes con profesionales de la salud.",
-                        "Empresa de desarrollo de videojuegos y experiencias interactivas.",
-                        "Consultora especializada en migración y arquitectura cloud.",
-                        "Empresa de analítica de datos y business intelligence para retail.",
-                        "Proveedor de soluciones IoT para industria y manufactura.",
-                        "Plataforma SaaS para gestión de recursos humanos y nómina.",
-                        "Empresa de desarrollo de aplicaciones móviles con enfoque en UX."
-        };
-
-        @Override
-        public void run(String... args) throws Exception {
-
-                long usuariosExistentes = usuarioRepository.count();
-                long empresasExistentes = empresaRepository.count();
-
-                boolean yaHayDatos = usuariosExistentes >= TOTAL_USUARIOS && empresasExistentes >= TOTAL_EMPRESAS;
-
-                if (yaHayDatos && usuarioRepository.findByCorreo("demo@devcoast.co") != null) {
-                        System.out.println("[DataSeeder] BD ya tiene datos suficientes. Verificando extras...");
-                        seedDemoCompleto();
-                        seedProyectosParaUsuarios();
-                        seedSolicitudesParaUsuarios();
-                        return;
+    public void sembrar() {
+        try {
+            if (limpiarAntiguos)
+                new LimpiezaSeederAntiguo(mongo).limpiar();
+            Document marca = mongo.findById(MARCA_ID, Document.class, COLECCION_MARCA);
+            if (marca != null && "completo".equals(marca.getString("estado")) && marca.getInteger("version", 0) >= VERSION) {
+                log.info("[DataSeeder] Los datos de ejemplo ya están sembrados (versión {}). No se hace nada.", marca.getInteger("version", 0));
+                return;
+            }
+            if (marca != null && "en_progreso".equals(marca.getString("estado"))) {
+                if (!reintentar) {
+                    log.warn("[DataSeeder] Una siembra anterior no terminó. No se toca nada. Para reintentar (borra solo lo creado "
+                            + "desde que esa siembra empezó) arranca con devcoast.seed.reintentar=true.");
+                    return;
                 }
+                deshacerParcial();
+            }
+            long t0 = System.currentTimeMillis();
+            Document nueva = new Document("_id", MARCA_ID).append("estado", "en_progreso").append("version", VERSION)
+                    .append("inicio", new Date());
+            mongo.save(nueva, COLECCION_MARCA);
 
-                System.out.println("[DataSeeder] Iniciando seed de datos...");
-                long inicio = System.currentTimeMillis();
+            Generacion g = new Generacion();
+            g.ejecutar();
 
-                String hashComun = passwordEncoder.encode("devcoast123");
+            nueva.put("estado", "completo");
+            nueva.put("fin", new Date());
+            nueva.put("resumen", g.resumen());
+            mongo.save(nueva, COLECCION_MARCA);
+            log.info("[DataSeeder] Siembra completa en {} s. {}", (System.currentTimeMillis() - t0) / 1000, g.resumen().toJson());
+            log.info("[DataSeeder] Cuentas de demo (contraseña demo1234): {}, {}, {}, {}", DEMO_TALENTO, DEMO_DISENO, DEMO_EMPRESA,
+                    DEMO_STARTUP);
+        } catch (Exception e) {
+            log.error("[DataSeeder] La siembra falló y quedó incompleta: {}", e.toString(), e);
+        }
+    }
 
-                if (usuariosExistentes < TOTAL_USUARIOS) {
-                        seedUsuarios(hashComun, (int) usuariosExistentes);
+    private static String coleccionDeIds(String coleccion) {
+        return "ids-" + coleccion;
+    }
+
+    private void deshacerParcial() {
+        log.warn("[DataSeeder] Reintento: borrando lo que creó la siembra interrumpida...");
+        for (String c : COLECCIONES) {
+            Document reg = mongo.findById(coleccionDeIds(c), Document.class, COLECCION_MARCA);
+            if (reg == null)
+                continue;
+            List<ObjectId> ids = reg.getList("ids", ObjectId.class);
+            long borrados = 0;
+            for (int i = 0; i < ids.size(); i += 5000)
+                borrados += mongo.remove(new Query(Criteria.where("_id").in(ids.subList(i, Math.min(ids.size(), i + 5000)))), c)
+                        .getDeletedCount();
+            mongo.remove(new Query(Criteria.where("_id").is(coleccionDeIds(c))), COLECCION_MARCA);
+            log.warn("[DataSeeder]   {}: {} documentos borrados", c, borrados);
+        }
+        mongo.remove(new Query(Criteria.where("_id").is(MARCA_ID)), COLECCION_MARCA);
+    }
+
+    private record EmpleoGen(Empleo e, String grupo) {
+    }
+
+    private record TalentoGen(Usuario u, String grupo, int tier, Arq arq) {
+    }
+
+    private final class Generacion {
+        final Random rnd = new Random(SEMILLA);
+        final Date ahora = new Date();
+        final int anioActual = LocalDate.now().getYear();
+        final String hash = encoder.encode("devcoast123");
+        final String hashDemo = encoder.encode("demo1234");
+
+        final Set<String> correos = new HashSet<>();
+        final Map<String, Integer> usadosBase = new HashMap<>();
+        final Set<String> nombresEmpresa = new HashSet<>();
+
+        final List<Empresa> empresas = new ArrayList<>();
+        final List<EmpleoGen> empleosGen = new ArrayList<>();
+        final List<TalentoGen> talentosGen = new ArrayList<>();
+        final List<Proyecto> proyectos = new ArrayList<>();
+        final List<Solicitud> solicitudes = new ArrayList<>();
+        final List<Invitacion> invitaciones = new ArrayList<>();
+        final List<Mensaje> mensajes = new ArrayList<>();
+        final List<Notificacion> notificaciones = new ArrayList<>();
+        final List<Cobro> cobros = new ArrayList<>();
+
+        final Map<String, Empresa> empresaPorId = new HashMap<>();
+        final Map<String, Empleo> empleoPorId = new HashMap<>();
+        final Map<String, Usuario> usuarioPorId = new HashMap<>();
+        final Map<String, TalentoGen> talentoGenPorId = new HashMap<>();
+        final Map<String, List<Empleo>> empleosPorGrupo = new LinkedHashMap<>();
+        final Map<String, List<Empleo>> activosPorGrupo = new LinkedHashMap<>();
+        final Map<String, List<Empleo>> activosPorEmpresa = new HashMap<>();
+        final Map<String, String> grupoDeEmpleo = new HashMap<>();
+        final Map<String, List<Proyecto>> proyectosPorUsuario = new HashMap<>();
+        final Map<String, List<TalentoGen>> talentosPorGrupo = new LinkedHashMap<>();
+        final Map<String, Integer> aprobadasPorEmpleo = new HashMap<>();
+        final Set<String> paresSolicitud = new HashSet<>();
+
+        boolean demoTalento;
+        boolean demoDiseno;
+        boolean demoEmpresa;
+        boolean demoStartup;
+        Usuario uDemoTalento;
+        Usuario uDemoDiseno;
+        Empresa eDemoEmpresa;
+        Empresa eDemoStartup;
+
+        void ejecutar() {
+            long t = System.currentTimeMillis();
+            for (String correo : mongo.findDistinct(new Query(), "correo", Usuario.class, String.class))
+                if (correo != null)
+                    correos.add(correo.toLowerCase(Locale.ROOT));
+            for (String correo : mongo.findDistinct(new Query(), "correo", Empresa.class, String.class))
+                if (correo != null)
+                    correos.add(correo.toLowerCase(Locale.ROOT));
+            demoTalento = !correos.contains(DEMO_TALENTO);
+            demoDiseno = !correos.contains(DEMO_DISENO);
+            demoEmpresa = !correos.contains(DEMO_EMPRESA);
+            demoStartup = !correos.contains(DEMO_STARTUP);
+            log.info("[DataSeeder] Iniciando: {} talentos y {} empresas (más cuentas de demo).", nTalentos, nEmpresas);
+
+            generarEmpresas();
+            insertar(empresas, Empresa.class, "empresas", Empresa::getId);
+            empresas.forEach(e -> empresaPorId.put(e.getId(), e));
+
+            generarEmpleos();
+            insertar(empleosGen.stream().map(EmpleoGen::e).toList(), Empleo.class, "empleos", Empleo::getId);
+            indexarEmpleos();
+
+            generarTalentos();
+            insertar(talentosGen.stream().map(TalentoGen::u).toList(), Usuario.class, "usuarios", Usuario::getId);
+            for (TalentoGen tg : talentosGen) {
+                usuarioPorId.put(tg.u().getId(), tg.u());
+                talentoGenPorId.put(tg.u().getId(), tg);
+                talentosPorGrupo.computeIfAbsent(tg.grupo(), k -> new ArrayList<>()).add(tg);
+            }
+
+            generarProyectos();
+            insertar(proyectos, Proyecto.class, "proyectos", Proyecto::getId);
+            for (Proyecto p : proyectos)
+                proyectosPorUsuario.computeIfAbsent(p.getUsuarioId(), k -> new ArrayList<>()).add(p);
+
+            generarSolicitudes();
+            insertar(solicitudes, Solicitud.class, "solicitudes", Solicitud::getId);
+
+            generarInvitaciones();
+            insertar(invitaciones, Invitacion.class, "invitaciones", Invitacion::getId);
+
+            generarMensajes();
+            insertar(mensajes, Mensaje.class, "mensajes", Mensaje::getId);
+
+            generarCobros();
+            insertar(cobros, Cobro.class, "cobros", Cobro::getId);
+
+            generarNotificaciones();
+            insertar(notificaciones, Notificacion.class, "notificaciones", Notificacion::getId);
+            log.info("[DataSeeder] Generación e inserción: {} s", (System.currentTimeMillis() - t) / 1000);
+        }
+
+        Document resumen() {
+            return new Document("empresas", empresas.size()).append("ofertas", empleosGen.size()).append("talentos", talentosGen.size())
+                    .append("proyectos", proyectos.size()).append("solicitudes", solicitudes.size())
+                    .append("invitaciones", invitaciones.size()).append("mensajes", mensajes.size())
+                    .append("notificaciones", notificaciones.size()).append("cobros", cobros.size());
+        }
+
+        <T> void insertar(List<T> lista, Class<T> tipo, String coleccion, Function<T, String> id) {
+            List<ObjectId> ids = new ArrayList<>(lista.size());
+            for (T t : lista)
+                ids.add(new ObjectId(id.apply(t)));
+            mongo.save(new Document("_id", coleccionDeIds(coleccion)).append("ids", ids), COLECCION_MARCA);
+            for (int i = 0; i < lista.size(); i += LOTE)
+                mongo.insert(lista.subList(i, Math.min(lista.size(), i + LOTE)), tipo);
+            log.info("[DataSeeder]   {}: {} insertados", coleccion, lista.size());
+        }
+
+        String idEn(Date fecha) {
+            return new ObjectId(fecha).toHexString();
+        }
+
+        int peso(int... pesos) {
+            int total = 0;
+            for (int p : pesos)
+                total += p;
+            int r = rnd.nextInt(total);
+            for (int i = 0; i < pesos.length; i++) {
+                r -= pesos[i];
+                if (r < 0)
+                    return i;
+            }
+            return pesos.length - 1;
+        }
+
+        <T> T pick(T[] arr) {
+            return arr[rnd.nextInt(arr.length)];
+        }
+
+        <T> T pick(List<T> l) {
+            return l.get(rnd.nextInt(l.size()));
+        }
+
+        boolean prob(double p) {
+            return rnd.nextDouble() < p;
+        }
+
+        Date atras(double dias) {
+            return new Date(ahora.getTime() - (long) (dias * DIA));
+        }
+
+        Date mas(Date base, double dias) {
+            return new Date(base.getTime() + (long) (dias * DIA));
+        }
+
+        Date limitar(Date f) {
+            return f.after(ahora) ? new Date(ahora.getTime() - 3_600_000L) : f;
+        }
+
+        List<Date> fechasOrdenadas(int n, double minDias, double maxDias) {
+            List<Date> l = new ArrayList<>(n);
+            for (int i = 0; i < n; i++)
+                l.add(atras(minDias + rnd.nextDouble() * (maxDias - minDias)));
+            l.sort(Comparator.naturalOrder());
+            return l;
+        }
+
+        String sinAcentos(String s) {
+            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").replace('ñ', 'n').replace('Ñ', 'N');
+        }
+
+        String slug(String s) {
+            return sinAcentos(s).toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        }
+
+        String miles(long n) {
+            return java.text.NumberFormat.getIntegerInstance(new Locale("es", "CO")).format(n);
+        }
+
+        long redondear(long v, long paso) {
+            return Math.round(v / (double) paso) * paso;
+        }
+
+        String telefono() {
+            return "+57 3" + rnd.nextInt(10) + rnd.nextInt(10) + " 555 " + String.format("%04d", rnd.nextInt(10000));
+        }
+
+        String anios(int n) {
+            return n == 1 ? "1 año" : n + " años";
+        }
+
+        Arq elegirArq(String grupo) {
+            List<Arq> candidatos = new ArrayList<>();
+            for (Arq a : SeedCatalogo.ARQUETIPOS)
+                if (a.grupo().equals(grupo))
+                    candidatos.add(a);
+            for (Arq a : SeedCatalogo.SOLO_OFERTAS)
+                if (a.grupo().equals(grupo))
+                    candidatos.add(a);
+            return pick(candidatos);
+        }
+
+        void generarEmpresas() {
+            List<Date> fechas = fechasOrdenadas(nEmpresas + 2, 20, 900);
+            int f = 0;
+            if (demoEmpresa) {
+                eDemoEmpresa = empresa("DevCoast Labs", "SaaS / Software", "51 – 200 personas", DEMO_EMPRESA, true, "Mariana Torres Cardona",
+                        "CTO", "Medellín, Colombia", atras(900), hashDemo,
+                        "DevCoast Labs desarrolla plataformas de talento tech con operación en Colombia y México: producto, datos y comunidad en un solo equipo.");
+                eDemoEmpresa.setPlanVenceEn(mas(ahora, 21));
+            }
+            if (demoStartup) {
+                eDemoStartup = empresa("Marea Studio", "Startup", "11 – 50 personas", DEMO_STARTUP, false, "Andrés Felipe Rueda Ibarra",
+                        "Cofundador", "Cartagena, Colombia", atras(430), hashDemo,
+                        "Marea Studio es una startup de turismo digital en el Caribe: reservas, experiencias locales y una app que ya tiene usuarios activos.");
+            }
+            for (int i = 0; i < nEmpresas; i++) {
+                String sector = SeedCatalogo.SECTORES[peso(SeedCatalogo.PESO_SECTORES)];
+                String nombre = nombreEmpresa();
+                String correoBase = pick(SeedCatalogo.CORREOS_EMPRESA) + "@" + slug(nombre);
+                String correo = correoBase + pick(SeedCatalogo.DOMINIOS_EMPRESA);
+                for (int n = 2; correos.contains(correo); n++)
+                    correo = correoBase + n + SeedCatalogo.DOMINIOS_EMPRESA[0];
+                String desc = String.format(pick(SeedCatalogo.DESCRIPCION_EMPRESA.get(sector)), nombre);
+                String rep = nombrePersona(prob(0.5)).completo();
+                Empresa e = empresa(nombre, sector, SeedCatalogo.TAMANOS[peso(SeedCatalogo.PESO_TAMANOS)], correo, prob(0.18), rep,
+                        pick(SeedCatalogo.CARGOS_REP), pick(SeedCatalogo.CIUDADES), fechas.get(f++), hash, desc);
+                if (PlanService.PLAN_PRO.equals(e.getPlan()))
+                    e.setPlanVenceEn(mas(ahora, 3 + rnd.nextInt(26)));
+            }
+            empresas.sort(Comparator.comparing(Empresa::getCreadoEn));
+        }
+
+        Empresa empresa(String nombre, String sector, String tamano, String correo, boolean pro, String representante, String cargo,
+                String ubicacion, Date creado, String password, String descripcion) {
+            Empresa e = new Empresa();
+            e.setTipo("empresa");
+            e.setNombreEmpresa(nombre);
+            e.setNombreRepresentante(representante);
+            e.setCargoRepresentante(cargo);
+            e.setSector(sector);
+            e.setTamano(tamano);
+            e.setSitioWeb("https://www." + slug(nombre) + ".example.com");
+            e.setCorreo(correo);
+            e.setTelefono(telefono());
+            e.setDescripcion(descripcion);
+            e.setUbicacion(ubicacion);
+            e.setPassword(password);
+            e.setActivo(true);
+            e.setCreadoEn(creado);
+            e.setActualizadoEn(creado);
+            e.setPlan(pro ? PlanService.PLAN_PRO : PlanService.PLAN_GRATIS);
+            e.setId(idEn(creado));
+            correos.add(correo.toLowerCase(Locale.ROOT));
+            empresas.add(e);
+            return e;
+        }
+
+        String nombreEmpresa() {
+            for (int intento = 0; intento < 20; intento++) {
+                String n = pick(SeedCatalogo.EMPRESA_A) + " " + pick(SeedCatalogo.EMPRESA_B);
+                if (nombresEmpresa.add(n))
+                    return n;
+            }
+            String n;
+            do {
+                n = pick(SeedCatalogo.EMPRESA_A) + " " + pick(SeedCatalogo.EMPRESA_B) + " " + pick(SeedCatalogo.EMPRESA_C);
+            } while (!nombresEmpresa.add(n));
+            return n;
+        }
+
+        void generarEmpleos() {
+            for (Empresa em : empresas) {
+                boolean pro = PlanService.PLAN_PRO.equals(em.getPlan());
+                boolean esDemoPro = DEMO_EMPRESA.equals(em.getCorreo());
+                int activos = esDemoPro ? 9 : pro ? 3 + rnd.nextInt(9) : peso(20, 45, 35);
+                int cerrados = esDemoPro ? 3 : pro ? rnd.nextInt(5) : rnd.nextInt(4);
+                if (DEMO_STARTUP.equals(em.getCorreo()))
+                    activos = 2;
+                int destacados = 0;
+                for (int k = 0; k < activos + cerrados; k++) {
+                    boolean activo = k < activos;
+                    boolean destacar = activo && pro && destacados < 3 && prob(esDemoPro ? 0.5 : 0.35);
+                    if (destacar)
+                        destacados++;
+                    empleosGen.add(crearEmpleo(em, activo, destacar));
                 }
-
-                if (empresasExistentes < TOTAL_EMPRESAS) {
-                        seedEmpresas(hashComun, (int) empresasExistentes);
-                }
-
-                seedDemoCompleto();
-                seedProyectosParaUsuarios();
-                seedSolicitudesParaUsuarios();
-
-                long fin = System.currentTimeMillis();
-                System.out.printf("[DataSeeder] Seed completado en %.1f segundos.%n",
-                                (fin - inicio) / 1000.0);
+            }
+            empleosGen.sort(Comparator.comparing(g -> g.e().getFechaPublicacion()));
         }
 
-        private void seedUsuarios(String hash, int yaExisten) {
-                int faltan = TOTAL_USUARIOS - yaExisten;
-                System.out.printf("[DataSeeder] Insertando %d usuarios...%n", faltan);
+        EmpleoGen crearEmpleo(Empresa em, boolean activo, boolean destacar) {
+            String sector = em.getSector();
+            String grupo = pick(SeedCatalogo.GRUPOS_POR_SECTOR.get(sector));
+            Arq arq = elegirArq(grupo);
+            int tier = peso(26, 34, 28, 8, 4);
+            String rol = pick(arq.roles());
+            String titulo = switch (tier) {
+                case 0 -> "Junior " + rol;
+                case 2 -> "Senior " + rol;
+                case 3 -> "Lead " + rol;
+                default -> rol;
+            };
+            int len = arq.stack().length;
+            int k = 3 + rnd.nextInt(Math.min(4, len - 2));
+            List<String> skills = new ArrayList<>(Arrays.asList(arq.stack()).subList(0, k));
+            if (k < len && prob(0.35))
+                skills.set(k - 1, arq.stack()[k + rnd.nextInt(len - k)]);
+            String stack = String.join(", ", skills);
 
-                List<Usuario> lote = new ArrayList<>(500);
-                Random rnd = ThreadLocalRandom.current();
-                Set<String> correosUsados = new HashSet<>();
+            String modalidad = SeedCatalogo.MODALIDADES_JOB[peso(50, 32, 18)];
+            String contrato = tier == 0 && prob(0.08) ? "Practicas"
+                    : SeedCatalogo.CONTRATOS[peso(78, 4, 10, 8, 0)];
+            boolean usd = "Remoto".equals(modalidad) && prob(0.4);
+            boolean blando = !grupo.equals("frontend") && !grupo.equals("backend") && !grupo.equals("fullstack") && !grupo.equals("mobile")
+                    && !grupo.equals("data") && !grupo.equals("devops");
+            double factor = blando ? 0.85 : 1.0;
 
-                for (int i = 0; i < faltan; i++) {
-                        String nombre = pick(NOMBRES, rnd);
-                        String apellido = pick(APELLIDOS, rnd);
-                        String correo = generarCorreo(nombre, apellido, i, correosUsados);
-                        correosUsados.add(correo);
+            Empleo e = new Empleo();
+            e.setEmpresaId(em.getId());
+            e.setEmpresaNombre(em.getNombreEmpresa());
+            e.setEmpresaSector(em.getSector());
+            e.setEmpresaWeb(em.getSitioWeb());
+            e.setEmpresaTamano(em.getTamano());
+            e.setEmpresaDescripcion(em.getDescripcion());
+            e.setEmpresaCorreo(em.getCorreo());
+            e.setIcono(arq.icono());
+            e.setColorIcono(pick(SeedCatalogo.COLORES));
+            e.setTitulo(titulo);
+            e.setCategoria(arq.categoria());
+            e.setSeniority(SeedCatalogo.SENIORITY[tier]);
+            e.setModalidad(modalidad);
+            e.setContrato(contrato);
+            e.setVacantes(peso(70, 20, 7, 3) + 1);
+            if ("Freelance / Proyecto".equals(contrato)) {
+                e.setMoneda("USD");
+                long lo = redondear(15 + rnd.nextInt(45), 5);
+                e.setSalarioMin((int) lo);
+                e.setSalarioMax((int) (lo + 10 + rnd.nextInt(25)));
+                e.setSalarioPeriodo("/ hora");
+            } else if (usd) {
+                long[][] b = { { 1100, 2000 }, { 2000, 3600 }, { 3600, 6500 }, { 6000, 10000 }, { 1500, 4000 } };
+                long lo = redondear(b[tier][0] + (long) (rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.7), 100);
+                e.setMoneda("USD");
+                e.setSalarioMin((int) lo);
+                e.setSalarioMax((int) redondear((long) (lo * (1.2 + rnd.nextDouble() * 0.3)), 100));
+                e.setSalarioPeriodo("/ mes");
+            } else {
+                long[][] b = { { 2_400_000, 4_500_000 }, { 4_500_000, 8_000_000 }, { 8_000_000, 14_000_000 },
+                        { 13_000_000, 22_000_000 }, { 3_000_000, 8_000_000 } };
+                long base = (long) (b[tier][0] * factor + rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.7 * factor);
+                long lo = redondear(base, 100_000);
+                e.setMoneda("COP");
+                e.setSalarioMin((int) lo);
+                e.setSalarioMax((int) redondear((long) (lo * (1.2 + rnd.nextDouble() * 0.3)), 100_000));
+                e.setSalarioPeriodo("/ mes");
+            }
+            e.setMostrarSalario(prob(0.78));
+            e.setTimezone(prob(0.55) ? "Latam · UTC-5" : prob(0.4) ? pick(SeedCatalogo.TIMEZONES) : null);
+            e.setIngles(tier == 0 && prob(0.5) ? null : SeedCatalogo.INGLES[peso(25, 50, 25)]);
+            String producto = pick(SeedCatalogo.PRODUCTO_POR_SECTOR.get(sector));
+            e.setDescripcionRol("En " + em.getNombreEmpresa() + " buscamos sumar a nuestro equipo el perfil de " + titulo
+                    + ". Participarás en la construcción de " + producto + ", trabajando con " + stack
+                    + " en ciclos cortos, con revisiones de código y contacto directo con producto. Ofrecemos "
+                    + pick(SeedCatalogo.BENEFICIOS) + " y " + pick(SeedCatalogo.BENEFICIOS) + ".");
+            e.setRequisitosDeseables(pick(SeedCatalogo.REQUISITOS_DESEABLES));
+            e.setStack(stack);
+            e.setSoftSkills(String.join(", ", pickVarios(SeedCatalogo.SOFT_SKILLS, 3 + rnd.nextInt(2))));
+            e.setMatchAutomatico(prob(0.3));
+            e.setDestacar(destacar);
+            e.setNotificacionesEmail(true);
+            boolean screening = prob(0.15);
+            e.setScreeningActivo(screening);
+            if (screening)
+                e.setScreeningKeywords(skills.get(0) + "," + skills.get(1));
 
-                        String[] stack = STACKS[rnd.nextInt(STACKS.length)];
-                        String ciudad = pick(CIUDADES_CO, rnd);
-
-                        Usuario u = new Usuario();
-                        u.setTipo("talento");
-                        u.setNombre(nombre + " " + apellido);
-                        u.setRolTitulo(pick(ROLES, rnd));
-                        u.setBio(generarBio(nombre, pick(ROLES, rnd), ciudad));
-                        u.setStack(Arrays.asList(stack));
-                        u.setEspecialidad(pick(ESPECIALIDADES, rnd));
-                        u.setModalidad(pick(MODALIDADES, rnd));
-                        u.setSalarioEsperado(pick(SALARIOS, rnd));
-                        u.setDisponibilidad(pick(DISPONIBILIDADES, rnd));
-                        u.setCorreo(correo);
-                        u.setEmailContacto(correo);
-                        u.setTelefono(generarTelefono(rnd));
-                        u.setPortfolioUrl("https://portfolio." + correo.split("@")[0] + ".dev");
-                        u.setLinkedinUrl("https://linkedin.com/in/" + correo.split("@")[0]);
-                        u.setPassword(hash);
-                        u.setActivo(true);
-                        u.setUbicacion(ciudad + ", Colombia");
-                        u.setNivelEspanol(rnd.nextInt(4) + 1);
-                        u.setNivelIngles(rnd.nextInt(4) + 1);
-                        u.setPerfilPublico(rnd.nextDouble() > 0.1);
-                        u.setCvExperiencias(generarExperiencias(rnd));
-                        u.setHabilidadesBlandas(generarHabilidadesBlandas(rnd));
-                        u.setCvBullets(generarBullets(rnd));
-                        u.setEmpleosFavoritos(new ArrayList<>());
-
-                        Date fecha = fechaAleatoria(rnd, 730);
-                        u.setCreadoEn(fecha);
-                        u.setActualizadoEn(fecha);
-
-                        lote.add(u);
-
-                        if (lote.size() == 500) {
-                                usuarioRepository.saveAll(lote);
-                                lote.clear();
-                                System.out.printf("[DataSeeder]   %d / %d usuarios insertados%n",
-                                                i + 1, faltan);
-                        }
-                }
-
-                if (!lote.isEmpty()) {
-                        usuarioRepository.saveAll(lote);
-                }
-
-                System.out.println("[DataSeeder] Usuarios completados.");
-        }
-
-        private void seedEmpresas(String hash, int yaExisten) {
-                int faltan = TOTAL_EMPRESAS - yaExisten;
-                System.out.printf("[DataSeeder] Insertando %d empresas...%n", faltan);
-
-                List<Empresa> lote = new ArrayList<>(500);
-                Random rnd = ThreadLocalRandom.current();
-                Set<String> correosUsados = new HashSet<>();
-
-                for (int i = 0; i < faltan; i++) {
-                        String nombreEmpresa = generarNombreEmpresa(rnd, i);
-                        String slug = nombreEmpresa.toLowerCase()
-                                        .replaceAll("[^a-z0-9]", "")
-                                        .substring(0, Math.min(20,
-                                                        nombreEmpresa.replaceAll("[^a-zA-Z0-9]", "").length()));
-                        String correo = garantizarUnico("contacto@" + slug + ".com", correosUsados, i);
-                        correosUsados.add(correo);
-
-                        String ciudad = pick(CIUDADES_CO, rnd);
-                        String repNombre = pick(NOMBRES, rnd) + " " + pick(APELLIDOS, rnd);
-
-                        Empresa e = new Empresa();
-                        e.setTipo("empresa");
-                        e.setNombreEmpresa(nombreEmpresa);
-                        e.setNombreRepresentante(repNombre);
-                        e.setCargoRepresentante(pick(CARGOS, rnd));
-                        e.setSector(pick(SECTORES, rnd));
-                        e.setTamano(pick(TAMANOS, rnd));
-                        e.setSitioWeb("https://www." + slug + ".co");
-                        e.setCorreo(correo);
-                        e.setTelefono(generarTelefono(rnd));
-                        e.setDescripcion(pick(DESCRIPCIONES_EMPRESA, rnd));
-                        e.setUbicacion(ciudad + ", Colombia");
-                        e.setPassword(hash);
-                        e.setActivo(true);
-
-                        Date fecha = fechaAleatoria(rnd, 1095);
-                        e.setCreadoEn(fecha);
-                        e.setActualizadoEn(fecha);
-
-                        lote.add(e);
-
-                        if (lote.size() == 500) {
-                                empresaRepository.saveAll(lote);
-                                lote.clear();
-                                System.out.printf("[DataSeeder]   %d / %d empresas insertadas%n",
-                                                i + 1, faltan);
-                        }
-                }
-
-                if (!lote.isEmpty()) {
-                        empresaRepository.saveAll(lote);
-                }
-
-                System.out.println("[DataSeeder] Empresas completadas.");
-        }
-
-        private <T> T pick(T[] arr, Random rnd) {
-                return arr[rnd.nextInt(arr.length)];
-        }
-
-        private String generarCorreo(String nombre, String apellido, int idx, Set<String> usados) {
-                String base = (nombre + apellido + idx)
-                                .toLowerCase()
-                                .replaceAll("[áàä]", "a")
-                                .replaceAll("[éèë]", "e")
-                                .replaceAll("[íìï]", "i")
-                                .replaceAll("[óòö]", "o")
-                                .replaceAll("[úùü]", "u")
-                                .replaceAll("[ñ]", "n")
-                                .replaceAll("[^a-z0-9]", "");
-                String[] dominios = { "gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "proton.me" };
-                String correo = base + "@" + dominios[idx % dominios.length];
-                return garantizarUnico(correo, usados, idx);
-        }
-
-        private String garantizarUnico(String correo, Set<String> usados, int idx) {
-                if (!usados.contains(correo))
-                        return correo;
-                int partes = correo.indexOf("@");
-                return correo.substring(0, partes) + idx + correo.substring(partes);
-        }
-
-        private String generarTelefono(Random rnd) {
-                return "+57 3" + (rnd.nextInt(9) + 1) + String.format("%08d", rnd.nextInt(100000000));
-        }
-
-        private String generarNombreEmpresa(Random rnd, int idx) {
-                String prefijo = EMPRESAS_PREFIJOS[rnd.nextInt(EMPRESAS_PREFIJOS.length)];
-                String sufijo = EMPRESAS_SUFIJOS[rnd.nextInt(EMPRESAS_SUFIJOS.length)];
-                return prefijo + sufijo + (idx % 50 == 0 ? " " + (idx / 50 + 1) : "");
-        }
-
-        private String generarBio(String nombre, String rol, String ciudad) {
-                String[] plantillas = {
-                                "%s es un profesional apasionado por la tecnología con experiencia en %s, basado en %s.",
-                                "Desarrollador con enfoque en %s y años de experiencia construyendo productos digitales en %s.",
-                                "%s combina habilidades técnicas y creatividad para entregar soluciones robustas como %s.",
-                                "Profesional en %s con experiencia trabajando en equipos ágiles y proyectos de alto impacto en %s.",
-                                "%s es un %s comprometido con la calidad del código y las buenas prácticas de desarrollo."
+            Date pub;
+            if (activo) {
+                double dias = switch (peso(30, 40, 30)) {
+                    case 0 -> rnd.nextDouble() * 7;
+                    case 1 -> 7 + rnd.nextDouble() * 23;
+                    default -> 30 + rnd.nextDouble() * 90;
                 };
-                int idx = Math.abs(nombre.hashCode()) % plantillas.length;
-                return String.format(plantillas[idx], nombre, rol, ciudad);
+                pub = atras(dias);
+                e.setEstado("ACTIVO");
+                e.setFaseReclutamiento(new String[] { "ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA" }[peso(55, 20, 17, 8)]);
+            } else {
+                pub = atras(40 + rnd.nextDouble() * 220);
+                e.setEstado("CERRADO");
+                e.setFaseReclutamiento("CERRADO_PROCESO");
+            }
+            Date minimo = mas(em.getCreadoEn(), 1);
+            if (pub.before(minimo))
+                pub = minimo;
+            e.setFechaPublicacion(limitar(pub));
+            e.setId(idEn(e.getFechaPublicacion()));
+            return new EmpleoGen(e, grupo);
         }
 
-        private List<Usuario.CvExperiencia> generarExperiencias(Random rnd) {
-                int cantidad = rnd.nextInt(3) + 1;
-                List<Usuario.CvExperiencia> lista = new ArrayList<>();
-                String[] cargosExp = { "Junior Developer", "Semi-Senior Developer", "Senior Developer",
-                                "Tech Lead", "Analista", "Consultor", "Arquitecto de Software", "QA Engineer" };
-                String[] empresasExp = { "Bancolombia", "Rappi", "Mercado Libre", "Globant", "Accenture",
-                                "Siesa", "Pragma", "PSL", "Intergrupo", "Tigo", "Claro", "EPM", "Grupo Éxito" };
-                String[] periodos = { "2019 - 2020", "2020 - 2021", "2021 - 2022", "2022 - 2023", "2023 - Presente" };
-
-                for (int i = 0; i < cantidad; i++) {
-                        Usuario.CvExperiencia exp = new Usuario.CvExperiencia();
-                        exp.setCargo(pick(cargosExp, rnd));
-                        exp.setEmpresa(pick(empresasExp, rnd));
-                        exp.setPeriodo(periodos[Math.min(i, periodos.length - 1)]);
-                        exp.setModalidad(pick(MODALIDADES, rnd));
-                        exp.setDescripcion("Desarrollo y mantenimiento de funcionalidades clave, " +
-                                        "trabajo en equipo ágil y entrega de valor continua.");
-                        lista.add(exp);
-                }
-                return lista;
+        List<String> pickVarios(String[] fuente, int n) {
+            List<String> copia = new ArrayList<>(Arrays.asList(fuente));
+            Collections.shuffle(copia, rnd);
+            return new ArrayList<>(copia.subList(0, Math.min(n, copia.size())));
         }
 
-        private List<String> generarHabilidadesBlandas(Random rnd) {
-                String[] todas = { "Trabajo en equipo", "Comunicación asertiva", "Liderazgo",
-                                "Resolución de problemas", "Adaptabilidad", "Creatividad", "Pensamiento crítico",
-                                "Gestión del tiempo", "Empatía", "Proactividad", "Orientación a resultados" };
-                int cantidad = rnd.nextInt(3) + 3;
-                List<String> shuffled = new ArrayList<>(Arrays.asList(todas));
-                Collections.shuffle(shuffled, rnd);
-                return shuffled.subList(0, cantidad);
+        void indexarEmpleos() {
+            for (EmpleoGen g : empleosGen) {
+                Empleo e = g.e();
+                empleoPorId.put(e.getId(), e);
+                grupoDeEmpleo.put(e.getId(), g.grupo());
+                empleosPorGrupo.computeIfAbsent(g.grupo(), k -> new ArrayList<>()).add(e);
+                if ("ACTIVO".equals(e.getEstado())) {
+                    activosPorGrupo.computeIfAbsent(g.grupo(), k -> new ArrayList<>()).add(e);
+                    activosPorEmpresa.computeIfAbsent(e.getEmpresaId(), k -> new ArrayList<>()).add(e);
+                }
+            }
         }
 
-        private List<String> generarBullets(Random rnd) {
-                String[] todos = {
-                                "Experiencia con metodologías ágiles (Scrum / Kanban)",
-                                "Conocimiento en patrones de diseño y arquitectura limpia",
-                                "Familiaridad con CI/CD y control de versiones con Git",
-                                "Capacidad para trabajar en equipos distribuidos y remotos",
-                                "Orientado a la entrega de valor y mejora continua",
-                                "Experiencia en code review y documentación técnica"
-                };
-                int cantidad = rnd.nextInt(3) + 2;
-                List<String> shuffled = new ArrayList<>(Arrays.asList(todos));
-                Collections.shuffle(shuffled, rnd);
-                return shuffled.subList(0, cantidad);
+        record Nombre(String pila, String completo, String apellido) {
         }
 
-        private Date fechaAleatoria(Random rnd, int diasAtras) {
-                long ahora = System.currentTimeMillis();
-                long hace = ahora - (long) rnd.nextInt(diasAtras) * 86400000L;
-                return new Date(hace);
+        Nombre nombrePersona(boolean mujer) {
+            String pila = pick(mujer ? SeedCatalogo.NOMBRES_F : SeedCatalogo.NOMBRES_M);
+            String completo = pila;
+            if (prob(0.22))
+                completo += " " + pick(mujer ? SeedCatalogo.NOMBRES_F : SeedCatalogo.NOMBRES_M);
+            String ap1 = pick(SeedCatalogo.APELLIDOS);
+            String ap2 = pick(SeedCatalogo.APELLIDOS);
+            return new Nombre(pila, completo + " " + ap1 + " " + ap2, ap1);
         }
 
-        private static final String[] NOMBRES_PROYECTOS = {
-                        "AppTracker", "FlowBoard", "NexusAPI", "DataPulse", "CloudSync",
-                        "ShopKit", "AuthGuard", "MetricsHub", "DeployBot", "UIForge",
-                        "InvoiceAI", "LogStream", "TaskFlow", "PayLink", "CodeReview"
-        };
-
-        private static final String[] CATEGORIAS_PROYECTO = {
-                        "Productividad", "E-commerce", "Fintech", "SaaS", "DevTools",
-                        "Educación", "Salud", "Entretenimiento", "Analytics", "Seguridad"
-        };
-
-        private static final String[] TIPOS_PROYECTO = {
-                        "Aplicación Web", "API REST", "Aplicación Móvil", "Dashboard",
-                        "Microservicio", "CLI Tool", "Librería", "Plataforma SaaS"
-        };
-
-        private static final String[] ROLES_PROYECTO = {
-                        "Desarrollador principal", "Colaborador", "Tech Lead",
-                        "Full Stack Developer", "Backend Developer", "Frontend Developer"
-        };
-
-        private static final String[] MENSAJES_MOTIVACION = {
-                        "Estoy muy interesado en esta posición. Tengo experiencia directa con el stack requerido.",
-                        "He trabajado en proyectos similares y creo que puedo aportar mucho valor al equipo.",
-                        "Me llama la atención la cultura de la empresa y el impacto del producto.",
-                        "Mi experiencia previa en el sector se alinea perfectamente con lo que buscan.",
-                        "Llevo 3 años trabajando con este stack y me encantaría aplicarlo en este reto.",
-                        "Es exactamente el tipo de proyecto en el que quiero crecer profesionalmente.",
-                        "Conozco bien el dominio del negocio y puedo incorporarme rápidamente.",
-                        "He liderado equipos con retos similares y tengo mucho que aportar."
-        };
-
-        private static final int MAX_PROYECTOS_POR_USUARIO = 500;
-        private static final int MAX_SOLICITUDES_POR_EMPLEO = 300;
-
-        private void seedProyectosParaUsuarios() {
-                long yaExisten = proyectoRepository.count();
-                if (yaExisten >= MAX_PROYECTOS_POR_USUARIO) {
-                        System.out.printf("[DataSeeder] Proyectos ya existen (%d). Saltando.%n", yaExisten);
-                        return;
-                }
-
-                System.out.println("[DataSeeder] Insertando proyectos para usuarios...");
-                Random rnd = ThreadLocalRandom.current();
-
-                List<Usuario> usuarios = usuarioRepository.findAll().stream()
-                                .filter(u -> u.getCorreo() != null && !u.getCorreo().endsWith("@devcoast.co"))
-                                .limit(200)
-                                .collect(java.util.stream.Collectors.toList());
-
-                List<Proyecto> lote = new ArrayList<>(500);
-
-                for (Usuario u : usuarios) {
-                        int cantidad = rnd.nextInt(3) + 1; // 1 a 3 proyectos por usuario
-                        String[] stack = STACKS[rnd.nextInt(STACKS.length)];
-                        for (int i = 0; i < cantidad; i++) {
-                                Proyecto p = new Proyecto();
-                                p.setUsuarioId(u.getId());
-                                p.setUsuarioCorreo(u.getCorreo());
-                                String nombre = NOMBRES_PROYECTOS[rnd.nextInt(NOMBRES_PROYECTOS.length)]
-                                                + " " + (char) ('A' + rnd.nextInt(26)) + rnd.nextInt(99);
-                                p.setNombre(nombre);
-                                p.setCategoria(CATEGORIAS_PROYECTO[rnd.nextInt(CATEGORIAS_PROYECTO.length)]);
-                                p.setTipo(TIPOS_PROYECTO[rnd.nextInt(TIPOS_PROYECTO.length)]);
-                                p.setDescripcionCorta("Plataforma " + nombre
-                                                + " con enfoque en automatización y experiencia de usuario.");
-                                p.setDescripcionExtendida(
-                                                "Proyecto desarrollado de forma independiente con foco en rendimiento y escalabilidad.");
-                                p.setAnio(String.valueOf(2022 + rnd.nextInt(3)));
-                                p.setStack(Arrays.asList(stack));
-                                p.setEtiquetas(Arrays.asList("Open Source", "Portfolio"));
-                                p.setRol(ROLES_PROYECTO[rnd.nextInt(ROLES_PROYECTO.length)]);
-                                p.setDuracion((rnd.nextInt(6) + 1) + " meses");
-                                p.setIconoClave(STACKS[rnd.nextInt(STACKS.length)][0].toLowerCase().replaceAll("[^a-z]",
-                                                ""));
-                                p.setColorIcono(String.format("#%06x", rnd.nextInt(0xffffff + 1)));
-                                p.setPublicado(true);
-                                p.setIncluirCv(rnd.nextBoolean());
-                                p.setDestacar(i == 0);
-                                Date fecha = fechaAleatoria(rnd, 500);
-                                p.setCreadoEn(fecha);
-                                p.setActualizadoEn(fecha);
-                                lote.add(p);
-                        }
-                        if (lote.size() >= 500) {
-                                proyectoRepository.saveAll(lote);
-                                lote.clear();
-                        }
-                }
-                if (!lote.isEmpty())
-                        proyectoRepository.saveAll(lote);
-                System.out.printf("[DataSeeder] Proyectos insertados: %d%n", proyectoRepository.count() - yaExisten);
+        String correoUnico(String pila, String apellido) {
+            String base = slug(pila) + "." + slug(apellido);
+            if (prob(0.3))
+                base += String.format("%02d", rnd.nextInt(100));
+            String dominio = SeedCatalogo.DOMINIOS_CORREO[peso(SeedCatalogo.PESO_DOMINIOS)];
+            String correo = base + "@" + dominio;
+            while (correos.contains(correo)) {
+                int n = usadosBase.merge(base, 1, Integer::sum);
+                correo = base + n + "@" + dominio;
+            }
+            correos.add(correo);
+            return correo;
         }
 
-        private void seedSolicitudesParaUsuarios() {
-                long yaExisten = solicitudRepository.count();
-                if (yaExisten >= MAX_SOLICITUDES_POR_EMPLEO) {
-                        System.out.printf("[DataSeeder] Solicitudes ya existen (%d). Saltando.%n", yaExisten);
-                        return;
-                }
+        void generarTalentos() {
+            List<Date> fechas = fechasOrdenadas(nTalentos, 2, 800);
+            List<Usuario> demos = new ArrayList<>();
+            if (demoTalento)
+                demos.add(uDemoTalento = talentoDemoPrincipal());
+            if (demoDiseno)
+                demos.add(uDemoDiseno = talentoDemoDiseno());
+            for (Usuario u : demos)
+                talentosGen.add(new TalentoGen(u, demoGrupo(u), 1, null));
 
-                System.out.println("[DataSeeder] Insertando solicitudes para usuarios...");
-                Random rnd = ThreadLocalRandom.current();
-
-                List<Empleo> empleos = empleoRepository.findAll().stream()
-                                .filter(e -> e.getEmpresaCorreo() != null
-                                                && !e.getEmpresaCorreo().endsWith("@devcoast.co"))
-                                .limit(30)
-                                .collect(java.util.stream.Collectors.toList());
-
-                List<Usuario> usuarios = usuarioRepository.findAll().stream()
-                                .filter(u -> u.getCorreo() != null && !u.getCorreo().endsWith("@devcoast.co"))
-                                .limit(150)
-                                .collect(java.util.stream.Collectors.toList());
-
-                if (empleos.isEmpty() || usuarios.isEmpty()) {
-                        System.out.println("[DataSeeder] No hay empleos o usuarios suficientes para solicitudes.");
-                        return;
-                }
-
-                String[] estados = { "revision", "revision", "aprobada", "rechazada" };
-                List<Solicitud> lote = new ArrayList<>(200);
-
-                for (Usuario u : usuarios) {
-                        int cantidad = rnd.nextInt(3) + 1; // 1 a 3 solicitudes por usuario
-                        Set<String> empleosUsados = new HashSet<>();
-                        for (int i = 0; i < cantidad; i++) {
-                                Empleo emp = empleos.get(rnd.nextInt(empleos.size()));
-                                if (empleosUsados.contains(emp.getId()))
-                                        continue;
-                                empleosUsados.add(emp.getId());
-
-                                Solicitud s = new Solicitud();
-                                s.setUsuarioId(u.getId());
-                                s.setUsuarioCorreo(u.getCorreo());
-                                s.setUsuarioNombre(u.getNombre());
-                                s.setUsuarioRolTitulo(u.getRolTitulo());
-                                s.setEmpleoId(emp.getId());
-                                s.setEmpleoTitulo(emp.getTitulo());
-                                s.setEmpleoCategoria(emp.getCategoria());
-                                s.setEmpleoSeniority(emp.getSeniority());
-                                s.setEmpleoModalidad(emp.getModalidad());
-                                s.setEmpleoContrato(emp.getContrato());
-                                s.setEmpleoEmpresaNombre(emp.getEmpresaNombre());
-                                s.setEmpleoEmpresaSector(emp.getEmpresaSector());
-                                s.setEmpleoEmpresaTamano(emp.getEmpresaTamano());
-                                s.setEmpleoEmpresaWeb(emp.getEmpresaWeb());
-                                s.setEmpleoEmpresaDescripcion(emp.getEmpresaDescripcion());
-                                s.setEmpleoIcono(emp.getIcono());
-                                s.setEmpleoColorIcono(emp.getColorIcono());
-                                s.setEmpleoStack(emp.getStack());
-                                s.setEmpleoSoftSkills(emp.getSoftSkills());
-                                s.setEmpleoDescripcionRol(emp.getDescripcionRol());
-                                s.setEmpleoRequisitosDeseables(emp.getRequisitosDeseables());
-                                s.setEmpleoMoneda(emp.getMoneda());
-                                s.setEmpleoSalarioMin(emp.getSalarioMin());
-                                s.setEmpleoSalarioMax(emp.getSalarioMax());
-                                s.setEmpleoSalarioPeriodo(emp.getSalarioPeriodo());
-                                s.setEmpleoTimezone(emp.getTimezone());
-                                s.setEmpleoIngles(emp.getIngles());
-                                s.setEmpleoVacantes(emp.getVacantes());
-                                s.setEmpleoMostrarSalario(emp.isMostrarSalario());
-                                s.setEstado(estados[rnd.nextInt(estados.length)]);
-                                s.setFechaSolicitud(fechaAleatoria(rnd, 180));
-                                s.setMensajeMotivacion(MENSAJES_MOTIVACION[rnd.nextInt(MENSAJES_MOTIVACION.length)]);
-                                s.setProyectosIds(new ArrayList<>());
-                                lote.add(s);
-                        }
-                        if (lote.size() >= 200) {
-                                solicitudRepository.saveAll(lote);
-                                lote.clear();
-                        }
-                }
-                if (!lote.isEmpty())
-                        solicitudRepository.saveAll(lote);
-                System.out.printf("[DataSeeder] Solicitudes insertadas: %d%n", solicitudRepository.count() - yaExisten);
+            for (int i = 0; i < nTalentos; i++) {
+                String grupo = SeedCatalogo.GRUPOS_TALENTO[peso(SeedCatalogo.PESO_GRUPOS_TALENTO)];
+                List<Arq> candidatos = SeedCatalogo.ARQUETIPOS.stream().filter(a -> a.grupo().equals(grupo)).toList();
+                Arq arq = pick(candidatos);
+                int tier = peso(28, 34, 28, 10);
+                talentosGen.add(new TalentoGen(talento(arq, grupo, tier, fechas.get(i)), grupo, tier, arq));
+            }
+            for (TalentoGen tg : talentosGen) {
+                if (tg.arq() == null)
+                    continue;
+                List<Empleo> pool = activosPorGrupo.getOrDefault(tg.grupo(), List.of());
+                int k = pool.isEmpty() ? 0 : peso(45, 20, 15, 10, 6, 4);
+                Set<String> ids = new java.util.LinkedHashSet<>();
+                for (int j = 0; j < k; j++)
+                    ids.add(pick(pool).getId());
+                tg.u().setEmpleosFavoritos(new ArrayList<>(ids));
+            }
+            for (TalentoGen tg : talentosGen) {
+                if (tg.arq() != null)
+                    continue;
+                List<Empleo> pool = activosPorGrupo.getOrDefault(tg.grupo(), List.of());
+                tg.u().setEmpleosFavoritos(new ArrayList<>(pool.stream().limit(3).map(Empleo::getId).toList()));
+            }
+            talentosGen.sort(Comparator.comparing(tg -> tg.u().getCreadoEn()));
         }
 
-        private void seedDemoCompleto() {
-                Usuario existente = usuarioRepository.findByCorreo("demo@devcoast.co");
-                if (existente != null) {
-                        // Asegurar que la cuenta demo siempre sea visible en talentos
-                        if (!existente.isPerfilPublico()) {
-                                existente.setPerfilPublico(true);
-                                usuarioRepository.save(existente);
-                                System.out.println("[DataSeeder] Corregido perfilPublico=true en demo@devcoast.co");
-                        }
-                        return;
-                }
-
-                System.out.println("[DataSeeder] Creando usuario y empresa demo...");
-
-                Empresa empresaDemo = new Empresa();
-                empresaDemo.setTipo("empresa");
-                empresaDemo.setNombreEmpresa("DevCoast Labs");
-                empresaDemo.setNombreRepresentante("Mariana Torres");
-                empresaDemo.setCargoRepresentante("CTO");
-                empresaDemo.setSector("Tecnología");
-                empresaDemo.setTamano("51-200 empleados");
-                empresaDemo.setSitioWeb("https://www.devcoastlabs.co");
-                empresaDemo.setCorreo("empresa@devcoast.co");
-                empresaDemo.setTelefono("+57 310 555 0001");
-                empresaDemo.setDescripcion(
-                                "Empresa de desarrollo de software especializada en plataformas de talento tech, con operaciones en Colombia y México.");
-                empresaDemo.setUbicacion("Medellín, Colombia");
-                empresaDemo.setPassword(passwordEncoder.encode("demo1234"));
-                empresaDemo.setActivo(true);
-                empresaDemo.setCreadoEn(new Date());
-                empresaDemo.setActualizadoEn(new Date());
-                empresaDemo = empresaRepository.save(empresaDemo);
-
-                Usuario usuarioDemo = new Usuario();
-                usuarioDemo.setTipo("talento");
-                usuarioDemo.setNombre("Carlos Andrés Ramírez");
-                usuarioDemo.setRolTitulo("Full Stack Developer");
-                usuarioDemo.setBio(
-                                "Desarrollador con 4 años de experiencia en Java y React, apasionado por construir productos digitales de alto impacto.");
-                usuarioDemo.setStack(Arrays.asList("Java", "Spring Boot", "React", "MongoDB", "Docker", "Git"));
-                usuarioDemo.setEspecialidad("Desarrollo Web");
-                usuarioDemo.setModalidad("Híbrido");
-                usuarioDemo.setSalarioEsperado("5.000.000 - 8.000.000 COP");
-                usuarioDemo.setDisponibilidad("Inmediata");
-                usuarioDemo.setCorreo("demo@devcoast.co");
-                usuarioDemo.setEmailContacto("demo@devcoast.co");
-                usuarioDemo.setTelefono("+57 315 555 0001");
-                usuarioDemo.setPortfolioUrl("https://carlosramirez.dev");
-                usuarioDemo.setLinkedinUrl("https://linkedin.com/in/carlosandresramirez");
-                usuarioDemo.setPassword(passwordEncoder.encode("demo1234"));
-                usuarioDemo.setActivo(true);
-                usuarioDemo.setPerfilPublico(true);
-                usuarioDemo.setUbicacion("Bogotá, Colombia");
-                usuarioDemo.setNivelEspanol(4);
-                usuarioDemo.setNivelIngles(3);
-                usuarioDemo.setHabilidadesBlandas(Arrays.asList("Trabajo en equipo", "Comunicación asertiva",
-                                "Resolución de problemas", "Liderazgo", "Adaptabilidad", "Proactividad"));
-                usuarioDemo.setCvBullets(Arrays.asList("Experiencia con metodologías ágiles (Scrum / Kanban)",
-                                "Conocimiento en patrones de diseño y arquitectura limpia",
-                                "Familiaridad con CI/CD y control de versiones con Git",
-                                "Capacidad para trabajar en equipos distribuidos y remotos"));
-
-                List<Usuario.CvExperiencia> exps = new ArrayList<>();
-                Usuario.CvExperiencia exp1 = new Usuario.CvExperiencia();
-                exp1.setCargo("Full Stack Developer");
-                exp1.setEmpresa("Pragma S.A.");
-                exp1.setPeriodo("2022 - Presente");
-                exp1.setModalidad("Remoto");
-                exp1.setDescripcion(
-                                "Desarrollo de microservicios con Spring Boot y frontends en React para clientes del sector financiero.");
-                exps.add(exp1);
-                Usuario.CvExperiencia exp2 = new Usuario.CvExperiencia();
-                exp2.setCargo("Backend Developer");
-                exp2.setEmpresa("Bancolombia");
-                exp2.setPeriodo("2020 - 2022");
-                exp2.setModalidad("Presencial");
-                exp2.setDescripcion(
-                                "Desarrollo y mantenimiento de APIs REST para plataformas de banca digital con Java 11 y PostgreSQL.");
-                exps.add(exp2);
-                usuarioDemo.setCvExperiencias(exps);
-                usuarioDemo.setEmpleosFavoritos(new ArrayList<>());
-                usuarioDemo.setCreadoEn(new Date());
-                usuarioDemo.setActualizadoEn(new Date());
-                usuarioDemo = usuarioRepository.save(usuarioDemo);
-
-                String[] pNombres = { "DevTrack — Gestión de tareas", "FinBot — Asistente financiero",
-                                "ShopLite — E-commerce" };
-                String[] pCats = { "Productividad", "Fintech", "E-commerce" };
-                String[] pDescs = { "Plataforma de gestión de tareas con tableros Kanban y reportes en tiempo real.",
-                                "Chatbot financiero que analiza gastos y genera recomendaciones de ahorro.",
-                                "Tienda online ligera con carrito, pasarela de pago y panel admin." };
-                String[][] pStacks = { { "Java", "Spring Boot", "React", "MongoDB" },
-                                { "Python", "FastAPI", "React Native", "Firebase" },
-                                { "Node.js", "Vue.js", "PostgreSQL", "Stripe" } };
-                String[] pIconos = { "layers", "trending-up", "shopping-cart" };
-                String[] pColores = { "#1d7fd0", "#10b981", "#f59e0b" };
-
-                List<String> proyectosIds = new ArrayList<>();
-                for (int i = 0; i < 3; i++) {
-                        Proyecto p = new Proyecto();
-                        p.setUsuarioId(usuarioDemo.getId());
-                        p.setUsuarioCorreo(usuarioDemo.getCorreo());
-                        p.setNombre(pNombres[i]);
-                        p.setCategoria(pCats[i]);
-                        p.setTipo("Aplicación Web");
-                        p.setDescripcionCorta(pDescs[i]);
-                        p.setDescripcionExtendida(pDescs[i] + " Desarrollado con enfoque en rendimiento y UX.");
-                        p.setAnio(String.valueOf(2023 - i));
-                        p.setLinkProyecto("https://github.com/carlosramirez/proj" + i);
-                        p.setStack(Arrays.asList(pStacks[i]));
-                        p.setEtiquetas(Arrays.asList("Open Source", "Portfolio"));
-                        p.setRol("Desarrollador principal");
-                        p.setDuracion((i + 2) + " meses");
-                        p.setIconoClave(pIconos[i]);
-                        p.setColorIcono(pColores[i]);
-                        p.setPublicado(true);
-                        p.setIncluirCv(true);
-                        p.setDestacar(i == 0);
-                        p.setCreadoEn(new Date());
-                        p.setActualizadoEn(new Date());
-                        proyectosIds.add(proyectoRepository.save(p).getId());
-                }
-
-                // 5 empleos publicados por la empresa demo
-                // solicitudes esperadas por empleo: [24, 10, 3, 7, 0]
-                String[] eTitulos = {
-                                "Senior Backend Developer",
-                                "Frontend Developer React",
-                                "DevOps Engineer",
-                                "Mobile Developer Android",
-                                "Data Engineer"
-                };
-                String[] eCats = { "Backend", "Frontend", "DevOps", "Mobile", "Data" };
-                String[] eSens = { "Senior", "Semi-Senior", "Senior", "Semi-Senior", "Senior" };
-                String[] eMods = { "Remoto", "Híbrido", "Remoto", "Remoto", "Híbrido" };
-                String[] eConts = { "Indefinido", "Término fijo", "Prestación de servicios", "Indefinido",
-                                "Término fijo" };
-                int[] eSalMin = { 6000000, 4000000, 7000000, 4500000, 8000000 };
-                int[] eSalMax = { 9000000, 6000000, 10000000, 7000000, 12000000 };
-                String[] eStacks = {
-                                "Java, Spring Boot, Kafka, AWS",
-                                "React, TypeScript, Tailwind CSS",
-                                "Docker, Kubernetes, Terraform, AWS",
-                                "Kotlin, Android, Firebase, Retrofit",
-                                "Python, Spark, Airflow, BigQuery"
-                };
-                String[] eDescs = {
-                                "Buscamos Senior Backend para liderar desarrollo de microservicios en nuestra plataforma core.",
-                                "Frontend con bases sólidas en React y TypeScript para interfaces de alta calidad.",
-                                "DevOps para gestionar infraestructura cloud y pipelines CI/CD.",
-                                "Desarrollador Android con experiencia en Kotlin y arquitectura MVVM para nuestra app flagship.",
-                                "Data Engineer para construir y mantener pipelines de datos a escala en entorno cloud."
-                };
-                String[] eIconos = { "cpu", "globe", "terminal", "code", "chart" };
-                String[] eColores = { "#1d7fd0", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444" };
-                // cuántas solicitudes de usuarios random tendrá cada empleo (el índice 4 = 0,
-                // sin solicitudes)
-                int[] solicitudesPorEmpleo = { 24, 10, 3, 7, 0 };
-
-                List<Empleo> empleosGuardados = new ArrayList<>();
-                for (int i = 0; i < 5; i++) {
-                        Empleo e = new Empleo();
-                        e.setEmpresaId(empresaDemo.getId());
-                        e.setEmpresaNombre(empresaDemo.getNombreEmpresa());
-                        e.setEmpresaSector(empresaDemo.getSector());
-                        e.setEmpresaWeb(empresaDemo.getSitioWeb());
-                        e.setEmpresaTamano(empresaDemo.getTamano());
-                        e.setEmpresaDescripcion(empresaDemo.getDescripcion());
-                        e.setEmpresaCorreo(empresaDemo.getCorreo());
-                        e.setTitulo(eTitulos[i]);
-                        e.setCategoria(eCats[i]);
-                        e.setSeniority(eSens[i]);
-                        e.setModalidad(eMods[i]);
-                        e.setContrato(eConts[i]);
-                        e.setVacantes(i + 1);
-                        e.setMoneda("COP");
-                        e.setSalarioMin(eSalMin[i]);
-                        e.setSalarioMax(eSalMax[i]);
-                        e.setSalarioPeriodo("Mensual");
-                        e.setTimezone("América/Bogotá");
-                        e.setIngles("Intermedio");
-                        e.setDescripcionRol(eDescs[i]);
-                        e.setRequisitosDeseables(
-                                        "Experiencia ágil, comunicación remota, certificaciones cloud son un plus.");
-                        e.setStack(eStacks[i]);
-                        e.setSoftSkills("Proactividad, trabajo en equipo, orientación a resultados");
-                        e.setMostrarSalario(true);
-                        e.setMatchAutomatico(false);
-                        e.setDestacar(i == 0);
-                        e.setNotificacionesEmail(true);
-                        e.setEstado("ACTIVO");
-                        // fechas repartidas en los últimos 30 días para que "hace N días" y NUEVA se vean variados
-                        e.setFechaPublicacion(new java.util.Date(System.currentTimeMillis() - (long) ((i * 7 + 1) % 30) * 86_400_000L));
-                        e.setIcono(eIconos[i]);
-                        e.setColorIcono(eColores[i]);
-                        empleosGuardados.add(empleoRepository.save(e));
-                }
-
-                // ── Solicitudes del usuario DEMO en empleos de la empresa demo (primeros 3) ──
-                String[] estadosDemo = { "aprobada", "revision", "rechazada" };
-                String[] mensajesDemo = {
-                                "Estoy muy interesado en esta posición. Tengo experiencia directa con el stack requerido.",
-                                "He trabajado en proyectos similares en el sector financiero, es una oportunidad alineada con mi trayectoria.",
-                                "Me llama la atención la cultura remota y el enfoque en automatización de DevCoast Labs."
-                };
-                for (int i = 0; i < 3; i++) {
-                        Empleo emp = empleosGuardados.get(i);
-                        Solicitud s = new Solicitud();
-                        s.setUsuarioId(usuarioDemo.getId());
-                        s.setUsuarioCorreo(usuarioDemo.getCorreo());
-                        s.setUsuarioNombre(usuarioDemo.getNombre());
-                        s.setUsuarioRolTitulo(usuarioDemo.getRolTitulo());
-                        s.setEmpleoId(emp.getId());
-                        s.setEmpleoTitulo(emp.getTitulo());
-                        s.setEmpleoCategoria(emp.getCategoria());
-                        s.setEmpleoSeniority(emp.getSeniority());
-                        s.setEmpleoModalidad(emp.getModalidad());
-                        s.setEmpleoContrato(emp.getContrato());
-                        s.setEmpleoEmpresaNombre(emp.getEmpresaNombre());
-                        s.setEmpleoEmpresaSector(emp.getEmpresaSector());
-                        s.setEmpleoEmpresaTamano(emp.getEmpresaTamano());
-                        s.setEmpleoEmpresaWeb(emp.getEmpresaWeb());
-                        s.setEmpleoEmpresaDescripcion(emp.getEmpresaDescripcion());
-                        s.setEmpleoIcono(emp.getIcono());
-                        s.setEmpleoColorIcono(emp.getColorIcono());
-                        s.setEmpleoStack(emp.getStack());
-                        s.setEmpleoSoftSkills(emp.getSoftSkills());
-                        s.setEmpleoDescripcionRol(emp.getDescripcionRol());
-                        s.setEmpleoRequisitosDeseables(emp.getRequisitosDeseables());
-                        s.setEmpleoMoneda(emp.getMoneda());
-                        s.setEmpleoSalarioMin(emp.getSalarioMin());
-                        s.setEmpleoSalarioMax(emp.getSalarioMax());
-                        s.setEmpleoSalarioPeriodo(emp.getSalarioPeriodo());
-                        s.setEmpleoTimezone(emp.getTimezone());
-                        s.setEmpleoIngles(emp.getIngles());
-                        s.setEmpleoVacantes(emp.getVacantes());
-                        s.setEmpleoMostrarSalario(emp.isMostrarSalario());
-                        s.setEstado(estadosDemo[i]);
-                        s.setFechaSolicitud(new Date());
-                        s.setMensajeMotivacion(mensajesDemo[i]);
-                        s.setProyectosIds(proyectosIds.subList(0, i + 1));
-                        solicitudRepository.save(s);
-                }
-
-                // ── Solicitudes de usuarios ALEATORIOS en los empleos de la empresa demo ──
-                {
-                        Random rnd = ThreadLocalRandom.current();
-                        List<Usuario> candidatos = usuarioRepository.findAll().stream()
-                                        .filter(u -> u.getCorreo() != null && !u.getCorreo().endsWith("@devcoast.co"))
-                                        .limit(200)
-                                        .collect(java.util.stream.Collectors.toList());
-
-                        String[] estadosRnd = { "revision", "revision", "aprobada", "rechazada" };
-
-                        for (int ei = 0; ei < empleosGuardados.size(); ei++) {
-                                int cantidad = solicitudesPorEmpleo[ei];
-                                if (cantidad == 0 || candidatos.isEmpty())
-                                        continue;
-
-                                Empleo emp = empleosGuardados.get(ei);
-                                Collections.shuffle(candidatos, rnd);
-                                List<Usuario> seleccionados = candidatos.subList(0,
-                                                Math.min(cantidad, candidatos.size()));
-
-                                for (Usuario u : seleccionados) {
-                                        Solicitud s = new Solicitud();
-                                        s.setUsuarioId(u.getId());
-                                        s.setUsuarioCorreo(u.getCorreo());
-                                        s.setUsuarioNombre(u.getNombre());
-                                        s.setUsuarioRolTitulo(u.getRolTitulo());
-                                        s.setEmpleoId(emp.getId());
-                                        s.setEmpleoTitulo(emp.getTitulo());
-                                        s.setEmpleoCategoria(emp.getCategoria());
-                                        s.setEmpleoSeniority(emp.getSeniority());
-                                        s.setEmpleoModalidad(emp.getModalidad());
-                                        s.setEmpleoContrato(emp.getContrato());
-                                        s.setEmpleoEmpresaNombre(emp.getEmpresaNombre());
-                                        s.setEmpleoEmpresaSector(emp.getEmpresaSector());
-                                        s.setEmpleoEmpresaTamano(emp.getEmpresaTamano());
-                                        s.setEmpleoEmpresaWeb(emp.getEmpresaWeb());
-                                        s.setEmpleoEmpresaDescripcion(emp.getEmpresaDescripcion());
-                                        s.setEmpleoIcono(emp.getIcono());
-                                        s.setEmpleoColorIcono(emp.getColorIcono());
-                                        s.setEmpleoStack(emp.getStack());
-                                        s.setEmpleoSoftSkills(emp.getSoftSkills());
-                                        s.setEmpleoDescripcionRol(emp.getDescripcionRol());
-                                        s.setEmpleoRequisitosDeseables(emp.getRequisitosDeseables());
-                                        s.setEmpleoMoneda(emp.getMoneda());
-                                        s.setEmpleoSalarioMin(emp.getSalarioMin());
-                                        s.setEmpleoSalarioMax(emp.getSalarioMax());
-                                        s.setEmpleoSalarioPeriodo(emp.getSalarioPeriodo());
-                                        s.setEmpleoTimezone(emp.getTimezone());
-                                        s.setEmpleoIngles(emp.getIngles());
-                                        s.setEmpleoVacantes(emp.getVacantes());
-                                        s.setEmpleoMostrarSalario(emp.isMostrarSalario());
-                                        s.setEstado(estadosRnd[rnd.nextInt(estadosRnd.length)]);
-                                        s.setFechaSolicitud(fechaAleatoria(rnd, 90));
-                                        s.setMensajeMotivacion(
-                                                        MENSAJES_MOTIVACION[rnd.nextInt(MENSAJES_MOTIVACION.length)]);
-                                        s.setProyectosIds(new ArrayList<>());
-                                        solicitudRepository.save(s);
-                                }
-                        }
-                }
-
-                // ── Postulaciones extra del usuario DEMO en empleos de OTRAS empresas ──
-                {
-                        Random rnd = ThreadLocalRandom.current();
-                        List<Empleo> empleosExternos = empleoRepository.findAll().stream()
-                                        .filter(e -> e.getEmpresaCorreo() != null
-                                                        && !e.getEmpresaCorreo().endsWith("@devcoast.co"))
-                                        .limit(100)
-                                        .collect(java.util.stream.Collectors.toList());
-
-                        if (!empleosExternos.isEmpty()) {
-                                Collections.shuffle(empleosExternos, rnd);
-                                // El usuario demo postula a 8 empleos externos con distintos estados
-                                String[] estadosExtra = { "revision", "aprobada", "revision", "rechazada", "revision",
-                                                "aprobada", "revision", "rechazada" };
-                                String[] mensajesExtra = {
-                                                "Busco un nuevo reto donde pueda aplicar mis conocimientos en Java y React a gran escala.",
-                                                "Tengo experiencia sólida con el stack que mencionan y me motiva el producto que están construyendo.",
-                                                "He liderado proyectos end-to-end y me interesa seguir creciendo en un equipo como el de ustedes.",
-                                                "Su empresa apareció en mi radar hace tiempo, y esta vacante encaja perfectamente con mi perfil.",
-                                                "Llevo 4 años trabajando con Spring Boot y me gustaría aplicar esa experiencia aquí.",
-                                                "El enfoque de producto y la tecnología que usan me generan mucho entusiasmo.",
-                                                "Creo que puedo aportar valor desde el primer sprint gracias a mi experiencia previa.",
-                                                "Me atrae la cultura de trabajo remoto y los desafíos técnicos que implica este rol."
-                                };
-                                int totalExtra = Math.min(8, empleosExternos.size());
-                                for (int i = 0; i < totalExtra; i++) {
-                                        Empleo emp = empleosExternos.get(i);
-                                        Solicitud s = new Solicitud();
-                                        s.setUsuarioId(usuarioDemo.getId());
-                                        s.setUsuarioCorreo(usuarioDemo.getCorreo());
-                                        s.setUsuarioNombre(usuarioDemo.getNombre());
-                                        s.setUsuarioRolTitulo(usuarioDemo.getRolTitulo());
-                                        s.setEmpleoId(emp.getId());
-                                        s.setEmpleoTitulo(emp.getTitulo());
-                                        s.setEmpleoCategoria(emp.getCategoria());
-                                        s.setEmpleoSeniority(emp.getSeniority());
-                                        s.setEmpleoModalidad(emp.getModalidad());
-                                        s.setEmpleoContrato(emp.getContrato());
-                                        s.setEmpleoEmpresaNombre(emp.getEmpresaNombre());
-                                        s.setEmpleoEmpresaSector(emp.getEmpresaSector());
-                                        s.setEmpleoEmpresaTamano(emp.getEmpresaTamano());
-                                        s.setEmpleoEmpresaWeb(emp.getEmpresaWeb());
-                                        s.setEmpleoEmpresaDescripcion(emp.getEmpresaDescripcion());
-                                        s.setEmpleoIcono(emp.getIcono());
-                                        s.setEmpleoColorIcono(emp.getColorIcono());
-                                        s.setEmpleoStack(emp.getStack());
-                                        s.setEmpleoSoftSkills(emp.getSoftSkills());
-                                        s.setEmpleoDescripcionRol(emp.getDescripcionRol());
-                                        s.setEmpleoRequisitosDeseables(emp.getRequisitosDeseables());
-                                        s.setEmpleoMoneda(emp.getMoneda());
-                                        s.setEmpleoSalarioMin(emp.getSalarioMin());
-                                        s.setEmpleoSalarioMax(emp.getSalarioMax());
-                                        s.setEmpleoSalarioPeriodo(emp.getSalarioPeriodo());
-                                        s.setEmpleoTimezone(emp.getTimezone());
-                                        s.setEmpleoIngles(emp.getIngles());
-                                        s.setEmpleoVacantes(emp.getVacantes());
-                                        s.setEmpleoMostrarSalario(emp.isMostrarSalario());
-                                        s.setEstado(estadosExtra[i]);
-                                        s.setFechaSolicitud(fechaAleatoria(rnd, 120));
-                                        s.setMensajeMotivacion(mensajesExtra[i]);
-                                        s.setProyectosIds(
-                                                        proyectosIds.subList(0, rnd.nextInt(proyectosIds.size()) + 1));
-                                        solicitudRepository.save(s);
-                                }
-                        }
-                }
-
-                Empleo empInv = empleosGuardados.get(0);
-                Invitacion inv = new Invitacion();
-                inv.setEmpresaId(empresaDemo.getId());
-                inv.setEmpresaNombre(empresaDemo.getNombreEmpresa());
-                inv.setEmpresaSector(empresaDemo.getSector());
-                inv.setEmpresaWeb(empresaDemo.getSitioWeb());
-                inv.setEmpresaDescripcion(empresaDemo.getDescripcion());
-                inv.setEmpresaTamano(empresaDemo.getTamano());
-                inv.setTalentoId(usuarioDemo.getId());
-                inv.setTalentoNombre(usuarioDemo.getNombre());
-                inv.setTalentoCorreo(usuarioDemo.getCorreo());
-                inv.setEmpleoId(empInv.getId());
-                inv.setEmpleoTitulo(empInv.getTitulo());
-                inv.setEmpleoModalidad(empInv.getModalidad());
-                inv.setEmpleoContrato(empInv.getContrato());
-                inv.setEmpleoCategoria(empInv.getCategoria());
-                inv.setEmpleoSalarioMin(empInv.getSalarioMin());
-                inv.setEmpleoSalarioMax(empInv.getSalarioMax());
-                inv.setEmpleoMoneda(empInv.getMoneda());
-                inv.setEmpleoMostrarSalario(empInv.isMostrarSalario());
-                inv.setMensaje(
-                                "Hola Carlos, hemos revisado tu perfil y creemos que encajas perfectamente con el rol de Senior Backend. ¿Tienes disponibilidad esta semana?");
-                inv.setEstado("pendiente");
-                inv.setFechaEnvio(new Date());
-                invitacionRepository.save(inv);
-
-                System.out.println(
-                                "[DataSeeder] Demo listo — usuario: demo@devcoast.co / empresa: empresa@devcoast.co (password: demo1234)"
-                                                +
-                                                " | 5 empleos publicados, solicitudes por empleo: [24, 10, 3, 7, 0] + 8 postulaciones externas del usuario demo");
+        String demoGrupo(Usuario u) {
+            return "ui-ux".equals(u.getEspecialidad()) ? "ui-ux" : "fullstack";
         }
+
+        Usuario talento(Arq arq, String grupo, int tier, Date creado) {
+            boolean mujer = prob(0.47);
+            Nombre n = nombrePersona(mujer);
+            String correo = correoUnico(n.pila(), n.apellido());
+            String handle = correo.substring(0, correo.indexOf('@')).replace(".", "-");
+            int anios = switch (tier) {
+                case 0 -> 1 + rnd.nextInt(2);
+                case 1 -> 2 + rnd.nextInt(3);
+                case 2 -> 5 + rnd.nextInt(4);
+                default -> 9 + rnd.nextInt(6);
+            };
+            String rolBase = pick(arq.roles());
+            String rol = switch (tier) {
+                case 0 -> "Junior " + rolBase;
+                case 2 -> "Senior " + rolBase;
+                case 3 -> "Lead " + rolBase;
+                default -> rolBase;
+            };
+            List<String> stack = new ArrayList<>(Arrays.asList(arq.stack()));
+            Collections.shuffle(stack, rnd);
+            stack = new ArrayList<>(stack.subList(0, Math.min(stack.size(), 3 + rnd.nextInt(3))));
+            if (!stack.contains(arq.stack()[0]))
+                stack.set(0, arq.stack()[0]);
+            for (int x = rnd.nextInt(3); x > 0; x--) {
+                String extra = pick(SeedCatalogo.EXTRAS_STACK);
+                if (!stack.contains(extra))
+                    stack.add(extra);
+            }
+            String ciudad = SeedCatalogo.CIUDADES[peso(SeedCatalogo.PESO_CIUDADES)];
+            String enfoque = pick(SeedCatalogo.ENFOQUE.get(grupo));
+
+            Usuario u = new Usuario();
+            u.setTipo("talento");
+            u.setNombre(n.completo());
+            u.setRolTitulo(rol);
+            u.setBio(String.format(pick(SeedCatalogo.BIOS), rol, anios(anios), enfoque, stack.get(0), stack.get(Math.min(1, stack.size() - 1)),
+                    ciudad.substring(0, ciudad.indexOf(',')), stack.get(Math.min(2, stack.size() - 1))));
+            u.setStack(stack);
+            u.setEspecialidad(arq.clave());
+            String modalidad = SeedCatalogo.MODALIDADES_TALENTO[peso(45, 35, 20)];
+            u.setModalidad(modalidad);
+            u.setDisponibilidad(tier == 0 && prob(0.25) ? "practicas" : SeedCatalogo.DISPONIBILIDADES[peso(58, 12, 30, 0)]);
+            u.setSalarioEsperado(salarioEsperado(tier, modalidad, u.getDisponibilidad(), grupo));
+            u.setCorreo(correo);
+            u.setEmailContacto(correo);
+            u.setTelefono(telefono());
+            u.setPortfolioUrl(prob(0.6) ? "https://" + handle + ".example.com" : null);
+            u.setLinkedinUrl(prob(0.85) ? "https://linkedin.example.com/in/" + handle : null);
+            boolean programa = !grupo.equals("ui-ux") && !grupo.equals("diseno-grafico");
+            u.setGithubUrl(programa && prob(0.75) ? "https://github.example.com/" + handle : null);
+            u.setPassword(hash);
+            u.setActivo(true);
+            u.setCreadoEn(creado);
+            u.setActualizadoEn(limitar(mas(creado, rnd.nextDouble() * 60)));
+            u.setUbicacion(ciudad);
+            u.setCvBullets(pickVarios(SeedCatalogo.CV_BULLETS, 2 + rnd.nextInt(3)));
+            u.setHabilidadesBlandas(pickVarios(SeedCatalogo.HABILIDADES_BLANDAS, 3 + rnd.nextInt(3)));
+            u.setNivelEspanol(prob(0.85) ? 5 : 4);
+            u.setNivelIngles(1 + peso(5, 20, 30, 30, 15));
+            u.setCvExperiencias(experiencias(rol, rolBase, grupo, tier, anios));
+            u.setCvEducaciones(educaciones(grupo, anios, tier));
+            u.setPerfilPublico(prob(0.92));
+            u.setMostrarCorreo(prob(0.2));
+            u.setPermitirMensajes(prob(0.9));
+            u.setOnboardingCompleto(true);
+            u.setDestacar(prob(0.03));
+            u.setEmpleosFavoritos(new ArrayList<>());
+            u.setId(idEn(creado));
+            return u;
+        }
+
+        String salarioEsperado(int tier, String modalidad, String disponibilidad, String grupo) {
+            if ("freelance".equals(disponibilidad)) {
+                long lo = redondear(15 + tier * 10 + rnd.nextInt(20), 5);
+                return "USD " + lo + " – " + (lo + 10 + rnd.nextInt(20)) + " / hora";
+            }
+            if ("practicas".equals(disponibilidad))
+                return "COP 1.500.000 – 2.200.000 / mes";
+            if ("remoto".equals(modalidad) && prob(0.3)) {
+                long[][] b = { { 1100, 2000 }, { 2000, 3600 }, { 3600, 6500 }, { 6000, 10000 } };
+                long lo = redondear(b[tier][0] + (long) (rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.6), 100);
+                return "USD " + miles(lo) + " – " + miles(redondear((long) (lo * 1.3), 100)) + " / mes";
+            }
+            long[][] b = { { 2_400_000, 4_500_000 }, { 4_500_000, 8_000_000 }, { 8_000_000, 14_000_000 }, { 13_000_000, 22_000_000 } };
+            double f = grupo.equals("ui-ux") || grupo.equals("diseno-grafico") ? 0.85 : 1.0;
+            long lo = redondear((long) ((b[tier][0] + rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.6) * f), 100_000);
+            return "COP " + miles(lo) + " – " + miles(redondear((long) (lo * 1.3), 100_000)) + " / mes";
+        }
+
+        List<Usuario.CvExperiencia> experiencias(String rol, String rolBase, String grupo, int tier, int anios) {
+            int n = tier == 0 ? 1 : tier == 1 ? 2 : tier == 2 ? 3 : 3 + rnd.nextInt(2);
+            List<Usuario.CvExperiencia> lista = new ArrayList<>();
+            int fin = anioActual;
+            for (int i = 0; i < n; i++) {
+                int dur = i == n - 1 ? Math.max(1, anios - (anioActual - fin)) : Math.max(1, Math.round(anios / (float) n));
+                int inicio = fin - dur;
+                Usuario.CvExperiencia x = new Usuario.CvExperiencia();
+                x.setCargo(i == 0 ? rol : (i == n - 1 && tier > 0 ? "Junior " + rolBase : rolBase));
+                x.setEmpresa(pick(SeedCatalogo.EMPRESAS_CV));
+                x.setPeriodo(i == 0 ? inicio + " – Presente" : inicio + " – " + fin);
+                x.setModalidad(pick(new String[] { "Remoto", "Híbrido", "Presencial" }));
+                x.setDescripcion(pick(SeedCatalogo.LOGROS.get(grupo)));
+                lista.add(x);
+                fin = inicio;
+            }
+            return lista;
+        }
+
+        List<Usuario.CvEducacion> educaciones(String grupo, int anios, int tier) {
+            Usuario.CvEducacion e = new Usuario.CvEducacion();
+            e.setInstitucion(pick(SeedCatalogo.UNIVERSIDADES));
+            e.setTitulo(pick(SeedCatalogo.TITULOS_ESTUDIO.get(grupo)));
+            int fin = Math.max(2008, anioActual - anios);
+            e.setPeriodo(tier == 0 && prob(0.4) ? (anioActual - 3) + " – Presente" : (fin - 5) + " – " + fin);
+            return new ArrayList<>(List.of(e));
+        }
+
+        void generarProyectos() {
+            for (TalentoGen tg : talentosGen) {
+                Usuario u = tg.u();
+                if (tg.arq() == null) {
+                    proyectosDemo(tg);
+                    continue;
+                }
+                int n = peso(30, 25, 22, 15, 8);
+                for (int i = 0; i < n; i++)
+                    proyectos.add(proyecto(tg, i == 0 && prob(0.5), null, null, null));
+            }
+        }
+
+        Proyecto proyecto(TalentoGen tg, boolean destacar, String nombre, String categoria, String descripcion) {
+            Usuario u = tg.u();
+            String grupo = tg.grupo();
+            boolean diseno = grupo.equals("ui-ux") || grupo.equals("diseno-grafico");
+            if (categoria == null)
+                categoria = pick(SeedCatalogo.CATEGORIAS_PROYECTO.get(grupo));
+            String dominio = pick(SeedCatalogo.DOMINIOS_PROYECTO);
+            String marca = pick(SeedCatalogo.NOMBRES_MARCA);
+            if (nombre == null)
+                nombre = marca + " · " + (diseno ? pick(SeedCatalogo.PRODUCTOS_PROYECTO_DISENO) : pick(SeedCatalogo.PRODUCTOS_PROYECTO_PROG));
+            List<String> herramientas = new ArrayList<>(u.getStack().subList(0, Math.min(u.getStack().size(), 2 + rnd.nextInt(3))));
+            String corta = descripcion != null ? descripcion
+                    : diseno ? "Propuesta de diseño para " + dominio + ": investigación, exploración visual y entrega final lista para desarrollo."
+                            : "Solución para " + dominio + " construida con " + String.join(", ", herramientas) + ", con foco en rendimiento y mantenibilidad.";
+            Proyecto p = new Proyecto();
+            p.setUsuarioId(u.getId());
+            p.setUsuarioCorreo(u.getCorreo());
+            p.setNombre(nombre);
+            p.setCategoria(categoria);
+            p.setTipo(SeedCatalogo.TIPOS_PROYECTO[peso(SeedCatalogo.PESO_TIPOS_PROYECTO)]);
+            p.setDescripcionCorta(corta.length() > 200 ? corta.substring(0, 200) : corta);
+            p.setDescripcionExtendida(corta + " Trabajé de punta a punta en el proceso: definición del problema, iteraciones con usuarios y entrega documentada.");
+            p.setAnio(String.valueOf(Math.max(2022, anioActual - peso(40, 30, 15, 10, 5))));
+            p.setLinkProyecto(prob(0.65) ? "https://example.com/proyectos/" + slug(nombre) : null);
+            p.setBannerClase(diseno ? pick(SeedCatalogo.COVERS_DISENO) : "cover-terminal");
+            p.setIconoClave(pick(SeedCatalogo.ICONOS_PROYECTO));
+            p.setColorIcono(pick(SeedCatalogo.COLORES));
+            p.setStack(herramientas);
+            p.setEtiquetas(pickVarios(SeedCatalogo.ETIQUETAS_PROYECTO, 2 + rnd.nextInt(2)));
+            p.setRol(pick(diseno ? SeedCatalogo.ROLES_PROYECTO_DISENO : SeedCatalogo.ROLES_PROYECTO_PROG));
+            p.setDuracion(pick(SeedCatalogo.DURACIONES));
+            p.setPublicado(prob(0.88));
+            p.setIncluirCv(prob(0.7));
+            p.setDestacar(destacar);
+            Date c = limitar(mas(u.getCreadoEn(), rnd.nextDouble() * Math.max(1, (ahora.getTime() - u.getCreadoEn().getTime()) / (double) DIA)));
+            p.setCreadoEn(c);
+            p.setActualizadoEn(c);
+            p.setId(idEn(c));
+            return p;
+        }
+
+        void generarSolicitudes() {
+            for (TalentoGen tg : talentosGen) {
+                if (tg.arq() == null)
+                    continue;
+                int k = peso(18, 17, 17, 15, 12, 9, 6, 4, 2);
+                for (int j = 0; j < k; j++) {
+                    boolean mismoGrupo = prob(0.72);
+                    List<Empleo> pool = mismoGrupo ? empleosPorGrupo.getOrDefault(tg.grupo(), List.of()) : null;
+                    Empleo e = pool != null && !pool.isEmpty() ? pick(pool) : pick(empleosGen).e();
+                    Solicitud s = solicitudAutomatica(tg, e, null);
+                    if (s != null)
+                        solicitudes.add(s);
+                }
+            }
+            solicitudesDemo();
+        }
+
+        Solicitud solicitudAutomatica(TalentoGen tg, Empleo e, String estadoForzado) {
+            Usuario u = tg.u();
+            String par = u.getId() + "|" + e.getId();
+            if (paresSolicitud.contains(par))
+                return null;
+            Date base = e.getFechaPublicacion().after(u.getCreadoEn()) ? e.getFechaPublicacion() : u.getCreadoEn();
+            if (!base.before(ahora))
+                return null;
+            double span = (ahora.getTime() - base.getTime()) / (double) DIA;
+            Date fecha = limitar(mas(base, rnd.nextDouble() * Math.min(span, 40)));
+            boolean cerrada = "CERRADO".equals(e.getEstado());
+            String fase = e.getFaseReclutamiento() == null ? "ABIERTO" : e.getFaseReclutamiento();
+            double pDecision = cerrada ? 0.97 : switch (fase) {
+                case "SCREENING" -> 0.45;
+                case "ENTREVISTAS" -> 0.6;
+                case "OFERTA" -> 0.75;
+                default -> 0.25;
+            };
+            String estado = "revision";
+            Date fechaDecision = null;
+            if (estadoForzado != null) {
+                estado = estadoForzado;
+                fechaDecision = "revision".equals(estado) ? null : limitar(mas(fecha, 1 + rnd.nextInt(6)));
+            } else if (prob(pDecision)) {
+                Date dec = mas(fecha, 1 + rnd.nextInt(14));
+                if (dec.after(ahora))
+                    dec = cerrada ? limitar(dec) : null;
+                if (dec != null && dec.before(fecha))
+                    dec = fecha;
+                if (dec != null) {
+                    double pAprob = cerrada ? 0.3 : "OFERTA".equals(fase) ? 0.5 : "ENTREVISTAS".equals(fase) ? 0.35 : 0.2;
+                    int cupo = e.getVacantes() == null ? 1 : e.getVacantes();
+                    if (prob(pAprob) && aprobadasPorEmpleo.getOrDefault(e.getId(), 0) < cupo) {
+                        estado = "aprobada";
+                        aprobadasPorEmpleo.merge(e.getId(), 1, Integer::sum);
+                    } else if (e.isScreeningActivo() && prob(0.15)) {
+                        estado = "descartado";
+                        dec = fecha;
+                    } else {
+                        estado = "rechazada";
+                    }
+                    fechaDecision = dec;
+                }
+            }
+            return construirSolicitud(tg, e, estado, fecha, fechaDecision);
+        }
+
+        Solicitud construirSolicitud(TalentoGen tg, Empleo e, String estado, Date fecha, Date fechaDecision) {
+            Usuario u = tg.u();
+            paresSolicitud.add(u.getId() + "|" + e.getId());
+            Solicitud s = new Solicitud();
+            s.setUsuarioId(u.getId());
+            s.setUsuarioCorreo(u.getCorreo());
+            s.setUsuarioNombre(u.getNombre());
+            s.setUsuarioRolTitulo(u.getRolTitulo());
+            s.setEmpleoId(e.getId());
+            s.setEmpleoTitulo(e.getTitulo());
+            s.setEmpleoCategoria(e.getCategoria());
+            s.setEmpleoSeniority(e.getSeniority());
+            s.setEmpleoModalidad(e.getModalidad());
+            s.setEmpleoContrato(e.getContrato());
+            s.setEmpleoEmpresaNombre(e.getEmpresaNombre());
+            s.setEmpleoEmpresaSector(e.getEmpresaSector());
+            s.setEmpleoEmpresaTamano(e.getEmpresaTamano());
+            s.setEmpleoEmpresaWeb(e.getEmpresaWeb());
+            s.setEmpleoEmpresaDescripcion(e.getEmpresaDescripcion());
+            s.setEmpleoIcono(e.getIcono());
+            s.setEmpleoColorIcono(e.getColorIcono());
+            s.setEmpleoStack(e.getStack());
+            s.setEmpleoSoftSkills(e.getSoftSkills());
+            s.setEmpleoDescripcionRol(e.getDescripcionRol());
+            s.setEmpleoRequisitosDeseables(e.getRequisitosDeseables());
+            s.setEmpleoMoneda(e.getMoneda());
+            s.setEmpleoSalarioMin(e.getSalarioMin());
+            s.setEmpleoSalarioMax(e.getSalarioMax());
+            s.setEmpleoSalarioPeriodo(e.getSalarioPeriodo());
+            s.setEmpleoTimezone(e.getTimezone());
+            s.setEmpleoIngles(e.getIngles());
+            s.setEmpleoVacantes(e.getVacantes());
+            s.setEmpleoMostrarSalario(e.isMostrarSalario());
+            s.setEstado(estado);
+            s.setFechaSolicitud(fecha);
+            String stackOferta = e.getStack() == null ? "mi stack" : e.getStack().split(",")[0].trim();
+            s.setMensajeMotivacion(String.format(pick(SeedCatalogo.MENSAJES_MOTIVACION), e.getTitulo(), e.getEmpresaNombre(), stackOferta));
+            List<String> ids = new ArrayList<>();
+            List<Proyecto> propios = proyectosPorUsuario.getOrDefault(u.getId(), List.of());
+            if (!propios.isEmpty() && prob(0.55)) {
+                int cuantos = 1 + rnd.nextInt(Math.min(2, propios.size()));
+                for (int i = 0; i < cuantos; i++)
+                    ids.add(propios.get(i).getId());
+            }
+            s.setProyectosIds(ids);
+            List<EventoEstado> historial = new ArrayList<>();
+            historial.add(new EventoEstado("revision", fecha, "Postulación enviada"));
+            if ("aprobada".equals(estado))
+                historial.add(new EventoEstado("aprobada", fechaDecision, "Aceptada por la empresa"));
+            else if ("rechazada".equals(estado))
+                historial.add(new EventoEstado("rechazada", fechaDecision, "Rechazada por la empresa"));
+            else if ("descartado".equals(estado))
+                historial.add(new EventoEstado("descartado", fecha,
+                        "Descartado automáticamente: stack no cumple los requisitos mínimos del empleo"));
+            s.setHistorial(historial);
+            s.setId(idEn(fecha));
+            return s;
+        }
+
+        Date fechaDe(Solicitud s, String estado) {
+            if (s.getHistorial() != null)
+                for (int i = s.getHistorial().size() - 1; i >= 0; i--)
+                    if (estado.equals(s.getHistorial().get(i).getEstado()))
+                        return s.getHistorial().get(i).getFecha();
+            return s.getFechaSolicitud();
+        }
+
+        void generarInvitaciones() {
+            int objetivo = Math.max(0, nTalentos / 2);
+            List<Empresa> conOfertas = empresas.stream().filter(e -> activosPorEmpresa.containsKey(e.getId())).toList();
+            List<Empresa> pro = conOfertas.stream().filter(e -> PlanService.PLAN_PRO.equals(e.getPlan())).toList();
+            Set<String> usadas = new HashSet<>();
+            if (!conOfertas.isEmpty())
+                for (int i = 0; i < objetivo; i++) {
+                    Empresa em = !pro.isEmpty() && prob(0.6) ? pick(pro) : pick(conOfertas);
+                    Empleo emp = prob(0.75) ? pick(activosPorEmpresa.get(em.getId())) : null;
+                    List<TalentoGen> pool = emp != null ? talentosPorGrupo.get(grupoDeEmpleo.get(emp.getId())) : talentosGen;
+                    if (pool == null || pool.isEmpty())
+                        continue;
+                    TalentoGen tg = pick(pool);
+                    Usuario t = tg.u();
+                    if (!t.isPerfilPublico() || Boolean.FALSE.equals(t.getPermitirMensajes()))
+                        continue;
+                    if (!usadas.add(em.getId() + "|" + t.getId() + "|" + (emp == null ? "" : emp.getId())))
+                        continue;
+                    String estado = new String[] { "pendiente", "aceptada", "rechazada" }[peso(55, 20, 25)];
+                    invitaciones.add(invitacion(em, t, emp, estado, atras(rnd.nextDouble() * 60)));
+                }
+            if (uDemoTalento != null && eDemoEmpresa != null && activosPorEmpresa.containsKey(eDemoEmpresa.getId())) {
+                invitaciones.add(invitacion(eDemoEmpresa, uDemoTalento, activosPorEmpresa.get(eDemoEmpresa.getId()).get(0), "pendiente", atras(1.5)));
+                if (eDemoStartup != null)
+                    invitaciones.add(invitacion(eDemoStartup, uDemoTalento, null, "pendiente", atras(4)));
+            }
+            if (uDemoDiseno != null && eDemoStartup != null)
+                invitaciones.add(invitacion(eDemoStartup, uDemoDiseno, null, "pendiente", atras(2)));
+        }
+
+        Invitacion invitacion(Empresa em, Usuario t, Empleo emp, String estado, Date fecha) {
+            Invitacion i = new Invitacion();
+            i.setEmpresaId(em.getId());
+            i.setEmpresaNombre(em.getNombreEmpresa());
+            i.setEmpresaSector(em.getSector());
+            i.setEmpresaWeb(em.getSitioWeb());
+            i.setEmpresaDescripcion(em.getDescripcion());
+            i.setEmpresaTamano(em.getTamano());
+            i.setTalentoId(t.getId());
+            i.setTalentoNombre(t.getNombre());
+            i.setTalentoCorreo(t.getCorreo());
+            String pila = t.getNombre().split(" ")[0];
+            if (emp != null) {
+                i.setEmpleoId(emp.getId());
+                i.setEmpleoTitulo(emp.getTitulo());
+                i.setEmpleoModalidad(emp.getModalidad());
+                i.setEmpleoContrato(emp.getContrato());
+                i.setEmpleoCategoria(emp.getCategoria());
+                i.setEmpleoSalarioMin(emp.getSalarioMin());
+                i.setEmpleoSalarioMax(emp.getSalarioMax());
+                i.setEmpleoMoneda(emp.getMoneda());
+                i.setEmpleoMostrarSalario(emp.isMostrarSalario());
+                i.setMensaje("Hola " + pila + ", revisamos tu perfil y creemos que encajas con el rol de " + emp.getTitulo()
+                        + " en " + em.getNombreEmpresa() + ". ¿Tienes disponibilidad esta semana para conversar?");
+            } else {
+                i.setMensaje("Hola " + pila + ", nos gustó tu portafolio y queremos tenerte en cuenta para próximas vacantes en "
+                        + em.getNombreEmpresa() + ". ¿Te interesa que hablemos?");
+            }
+            i.setEstado(estado);
+            i.setFechaEnvio(fecha);
+            i.setId(idEn(fecha));
+            return i;
+        }
+
+        final Map<String, List<Mensaje>> hilos = new LinkedHashMap<>();
+
+        void generarMensajes() {
+            for (Solicitud s : solicitudes) {
+                boolean aprobada = "aprobada".equals(s.getEstado());
+                if (!(aprobada ? prob(0.55) : "revision".equals(s.getEstado()) && prob(0.02)))
+                    continue;
+                Empleo e = empleoPorId.get(s.getEmpleoId());
+                Empresa em = empresaPorId.get(e.getEmpresaId());
+                Date t = mas(fechaDe(s, aprobada ? "aprobada" : "revision"), (1 + rnd.nextInt(6)) / 24.0);
+                int n = 2 + rnd.nextInt(4);
+                List<Mensaje> hilo = new ArrayList<>();
+                for (int i = 0; i < n; i++) {
+                    if (t.after(ahora))
+                        break;
+                    boolean deEmpresa = i % 2 == 0;
+                    Mensaje m = new Mensaje();
+                    m.setSolicitudId(s.getId());
+                    m.setRemitenteId(deEmpresa ? em.getId() : s.getUsuarioId());
+                    m.setRemitenteNombre(deEmpresa ? em.getNombreEmpresa() : s.getUsuarioNombre());
+                    m.setDestinatarioId(deEmpresa ? s.getUsuarioId() : em.getId());
+                    String texto = deEmpresa ? SeedCatalogo.MENSAJES_CHAT_EMPRESA[Math.min(i / 2, SeedCatalogo.MENSAJES_CHAT_EMPRESA.length - 1)]
+                            : SeedCatalogo.MENSAJES_CHAT_TALENTO[Math.min(i / 2, SeedCatalogo.MENSAJES_CHAT_TALENTO.length - 1)];
+                    m.setTexto(String.format(texto, s.getUsuarioNombre().split(" ")[0], s.getEmpleoTitulo()));
+                    m.setFechaEnvio(t);
+                    m.setLeido(true);
+                    m.setId(idEn(t));
+                    hilo.add(m);
+                    t = mas(t, (1 + rnd.nextInt(20)) / 24.0);
+                }
+                if (hilo.isEmpty())
+                    continue;
+                Mensaje ultimo = hilo.get(hilo.size() - 1);
+                if (ultimo.getFechaEnvio().after(atras(14)) && prob(0.4))
+                    ultimo.setLeido(false);
+                mensajes.addAll(hilo);
+                hilos.put(s.getId(), hilo);
+            }
+        }
+
+        void generarCobros() {
+            for (Solicitud s : solicitudes) {
+                if (!"aprobada".equals(s.getEstado()))
+                    continue;
+                Empresa em = empresaPorId.get(empleoPorId.get(s.getEmpleoId()).getEmpresaId());
+                if (PlanService.PLAN_PRO.equals(em.getPlan()))
+                    continue;
+                Cobro c = new Cobro();
+                c.setEmpresaId(em.getId());
+                c.setSolicitudId(s.getId());
+                c.setEmpleoTitulo(s.getEmpleoTitulo());
+                c.setMonto(PlanService.TARIFA_COLOCACION);
+                c.setMotivo("Tarifa de colocación exitosa");
+                c.setFecha(fechaDe(s, "aprobada"));
+                c.setId(idEn(c.getFecha()));
+                cobros.add(c);
+            }
+        }
+
+        void generarNotificaciones() {
+            Date corte = atras(60);
+            for (Solicitud s : solicitudes) {
+                Empleo e = empleoPorId.get(s.getEmpleoId());
+                if (s.getFechaSolicitud().after(corte))
+                    notificaciones.add(notif(e.getEmpresaId(), "NUEVA_SOLICITUD", "Nueva postulación",
+                            s.getUsuarioNombre() + " se postuló a " + s.getEmpleoTitulo(), s.getFechaSolicitud(),
+                            "/empleos/" + e.getId() + "/postulaciones/" + s.getId()));
+                String est = s.getEstado();
+                if ("aprobada".equals(est) || "rechazada".equals(est)) {
+                    Date f = fechaDe(s, est);
+                    if (f.after(corte)) {
+                        boolean ok = "aprobada".equals(est);
+                        notificaciones.add(notif(s.getUsuarioId(), "ESTADO_SOLICITUD",
+                                ok ? "¡Tu postulación fue aceptada! 🎉" : "Actualización de tu postulación",
+                                s.getEmpleoEmpresaNombre() + (ok ? " aceptó tu postulación a " : " actualizó tu postulación a ") + s.getEmpleoTitulo(),
+                                f, "/solicitudes/" + s.getId()));
+                    }
+                }
+            }
+            for (Invitacion i : invitaciones) {
+                if ("pendiente".equals(i.getEstado()) && i.getFechaEnvio().after(atras(30)))
+                    notificaciones.add(notif(i.getTalentoId(), "NUEVA_INVITACION", "Una empresa quiere conocerte",
+                            i.getEmpresaNombre() + " te envió una invitación", i.getFechaEnvio(), "/solicitudes?estado=invitaciones"));
+                else if (!"pendiente".equals(i.getEstado()) && i.getFechaEnvio().after(atras(30)))
+                    notificaciones.add(notif(i.getEmpresaId(), "ESTADO_INVITACION",
+                            "aceptada".equals(i.getEstado()) ? "Invitación aceptada" : "Invitación rechazada",
+                            i.getTalentoNombre() + ("aceptada".equals(i.getEstado()) ? " aceptó" : " rechazó") + " tu invitación",
+                            mas(i.getFechaEnvio(), 1 + rnd.nextInt(3)), "/talentos/" + i.getTalentoId()));
+            }
+            for (Map.Entry<String, List<Mensaje>> h : hilos.entrySet()) {
+                Mensaje ultimo = h.getValue().get(h.getValue().size() - 1);
+                if (!ultimo.isLeido())
+                    notificaciones.add(notif(ultimo.getDestinatarioId(), "NUEVO_MENSAJE", "Nuevo mensaje",
+                            ultimo.getRemitenteNombre() + " te escribió", ultimo.getFechaEnvio(), "/chat/" + h.getKey()));
+            }
+            for (Notificacion n : notificaciones)
+                n.setLeida(n.getFechaCreacion().before(atras(10)) || prob(0.35));
+            for (Notificacion n : notificaciones)
+                if ("NUEVO_MENSAJE".equals(n.getTipo()))
+                    n.setLeida(false);
+            notificaciones.sort(Comparator.comparing(Notificacion::getFechaCreacion));
+        }
+
+        Notificacion notif(String destinatario, String tipo, String titulo, String mensaje, Date fecha, String url) {
+            Notificacion n = new Notificacion();
+            n.setDestinatarioId(destinatario);
+            n.setTipo(tipo);
+            n.setTitulo(titulo);
+            n.setMensaje(mensaje);
+            n.setFechaCreacion(fecha);
+            n.setUrl(url);
+            n.setId(idEn(fecha));
+            return n;
+        }
+
+        Usuario talentoDemoPrincipal() {
+            Usuario u = new Usuario();
+            u.setTipo("talento");
+            u.setNombre("Carlos Andrés Ramírez");
+            u.setRolTitulo("Full Stack Developer");
+            u.setBio("Desarrollador con 4 años de experiencia en Java y React, apasionado por construir productos digitales de alto impacto. "
+                    + "Me gustan los equipos pequeños, el código bien probado y compartir lo que aprendo.");
+            u.setStack(new ArrayList<>(List.of("Java", "Spring Boot", "React", "TypeScript", "PostgreSQL", "Docker", "Git")));
+            u.setEspecialidad("fullstack");
+            u.setModalidad("hibrido");
+            u.setSalarioEsperado("COP 7.000.000 – 9.000.000 / mes");
+            u.setDisponibilidad("full-time");
+            u.setCorreo(DEMO_TALENTO);
+            u.setEmailContacto(DEMO_TALENTO);
+            u.setTelefono("+57 315 555 0001");
+            u.setPortfolioUrl("https://carlos.example.com");
+            u.setLinkedinUrl("https://linkedin.example.com/in/carlos-ramirez");
+            u.setGithubUrl("https://github.example.com/carlos-ramirez");
+            u.setPassword(hashDemo);
+            u.setActivo(true);
+            u.setPerfilPublico(true);
+            u.setMostrarCorreo(true);
+            u.setPermitirMensajes(true);
+            u.setOnboardingCompleto(true);
+            u.setDestacar(true);
+            u.setUbicacion("Bogotá, Colombia");
+            u.setNivelEspanol(5);
+            u.setNivelIngles(4);
+            u.setHabilidadesBlandas(new ArrayList<>(List.of("Trabajo en equipo", "Comunicación asertiva", "Resolución de problemas",
+                    "Liderazgo", "Adaptabilidad", "Proactividad")));
+            u.setCvBullets(new ArrayList<>(List.of(SeedCatalogo.CV_BULLETS[0], SeedCatalogo.CV_BULLETS[1], SeedCatalogo.CV_BULLETS[2],
+                    SeedCatalogo.CV_BULLETS[3])));
+            Usuario.CvExperiencia e1 = new Usuario.CvExperiencia();
+            e1.setCargo("Full Stack Developer");
+            e1.setEmpresa("Andina Software");
+            e1.setPeriodo((anioActual - 3) + " – Presente");
+            e1.setModalidad("Remoto");
+            e1.setDescripcion("Desarrollo de microservicios con Spring Boot y frontends en React para clientes del sector financiero.");
+            Usuario.CvExperiencia e2 = new Usuario.CvExperiencia();
+            e2.setCargo("Backend Developer");
+            e2.setEmpresa("Costa Pay");
+            e2.setPeriodo((anioActual - 5) + " – " + (anioActual - 3));
+            e2.setModalidad("Presencial");
+            e2.setDescripcion("APIs REST para banca digital con Java y PostgreSQL, con pruebas automáticas y despliegue continuo.");
+            u.setCvExperiencias(new ArrayList<>(List.of(e1, e2)));
+            Usuario.CvEducacion ed = new Usuario.CvEducacion();
+            ed.setInstitucion("Universidad Nacional");
+            ed.setTitulo("Ingeniería de Sistemas");
+            ed.setPeriodo((anioActual - 10) + " – " + (anioActual - 5));
+            u.setCvEducaciones(new ArrayList<>(List.of(ed)));
+            u.setCreadoEn(atras(420));
+            u.setActualizadoEn(atras(2));
+            u.setEmpleosFavoritos(new ArrayList<>());
+            u.setId(idEn(u.getCreadoEn()));
+            correos.add(DEMO_TALENTO);
+            return u;
+        }
+
+        Usuario talentoDemoDiseno() {
+            Usuario u = new Usuario();
+            u.setTipo("talento");
+            u.setNombre("Laura Camila Ospina");
+            u.setRolTitulo("Product Designer");
+            u.setBio("Diseñadora de producto con 5 años creando interfaces y sistemas de diseño para equipos de software. "
+                    + "Trabajo de la investigación al handoff, con foco en accesibilidad.");
+            u.setStack(new ArrayList<>(List.of("Figma", "Design Systems", "Prototipado", "User Research", "Accesibilidad", "Framer")));
+            u.setEspecialidad("ui-ux");
+            u.setModalidad("remoto");
+            u.setSalarioEsperado("COP 6.000.000 – 8.000.000 / mes");
+            u.setDisponibilidad("full-time");
+            u.setCorreo(DEMO_DISENO);
+            u.setEmailContacto(DEMO_DISENO);
+            u.setTelefono("+57 316 555 0002");
+            u.setPortfolioUrl("https://laura.example.com");
+            u.setLinkedinUrl("https://linkedin.example.com/in/laura-ospina");
+            u.setPassword(hashDemo);
+            u.setActivo(true);
+            u.setPerfilPublico(true);
+            u.setPermitirMensajes(true);
+            u.setOnboardingCompleto(true);
+            u.setUbicacion("Medellín, Colombia");
+            u.setNivelEspanol(5);
+            u.setNivelIngles(4);
+            u.setHabilidadesBlandas(new ArrayList<>(List.of("Empatía", "Comunicación asertiva", "Creatividad", "Pensamiento crítico")));
+            u.setCvBullets(new ArrayList<>(List.of(SeedCatalogo.CV_BULLETS[6], SeedCatalogo.CV_BULLETS[4])));
+            Usuario.CvExperiencia e1 = new Usuario.CvExperiencia();
+            e1.setCargo("Product Designer");
+            e1.setEmpresa("Estudio Faro");
+            e1.setPeriodo((anioActual - 3) + " – Presente");
+            e1.setModalidad("Remoto");
+            e1.setDescripcion("Diseño de un sistema de diseño adoptado por tres equipos de producto y pruebas de usabilidad quincenales.");
+            u.setCvExperiencias(new ArrayList<>(List.of(e1)));
+            Usuario.CvEducacion ed = new Usuario.CvEducacion();
+            ed.setInstitucion("Universidad Pontificia Bolivariana");
+            ed.setTitulo("Diseño Gráfico");
+            ed.setPeriodo((anioActual - 10) + " – " + (anioActual - 6));
+            u.setCvEducaciones(new ArrayList<>(List.of(ed)));
+            u.setCreadoEn(atras(300));
+            u.setActualizadoEn(atras(3));
+            u.setEmpleosFavoritos(new ArrayList<>());
+            u.setId(idEn(u.getCreadoEn()));
+            correos.add(DEMO_DISENO);
+            return u;
+        }
+
+        void proyectosDemo(TalentoGen tg) {
+            if (tg.u() == uDemoTalento) {
+                proyectos.add(proyecto(tg, true, "DevTrack · Gestión de tareas", "Full Stack",
+                        "Plataforma de gestión de tareas con tableros Kanban, comentarios y reportes en tiempo real."));
+                proyectos.add(proyecto(tg, false, "FinBot · Asistente financiero", "Backend",
+                        "Asistente que analiza gastos y recomienda metas de ahorro con alertas semanales."));
+                proyectos.add(proyecto(tg, false, "ShopLite · E-commerce", "Frontend",
+                        "Tienda en línea ligera con carrito, pasarela de pago de pruebas y panel de administración."));
+                proyectos.add(proyecto(tg, false, "Cauca · API de eventos", "Backend",
+                        "API de eventos y boletería con colas, caché y documentación OpenAPI."));
+            } else {
+                proyectos.add(proyecto(tg, true, "Sistema de diseño Brisa", "Design System",
+                        "Biblioteca de componentes y tokens en Figma con guías de accesibilidad y documentación para desarrollo."));
+                proyectos.add(proyecto(tg, false, "Rediseño app de reservas", "UI/UX Design",
+                        "Rediseño del flujo de reserva con pruebas de usabilidad: la conversión subió un 18 %."));
+                proyectos.add(proyecto(tg, false, "Panel de analítica para clínica", "Dashboard SaaS",
+                        "Tablero de indicadores clínicos pensado para lectura rápida en pantalla compartida."));
+            }
+            for (Proyecto p : proyectos.subList(Math.max(0, proyectos.size() - 4), proyectos.size()))
+                if (p.getUsuarioId() != null && p.getUsuarioId().equals(tg.u().getId())) {
+                    p.setPublicado(true);
+                    p.setIncluirCv(true);
+                }
+        }
+
+        void solicitudesDemo() {
+            List<Empleo> deLabs = eDemoEmpresa == null ? List.of() : empleosGen.stream().map(EmpleoGen::e)
+                    .filter(e -> eDemoEmpresa.getId().equals(e.getEmpresaId())).toList();
+            if (uDemoTalento != null) {
+                TalentoGen tg = talentoGenPorId.get(uDemoTalento.getId());
+                String[] estados = { "aprobada", "revision", "rechazada" };
+                List<Empleo> activos = deLabs.stream().filter(e -> "ACTIVO".equals(e.getEstado())).toList();
+                for (int i = 0; i < Math.min(3, activos.size()); i++) {
+                    Empleo e = activos.get(i);
+                    Date f = atras(18 - i * 4);
+                    solicitudes.add(construirSolicitud(tg, e, estados[i], f, "revision".equals(estados[i]) ? null : mas(f, 3)));
+                }
+                String[] ext = { "revision", "aprobada", "revision", "rechazada", "revision", "aprobada", "revision", "revision" };
+                List<Empleo> afines = new ArrayList<>(activosPorGrupo.getOrDefault("fullstack", List.of()));
+                afines.addAll(activosPorGrupo.getOrDefault("backend", List.of()));
+                afines.sort(Comparator.comparingInt((Empleo e) -> -MatchEmpleo.porcentaje(uDemoTalento, e)));
+                int hechos = 0;
+                for (Empleo e : afines) {
+                    if (hechos >= ext.length)
+                        break;
+                    if (eDemoEmpresa != null && eDemoEmpresa.getId().equals(e.getEmpresaId()) || paresSolicitud.contains(uDemoTalento.getId() + "|" + e.getId()))
+                        continue;
+                    Date f = atras(3 + hechos * 6 + rnd.nextInt(4));
+                    solicitudes.add(construirSolicitud(tg, e, ext[hechos], f, "revision".equals(ext[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(5)))));
+                    hechos++;
+                }
+            }
+            if (uDemoDiseno != null) {
+                TalentoGen tg = talentoGenPorId.get(uDemoDiseno.getId());
+                List<Empleo> afines = new ArrayList<>(activosPorGrupo.getOrDefault("ui-ux", List.of()));
+                afines.addAll(activosPorGrupo.getOrDefault("diseno-grafico", List.of()));
+                afines.sort(Comparator.comparingInt((Empleo e) -> -MatchEmpleo.porcentaje(uDemoDiseno, e)));
+                String[] est = { "revision", "aprobada", "revision", "rechazada", "revision" };
+                int hechos = 0;
+                for (Empleo e : afines) {
+                    if (hechos >= est.length)
+                        break;
+                    if (paresSolicitud.contains(uDemoDiseno.getId() + "|" + e.getId()))
+                        continue;
+                    Date f = atras(2 + hechos * 5 + rnd.nextInt(3));
+                    solicitudes.add(construirSolicitud(tg, e, est[hechos], f, "revision".equals(est[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(4)))));
+                    hechos++;
+                }
+            }
+            int[] porOferta = { 24, 10, 3, 7, 0, 14, 5, 2, 9 };
+            List<Empleo> objetivo = new ArrayList<>(deLabs);
+            if (eDemoStartup != null)
+                empleosGen.stream().map(EmpleoGen::e).filter(e -> eDemoStartup.getId().equals(e.getEmpresaId())).forEach(objetivo::add);
+            for (int i = 0; i < objetivo.size(); i++) {
+                Empleo e = objetivo.get(i);
+                int cuantos = i < porOferta.length ? porOferta[i] : 4;
+                List<TalentoGen> pool = talentosPorGrupo.getOrDefault(grupoDeEmpleo.get(e.getId()), List.of());
+                for (int c = 0; c < cuantos && !pool.isEmpty(); c++) {
+                    TalentoGen tg = pick(pool);
+                    if (tg.arq() == null)
+                        continue;
+                    Solicitud s = solicitudAutomatica(tg, e, null);
+                    if (s != null)
+                        solicitudes.add(s);
+                }
+            }
+        }
+    }
 }
-        */

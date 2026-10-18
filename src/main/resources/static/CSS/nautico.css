@@ -1,9 +1,4 @@
-/* DevCoast · sistema visual náutico.
-   Fuente: docs/diseno/DEVCOAST-SISTEMA-VISUAL.md y los mockups devcoast-*-motion.html (si hay contradicción, manda el HTML).
-   Un solo tema oscuro, estilo plano: sin degradados ni sombras difusas.
-   Este archivo trae tokens, base, el shell de la app (sidebar + barra superior) y los componentes compartidos
-   (chips, botones, estado vacío, toast, sello). Los pases/tickets viven en nautico-pase.css. */
-
+/* oigan, acá viven los colores, tamaños y estilos base de toda la app. Si quieren cambiar el look, empiecen por este archivo */
 :root {
     --sky: #101114;
     --panel: #0B0C0F;
@@ -17,6 +12,7 @@
     --orange-ink: #A93A1B;
     --teal: #2DD4BF;
     --teal-d: #1F8F82;
+    --teal-ink: #0F766E;
     --sea0: #0E2A2D;
     --paper: #F3F4F8;
     --paper-ink: #101114;
@@ -25,7 +21,6 @@
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     --gx: clamp(16px, 3vw, 36px);
-    /* acento principal: naranja para Talento, teal para Empresa */
     --acc: var(--orange);
     color-scheme: dark;
 }
@@ -115,8 +110,6 @@ h2 {
     color: var(--mute);
     letter-spacing: .06em;
 }
-
-/* ───────── shell: menú lateral + barra superior ───────── */
 .app {
     display: grid;
     grid-template-columns: 248px minmax(0, 1fr);
@@ -208,8 +201,6 @@ h2 {
 .mi[aria-current="page"] svg {
     color: var(--teal);
 }
-
-/* grupo secundario "Más": funciones que no están en el menú del mockup */
 .menu-h {
     margin: 14px 14px 2px;
     font-family: var(--font-mono);
@@ -358,7 +349,6 @@ h2 {
 
 .main {
     min-width: 0;
-    /* rejilla decorativa muy tenue */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M80 0H0V80' fill='none' stroke='%231A1C22'/%3E%3C/svg%3E");
 }
 
@@ -487,8 +477,6 @@ h2 {
     font-size: 11px;
     color: var(--mute);
 }
-
-/* campana de notificaciones */
 .bell {
     position: relative;
 }
@@ -610,11 +598,10 @@ h2 {
     cursor: pointer;
     text-align: left;
 }
-
-/* ───────── contenido: cabecera de página ───────── */
 .content {
     padding: 30px var(--gx) 80px;
     max-width: 1240px;
+    overflow-x: clip;
 }
 
 .head {
@@ -681,8 +668,6 @@ h2 {
     font: 500 13px var(--font-mono);
     color: var(--mute);
 }
-
-/* ───────── filtros: chips ───────── */
 .filters {
     display: flex;
     flex-wrap: wrap;
@@ -706,8 +691,6 @@ h2 {
     flex-wrap: wrap;
     gap: 8px;
 }
-
-/* .ch sirve como <a> (filtros por GET) o <button>; el estado activo va en aria-pressed / aria-current */
 .ch {
     display: inline-flex;
     align-items: center;
@@ -753,8 +736,6 @@ h2 {
     display: inline-flex;
     align-items: center;
 }
-
-/* ───────── botones ───────── */
 .btn-o {
     display: inline-flex;
     align-items: center;
@@ -800,8 +781,6 @@ h2 {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
-
-/* ───────── estado vacío "Mar en calma." ───────── */
 .empty {
     display: flex;
     flex-direction: column;
@@ -826,8 +805,6 @@ h2 {
     color: var(--mute);
     max-width: 36ch;
 }
-
-/* ───────── toast ───────── */
 .toast {
     position: fixed;
     left: 50%;
@@ -862,8 +839,6 @@ h2 {
     outline: 3px solid var(--paper-ink);
     outline-offset: 2px;
 }
-
-/* ───────── sello ───────── */
 .stamp {
     padding: 6px 12px;
     border: 3px solid var(--err);
@@ -873,8 +848,6 @@ h2 {
     letter-spacing: .08em;
     transform: rotate(-8deg);
 }
-
-/* ───────── móvil ───────── */
 @media (max-width: 900px) {
     .app {
         grid-template-columns: minmax(0, 1fr);
@@ -932,8 +905,6 @@ h2 {
         transform: none;
     }
 }
-
-/* ───────── movimiento (solo transform y opacity) ───────── */
 @media (prefers-reduced-motion: no-preference) {
     @keyframes rock {
 
@@ -1251,4 +1222,31 @@ h2 {
     transform-origin: 172px 326px;
     transform: rotate(calc(var(--look, 0) * 1deg));
     transition: transform .25s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+@media (pointer: coarse) {
+
+    .ch,
+    .clear,
+    .mi.sm,
+    .sort select {
+        min-height: 44px;
+    }
+
+    .mi.sm {
+        height: 44px;
+    }
+}
+.search input {
+    text-overflow: ellipsis;
 }

@@ -43,7 +43,6 @@ public class NotificacionController {
         return "redirect:/dashboard";
     }
 
-    // esto lo llama el AJAX del botón "marcar todas como leídas"
     @PostMapping("/notificaciones/leer-todas")
     public ResponseEntity<Map<String, Object>> leerTodas(HttpSession session) {
         String uid = (String) session.getAttribute("usuarioActualId");

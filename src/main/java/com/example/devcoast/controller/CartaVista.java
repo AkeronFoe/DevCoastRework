@@ -6,17 +6,6 @@ import java.util.List;
 
 import lombok.Getter;
 
-/**
- * La carta de navegación del Dashboard: cada solicitud activa es un barquito en la zona de su etapa.
- * Tres zonas con los estados reales:
- * <ul>
- * <li>ZARPANDO: en revisión y enviada hace 3 días o menos (según la fecha del historial).</li>
- * <li>EN ALTA MAR: el resto de las que están en revisión.</li>
- * <li>PUERTO: aceptadas en los últimos 30 días.</li>
- * </ul>
- * Las que no avanzaron no se dibujan. Máximo 4 barcos por zona; el resto se resume en "+N más".
- * Sirve a las dos cuentas: el talento ve sus solicitudes y la empresa las postulaciones recibidas.
- */
 @Getter
 public class CartaVista {
 
@@ -25,12 +14,10 @@ public class CartaVista {
     public static final int DIAS_PUERTO = 30;
     private static final long DIA = 86_400_000L;
 
-    /** Lo que la carta necesita de cada solicitud. {@code estado}: revision | aprobada. */
     public record Item(String id, String titulo, String detalle, Integer match, String areaClave, String estado,
             Date fechaEnvio, Date fechaDecision, String href) {
     }
 
-    /** Un barquito. La vela depende del área: naranja programación, teal diseño, gris otras. */
     public record Barco(String id, String titulo, String detalle, Integer match, String area, boolean aceptada,
             String href, String s1, String s2, String s3, int indice, String aria) {
     }
@@ -47,9 +34,9 @@ public class CartaVista {
 
     private final List<Zona> zonas = new ArrayList<>();
     private int totalEnRuta;
-    private String hrefMas = "/solicitudes";   // adónde lleva "+N más"
+    private String hrefMas = "/solicitudes";
     private String textoVacia = "Todavía no has zarpado. Postúlate a una oferta desde Empleos.";
-    private String etiqueta = "Tus solicitudes en ruta";                       // aria-label de la carta
+    private String etiqueta = "Tus solicitudes en ruta";
     private String textoZonaVacia = "Sin solicitudes en esta etapa.";
 
     public CartaVista conTextos(String hrefMas, String textoVacia) {
@@ -58,7 +45,6 @@ public class CartaVista {
         return this;
     }
 
-    /** Textos de la carta de la empresa, que habla de postulaciones recibidas y no de solicitudes enviadas. */
     public CartaVista paraEmpresa() {
         this.etiqueta = "Tus candidatos en ruta";
         this.textoZonaVacia = "Sin postulaciones en esta etapa.";
@@ -92,7 +78,6 @@ public class CartaVista {
         return c;
     }
 
-    // días enteros desde la fecha; sin fecha cuenta como muy antigua para no inflar las zonas recientes
     private static long dias(Date fecha, Date ahora) {
         if (fecha == null || ahora == null)
             return Long.MAX_VALUE;
@@ -117,7 +102,6 @@ public class CartaVista {
         return new Zona(titulo, subtitulo, filtro, lista.size(), barcos);
     }
 
-    /** Items de la carta a partir de las solicitudes de un talento. */
     public static List<Item> deSolicitudes(List<SolicitudVista> solicitudes) {
         List<Item> items = new ArrayList<>();
         for (SolicitudVista s : solicitudes)

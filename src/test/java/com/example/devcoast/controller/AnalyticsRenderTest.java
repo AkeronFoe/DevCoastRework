@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,7 +31,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// Analytics con el shell náutico: una versión para Talento ("Mi actividad") y otra para Empresa
 @WebMvcTest(PageController.class)
 @Import(SecurityConfig.class)
 class AnalyticsRenderTest {
@@ -80,7 +80,7 @@ class AnalyticsRenderTest {
                 .andExpect(content().string(containsString("Mi actividad")))
                 .andExpect(content().string(containsString("id=\"talChartEstado\"")))
                 .andExpect(content().string(containsString("Plataforma DevCoast")))
-                .andExpect(content().string(containsString("/CSS/nautico-analytics.css")))
+                .andExpect(content().string(matchesPattern("(?s).*/CSS/nautico-analytics(-[0-9a-f]{32})?\\.css.*")))
                 .andExpect(content().string(not(containsString("empChartEstado"))))
                 .andExpect(content().string(not(containsString("ws-top"))));
     }

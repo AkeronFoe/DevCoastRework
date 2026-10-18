@@ -43,7 +43,6 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.PlanService;
 
-// ronda 6: Postulaciones de la cuenta de Empresa, agrupadas por oferta, con el match de cada candidato
 @WebMvcTest(CandidatosController.class)
 @Import(SecurityConfig.class)
 class PostulacionesPageRenderTest {
@@ -142,17 +141,16 @@ class PostulacionesPageRenderTest {
                 .andExpect(content().string(containsString("Backend Java")))
                 .andExpect(content().string(containsString("DevOps")))
                 .andExpect(content().string(containsString("CERRADA")))
-                // la oferta sin postulaciones no aparece
                 .andExpect(content().string(not(containsString("Sin gente"))))
                 .andExpect(content().string(containsString("1 en revisión · 1 aceptada · 1 no avanzó")))
-                .andExpect(content().string(containsString("Match 50%")))     // Java, Docker de 4
+                .andExpect(content().string(containsString("Match 50%")))
                 .andExpect(content().string(containsString("Match 100%")))
-                .andExpect(content().string(containsString("Sin match")))      // Ana Ríos no tiene perfil cargado
+                .andExpect(content().string(containsString("Sin match")))
                 .andExpect(content().string(containsString("href=\"/empleos/e1/postulaciones/s2\"")))
                 .andExpect(content().string(containsString("action=\"/empleos/e1/postulaciones/s2/aprobar\"")))
                 .andExpect(content().string(containsString("action=\"/empleos/e1/postulaciones/s3/reconsiderar\"")))
                 .andExpect(content().string(containsString("data-url=\"/empleos/e1/postulaciones/s1/estado\"")))
-                .andExpect(content().string(containsString("data-estado=\"rechazada\"")))   // el descartado se agrupa con "no avanzó"
+                .andExpect(content().string(containsString("data-estado=\"rechazada\"")))
                 .andExpect(content().string(containsString("Con el plan Gratis se registra la tarifa de colocación")))
                 .andReturn();
         guardar("postulaciones.html", r);
@@ -174,7 +172,6 @@ class PostulacionesPageRenderTest {
                 .andExpect(content().string(not(containsString("Camila Soto"))))
                 .andExpect(content().string(not(containsString("DevOps"))))
                 .andExpect(content().string(containsString("data-estado=\"aceptadas\"")))
-                // el total y los contadores no cambian con el filtro
                 .andExpect(content().string(containsString("<span id=\"cTotal\">4</span>")));
         mockMvc.perform(get("/candidatos").param("q", "rios").session(sesion("empresa")).with(csrf()))
                 .andExpect(content().string(containsString("Ana Ríos")))
@@ -200,5 +197,69 @@ class PostulacionesPageRenderTest {
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/dashboard"));
         mockMvc.perform(get("/candidatos").with(csrf()))
                 .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
+    }
+
+    private void conMuchasPostulaciones(int cuantas) {
+        when(empleoRepository.findByEmpresaIdOrderByIdDesc("em1"))
+                .thenReturn(List.of(oferta("e1", "Backend Java", "ACTIVO"), oferta("e2", "DevOps", "ACTIVO")));
+        List<Solicitud> todas = new ArrayList<>();
+        for (int i = 0; i < cuantas; i++)
+            todas.add(sol("s" + i, i % 2 == 0 ? "e1" : "e2", "t" + i, "Persona " + String.format("%03d", i), "revision", i % 30));
+        when(solicitudRepository.findByEmpleoIdIn(any())).thenReturn(todas);
+    }
+
+    @Test
+    void conMuchasPostulacionesSeMuestranPorPaginasYLosContadoresSiguenSiendoDeTodas() throws Exception {
+        conMuchasPostulaciones(60);
+
+        String html = mockMvc.perform(get("/candidatos").session(sesion("empresa")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Página 1 de 3")))
+                .andExpect(content().string(containsString("page=1\" rel=\"next\"")))
+                .andExpect(content().string(not(containsString("rel=\"prev\""))))
+                .andReturn().getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertEquals(25, html.split("<article", -1).length - 1, "25 tarjetas por página");
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains(">60<"), "el contador global sigue mostrando las 60");
+    }
+
+    @Test
+    void laUltimaPaginaTraeElResto() throws Exception {
+        conMuchasPostulaciones(60);
+
+        mockMvc.perform(get("/candidatos").param("page", "2").session(sesion("empresa")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Página 3 de 3")))
+                .andExpect(content().string(containsString("rel=\"prev\"")))
+                .andExpect(content().string(not(containsString("rel=\"next\""))))
+                .andExpect(content().string(containsString("Persona 059")))
+                .andExpect(content().string(not(containsString("Persona 000"))));
+    }
+
+    @Test
+    void unaPaginaFueraDeRangoSeAjustaALaUltima() throws Exception {
+        conMuchasPostulaciones(60);
+
+        mockMvc.perform(get("/candidatos").param("page", "99").session(sesion("empresa")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Página 3 de 3")));
+    }
+
+    @Test
+    void conPocasPostulacionesNoHayPaginador() throws Exception {
+        conMuchasPostulaciones(10);
+
+        mockMvc.perform(get("/candidatos").session(sesion("empresa")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Página 1 de"))));
+    }
+
+    @Test
+    void elPaginadorConservaElFiltroDeEstado() throws Exception {
+        conMuchasPostulaciones(60);
+
+        mockMvc.perform(get("/candidatos").param("estado", "revision").session(sesion("empresa")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/candidatos?estado=revision&amp;q=&amp;page=1")));
     }
 }

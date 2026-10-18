@@ -43,7 +43,7 @@ class SolicitudVistaTest {
     private String estados(SolicitudVista v) {
         StringBuilder sb = new StringBuilder();
         v.getEtapas().forEach(e -> sb.append(e.estado().charAt(0)));
-        return sb.toString(); // h = hecha, a = actual, f = fin, p = pendiente
+        return sb.toString();
     }
 
     @Test

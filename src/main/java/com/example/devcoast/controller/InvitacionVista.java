@@ -8,7 +8,6 @@ import com.example.devcoast.service.AreaEmpleo;
 
 import lombok.Getter;
 
-/** Una invitación de empresa mostrada como pase (misma pestaña de Solicitudes). */
 @Getter
 public class InvitacionVista {
 
@@ -23,8 +22,8 @@ public class InvitacionVista {
     private String salarioTexto;
     private String hace;
     private String mensaje;
-    private String estado;        // pendiente | aceptada | rechazada
-    private String claseEstado;   // s-inv | s-ace | s-ret
+    private String estado;
+    private String claseEstado;
     private String estadoTexto;
     private String sello;
     private String claseSello;

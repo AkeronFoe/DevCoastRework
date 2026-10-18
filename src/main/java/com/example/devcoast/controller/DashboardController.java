@@ -31,15 +31,9 @@ import com.example.devcoast.service.MatchEmpleo;
 
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Dashboard (ronda 5 del rediseño náutico): banner con los números, la carta de navegación, "Para ti hoy",
- * "Avistadas" y la bitácora. Una vista para Talento y otra para Empresa. Todo sale de datos que existen
- * (solicitudes con su historial, invitaciones, ofertas y el match); no hay cifras de ejemplo.
- */
 @Controller
 public class DashboardController {
 
-    // ofertas activas más recientes que se puntúan para "Para ti hoy" y "Avistadas"
     private static final int OFERTAS_CANDIDATAS = 150;
     private static final int DIAS_NUEVAS = 7;
     private static final int DIAS_AVISTADAS = 30;
@@ -68,7 +62,6 @@ public class DashboardController {
         return RoleGuard.esEmpresa(session) ? dashboardEmpresa(session, model) : dashboardTalento(session, model);
     }
 
-    // ───────────────────────── Talento ─────────────────────────
     private String dashboardTalento(HttpSession session, Model model) {
         String id = RoleGuard.getId(session);
         Usuario talento = usuarioRepository.findById(id).orElse(null);
@@ -84,7 +77,6 @@ public class DashboardController {
         Invitacion pendiente = invitaciones.stream().filter(i -> "pendiente".equals(i.getEstado())).findFirst().orElse(null);
         long invPendientes = invitaciones.stream().filter(i -> "pendiente".equals(i.getEstado())).count();
 
-        // ofertas activas recientes que aún no solicitó, con su match
         boolean tieneStack = talento != null && talento.getStack() != null && !talento.getStack().isEmpty();
         Set<String> yaSolicitadas = new HashSet<>();
         solicitudes.forEach(s -> yaSolicitadas.add(s.getEmpleoId()));
@@ -105,7 +97,6 @@ public class DashboardController {
             }
         }
 
-        // mejor match de hoy (de nivel medio o alto); en empate, la más reciente (la lista llega más reciente primero)
         Empleo mejor = null;
         for (Empleo e : candidatas)
             if (matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_MEDIO
@@ -119,7 +110,6 @@ public class DashboardController {
         long nuevasAltas = candidatas.stream().filter(e -> dias(e, ahora) <= DIAS_NUEVAS
                 && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_ALTO).count();
 
-        // avistadas: recientes con buen match, de mayor a menor match
         List<Empleo> avist = new ArrayList<>();
         for (Empleo e : candidatas)
             if (e != mejor && dias(e, ahora) <= DIAS_AVISTADAS && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_MEDIO)
@@ -151,13 +141,11 @@ public class DashboardController {
         model.addAttribute("pendientes", pendientes.subList(0, Math.min(5, pendientes.size())));
         model.addAttribute("pendientesMas", Math.max(0, pendientes.size() - 5));
         model.addAttribute("eventos", DashboardCalculos.eventosTalento(solicitudes, invitaciones, ahora, 6));
-        // bienvenida a talentos con el perfil recién creado y vacío (la bandera la pone el registro y el login)
         model.addAttribute("mostrarOnboarding", talento != null && !talento.isOnboardingCompleto());
         model.addAttribute("usuario", talento);
         return "dashboard";
     }
 
-    // ───────────────────────── Empresa ─────────────────────────
     private String dashboardEmpresa(HttpSession session, Model model) {
         String id = RoleGuard.getId(session);
         Date ahora = new Date();
@@ -168,7 +156,6 @@ public class DashboardController {
         activos.forEach(e -> empleoIds.add(e.getId()));
         cerrados.forEach(e -> empleoIds.add(e.getId()));
 
-        // las 300 postulaciones más recientes (suficiente para la carta, los números y la bitácora)
         List<Solicitud> recibidas = empleoIds.isEmpty() ? List.of()
                 : solicitudRepository.findByEmpleoIdIn(empleoIds).stream()
                         .sorted(Comparator.comparing(Solicitud::getFechaSolicitud, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -211,7 +198,6 @@ public class DashboardController {
 
         model.addAttribute("carta", carta);
         model.addAttribute("nActivas", activos.size());
-        // el conteo de postulaciones en revisión es exacto (la lista solo trae las 300 más recientes)
         long enRevisionTotal = activos.isEmpty() ? 0 : mongoTemplate.count(
                 Query.query(Criteria.where("empleoId").in(activosIds(activos)).and("estado").is("revision")), Solicitud.class);
         model.addAttribute("nNuevas", enRevisionTotal);

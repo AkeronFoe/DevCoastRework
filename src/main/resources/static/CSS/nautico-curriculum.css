@@ -1,13 +1,9 @@
-/* DevCoast · Currículum. Requiere nautico.css, nautico-temas.css y nautico-pase.css (paneles .pn, .pbar, .btn-o, .btn-d). */
-
 .cv-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .cv-btn { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border: 1px solid var(--line2); border-radius: 10px; background: none; color: var(--ink); font: 700 14px var(--font-display); cursor: pointer; text-decoration: none; transition: border-color .15s ease, transform .15s ease; }
 .cv-btn:hover { border-color: var(--mute); transform: translateY(-2px); }
 .cv-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .content > .pn, .content > .cv { margin-top: 22px; }
 .head + .pn { margin-top: 26px; }
-
-/* revisión de candidatura */
 .cv-rev-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cv-st { font: 700 11px var(--font-mono); letter-spacing: .08em; padding: 5px 10px; border-radius: 6px; color: #101114; }
 .cv-st.rev { background: var(--orange); } .cv-st.ok { background: var(--teal); } .cv-st.no { background: #CDD1DB; }
@@ -29,8 +25,6 @@
 .cv-no { height: 44px; padding: 0 18px; border: 1px solid var(--line2); border-radius: 10px; background: none; color: var(--ink); font: 700 14px var(--font-display); cursor: pointer; }
 .cv-quote { margin: 0; padding: 14px 18px; border-left: 4px solid var(--teal); background: var(--panel2); border-radius: 0 10px 10px 0; font-size: 16px; line-height: 1.6; white-space: pre-line; max-width: 75ch; }
 .cv-hint { margin: 0; font: 500 13px/1.5 var(--font-mono); color: var(--mute); }
-
-/* completitud */
 .pbar.big { height: 10px; border-radius: 5px; } .pbar.big i { height: 10px; border-radius: 5px; }
 .cv-falta { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; }
 .cv-falta button, .cv-falta a { background: none; border: 0; padding: 4px 0; color: var(--ink); font: 500 14.5px var(--font-display); text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 4px; cursor: pointer; }
@@ -38,8 +32,6 @@
 .cv-nums > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; background: var(--panel); padding: 12px 14px; }
 .cv-nums dt { font: 700 10px var(--font-mono); letter-spacing: .07em; color: var(--mute); }
 .cv-nums dd { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
-
-/* proyectos (adjuntos o propios) */
 .cv-pj { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 14px; }
 .cv-pj-i { display: flex; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); min-width: 0; }
 .cv-pj-c { width: 38px; height: 38px; border-radius: 10px; flex: none; }
@@ -51,8 +43,6 @@
 html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
 .cv .cv-pj-i { background: transparent; border-color: #CDD1DB; }
 .cv .cv-pj-b p { color: var(--paper-mute); }
-
-/* la hoja: un papel */
 .cv { background: var(--paper); color: var(--paper-ink); border-radius: 16px; padding: 34px 38px 38px; display: flex; flex-direction: column; gap: 22px; }
 .cv-top { display: flex; align-items: center; gap: 18px; }
 .cv-av { width: 76px; height: 76px; border-radius: 18px; background: var(--teal) center / cover; color: #101114; display: grid; place-items: center; font: 700 30px var(--font-mono); flex: none; }
@@ -79,7 +69,7 @@ html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
 .cv-tl li::before { content: ""; position: absolute; left: -25px; top: 5px; width: 12px; height: 12px; border-radius: 3px; background: var(--paper-ink); box-shadow: 0 0 0 4px var(--paper); }
 .cv-tl li:first-child::before { background: var(--teal-d); }
 .cv-tl b { font-size: 17px; }
-.cv-em { font-weight: 600; color: var(--teal-d); font-size: 15px; }
+.cv-em { font-weight: 600; color: var(--teal-ink); font-size: 15px; }
 .cv-meta { font: 500 12.5px var(--font-mono); color: var(--paper-mute); }
 .cv-tl p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: #2B2E36; }
 .cv-pref { margin-top: 16px; }
@@ -95,11 +85,9 @@ html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
 .cv-chips span { font: 500 12px var(--font-mono); padding: 3px 10px; border-radius: 6px; border: 1.5px solid var(--paper-ink); }
 .cv-chips.tech span { background: var(--paper-ink); color: #F3F4F8; }
 .cv-chips.soft span { border-style: dashed; border-color: #8A8F9C; color: #2B2E36; }
-
-/* diálogo de edición */
-.cv-dlg { border: 0; padding: 0; background: transparent; width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); color: var(--paper-ink); }
+.cv-dlg { border: 0; padding: 0; background: transparent; width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); color: var(--paper-ink); }
 .cv-dlg::backdrop { background: rgba(6, 17, 19, .78); }
-.cv-dlg-f { background: var(--paper); border-radius: 16px; padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); }
+.cv-dlg-f { background: var(--paper); border-radius: 16px; padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); }
 .cv-dlg-h { display: flex; align-items: center; justify-content: space-between; }
 .cv-dlg-h h2 { font-size: 28px; letter-spacing: -.02em; margin: 0; }
 .cv-x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: none; color: var(--paper-ink); font-size: 28px; line-height: 1; cursor: pointer; }
@@ -149,8 +137,6 @@ html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
     .cv-lang-r { grid-template-columns: 70px auto; }
     .cv-lang-r small { grid-column: 1 / -1; }
 }
-
-/* imprimir = PDF: solo la hoja, en blanco y negro sobre papel */
 @media print {
     @page { margin: 14mm; }
     html, body { background: #fff !important; }

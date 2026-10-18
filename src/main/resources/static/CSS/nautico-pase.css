@@ -1,6 +1,3 @@
-/* DevCoast · pases de abordaje (tickets). Fuente: docs/diseno/devcoast-empleos-motion.html.
-   Se usa en Empleos y, después, en Solicitudes y Dashboard. Requiere nautico.css (tokens y shell). */
-/* ofertas = pases de abordaje: el talón muestra el MATCH (color = nivel de match) */
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin-top:16px;font-family:var(--font-mono);font-size:12px;color:var(--mute)}
 .legend b{color:var(--ink)}
 .lg{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
@@ -27,11 +24,11 @@
 .jt-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .area{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
 .area svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.area.p{color:var(--teal-d)} .area.d{color:var(--orange-ink)}
+.area.p{color:var(--teal-ink)} .area.d{color:var(--orange-ink)}
 .when{display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--paper-mute)}
 .k{font-family:var(--font-mono);font-size:10.5px;color:var(--paper-mute);letter-spacing:.05em}
 .jt-t{font-size:24px;line-height:1.1;font-weight:700;letter-spacing:-.01em}
-.co{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;margin-top:-4px}
+.co{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px;font-size:15px;font-weight:500;margin-top:-4px;min-width:0}
 .co-t{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex:none}
 .co-t svg{width:14px;height:14px;fill:#F3F4F8}
 .desc{font-size:15px;line-height:1.45;color:#2B2E36;max-width:56ch}
@@ -59,8 +56,6 @@
 .jt.sent .jt-stub{transform:translate(20px,40px) rotate(9deg);opacity:0;pointer-events:none}
 .jt.sent .stamp{opacity:1;transform:rotate(-8deg) scale(1)}
 .jt.sent:hover{transform:none}
-
-/* empleo destacado = el de mayor match */
 .fpill{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:8px;color:var(--sky);font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.08em}
 .fpill svg{width:14px;height:14px;fill:var(--sky)}
 .fpill.hi{background:var(--teal)} .fpill.md{background:var(--orange)} .fpill.lo{background:#CDD1DB}
@@ -76,8 +71,6 @@
 .jt.feat .mt-bar i{height:14px}
 .jt.feat .apply{height:48px;font-size:16px}
 .why{display:flex;flex-direction:column;gap:8px}
-
-/* enlace del cargo hacia el detalle de la oferta: el ticket sigue siendo un <article> */
 .jt-t a{color:inherit}
 .jt-t a:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
 .jt-t a:focus-visible{outline:3px solid var(--paper-ink);outline-offset:3px;border-radius:4px}
@@ -110,7 +103,6 @@
   .stamp{right:14px;font-size:13px}
   .clear{margin-left:0}
 }
-/* backwards (no both): con forwards la animación seguiría mandando sobre transform y el hover no levantaría el ticket */
 @media (prefers-reduced-motion:no-preference){
 @keyframes rise{from{opacity:0;transform:translateY(24px) rotate(1deg)}to{opacity:1;transform:none}}
 @keyframes riseF{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
@@ -132,8 +124,6 @@ a.btn-o{text-decoration:none}
 .pn h2{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:17px;letter-spacing:-.01em}
 .pn h2 a{font:500 12px var(--font-mono);color:var(--teal);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .toast button[hidden]{display:none}
-
-/* ===== Solicitudes ===== */
 .alertbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:26px 0 0;padding:14px 18px;border-radius:12px;background:var(--paper);color:var(--paper-ink);border-left:6px solid var(--teal)}
 .alertbar svg{width:26px;height:26px;flex:none;fill:none;stroke:var(--teal-d);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .alertbar .txt{flex:1;min-width:220px;font-size:15px;line-height:1.4}
@@ -169,7 +159,7 @@ a.btn-o{text-decoration:none}
 .next{display:flex;flex-direction:column;gap:2px;max-width:60ch}
 .next p{font-size:14.5px;line-height:1.45;color:#2B2E36}
 .stamp.show{opacity:1;transform:rotate(-8deg) scale(1)}
-.stamp.ok{color:var(--teal-d);border-color:var(--teal-d)}
+.stamp.ok{color:var(--teal-ink);border-color:var(--teal-d)}
 .stamp.no{color:var(--err);border-color:var(--err)}
 .jt.has-stamp .next{padding-right:170px}
 @media (max-width:900px){.jt.has-stamp .next{padding-right:0}.stamp{bottom:12px}}
@@ -181,16 +171,12 @@ a.btn-o{text-decoration:none}
   .track .l{white-space:normal}
   .jt.has-stamp .jt-main{padding-bottom:50px}
 }
-
-
-/* ───── Solicitudes (ronda 4) ───── */
 .jt.rq .apply.ghost{background:transparent;color:var(--paper-ink);border:2px solid var(--paper-ink)}
 .jt.rq .jt-stub.s-rec .apply.ghost,.jt.rq .jt-stub.s-ret .apply.ghost{border-color:var(--paper);color:var(--paper)}
 .jt.rq .jt-t a{color:inherit}
 .stamp.hide{opacity:0}
 .jt.rq.sent .jt-stub{pointer-events:none}
 .jt.rq .jt-stub.s-inv{background:var(--teal)}
-/* retirar con confirmación a la vista (sin confirm()): <details> dentro del talón */
 .ret{display:block}
 .ret>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;height:44px;border-radius:10px;font:700 15px var(--font-display);background:transparent;color:var(--paper-ink);border:2px solid var(--paper-ink);transition:transform .2s ease}
 .ret>summary::-webkit-details-marker{display:none}

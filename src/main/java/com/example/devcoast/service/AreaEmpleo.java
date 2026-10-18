@@ -2,10 +2,6 @@ package com.example.devcoast.service;
 
 import java.text.Normalizer;
 
-/**
- * Agrupa la categoría de una oferta (texto libre del formulario) en tres áreas para filtros e iconos,
- * y arregla al mostrar las categorías guardadas sin tilde. No modifica ningún dato guardado.
- */
 public final class AreaEmpleo {
 
     public enum Area {
@@ -21,7 +17,6 @@ public final class AreaEmpleo {
             this.etiqueta = etiqueta;
         }
 
-        /** Valor del parámetro ?area= */
         public String clave() {
             return clave;
         }
@@ -52,11 +47,6 @@ public final class AreaEmpleo {
         return Area.OTRAS;
     }
 
-    /**
-     * Área de un proyecto del portafolio según su categoría (las del formulario de subir proyecto):
-     * Frontend, Backend, Full Stack y App móvil son Programación; UI/UX, Ilustraciones 3D, Branding,
-     * Motion, Design System y Dashboard SaaS son Diseño; "Otro" y lo desconocido, Otras.
-     */
     public static Area deProyecto(String categoria) {
         String c = sinTildes(categoria).toLowerCase().trim();
         if (c.matches("^(frontend|backend|full ?stack|app movil|mobile|api|devops|data).*"))
@@ -66,15 +56,24 @@ public final class AreaEmpleo {
         return Area.OTRAS;
     }
 
-    /** "Programacion · Backend" se muestra como "Programación · Backend"; el resto queda igual. */
     public static String categoriaVisible(String categoria) {
-        if (categoria == null)
+        return textoVisible(categoria);
+    }
+
+    // los formularios guardan algunas palabras sin tilde (Hibrido, Educacion...). Esto las escribe bien solo al mostrarlas; lo guardado no se toca
+    public static String textoVisible(String texto) {
+        if (texto == null)
             return null;
-        return categoria
+        return texto
                 .replaceAll("\\bProgramacion\\b", "Programación")
                 .replaceAll("\\bDiseno\\b", "Diseño")
                 .replaceAll("\\bGrafico\\b", "Gráfico")
-                .replaceAll("\\bIlustracion\\b", "Ilustración");
+                .replaceAll("\\bIlustracion\\b", "Ilustración")
+                .replaceAll("\\bEducacion\\b", "Educación")
+                .replaceAll("\\bHibrido\\b", "Híbrido")
+                .replaceAll("\\bPracticas\\b", "Prácticas")
+                .replaceAll("\\brestriccion\\b", "restricción")
+                .replaceAll("\\bBasico\\b", "Básico");
     }
 
     private static String sinTildes(String s) {

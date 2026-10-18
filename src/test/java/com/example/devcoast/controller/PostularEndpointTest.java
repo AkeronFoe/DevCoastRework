@@ -40,7 +40,6 @@ import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 import com.example.devcoast.service.PlanService;
 
-// el botón "Postularme" de la lista de empleos usa /empleos/{id}/postular (JSON); /aplicar sigue igual (redirección)
 @WebMvcTest(SolicitudController.class)
 @Import(SecurityConfig.class)
 class PostularEndpointTest {

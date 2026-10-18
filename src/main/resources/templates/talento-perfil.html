@@ -44,7 +44,6 @@
                 </div>
 
                 <div class="tpg">
-                    <!-- ===== ficha de papel: quién es y cómo contactarle ===== -->
                     <article class="ficha" th:style="'--av:' + ${tv.color}">
                         <div class="tc-top">
                             <span class="tc-av big" aria-hidden="true">
@@ -72,7 +71,6 @@
                             <a th:if="${tv.githubUrl != null}" th:href="${tv.githubUrl}" target="_blank" rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
                         </div>
 
-                        <!-- invitar (solo cuentas de empresa): el formulario se abre en la misma ficha, sin ventana aparte -->
                         <div class="tp-inv" th:if="${esEmpresa}">
                             <details class="inv" th:if="${!yaInvitado and permiteContacto}">
                                 <summary class="tc-inv">Invitar a este talento</summary>
@@ -101,7 +99,6 @@
                         </div>
                     </article>
 
-                    <!-- ===== panel derecho: stack, experiencia, habilidades y contacto ===== -->
                     <div class="pf-side">
                         <section class="pn" aria-labelledby="hStack" th:if="${talento.stack != null and !#lists.isEmpty(talento.stack)}">
                             <h2 id="hStack">Stack <span class="lab" th:text="${#lists.size(talento.stack)} + ' tecnologías'">5 tecnologías</span></h2>

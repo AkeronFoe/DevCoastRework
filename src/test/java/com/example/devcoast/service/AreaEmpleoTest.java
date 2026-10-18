@@ -39,4 +39,15 @@ class AreaEmpleoTest {
         assertNull(Area.deClave("zzz"));
         assertNull(Area.deClave(null));
     }
+
+    @Test
+    void textoVisibleRestauraLasTildesQueElFormularioNoGuarda() {
+        assertEquals("Híbrido", AreaEmpleo.textoVisible("Hibrido"));
+        assertEquals("Educación", AreaEmpleo.textoVisible("Educacion"));
+        assertEquals("Prácticas", AreaEmpleo.textoVisible("Practicas"));
+        assertEquals("Sin restricción", AreaEmpleo.textoVisible("Sin restriccion"));
+        assertEquals("Básico (A1/A2)", AreaEmpleo.textoVisible("Basico (A1/A2)"));
+        assertEquals("Remoto", AreaEmpleo.textoVisible("Remoto"));
+        assertNull(AreaEmpleo.textoVisible(null));
+    }
 }

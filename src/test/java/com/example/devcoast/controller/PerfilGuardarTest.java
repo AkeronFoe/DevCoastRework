@@ -32,7 +32,6 @@ import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.PlanService;
 
-// ronda 6: lo que guarda el formulario de Mi perfil y del Perfil de empresa en POST /perfil/guardar
 @WebMvcTest(UsuarioController.class)
 @Import(SecurityConfig.class)
 class PerfilGuardarTest {

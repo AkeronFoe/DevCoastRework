@@ -10,28 +10,23 @@ import com.example.devcoast.model.Invitacion;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
 
-/** Cálculos del Dashboard que no dependen de la base: pendientes del perfil, bitácora y promedios. */
 final class DashboardCalculos {
 
     private DashboardCalculos() {
     }
 
-    /** Un pendiente del perfil con el enlace donde se resuelve. */
     record Pendiente(String texto, String href) {
     }
 
-    /** Un evento de la bitácora. {@code tono}: t (buena noticia), o (alguien vio algo), g (acción tuya o neutra). */
     record Evento(String texto, String tono, String cuando, Date fecha) {
     }
 
-    /** "Valentina Ríos" -> "Valentina" */
     static String nombrePila(String nombre) {
         if (nombre == null || nombre.isBlank())
             return "";
         return nombre.trim().split("\\s+")[0];
     }
 
-    /** Lo que falta para el 100 % del perfil: los campos que mide {@code Usuario.getCompletitudPerfil()} (el nombre siempre existe). */
     static List<Pendiente> pendientesPerfil(Usuario u) {
         List<Pendiente> p = new ArrayList<>();
         if (u == null)
@@ -61,7 +56,6 @@ final class DashboardCalculos {
         return p;
     }
 
-    /** Últimos eventos del talento: sus solicitudes (según el historial) y las invitaciones que recibió. */
     static List<Evento> eventosTalento(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora, int max) {
         List<Evento> out = new ArrayList<>();
         for (Solicitud s : solicitudes) {
@@ -95,7 +89,6 @@ final class DashboardCalculos {
         return recientes(out, max);
     }
 
-    /** Últimos eventos de la empresa: postulaciones recibidas, decisiones que tomó e invitaciones que envió. */
     static List<Evento> eventosEmpresa(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora, int max) {
         List<Evento> out = new ArrayList<>();
         for (Solicitud s : solicitudes) {
@@ -131,7 +124,6 @@ final class DashboardCalculos {
         return recientes(out, max);
     }
 
-    /** Promedio redondeado, o null si no hay valores. */
     static Integer promedio(List<Integer> valores) {
         if (valores == null || valores.isEmpty())
             return null;
@@ -148,7 +140,6 @@ final class DashboardCalculos {
         return new Evento(texto, tono, cuando(fecha, ahora), fecha);
     }
 
-    /** "hoy", "ayer", "hace 5 días", y a partir de un mes la fecha corta ("14 oct"). */
     static String cuando(Date fecha, Date ahora) {
         if (fecha == null)
             return "";

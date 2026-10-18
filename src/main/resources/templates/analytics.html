@@ -6,7 +6,7 @@
     <title>Analytics | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/nautico-analytics.css}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script th:src="@{/JS/vendor/chart.umd.js}"></script>
 </head>
 
 <body th:classappend="${usuarioActualTipo == 'empresa'} ? 'empresa'"
@@ -157,12 +157,12 @@
                                     <td th:text="${i.count}" style="color:var(--mute);font-weight:700;">1</td>
                                     <td th:text="${row.titulo}" style="font-weight:600;color:var(--ink);">Título</td>
                                     <td>
-                                        <span class="pill" th:text="${row.categoria ?: '—'}">Cat</span>
+                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.categoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
                                             th:classappend="${row.modalidad == 'Remoto'} ? ' pill-blue' : (${row.modalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
-                                            th:text="${row.modalidad ?: '—'}">Remoto</span>
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.modalidad) ?: '—'}">Remoto</span>
                                     </td>
                                     <td>
                                         <span class="pill"
@@ -357,12 +357,12 @@
                                     <td style="font-weight:600;color:var(--ink);" th:text="${sol.empleoTitulo}">Título</td>
                                     <td th:text="${sol.empleoEmpresaNombre}">Empresa</td>
                                     <td>
-                                        <span class="pill" th:text="${sol.empleoCategoria ?: '—'}">Cat</span>
+                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoCategoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
                                             th:classappend="${sol.empleoModalidad == 'Remoto'} ? ' pill-blue' : (${sol.empleoModalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
-                                            th:text="${sol.empleoModalidad ?: '—'}">Remoto</span>
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoModalidad) ?: '—'}">Remoto</span>
                                     </td>
                                     <td style="text-align:right;">
                                         <span class="pill pill-amber" th:if="${sol.estado == 'revision'}">En revisión</span>
@@ -417,7 +417,6 @@
     <div th:replace="~{fragments/nautico :: toast}"></div>
 
     <script th:inline="javascript">
-        // colores de marca; el texto y las rejillas salen del tema activo
         const PALETTE      = ['#FF7B4F','#2DD4BF','#CC4B27','#1F8F82','#A6ABB8','#F2B544','#7C8CF8','#E85D9A'];
         const MODAL_COLORS = { 'Remoto':'#2DD4BF', 'Presencial':'#FF7B4F', 'Híbrido':'#7C8CF8', 'Hibrido':'#7C8CF8' };
         const css       = getComputedStyle(document.documentElement);

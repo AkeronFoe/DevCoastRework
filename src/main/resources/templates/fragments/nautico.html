@@ -3,20 +3,19 @@
 
 <body>
 
-    <!-- Sistema visual náutico (docs/diseno/DEVCOAST-SISTEMA-VISUAL.md).
-         Fragmentos compartidos por las páginas rediseñadas. La fuente de verdad del dibujo
-         es el HTML de cada mockup; aquí solo están las piezas que se repiten. -->
+    <!-- oigan, aquí viven las piezas que se repiten en casi todas las pantallas: menú lateral, barra de arriba, el barquito, los avisos... -->
 
     <th:block th:fragment="meta">
         <meta charset="UTF-8">
-        <!-- token CSRF: lo usa nautico.js para los fetch() que modifican datos -->
         <meta name="_csrf" th:content="${_csrf.token}">
         <meta name="_csrf_header" th:content="${_csrf.headerName}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" th:href="@{/favicon.ico}" sizes="any">
+        <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/favicon-32.png}">
+        <link rel="apple-touch-icon" th:href="@{/img/apple-touch-icon.png}">
         <meta name="color-scheme" content="dark">
     </th:block>
 
-    <!-- tipografías (Space Grotesk y JetBrains Mono) -->
     <th:block th:fragment="fonts">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,18 +23,15 @@
             href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
     </th:block>
 
-    <!-- páginas de la app (con shell). Las páginas públicas (landing, login, registro) traen su propio CSS autocontenido -->
     <th:block th:fragment="assets">
         <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
         <link rel="stylesheet" th:href="@{/CSS/nautico.css}">
         <link rel="stylesheet" th:href="@{/CSS/nautico-temas.css}">
-        <!-- sin defer: fija tema y preferencias en <html> antes del primer pintado -->
         <script th:src="@{/JS/preferencias.js}"></script>
-        <script th:src="@{/JS/i18n.js}"></script>
+        <script th:src="@{/JS/i18n.js}" defer></script>
         <script th:src="@{/JS/nautico.js}" defer></script>
     </th:block>
 
-    <!-- barco por piezas con la gaviota; clip = id único del clipPath del casco (hullclip, hullclip2…) -->
     <th:block th:fragment="boat(clip)">
         <svg class="boat" viewBox="90 30 470 490" aria-hidden="true">
       <defs><clipPath th:id="${clip}"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath></defs>
@@ -65,7 +61,6 @@
     </svg>
     </th:block>
 
-    <!-- gaviota (silueta unificada). Se usa dentro del barco y en el estado vacío -->
     <th:block th:fragment="gull">
         <g class="gull">
             <path d="M189 378 V398 M211 378 V398 M189 398 H179 M211 398 H201" stroke="#FF7B4F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -83,7 +78,6 @@
       </g>
     </th:block>
 
-    <!-- banderines que ondean (landing, login y registro) -->
     <th:block th:fragment="bunting">
   <svg class="bunting" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0 6 Q360 46 720 6 Q1080 46 1440 6" fill="none" stroke="#3A3D47" stroke-width="2"/>
@@ -91,20 +85,14 @@
   </svg>
     </th:block>
 
-    <!-- las tres olas planas -->
     <th:block th:fragment="sea">
         <div class="wvs"><svg class="wv wv1" viewBox="0 0 2880 160" preserveAspectRatio="none"><path d="M0 40 Q 90 0 180 40 T 360 40 T 540 40 T 720 40 T 900 40 T 1080 40 T 1260 40 T 1440 40 T 1620 40 T 1800 40 T 1980 40 T 2160 40 T 2340 40 T 2520 40 T 2700 40 T 2880 40 L2880 160 L0 160 Z" fill="#2DD4BF"/></svg><svg class="wv wv2" viewBox="0 0 2880 160" preserveAspectRatio="none"><path d="M0 66 Q 90 26 180 66 T 360 66 T 540 66 T 720 66 T 900 66 T 1080 66 T 1260 66 T 1440 66 T 1620 66 T 1800 66 T 1980 66 T 2160 66 T 2340 66 T 2520 66 T 2700 66 T 2880 66 L2880 160 L0 160 Z" fill="#1F8F82"/></svg><svg class="wv wv3" viewBox="0 0 2880 160" preserveAspectRatio="none"><path d="M0 94 Q 90 54 180 94 T 360 94 T 540 94 T 720 94 T 900 94 T 1080 94 T 1260 94 T 1440 94 T 1620 94 T 1800 94 T 1980 94 T 2160 94 T 2340 94 T 2520 94 T 2700 94 T 2880 94 L2880 160 L0 160 Z" fill="#0E2A2D"/></svg></div>
     </th:block>
 
-    <!-- logo compacto del sidebar -->
     <th:block th:fragment="logo">
         <svg viewBox="90 30 470 490" width="38" height="40" aria-hidden="true"><polygon points="273,52 510,274 408,276" fill="#FF7B4F" stroke="#FF7B4F" stroke-width="5" stroke-linejoin="round"/><polygon points="273,52 408,274 350,292 274,366" fill="#EA6A44" stroke="#EA6A44" stroke-width="5" stroke-linejoin="round"/><polygon points="350,292 406,271 464,396 392,396" fill="#CC4B27" stroke="#CC4B27" stroke-width="5" stroke-linejoin="round"/><rect x="260" y="42" width="12" height="356" rx="6" fill="#F3F4F8"/><defs><clipPath id="hullclip-brand"><path d="M116 397 L539 397 L492 466 Q478 490 450 490 L205 490 Q177 490 162 466 Z"/></clipPath></defs><g clip-path="url(#hullclip-brand)"><rect x="100" y="397" width="450" height="15" fill="#F3F4F8"/><rect x="100" y="412" width="450" height="29" fill="#2DD4BF"/><rect x="100" y="441" width="450" height="8" fill="#F3F4F8"/><rect x="100" y="449" width="450" height="45" fill="#CDD1DB"/></g></svg>
     </th:block>
 
-    <!-- ===== Sidebar de la app. active: dashboard | empleos | solicitudes | proyectos | directorio | perfil
-                                   | mensajes | guardados | curriculum | analytics | ajustes | ofertas | postulaciones | crear
-         Los datos (shellCompletitud, shellTotalOfertas, invPendienteCount, mensajesNoLeidos) los pone NotificacionInterceptor.
-         El tipo de cuenta sale de la sesión (la app no usa sec:authorize: la seguridad es por RoleGuard). ===== -->
     <aside class="side" id="side" aria-label="Menú principal" th:fragment="sidebar(active)">
         <a class="brand" th:href="@{/dashboard}" aria-label="DevCoast, inicio">
             <th:block th:replace="~{fragments/nautico :: logo}"></th:block>DevCoast
@@ -115,7 +103,6 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
                 Dashboard</a>
 
-            <!-- Cuenta de Talento -->
             <th:block th:unless="${esEmpresa}">
                 <a class="mi" th:href="@{/empleos}" th:aria-current="${active == 'empleos'} ? 'page'">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
@@ -128,7 +115,6 @@
                     Proyectos</a>
             </th:block>
 
-            <!-- Cuenta de Empresa -->
             <th:block th:if="${esEmpresa}">
                 <a class="mi" th:href="@{/misEmpleos}" th:aria-current="${active == 'ofertas'} ? 'page'">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
@@ -145,7 +131,6 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.5 4-7 8-7s7.3 2.5 8 7"/></svg>
                 <span th:text="${esEmpresa} ? 'Perfil de empresa' : 'Mi perfil'">Mi perfil</span></a>
 
-            <!-- Grupo secundario: funciones que existen en la app y no están en el menú del mockup -->
             <span class="menu-h" id="menuMas">MÁS</span>
             <div class="menu-g" role="group" aria-labelledby="menuMas">
                 <a class="mi sm" th:href="@{/mensajes}" th:aria-current="${active == 'mensajes'} ? 'page'">
@@ -170,7 +155,6 @@
         </nav>
 
         <div class="side-bottom">
-            <!-- perfil completado: solo talento y solo si el servidor lo calculó -->
             <div class="prog" th:if="${session.usuarioActualTipo != 'empresa' and shellCompletitud != null}">
                 <div class="prog-top"><span>PERFIL</span><b th:text="${shellCompletitud} + '%'">80%</b></div>
                 <div class="pbar" role="progressbar" th:attr="aria-valuenow=${shellCompletitud}" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo"><i th:style="'width:' + ${shellCompletitud} + '%'"></i></div>
@@ -186,7 +170,6 @@
         </div>
     </aside>
 
-    <!-- ===== Barra superior. searchAction: ruta GET que recibe ?q= ; searchLabel/placeholder: textos; q: valor actual ===== -->
     <header class="top" th:fragment="topbar(searchAction, searchLabel, placeholder, q)">
         <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="side">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -201,7 +184,6 @@
         </form>
 
         <div class="user">
-            <!-- campana: notificaciones reales (las pone NotificacionInterceptor) -->
             <div class="bell" id="bell">
                 <button class="bell-btn" id="bellBtn" type="button" aria-expanded="false" aria-controls="bellPanel"
                     th:attr="aria-label=${notifNoLeidas != null and notifNoLeidas > 0} ? |Notificaciones, ${notifNoLeidas} sin leer| : 'Notificaciones'">
@@ -233,13 +215,10 @@
         </div>
     </header>
 
-    <!-- fondo oscuro del cajón móvil (nautico.js lo abre y cierra) -->
     <div class="scrim" id="scrim" hidden th:fragment="scrim"></div>
 
-    <!-- aviso con "Deshacer" opcional: window.DevCoast.toast(texto, { undo: fn }) lo rellena -->
     <div class="toast" id="toast" role="status" hidden th:fragment="toast"><span id="toastTxt"></span><button type="button" id="toastUndo" hidden>Deshacer</button></div>
 
-    <!-- estado vacío "Mar en calma." — titulo, texto y (opcional) enlace para limpiar filtros -->
     <div class="empty" th:fragment="empty(titulo, texto, enlaceHref, enlaceTexto)">
         <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/>
             <th:block th:replace="~{fragments/nautico :: gull}"></th:block></svg>

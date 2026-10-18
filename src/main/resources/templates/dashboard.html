@@ -25,7 +25,6 @@
                 <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
-                <!-- ===== saludo y números ===== -->
                 <section class="hello" aria-label="Resumen de hoy">
                     <div class="hello-t">
                         <div class="eyebrow">// resumen</div>
@@ -52,7 +51,6 @@
                     </dl>
                 </section>
 
-                <!-- ===== carta de navegación ===== -->
                 <div class="sec2"><h2>Tu travesía</h2><span>tus solicitudes, de la salida al puerto</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#FF7B4F"></i>Programación</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#2DD4BF"></i>Diseño</span>
@@ -60,7 +58,6 @@
                     <a th:href="@{/solicitudes}">ver solicitudes</a></div>
                 <th:block th:replace="~{fragments/pase :: carta(${carta})}"></th:block>
 
-                <!-- ===== Para ti hoy: mejor match y, si hay, una invitación por responder ===== -->
                 <th:block th:if="${destacado != null or invitacion != null}">
                     <div class="sec2"><h2>Para ti hoy</h2><span th:text="${destacado != null} ? 'lo que más encaja con tu perfil' : 'una empresa quiere conocerte'">lo que más encaja con tu perfil</span><a th:href="@{/empleos}">ver todas las ofertas</a></div>
                     <div class="pair" th:classappend="${destacado == null or invitacion == null} ? 'solo'">
@@ -69,7 +66,6 @@
                     </div>
                 </th:block>
 
-                <!-- ===== Avistadas ===== -->
                 <th:block th:if="${!#lists.isEmpty(avistadas)}">
                     <div class="sec2"><h2>Avistadas</h2><span>ofertas recientes con buen match</span><a th:href="@{/empleos}">ver más</a></div>
                     <div class="minis">
@@ -77,7 +73,6 @@
                     </div>
                 </th:block>
 
-                <!-- ===== Tu semana: bitácora ===== -->
                 <div class="sec2"><h2>Tu semana</h2><span>cómo va tu perfil y qué ha pasado</span></div>
                 <section class="pn" aria-labelledby="hBit">
                     <h2 id="hBit">Bitácora <span class="lab" th:text="'PERFIL ' + ${completitud} + '%'">PERFIL 80%</span></h2>
@@ -104,7 +99,6 @@
         </div>
     </div>
 
-    <!-- ===== bienvenida a talentos con el perfil recién creado ===== -->
     <dialog class="ob" id="ob" th:if="${mostrarOnboarding}" aria-labelledby="obT"
         th:attr="data-stack=${usuario != null and usuario.stack != null ? #strings.listJoin(usuario.stack, '|') : ''}">
         <form id="obForm" novalidate>

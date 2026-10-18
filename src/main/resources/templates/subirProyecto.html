@@ -607,21 +607,12 @@
 </body>
 <script th:src="@{/JS/s-proyecto.js}" defer></script>
 <script th:if="${proyecto.id != null}" th:inline="javascript">
-    // s-proyecto.js ahora carga con "defer" (necesitaba esperar a
-    // proyectos-render.js), así que esta precarga tiene que esperar a
-    // DOMContentLoaded en vez de correr inline — si no, crearChip/stackTags/
-    // actualizarPreviewLateral todavía no existirían cuando el parser llega acá
     document.addEventListener('DOMContentLoaded', function () {
         var colorSel = document.querySelector('.color-dot.sel');
         if (colorSel) iconColor = colorSel.dataset.color;
-        // si el proyecto ya tenía un banner de la tanda vieja (que ya no se
-        // ofrece en el picker), se conserva tal cual en vez de resetearse
-        // al default silenciosamente solo por no tener un tile marcado
         coverActual = /*[[${proyecto.bannerClase ?: 'cover-terminal'}]]*/ 'cover-terminal';
         var bannerSel = document.querySelector('.banner-opt.sel');
         if (bannerSel) coverActual = bannerSel.dataset.cover;
-        // el ícono clásico ya no tiene picker en el formulario — se
-        // preserva tal cual estaba guardado en vez de resetearse
         iconKey = /*[[${proyecto.iconoClave ?: 'layers'}]]*/ 'layers';
 
         function precargarTags(valor, array, fieldId, inputId) {

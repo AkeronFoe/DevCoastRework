@@ -6,7 +6,7 @@
     <title>Crear cuenta | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/acceso.css}">
-    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/i18n.js}" defer></script>
     <script th:src="@{/JS/acceso.js}" defer></script>
 </head>
 
@@ -161,7 +161,7 @@
                         <div class="meter" aria-hidden="false"><i></i><i></i><i></i><i></i><span class="meter-txt" aria-live="polite">fuerza de la contraseña</span></div>
                     </form>
 
-                        <p class="formerr" id="formErr" role="alert" th:text="${errorParam != null} ? 'Revisa los campos marcados para poder subir a bordo.'"></p>
+                        <p class="formerr" id="formErr" role="alert" th:text="${errorParam == 'limite'} ? 'Se crearon demasiadas cuentas desde este equipo. Espera unos minutos e inténtalo de nuevo.' : (${errorParam != null} ? 'Revisa los campos marcados para poder subir a bordo.')"></p>
                     </div>
                     <div class="pass-stub" id="stub">
                         <button class="go" id="go" type="submit" th:attr="form=${esEmpresa} ? 'formEmpresa' : 'formTalento'" data-label="Crear cuenta" data-busy="Creando cuenta…"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg><span id="goTxt">Crear cuenta</span></button>

@@ -1,6 +1,7 @@
 package com.example.devcoast.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -28,7 +29,6 @@ import com.example.devcoast.repository.MensajeRepository;
 import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.ProyectoRepository;
 
-// Subir / editar proyecto con el shell náutico: el formulario por pasos conserva los ids que usa s-proyecto.js
 @WebMvcTest(ProyectoController.class)
 @Import(SecurityConfig.class)
 class SubirProyectoRenderTest {
@@ -63,15 +63,14 @@ class SubirProyectoRenderTest {
                 .andExpect(view().name("subirProyecto"))
                 .andExpect(content().string(containsString("// nuevo proyecto")))
                 .andExpect(content().string(containsString("Subir proyecto")))
-                .andExpect(content().string(containsString("/CSS/nautico-subir.css")))
+                .andExpect(content().string(matchesPattern("(?s).*/CSS/nautico-subir(-[0-9a-f]{32})?\\.css.*")))
                 .andExpect(content().string(containsString("action=\"/proyectos/guardar\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")))
-                // los campos ocultos que llena s-proyecto.js al enviar
                 .andExpect(content().string(containsString("name=\"nombre\" id=\"h-nombre\"")))
                 .andExpect(content().string(containsString("name=\"stack\" id=\"h-stack\"")))
                 .andExpect(content().string(containsString("id=\"btn-publicar\"")))
                 .andExpect(content().string(containsString("id=\"lp-card\"")))
-                .andExpect(content().string(containsString("/JS/proyectos-render.js")))
+                .andExpect(content().string(matchesPattern("(?s).*/JS/proyectos-render(-[0-9a-f]{32})?\\.js.*")))
                 .andExpect(content().string(not(containsString("ws-top"))))
                 .andExpect(content().string(not(containsString("wsjobs"))));
     }

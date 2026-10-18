@@ -1,7 +1,4 @@
-/* DevCoast · preferencias de interfaz (tema, tamaño de texto, densidad, contraste, movimiento).
-   Se carga en el <head>, sin defer, para fijar los atributos de <html> antes del primer pintado y que la
-   página no parpadee. Las claves de localStorage son las mismas que usaba themes.js (theme, ui-density,
-   ui-text-size, ui-contrast, dc-reduce-motion), así las preferencias ya guardadas siguen valiendo. */
+// esto de acá pone el tema y las preferencias ANTES de que se pinte la página, para que no parpadee
 (function () {
     'use strict';
 
@@ -18,7 +15,7 @@
         try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
     }
     function write(key, value) {
-        try { localStorage.setItem(key, value); } catch (e) { /* modo privado: la preferencia vale solo en esta página */ }
+        try { localStorage.setItem(key, value); } catch (e) { }
     }
 
     function valores() {
@@ -51,7 +48,6 @@
     apply();
 
     window.DevCoastPrefs = {
-        /* name: theme | density | text | contrast | motion */
         get: function (name) { return valores()[name]; },
         set: function (name, value) {
             if (!KEYS[name]) return;
@@ -62,7 +58,6 @@
         apply: apply
     };
 
-    // si el usuario cambia una preferencia en otra pestaña, esta se pone al día
     window.addEventListener('storage', function (e) {
         for (var k in KEYS) { if (KEYS[k] === e.key) { apply(); return; } }
     });

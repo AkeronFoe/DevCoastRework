@@ -49,7 +49,6 @@ public class InvitacionController {
             return "redirect:/solicitudes?tab=invitaciones";
         }
 
-        // si ya respondiste no dejo que se cambie de nuevo, evita duplicar notificaciones
         if (!"pendiente".equals(inv.getEstado())) {
             ra.addFlashAttribute("flashMessage", "Ya respondiste esta invitación");
             ra.addFlashAttribute("flashType", "info");

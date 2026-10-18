@@ -1,5 +1,3 @@
-/* DevCoast · landing (docs/diseno/devcoast-landing-motion.html). Autocontenido: no carga nautico.css. */
-/* Concepto: carta náutica que se recorre hacia el fondo. Cada escena se fija a la pantalla y el scroll hace avanzar la historia. */
 :root{
   --sky:#101114; --ink:#F3F4F8; --mute:#A6ABB8; --line:#2B2E36; --line2:#3A3D47;
   --orange:#FF7B4F; --orange-d:#CC4B27; --teal:#2DD4BF; --teal-d:#1F8F82;
@@ -28,8 +26,6 @@ h1,h2,h3{text-wrap:balance}
 .nl{position:relative}
 .nl:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
 .nl:hover:after,.nl:focus-visible:after{transform:scaleX(1)}
-
-/* HUD de profundidad */
 .hud{position:fixed;right:18px;top:50%;margin-top:-23vh;z-index:20;height:46vh;display:flex;flex-direction:column;align-items:flex-end;gap:12px;font-family:var(--font-mono);font-size:12px;color:var(--teal);opacity:0;pointer-events:none}
 .hud-n{font-size:18px;font-weight:700;color:var(--ink)}
 .hud-bar{position:relative;flex:1;width:2px;background:var(--teal-d);margin-right:6px}
@@ -37,8 +33,6 @@ h1,h2,h3{text-wrap:balance}
 .hud-t{position:absolute;right:12px;font-size:11px;color:var(--mute);transform:translateY(-50%)}
 .bubbles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;overflow:hidden}
 .bub{position:absolute;bottom:-30px;border:2px solid var(--teal);border-radius:50%;opacity:0}
-
-/* HERO */
 #hero .stick{background:var(--sky);display:flex;flex-direction:column}
 .bar{position:relative;z-index:2;border-bottom:1px solid var(--line);padding:8px var(--gx);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-family:var(--font-mono);font-size:12px;color:var(--mute)}
 .nav{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:14px var(--gx)}
@@ -60,8 +54,6 @@ h1,h2,h3{text-wrap:balance}
 #sea{position:absolute;left:0;top:0;width:100%;height:100%;z-index:3;pointer-events:none;will-change:transform}
 #sea .wv{position:absolute;left:0;top:0;width:200%;height:160px;display:block}
 #sea .seabody{position:absolute;left:0;right:0;top:158px;height:calc(100vh + 420px);background:var(--sea0)}
-
-/* RUTA */
 .sec-h{display:flex;flex-direction:column;gap:6px}
 .eyebrow{font-family:var(--font-mono);font-size:14px;color:var(--orange)}
 .sec-h h2{font-size:clamp(28px,3.8vw,52px);line-height:1.05;letter-spacing:-.02em}
@@ -84,8 +76,6 @@ h1,h2,h3{text-wrap:balance}
 .mini-ui{margin-top:4px;background:#17191F;border-radius:10px;padding:10px;font-family:var(--font-mono);font-size:11px;color:var(--mute);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .chip{border:1px solid var(--line2);padding:3px 7px;border-radius:6px}
 .chip.t{border-color:var(--teal);color:var(--teal)}.chip.o{border-color:var(--orange);color:var(--orange)}
-
-/* PASES */
 #pases .stick{gap:0}
 #pases .tks{margin-block:auto;padding-bottom:6vh}
 .pases-h{width:min(1100px,100%)}
@@ -100,8 +90,6 @@ h1,h2,h3{text-wrap:balance}
 .tk-v{font-size:14px;font-weight:500}
 .stub{width:84px;flex:none;color:var(--paper-ink);border-radius:0 14px 14px 0;padding:18px 10px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;transform-origin:top left;font-family:var(--font-mono);font-size:11px;font-weight:700}
 .notch{position:absolute;right:73px;width:20px;height:20px;border-radius:50%;background:var(--bgnow)}
-
-/* GAVIOTA */
 #gaviota .stick{display:flex;align-items:center;justify-content:center;padding:0 var(--gx)}
 .gq{width:min(900px,100%);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:36px}
 .tile{position:relative;width:250px;flex:none;background:transparent;border:2px solid var(--teal);border-radius:20px;overflow:hidden}
@@ -110,8 +98,6 @@ h1,h2,h3{text-wrap:balance}
 .bubble:before{content:"";position:absolute;left:-8px;top:50%;margin-top:-8px;width:16px;height:16px;background:var(--paper);transform:rotate(45deg)}
 .bubble p{position:relative;font-size:clamp(20px,2.4vw,27px);font-weight:700;line-height:1.22}
 .bubble .who{position:relative;margin-top:12px;font-family:var(--font-mono);font-size:12px;color:var(--paper-mute)}
-
-/* MUELLES */
 #muelles .stick{gap:40px}
 #muelles .docks{margin-block:auto;padding-bottom:6vh}
 .docks{width:min(1200px,100%);display:flex;flex-wrap:nowrap}
@@ -121,8 +107,6 @@ h1,h2,h3{text-wrap:balance}
 .dock1{background:var(--orange);color:var(--sky);padding-right:88px;clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}
 .dock2{background:#15363A;margin-left:-48px;padding-left:96px;clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)}
 .dock .tagl{font-family:var(--font-mono);font-size:14px;font-weight:700}
-
-/* FINAL */
 #crear{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between}
 .x-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;text-align:center;padding:90px var(--gx) 40px}
 .xbox{position:relative;width:150px;height:150px}
@@ -149,7 +133,6 @@ h1,h2,h3{text-wrap:balance}
   .docks{flex-wrap:wrap}
   .pcs{grid-template-columns:1fr}
 }
-/* sin sticky (móvil o movimiento reducido) */
 .simple .scene{height:auto !important}
 .simple .stick{position:relative;height:auto;overflow:visible;padding-block:72px}
 .simple #hero{height:195vh !important}
@@ -205,6 +188,5 @@ h1,h2,h3{text-wrap:balance}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--paper);color:var(--paper-ink);padding:10px 16px;border-radius:8px;font-weight:700}
 .skip:focus{top:12px}
-/* el fragmento de olas trae un contenedor .wvs: aquí no cuenta como caja */
 #sea .wvs{display:contents}
 .nav-l svg{width:40px;height:42px;flex:none}

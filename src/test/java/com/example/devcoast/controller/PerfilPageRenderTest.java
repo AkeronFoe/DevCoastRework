@@ -39,7 +39,6 @@ import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 import com.example.devcoast.service.CleanupService;
 
-// ronda 6: Mi perfil (talento) y Perfil de empresa con el shell náutico y el formulario en un pase vertical
 @WebMvcTest(PageController.class)
 @Import(SecurityConfig.class)
 class PerfilPageRenderTest {
@@ -104,7 +103,7 @@ class PerfilPageRenderTest {
         u.setStack(List.of("React", "TypeScript"));
         u.setHabilidadesBlandas(List.of("Comunicación"));
         u.setUbicacion("Santiago, Chile");
-        u.setModalidad("Remoto");               // guardado por la versión anterior de Mi perfil
+        u.setModalidad("Remoto");
         u.setDisponibilidad("Full-time");
         u.setEspecialidad("frontend");
         u.setLinkedinUrl("https://linkedin.com/in/valentina");
@@ -123,7 +122,6 @@ class PerfilPageRenderTest {
                 .andExpect(view().name("perfil"))
                 .andExpect(content().string(containsString("// mi perfil")))
                 .andExpect(content().string(containsString("class=\"pass\"")))
-                // los valores viejos ("Remoto", "Full-time") quedan seleccionados en los selectores nuevos
                 .andExpect(content().string(containsString("selected=\"selected\">Remoto</option>")))
                 .andExpect(content().string(containsString("selected=\"selected\">Tiempo completo</option>")))
                 .andExpect(content().string(containsString("selected=\"selected\">Frontend</option>")))

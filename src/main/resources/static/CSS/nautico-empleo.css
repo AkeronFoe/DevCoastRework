@@ -1,8 +1,4 @@
-/* DevCoast · Ficha de una oferta. Requiere nautico.css, nautico-temas.css y nautico-pase.css (pase .jt, chips de habilidades .s, paneles .pn). */
-
 .back { display: inline-block; margin-bottom: 16px; }
-
-/* encabezado: el pase de la oferta */
 .jd-hero { margin-top: 0; }
 .jd-hero .jt-t { margin: 0; }
 .jd-hero .co a { color: var(--paper-ink); text-decoration: underline; text-decoration-color: var(--orange-ink); text-underline-offset: 4px; }
@@ -15,8 +11,6 @@
 .jd-hero .apply.save[aria-pressed="true"] { background: var(--paper-ink); color: #F3F4F8; }
 .jd-hero.closed .jt-main { opacity: .85; }
 .jd-hero .nomatch { font: 500 12px/1.4 var(--font-mono); margin: 0; }
-
-/* detalle en dos columnas */
 .jd { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 22px; }
 .jd-main, .jd-aside { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .rg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 24px; margin: 0; }
@@ -28,8 +22,6 @@
 .prose.sm { font-size: 14.5px; color: var(--mute); }
 .pn .sk .s.nm { border-color: var(--line2); color: var(--ink); background: transparent; }
 .pn .sk .s.nm { font-size: 12.5px; padding: 4px 11px; }
-
-/* confirmación de eliminar (details) */
 .jd-del { margin-top: 4px; }
 .jd-ret > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border: 1px solid var(--line2); border-radius: 10px; font: 700 14px var(--font-display); color: var(--ink); }
 .jd-ret > summary::-webkit-details-marker { display: none; }
@@ -39,11 +31,9 @@
 .jd-ret-box p { font: 500 12.5px/1.5 var(--font-mono); color: var(--mute); margin: 0; }
 .jd-no { height: 44px; padding: 0 18px; border: 1px solid var(--line2); border-radius: 10px; background: none; color: var(--ink); font: 700 14px var(--font-display); cursor: pointer; }
 .jd-ret-box .btn-d { height: 44px; }
-
-/* diálogo de postulación */
-.ap-dlg { border: 0; padding: 0; background: transparent; width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 32px); color: var(--paper-ink); }
+.ap-dlg { border: 0; padding: 0; background: transparent; width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); color: var(--paper-ink); }
 .ap-dlg::backdrop { background: rgba(6, 17, 19, .78); }
-.ap-f { background: var(--paper); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+.ap-f { background: var(--paper); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; }
 .ap-f h2 { font-size: 28px; letter-spacing: -.02em; margin: 0; }
 .ap-sub { font: 500 13px var(--font-mono); color: var(--paper-mute); margin: -10px 0 0; }
 .ap-fl { display: flex; flex-direction: column; gap: 6px; }

@@ -28,12 +28,10 @@ import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Postulaciones de la cuenta de Empresa: las postulaciones de todas sus ofertas, agrupadas por oferta.
- * ?estado=revision|aceptadas|rechazadas &amp;q= (nombre o cargo del candidato).
- */
 @Controller
 public class CandidatosController {
+
+    private static final int POR_PAGINA = 25;
 
     private final EmpleoRepository empleoRepository;
     private final SolicitudRepository solicitudRepository;
@@ -52,7 +50,7 @@ public class CandidatosController {
 
     @GetMapping("/candidatos")
     public String candidatos(@RequestParam(required = false) String estado, @RequestParam(required = false) String q,
-            Model model, HttpSession session) {
+            @RequestParam(defaultValue = "0") int page, Model model, HttpSession session) {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
         if (RoleGuard.soloEmpresa(session))
@@ -70,7 +68,6 @@ public class CandidatosController {
         List<String> empleoIds = empleos.stream().map(Empleo::getId).collect(Collectors.toList());
         List<Solicitud> todas = empleoIds.isEmpty() ? List.of() : solicitudRepository.findByEmpleoIdIn(empleoIds);
 
-        // candidatos para calcular el match de cada uno con el stack de la oferta
         Map<String, Usuario> candidatos = new HashMap<>();
         Set<String> usuarioIds = todas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
         if (!usuarioIds.isEmpty())
@@ -111,7 +108,12 @@ public class CandidatosController {
 
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
 
-        model.addAttribute("grupos", grupos);
+        int totalFiltradas = grupos.stream().mapToInt(g -> g.getItems().size()).sum();
+        int totalPaginas = Math.max(1, (int) Math.ceil(totalFiltradas / (double) POR_PAGINA));
+        int pagina = Math.min(Math.max(0, page), totalPaginas - 1);
+        model.addAttribute("grupos", recortar(grupos, pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA));
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("totalPaginas", totalPaginas);
         model.addAttribute("estadoSel", filtro);
         model.addAttribute("q", busqueda.isEmpty() ? null : busqueda);
         model.addAttribute("nTotal", total);
@@ -119,10 +121,23 @@ public class CandidatosController {
         model.addAttribute("nAceptadas", aceptadas);
         model.addAttribute("nNoAvanzaron", noAvanzaron);
         model.addAttribute("hayFiltros", !filtro.isEmpty() || !busqueda.isEmpty());
-        // con el plan Gratis, aceptar una postulación registra la tarifa de colocación (ver SolicitudController)
         model.addAttribute("cobraColocacion", !planService.esPro(empresa));
         agregarSesion(session, model);
         return "candidatos";
+    }
+
+    // deja solo las postulaciones [desde, hasta) contando todas las ofertas en orden; las ofertas sin nada en esa página se omiten
+    private static List<PostulacionesOfertaVista> recortar(List<PostulacionesOfertaVista> grupos, int desde, int hasta) {
+        List<PostulacionesOfertaVista> res = new ArrayList<>();
+        int inicio = 0;
+        for (PostulacionesOfertaVista g : grupos) {
+            int n = g.getItems().size();
+            int a = Math.max(desde - inicio, 0), b = Math.min(hasta - inicio, n);
+            if (a < b)
+                res.add(g.conItems(g.getItems().subList(a, b)));
+            inicio += n;
+        }
+        return res;
     }
 
     private static boolean coincideEstado(SolicitudVista v, String filtro) {

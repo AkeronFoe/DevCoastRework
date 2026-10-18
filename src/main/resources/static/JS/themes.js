@@ -1,5 +1,3 @@
-// ── CSRF: adjunta la cabecera automáticamente a todo fetch() que modifique
-// datos, para no tener que tocar cada llamada AJAX de la app una por una.
 (function () {
     var tokenMeta = document.querySelector('meta[name="_csrf"]');
     var headerMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -218,8 +216,6 @@ function applyTheme(name) {
   document.dispatchEvent(new CustomEvent('dc:theme-changed', { detail: { theme: name } }))
 }
 
-// ── Ciclo de tema al hacer clic en el widget .theme-toggle del topbar ──
-// (antes solo mostraba el tema actual; no reaccionaba a clics en ninguna página)
 const THEME_ORDER = ['light', 'dark', 'midnight']
 
 function cycleTheme() {

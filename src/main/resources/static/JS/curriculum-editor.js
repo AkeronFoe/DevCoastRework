@@ -1,8 +1,3 @@
-/* DevCoast · Currículum (diseño náutico).
-   Diálogo "Editar secciones" con pestañas, experiencias y educación que se agregan y se quitan, chips de
-   habilidades blandas, preferencias e idiomas. Guarda con el mismo endpoint de siempre (POST /curriculum/guardar)
-   y recarga la página para que la hoja muestre exactamente lo que quedó guardado. "Descargar PDF" imprime la hoja.
-   En la vista de revisión de la empresa (sin diálogo) solo funcionan el PDF y los avisos. */
 (function () {
     'use strict';
 
@@ -10,7 +5,6 @@
     var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
     var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-    /* ── descargar PDF: se imprime solo la hoja (las reglas @media print del CSS esconden el resto) ── */
     var pdf = $('#btnPdf');
     if (pdf) pdf.addEventListener('click', function () {
         var antes = document.title;
@@ -20,18 +14,16 @@
         document.title = antes;
     });
 
-    /* aviso que quedó pendiente de antes de recargar */
     try {
         if (sessionStorage.getItem('dc-cv-guardado') === '1') {
             sessionStorage.removeItem('dc-cv-guardado');
             toast('Cambios guardados.');
         }
-    } catch (e) { /* sin sessionStorage */ }
+    } catch (e) { }
 
     var dlg = $('#dlgCv');
-    if (!dlg) return;   // vista de revisión: no hay edición
+    if (!dlg) return;
 
-    /* ── pestañas ── */
     var tabs = $$('.cv-tab', dlg);
     function activar(nombre) {
         var existe = false;
@@ -63,7 +55,6 @@
 
     var editar = $('#btnEditar');
     if (editar) editar.addEventListener('click', function () { abrir('perfil'); });
-    // los enlaces "Editar secciones" de la hoja abren la pestaña que corresponde
     document.addEventListener('click', function (e) {
         var b = e.target.closest ? e.target.closest('[data-abrir]') : null;
         if (b) { e.preventDefault(); abrir(b.getAttribute('data-abrir')); }
@@ -72,7 +63,6 @@
     $('#cvCancelar').addEventListener('click', cerrar);
     dlg.addEventListener('click', function (e) { if (e.target === dlg) cerrar(); });
 
-    /* ── resumen: contador de caracteres y logros (una línea cada uno) ── */
     var bio = $('#inBio'), bioCount = $('#bioCount'), BIO_MAX = 400;
     function contarBio() {
         if (!bio || !bioCount) return;
@@ -86,7 +76,6 @@
         logros.value = crudo ? crudo.split('||').join('\n') : '';
     }
 
-    /* ── opciones de varias respuestas (modalidad, contrato) ── */
     function normalizar(v) {
         return (v || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-_]/g, ' ').trim();
     }
@@ -105,7 +94,6 @@
     iniciarMulti('#prefMod', dlg.getAttribute('data-mod'));
     iniciarMulti('#prefCon', dlg.getAttribute('data-disp'));
 
-    /* ── idiomas: un solo nivel por idioma ── */
     var nivel = { es: parseInt(dlg.getAttribute('data-es'), 10) || 5, en: parseInt(dlg.getAttribute('data-en'), 10) || 4 };
     function iniciarIdioma(sel, clave) {
         var botones = $$(sel + ' button', dlg);
@@ -120,7 +108,6 @@
     iniciarIdioma('#langEs', 'es');
     iniciarIdioma('#langEn', 'en');
 
-    /* ── experiencias y educación: se clonan desde <template> y se quitan con "Quitar" ── */
     function renumerar(lista, etiqueta) {
         $$('.cv-item', lista).forEach(function (it, i) {
             var l = $('.cv-item-l', it); if (l) l.textContent = etiqueta + ' ' + (i + 1);
@@ -144,7 +131,6 @@
     iniciarLista('#expLista', '#tplExp', '#expAgregar', 'Experiencia');
     iniciarLista('#eduLista', '#tplEdu', '#eduAgregar', 'Educación');
 
-    /* ── habilidades blandas: chips (Enter o coma agregan; × quita) ── */
     var softWrap = $('#softWrap', dlg), softIn = $('#softIn', dlg);
     function valoresSoft() { return $$('.cv-chip', softWrap).map(function (c) { return c.getAttribute('data-v'); }); }
     function agregarSoft(v) {
@@ -167,7 +153,6 @@
         else if (e.target === softWrap) softIn.focus();
     });
 
-    /* ── guardar ── */
     function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
     function texto(it, c) { var el = $(c, it); return el ? el.value.trim() : ''; }
 
@@ -207,7 +192,7 @@
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 if (d && d.ok) {
-                    try { sessionStorage.setItem('dc-cv-guardado', '1'); } catch (e) { /* ignora */ }
+                    try { sessionStorage.setItem('dc-cv-guardado', '1'); } catch (e) { }
                     window.location.reload();
                 } else {
                     err.textContent = (d && d.error) || 'No se pudo guardar. Intenta de nuevo.'; err.hidden = false;

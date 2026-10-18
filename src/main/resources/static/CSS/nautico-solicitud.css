@@ -1,10 +1,7 @@
-/* DevCoast · Detalle de una solicitud. Requiere nautico.css, nautico-temas.css y nautico-pase.css (pase .jt.rq, paneles .pn). */
 .back { display: inline-block; margin-bottom: 16px; }
 .sd { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 22px; }
 .sd-main, .sd-aside { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .sd-hint { margin: 0; font: 500 13px/1.5 var(--font-mono); color: var(--mute); }
-
-/* estado actual + línea de tiempo */
 .sd-now { padding: 14px 18px; border-radius: 10px; border-left: 6px solid var(--orange); background: var(--panel2); }
 .sd-now.ok { border-left-color: var(--teal); } .sd-now.no { border-left-color: #8A8F9C; } .sd-now.warn { border-left-color: #CDD1DB; }
 .sd-now b { font-size: 18px; }
@@ -23,8 +20,6 @@
 .sd-pj li { display: flex; align-items: center; gap: 12px; }
 .sd-pj-c { width: 30px; height: 30px; border-radius: 8px; flex: none; }
 .sd-pj a { font-weight: 700; text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 4px; }
-
-/* datos en lista */
 .rg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 24px; margin: 0; }
 .rg.one { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .rg > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; min-width: 0; }
@@ -34,3 +29,4 @@
 .sd-aside .btn-o { align-self: flex-start; text-decoration: none; }
 
 @media (max-width: 1000px) { .sd { grid-template-columns: minmax(0, 1fr); } }
+.sd-aside .btn-o + .btn-o { margin-top: 10px; background: none; border: 1.5px solid var(--acc); color: var(--ink); }

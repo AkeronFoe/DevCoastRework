@@ -1,9 +1,6 @@
-/* DevCoast · login y registro (docs/diseno/devcoast-login-motion.html y devcoast-register-motion.html).
-   Autocontenido: no carga nautico.css. El formulario es un pase de abordaje vertical. */
-/* Login de DevCoast: el formulario es un pase de abordaje. Al enviar, se rasga el talón y el barco zarpa. */
 :root{
   --sky:#101114; --ink:#F3F4F8; --mute:#A6ABB8; --line:#2B2E36; --line2:#3A3D47;
-  --orange:#FF7B4F; --orange-d:#CC4B27; --orange-ink:#A93A1B; --teal:#2DD4BF; --teal-d:#1F8F82;
+  --orange:#FF7B4F; --orange-d:#CC4B27; --orange-ink:#A93A1B; --teal:#2DD4BF; --teal-d:#1F8F82; --teal-ink:#0F766E;
   --sea0:#0E2A2D; --paper:#F3F4F8; --paper-ink:#101114; --paper-mute:#5A5F6B; --field:#FFFFFF; --field-line:#CDD1DB; --err:#B3361A;
   --font-display:'Space Grotesk',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
   --gx:clamp(16px,4vw,48px); --wl:150px;
@@ -19,8 +16,6 @@ h1,h2{text-wrap:balance}
 
 .page{position:relative;min-height:100vh;min-height:100svh;overflow:hidden;display:flex;flex-direction:column;background:var(--sky)}
 .grat{position:absolute;inset:0;width:100%;height:100%}
-
-/* navegación */
 .nav{position:relative;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px var(--gx)}
 .nav-l{display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-weight:700;font-size:26px;letter-spacing:-.02em}
 .nav-r{display:flex;flex-wrap:wrap;align-items:center;gap:22px;font-family:var(--font-mono);font-size:15px}
@@ -31,8 +26,6 @@ h1,h2{text-wrap:balance}
 .btn:hover{transform:translateY(-3px)}
 .btn-g{border:1px solid var(--line2);padding:9px 18px;font-size:15px}
 .bunting{position:relative;z-index:1;display:block;width:100%;height:56px;margin-top:-6px;flex:none}
-
-/* escena */
 .stage{position:relative;z-index:4;flex:1;display:grid;grid-template-columns:minmax(0,460px);align-content:start;padding:clamp(4px,1.5vh,20px) var(--gx) 28px}
 .stage{pointer-events:none}
 .left{pointer-events:auto;display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -45,8 +38,6 @@ h1 .bordo{position:relative;display:inline-block;color:var(--teal)}
 .w{display:inline-block}
 .alt{font-family:var(--font-mono);font-size:14px;color:var(--mute)}
 .alt a{color:var(--ink);border-bottom:2px solid var(--orange);padding-bottom:1px}
-
-/* pase */
 .zone{display:grid}
 .zone>*{grid-area:1/1}
 .pass{width:100%;display:flex;flex-direction:column;transition:transform .5s ease,opacity .5s ease}
@@ -90,8 +81,6 @@ h1 .bordo{position:relative;display:inline-block;color:var(--teal)}
 .go[disabled]{cursor:default;transform:none}
 .bars{flex:none;display:block}
 .stubtag{position:absolute;left:24px;bottom:5px;font-family:var(--font-mono);font-size:10px;color:var(--paper-mute)}
-
-/* éxito */
 .ok{align-self:start;display:flex;flex-direction:column;gap:16px;opacity:0;visibility:hidden;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease,visibility 0s .5s}
 .ok h2{font-size:clamp(36px,5vw,56px);line-height:1;letter-spacing:-.03em}
 .ok h2 span{color:var(--teal)}
@@ -102,8 +91,6 @@ h1 .bordo{position:relative;display:inline-block;color:var(--teal)}
 .zone.torn .pass-stub{transform:translate(26px,84px) rotate(10deg);opacity:0;transition:transform .7s cubic-bezier(.5,0,.9,.6),opacity .6s ease .15s}
 .zone.gone .pass{opacity:0;transform:translateY(-26px);pointer-events:none;visibility:hidden;transition:opacity .5s ease,transform .5s ease,visibility 0s .5s}
 .zone.done .ok{opacity:1;visibility:visible;transform:none;transition:opacity .5s ease,transform .5s ease,visibility 0s}
-
-/* barco y mar */
 .boat-wrap{--bh:min(430px,50vh);position:absolute;right:max(3vw,24px);bottom:calc(var(--wl) - 30px - var(--bh) * .145);z-index:2;transition:transform 1.9s cubic-bezier(.55,.05,.9,.5);will-change:transform}
 .boat-wrap.away{transform:translateX(120vw) rotate(3deg)}
 .boat{display:block;height:var(--bh);width:auto;overflow:visible}
@@ -179,23 +166,19 @@ h1 .bordo{position:relative;display:inline-block;color:var(--teal)}
 @media (prefers-reduced-motion:reduce){
   .boat-wrap,.pass,.ok,.pass-stub,.say{transition:none !important}
 }
-
-/* ───────── accesibilidad ───────── */
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--paper);color:var(--paper-ink);padding:10px 16px;border-radius:8px;font-weight:700}
 .skip:focus{top:12px}
 .nav-l svg{flex:none}
 .sea .wvs{display:contents}
 .hint{font-size:12.5px;color:var(--paper-mute)}
-.formok{font-size:14px;font-weight:500;color:var(--teal-d)}
+.formok{font-size:14px;font-weight:500;color:var(--teal-ink)}
 .formok:empty{display:none}
 .stub-note{font-family:var(--font-mono);font-size:11px;color:var(--paper-mute)}
 .inp select{width:100%;height:48px;padding:0 40px 0 14px;border:2px solid var(--field-line);border-radius:10px;background:var(--field);color:var(--paper-ink);font:500 16px var(--font-display);appearance:none;-webkit-appearance:none;cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235A5F6B' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 .inp select:focus{outline:none;border-color:var(--paper-ink);box-shadow:0 0 0 3px var(--orange)}
 .fields{display:flex;flex-direction:column;gap:16px}
-
-/* ───────── registro: selector de cuenta, chips de especialidad, medidor ───────── */
 .roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .role{position:relative;display:block}
 .role input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
@@ -213,14 +196,14 @@ h1 .bordo{position:relative;display:inline-block;color:var(--teal)}
 .meter i.t{background:var(--teal-d)}
 .meter span{margin-left:6px;font-family:var(--font-mono);font-size:11px;color:var(--paper-mute)}
 .pass[data-role="empresa"] .go{background:var(--teal)}
-.pass[data-role="empresa"] .tk-top{color:var(--teal-d)}
+.pass[data-role="empresa"] .tk-top{color:var(--teal-ink)}
 body.registro .stage{grid-template-columns:minmax(0,520px)}
 body.registro h1{font-size:clamp(34px,min(4.8vw,7.4vh),62px)}
 body.registro .pass-main{gap:13px;padding-top:18px}
 body.registro .fields{gap:13px}
 body.registro .boat-wrap{position:fixed}
 body.registro .sea{position:fixed}
-.opt{font-weight:400;color:#7A7F8C}
+.opt{font-weight:400;color:#5F6574}
 @media (max-width:900px){body.registro .stage{grid-template-columns:minmax(0,1fr);padding-bottom:calc(var(--wl) + 30px)}}
 @media (max-width:480px){.two{grid-template-columns:1fr}}
 

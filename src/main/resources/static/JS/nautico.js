@@ -1,12 +1,10 @@
-/* DevCoast · sistema visual náutico: comportamiento común del shell.
-   Solo interfaz (cajón móvil, campana, toast, gaviota, CSRF); nada de datos simulados. Vanilla, sin librerías. */
+// esto de acá maneja lo que se mueve en todas las pantallas: el menú del celular, la campana de avisos y los mensajitos que aparecen abajo
 (function () {
     'use strict';
 
     var $ = function (s, r) { return (r || document).querySelector(s); };
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ── CSRF: agrega la cabecera a todo fetch() que modifica datos (lo mismo que hace themes.js en las páginas viejas) ── */
     (function () {
         var tokenMeta = $('meta[name="_csrf"]');
         var headerMeta = $('meta[name="_csrf_header"]');
@@ -27,11 +25,9 @@
         };
     })();
 
-    /* ── orden de las listas: el selector #sort envía su formulario (sin JS queda el botón "aplicar") ── */
     var sortSel = $('#sort');
     if (sortSel && sortSel.form) sortSel.addEventListener('change', function () { sortSel.form.submit(); });
 
-    /* ── confirmaciones a la vista (<details>): "Cancelar" la cierra y devuelve el foco al botón que la abrió ── */
     document.addEventListener('click', function (e) {
         var c = e.target.closest ? e.target.closest('[data-cancelar]') : null;
         if (!c) return;
@@ -39,7 +35,6 @@
         if (det) { det.open = false; var s = det.querySelector('summary'); if (s) s.focus(); }
     });
 
-    /* ── cajón del menú en móvil ── */
     var side = $('#side'), scrim = $('#scrim'), menuBtn = $('#menuBtn');
     if (side && scrim && menuBtn) {
         var mq = window.matchMedia('(max-width:900px)');
@@ -54,7 +49,6 @@
                 menuBtn.focus();
             }
         };
-        // cerrado en móvil = inert, para que el foco no entre a un menú que no se ve
         var sideA11y = function () {
             if (mq.matches && !side.classList.contains('open')) side.setAttribute('inert', '');
             else side.removeAttribute('inert');
@@ -72,7 +66,6 @@
         sideA11y();
     }
 
-    /* ── campana de notificaciones ── */
     var bellBtn = $('#bellBtn'), bellPanel = $('#bellPanel');
     if (bellBtn && bellPanel) {
         var setBell = function (open) {
@@ -102,7 +95,6 @@
         });
     }
 
-    /* ── toast: window.DevCoast.toast('texto', { undo: fn }) ── (role="status" ya está en el contenedor) */
     var toastEl = $('#toast'), toastTxt = $('#toastTxt'), toastUndo = $('#toastUndo'), toastT = 0, undoFn = null;
     function hideToast() { if (toastEl) toastEl.hidden = true; undoFn = null; }
     function toast(txt, opts) {
@@ -111,7 +103,6 @@
         toastTxt.textContent = txt;
         undoFn = typeof opts.undo === 'function' ? opts.undo : null;
         toastUndo.hidden = !undoFn;
-        // reinicia la animación de entrada si ya estaba visible
         toastEl.hidden = true; void toastEl.offsetWidth; toastEl.hidden = false;
         clearTimeout(toastT);
         toastT = setTimeout(hideToast, opts.ms || 5000);
@@ -123,7 +114,6 @@
     window.DevCoast = window.DevCoast || {};
     window.DevCoast.toast = toast;
 
-    /* ── gaviota: mira hacia el cursor (±8°) y salta al hacer clic. Un solo rAF por evento. ── */
     var gulls = document.querySelectorAll('.gull');
     if (gulls.length) {
         var raf = 0, lastLook = null;
@@ -136,7 +126,7 @@
                     raf = 0;
                     var v = Math.round((e.clientY / window.innerHeight - 0.5) * 16);
                     v = Math.max(-8, Math.min(8, v));
-                    if (v === lastLook) return;       // solo escribe en el DOM si cambió
+                    if (v === lastLook) return;
                     lastLook = v;
                     looks.forEach(function (l) { l.style.setProperty('--look', v); });
                 });

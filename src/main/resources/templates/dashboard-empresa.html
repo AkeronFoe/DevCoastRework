@@ -24,7 +24,6 @@
                 <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
-                <!-- ===== saludo y números ===== -->
                 <section class="hello" aria-label="Resumen de hoy">
                     <div class="hello-t">
                         <div class="eyebrow">// resumen</div>
@@ -46,7 +45,6 @@
                     </dl>
                 </section>
 
-                <!-- ===== carta de navegación ===== -->
                 <div class="sec2"><h2>Tus candidatos</h2><span>postulaciones recibidas, de la salida al puerto</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#FF7B4F"></i>Programación</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#2DD4BF"></i>Diseño</span>
@@ -54,7 +52,6 @@
                     <a th:href="@{/candidatos}">ver postulaciones</a></div>
                 <th:block th:replace="~{fragments/pase :: carta(${carta})}"></th:block>
 
-                <!-- ===== Mejores candidatos en revisión ===== -->
                 <th:block th:if="${!#lists.isEmpty(mejores)}">
                     <div class="sec2"><h2>Mejores candidatos</h2><span>en revisión, con mayor match</span><a th:href="@{/candidatos}">ver todos</a></div>
                     <div class="minis">
@@ -62,7 +59,6 @@
                     </div>
                 </th:block>
 
-                <!-- ===== Tu semana ===== -->
                 <div class="sec2"><h2>Tu semana</h2><span>tus ofertas y lo que ha pasado</span></div>
                 <section class="pn" aria-labelledby="hBit">
                     <h2 id="hBit">Bitácora <span class="lab" th:text="${nActivas} + (${nActivas} == 1 ? ' OFERTA ACTIVA' : ' OFERTAS ACTIVAS')">3 OFERTAS ACTIVAS</span></h2>

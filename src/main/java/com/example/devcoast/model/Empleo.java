@@ -57,20 +57,15 @@ public class Empleo {
 
     private String estado = "ACTIVO";
 
-    // valores posibles: ABIERTO · SCREENING · ENTREVISTAS · OFERTA · CERRADO_PROCESO
     private String faseReclutamiento = "ABIERTO";
 
     private boolean screeningActivo = false;
-    // palabras clave separadas por coma, el candidato pasa si su stack tiene al menos una
     private String screeningKeywords;
 
     private String logoUrl;
 
-    // se asigna al publicar; las ofertas anteriores no lo tienen (ver getFechaPublicacionEfectiva)
     private Date fechaPublicacion;
 
-    // para las ofertas que no guardaron fecha: el momento de creación va embebido en el ObjectId del id.
-    // Solo se calcula al leer; nunca se escribe en la base.
     public Date getFechaPublicacionEfectiva() {
         if (fechaPublicacion != null)
             return fechaPublicacion;
@@ -79,7 +74,6 @@ public class Empleo {
         return null;
     }
 
-    // la categoría tal como se muestra (las guardadas antes del cambio no llevan tilde en "Programacion")
     public String getCategoriaMostrar() {
         return com.example.devcoast.service.AreaEmpleo.categoriaVisible(categoria);
     }

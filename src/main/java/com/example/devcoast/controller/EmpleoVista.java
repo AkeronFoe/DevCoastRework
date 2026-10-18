@@ -11,11 +11,9 @@ import com.example.devcoast.service.MatchEmpleo;
 
 import lombok.Getter;
 
-/** Lo que necesita un pase (ticket) de la lista de empleos, ya calculado en el servidor. */
 @Getter
 public class EmpleoVista {
 
-    /** Una habilidad del pase: {@code estado} es "tiene", "falta" o "neutra" (sin match). */
     public record Habilidad(String nombre, String estado) {
     }
 
@@ -25,7 +23,7 @@ public class EmpleoVista {
     private String empresaInicial;
     private String empresaColor;
     private String logoUrl;
-    private String areaClave;       // p (programación) | d (diseño) | o (otras)
+    private String areaClave;
     private String categoria;
     private String modalidad;
     private String seniority;
@@ -35,13 +33,13 @@ public class EmpleoVista {
     private boolean nueva;
     private String descripcionCorta;
     private Long postulantes;
-    private Integer match;          // null = sin match (talento o oferta sin stack, o cuenta de empresa)
-    private String nivel;           // alto | medio | bajo
-    private int cubos;              // cubitos llenos de la barra (uno por cada 10 %)
+    private Integer match;
+    private String nivel;
+    private int cubos;
     private List<Habilidad> habilidades = new ArrayList<>();
     private int habilidadesRestantes;
     private boolean solicitada;
-    private boolean cerrada;        // la empresa ya cerró la oferta (se ve en Guardados, donde no se puede postular)
+    private boolean cerrada;
 
     public static EmpleoVista de(Empleo e, MatchEmpleo.Resultado m, boolean solicitada, boolean destacado, Long postulantes,
             Date ahora) {
@@ -56,8 +54,8 @@ public class EmpleoVista {
         AreaEmpleo.Area area = AreaEmpleo.de(e.getCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
         v.categoria = e.getCategoriaMostrar();
-        v.modalidad = vacioANull(e.getModalidad());
-        v.seniority = vacioANull(e.getSeniority());
+        v.modalidad = AreaEmpleo.textoVisible(vacioANull(e.getModalidad()));
+        v.seniority = AreaEmpleo.textoVisible(vacioANull(e.getSeniority()));
         v.postulantes = postulantes;
         v.solicitada = solicitada;
         v.cerrada = e.getEstado() != null && !"ACTIVO".equalsIgnoreCase(e.getEstado());
@@ -88,7 +86,6 @@ public class EmpleoVista {
         return v;
     }
 
-    // "$5–7 M", "$800–900 K"; solo si la empresa muestra el salario y hay al menos un valor
     private static void armarSalario(EmpleoVista v, Empleo e) {
         if (!e.isMostrarSalario() || (e.getSalarioMin() == null && e.getSalarioMax() == null))
             return;
@@ -98,9 +95,9 @@ public class EmpleoVista {
         String a = e.getSalarioMin() != null ? num(e.getSalarioMin() / divisor) : null;
         String b = e.getSalarioMax() != null ? num(e.getSalarioMax() / divisor) : null;
         v.salarioTexto = "$" + (a != null && b != null ? (a.equals(b) ? a : a + "–" + b) : a != null ? "Desde " + a : "Hasta " + b) + sufijo;
-        String per = e.getSalarioPeriodo() == null ? "" : e.getSalarioPeriodo().trim().toLowerCase(Locale.ROOT);
-        String perAbrev = per.startsWith("mens") ? "MES" : per.startsWith("anu") ? "AÑO" : per.startsWith("hora") ? "HORA"
-                : per.startsWith("seman") ? "SEMANA" : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
+        String per = e.getSalarioPeriodo() == null ? "" : e.getSalarioPeriodo().trim().replaceFirst("^/\\s*", "").toLowerCase(Locale.ROOT);
+        String perAbrev = per.startsWith("mes") || per.startsWith("mens") ? "MES" : per.startsWith("anu") || per.startsWith("año") ? "AÑO"
+                : per.startsWith("hora") ? "HORA" : per.startsWith("seman") ? "SEMANA" : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
         String mon = vacioANull(e.getMoneda());
         v.salarioEtiqueta = "SALARIO" + (mon != null || perAbrev != null
                 ? " · " + (mon != null ? mon.toUpperCase(Locale.ROOT) : "") + (mon != null && perAbrev != null ? "/" : "") + (perAbrev != null ? perAbrev : "")

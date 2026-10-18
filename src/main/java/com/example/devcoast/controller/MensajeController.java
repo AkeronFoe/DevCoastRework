@@ -1,6 +1,5 @@
 package com.example.devcoast.controller;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -14,9 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.bson.Document;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empleo;
 import com.example.devcoast.model.Empresa;
@@ -48,6 +51,9 @@ public class MensajeController {
 
     private static final int CHAT_PAGE_SIZE = 50;
     private static final int LOAD_MORE_SIZE = 20;
+    private static final int MAX_CONVERSACIONES = 100;
+    private static final int MAX_TEXTO = 1000;
+    private static final int MAX_MENSAJES_POR_MINUTO = 40;
 
     private final SolicitudRepository solicitudRepository;
     private final EmpleoRepository empleoRepository;
@@ -56,10 +62,12 @@ public class MensajeController {
     private final UsuarioRepository usuarioRepository;
     private final EmpresaRepository empresaRepository;
     private final MongoTemplate mongoTemplate;
+    private final LimiteTasa limiteTasa;
 
     public MensajeController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository,
             MensajeRepository mensajeRepository, NotificacionRepository notificacionRepository,
-            UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, MongoTemplate mongoTemplate) {
+            UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, MongoTemplate mongoTemplate,
+            LimiteTasa limiteTasa) {
         this.solicitudRepository = solicitudRepository;
         this.empleoRepository = empleoRepository;
         this.mensajeRepository = mensajeRepository;
@@ -67,75 +75,85 @@ public class MensajeController {
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;
         this.mongoTemplate = mongoTemplate;
+        this.limiteTasa = limiteTasa;
     }
 
     @GetMapping("/mensajes")
-    public String bandejaMensajes(Model model, HttpSession session) {
+    public String bandejaMensajes(@RequestParam(required = false) String q, Model model, HttpSession session) {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
-        String userId = RoleGuard.getId(session);
-        String tipo = RoleGuard.getTipo(session);
-        List<ConversacionItem> conversaciones = new ArrayList<>();
-        boolean esTalento = "talento".equals(tipo);
-
-        List<Solicitud> misSolicitudes;
-        if (esTalento) {
-            misSolicitudes = solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(userId);
-        } else {
-            List<Empleo> empleos = empleoRepository.findByEmpresaIdOrderByIdDesc(userId);
-            List<String> ids = new ArrayList<>();
-            for (Empleo e : empleos)
-                ids.add(e.getId());
-            misSolicitudes = ids.isEmpty() ? List.of() : solicitudRepository.findByEmpleoIdIn(ids);
-        }
-
-        List<String> solicitudIds = new ArrayList<>();
-        for (Solicitud sol : misSolicitudes)
-            solicitudIds.add(sol.getId());
-
-        // traigo todos los mensajes de todas mis conversaciones de una, en vez de 2 consultas por conversación
-        List<Mensaje> todosMensajes = solicitudIds.isEmpty()
-                ? List.of()
-                : mensajeRepository.findBySolicitudIdInOrderByFechaEnvioDesc(solicitudIds);
-
-        // vienen ordenados desc por fecha, así que la primera aparición de cada solicitudId ya es la más reciente
-        Map<String, Mensaje> ultimoPorSolicitud = new LinkedHashMap<>();
-        Map<String, Long> noLeidosPorSolicitud = new HashMap<>();
-        for (Mensaje m : todosMensajes) {
-            ultimoPorSolicitud.putIfAbsent(m.getSolicitudId(), m);
-            if (userId.equals(m.getDestinatarioId()) && !m.isLeido())
-                noLeidosPorSolicitud.merge(m.getSolicitudId(), 1L, Long::sum);
-        }
-
-        for (Solicitud sol : misSolicitudes) {
-            Mensaje ultimo = ultimoPorSolicitud.get(sol.getId());
-            if (ultimo == null)
-                continue;
-            long noLeidos = noLeidosPorSolicitud.getOrDefault(sol.getId(), 0L);
-            String otroNombre = esTalento
-                    ? (sol.getEmpleoEmpresaNombre() != null ? sol.getEmpleoEmpresaNombre() : "Empresa")
-                    : ((sol.getUsuarioNombre() != null && !sol.getUsuarioNombre().isBlank())
-                            ? sol.getUsuarioNombre()
-                            : (sol.getUsuarioCorreo() != null ? sol.getUsuarioCorreo() : "Candidato"));
-            conversaciones.add(new ConversacionItem(sol, ultimo, noLeidos, otroNombre));
-        }
-
-        conversaciones.sort((a, b) -> {
-            Date fa = a.getUltimoMensaje().getFechaEnvio();
-            Date fb = b.getUltimoMensaje().getFechaEnvio();
-            if (fa == null)
-                return 1;
-            if (fb == null)
-                return -1;
-            return fb.compareTo(fa);
-        });
-
-        long totalNoLeidos = conversaciones.stream().mapToLong(ConversacionItem::getNoLeidos).sum();
-        model.addAttribute("conversaciones", conversaciones);
-        model.addAttribute("totalNoLeidos", totalNoLeidos);
+        cargarBandeja(model, session, q);
+        model.addAttribute("q", q == null || q.isBlank() ? null : q.trim());
         agregarSesion(session, model);
         return "mensajes";
+    }
+
+    // oigan, esto de acá arma la lista de conversaciones sin traerse todos los mensajes: la base nos da solo el último de cada charla
+    private void cargarBandeja(Model model, HttpSession session, String q) {
+        String userId = RoleGuard.getId(session);
+        boolean esTalento = "talento".equals(RoleGuard.getTipo(session));
+        List<ConversacionItem> conversaciones = conversaciones(userId, esTalento);
+        String buscado = normalizar(q);
+        if (!buscado.isEmpty())
+            conversaciones = conversaciones.stream()
+                    .filter(c -> normalizar(c.getOtroNombre() + " " + c.getSolicitud().getEmpleoTitulo()).contains(buscado))
+                    .toList();
+        model.addAttribute("conversaciones", conversaciones);
+        model.addAttribute("totalNoLeidos", conversaciones.stream().mapToLong(ConversacionItem::getNoLeidos).sum());
+    }
+
+    private List<ConversacionItem> conversaciones(String userId, boolean esTalento) {
+        Criteria mio = new Criteria().orOperator(Criteria.where("destinatarioId").is(userId),
+                Criteria.where("remitenteId").is(userId));
+        List<Document> ultimos = mongoTemplate.aggregate(Aggregation.newAggregation(
+                Aggregation.match(mio),
+                Aggregation.sort(Sort.Direction.DESC, "fechaEnvio"),
+                Aggregation.group("solicitudId").first("texto").as("texto").first("fechaEnvio").as("fecha")
+                        .first("remitenteId").as("remitente"),
+                Aggregation.sort(Sort.Direction.DESC, "fecha"),
+                Aggregation.limit(MAX_CONVERSACIONES)), "mensajes", Document.class).getMappedResults();
+        if (ultimos.isEmpty())
+            return List.of();
+
+        Map<String, Long> noLeidos = new HashMap<>();
+        for (Document d : mongoTemplate.aggregate(Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("destinatarioId").is(userId).and("leido").is(false)),
+                Aggregation.group("solicitudId").count().as("n")), "mensajes", Document.class).getMappedResults())
+            noLeidos.put(d.getString("_id"), ((Number) d.get("n")).longValue());
+
+        List<String> ids = new ArrayList<>();
+        for (Document d : ultimos)
+            ids.add(d.getString("_id"));
+        Map<String, Solicitud> solicitudes = new HashMap<>();
+        solicitudRepository.findAllById(ids).forEach(s -> solicitudes.put(s.getId(), s));
+
+        List<ConversacionItem> lista = new ArrayList<>();
+        for (Document d : ultimos) {
+            Solicitud sol = solicitudes.get(d.getString("_id"));
+            if (sol == null)
+                continue;
+            Date fecha = d.getDate("fecha");
+            lista.add(new ConversacionItem(sol, nombreDelOtro(sol, esTalento), d.getString("texto"),
+                    userId.equals(d.getString("remitente")), fecha == null ? 0 : fecha.getTime(),
+                    noLeidos.getOrDefault(sol.getId(), 0L)));
+        }
+        return lista;
+    }
+
+    private static String normalizar(String s) {
+        return java.text.Normalizer.normalize(s == null ? "" : s, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "").toLowerCase().trim();
+    }
+
+    private static String nombreDelOtro(Solicitud sol, boolean esTalento) {
+        if (esTalento)
+            return sol.getEmpleoEmpresaNombre() != null && !sol.getEmpleoEmpresaNombre().isBlank()
+                    ? sol.getEmpleoEmpresaNombre()
+                    : "Empresa";
+        if (sol.getUsuarioNombre() != null && !sol.getUsuarioNombre().isBlank())
+            return sol.getUsuarioNombre();
+        return sol.getUsuarioCorreo() != null ? sol.getUsuarioCorreo() : "Candidato";
     }
 
     @GetMapping("/chat/{solicitudId}")
@@ -166,7 +184,6 @@ public class MensajeController {
             return "redirect:/dashboard";
         }
 
-        String miAvatarUrl = (String) session.getAttribute("usuarioActualFotoUrl");
         String otroAvatarUrl = null;
         String otroUserId = esTalento ? empleo.getEmpresaId() : solicitud.getUsuarioId();
         if (otroUserId != null) {
@@ -181,14 +198,8 @@ public class MensajeController {
         if (otroAvatarUrl == null && esTalento && empleo.getLogoUrl() != null)
             otroAvatarUrl = empleo.getLogoUrl();
 
-        String otroNombre = esTalento
-                ? solicitud.getEmpleoEmpresaNombre()
-                : (solicitud.getUsuarioNombre() != null
-                        ? solicitud.getUsuarioNombre()
-                        : solicitud.getUsuarioCorreo());
-        String otroInitial = (otroNombre != null && !otroNombre.isBlank())
-                ? otroNombre.substring(0, 1).toUpperCase()
-                : "?";
+        String otroNombre = nombreDelOtro(solicitud, esTalento);
+        String otroInitial = otroNombre.substring(0, 1).toUpperCase();
 
         Pageable pageable = PageRequest.of(0, CHAT_PAGE_SIZE);
         Page<Mensaje> pagina = mensajeRepository
@@ -197,17 +208,13 @@ public class MensajeController {
         List<Mensaje> mensajes = new ArrayList<>(pagina.getContent());
         Collections.reverse(mensajes);
 
-        // marco todo como leído de una sola pasada en vez de uno por uno
-        Query markQuery = Query.query(
-                Criteria.where("solicitudId").is(solicitudId)
-                        .and("destinatarioId").is(userId)
-                        .and("leido").is(false));
-        mongoTemplate.updateMulti(markQuery, Update.update("leido", true), Mensaje.class);
+        long ultimaMarca = mensajes.isEmpty() || mensajes.get(mensajes.size() - 1).getFechaEnvio() == null
+                ? System.currentTimeMillis()
+                : mensajes.get(mensajes.size() - 1).getFechaEnvio().getTime();
+        Long primeraMarca = mensajes.isEmpty() || mensajes.get(0).getFechaEnvio() == null ? null
+                : mensajes.get(0).getFechaEnvio().getTime();
 
-        String primerMensajeFecha = null;
-        if (!mensajes.isEmpty() && mensajes.get(0).getFechaEnvio() != null)
-            primerMensajeFecha = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
-                    .format(mensajes.get(0).getFechaEnvio());
+        marcarLeidos(solicitudId, userId);
 
         model.addAttribute("solicitud", solicitud);
         model.addAttribute("empleo", empleo);
@@ -215,13 +222,30 @@ public class MensajeController {
         model.addAttribute("esTalento", esTalento);
         model.addAttribute("otroNombre", otroNombre);
         model.addAttribute("currentUserId", userId);
-        model.addAttribute("miAvatarUrl", miAvatarUrl);
         model.addAttribute("otroAvatarUrl", otroAvatarUrl);
         model.addAttribute("otroInitial", otroInitial);
         model.addAttribute("hayMasAntiguos", pagina.hasNext());
-        model.addAttribute("primerMensajeFecha", primerMensajeFecha);
+        model.addAttribute("primeraMarca", primeraMarca);
+        model.addAttribute("ultimaMarca", ultimaMarca);
+        model.addAttribute("otroPerfilUrl", esTalento
+                ? (empleo.getEmpresaId() != null ? "/empresa/" + empleo.getEmpresaId() : null)
+                : (solicitud.getUsuarioId() != null ? "/talentos/" + solicitud.getUsuarioId() : null));
+        model.addAttribute("solicitudUrl", esTalento ? "/solicitudes/" + solicitudId
+                : "/empleos/" + empleo.getId() + "/postulaciones/" + solicitudId);
+        model.addAttribute("activaId", solicitudId);
+        model.addAttribute("otroTono", Math.floorMod(otroNombre.toLowerCase().hashCode(), 4));
+        cargarBandeja(model, session, null);
         agregarSesion(session, model);
         return "chat";
+    }
+
+    private void marcarLeidos(String solicitudId, String userId) {
+        mongoTemplate.updateMulti(Query.query(Criteria.where("solicitudId").is(solicitudId)
+                .and("destinatarioId").is(userId).and("leido").is(false)), Update.update("leido", true), Mensaje.class);
+    }
+
+    private boolean participa(Solicitud sol, Empleo emp, String userId) {
+        return userId.equals(sol.getUsuarioId()) || userId.equals(emp.getEmpresaId());
     }
 
     @GetMapping(value = "/chat/{solicitudId}/mas-mensajes", produces = "application/json")
@@ -237,30 +261,22 @@ public class MensajeController {
         Optional<Solicitud> solOpt = solicitudRepository.findById(solicitudId);
         if (solOpt.isEmpty())
             return ResponseEntity.notFound().build();
-        Solicitud sol = solOpt.get();
-
-        Optional<Empleo> empOpt = empleoRepository.findById(sol.getEmpleoId());
+        Optional<Empleo> empOpt = empleoRepository.findById(solOpt.get().getEmpleoId());
         if (empOpt.isEmpty())
             return ResponseEntity.notFound().build();
-        Empleo emp = empOpt.get();
-
-        if (!userId.equals(sol.getUsuarioId()) && !userId.equals(emp.getEmpresaId()))
+        if (!participa(solOpt.get(), empOpt.get(), userId))
             return ResponseEntity.status(403).build();
 
-        Date antesDate;
-        try {
-            antesDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(antes);
-        } catch (java.text.ParseException e) {
+        Date antesDate = aFecha(antes);
+        if (antesDate == null)
             antesDate = new Date();
-        }
 
-        Pageable pageable = PageRequest.of(0, LOAD_MORE_SIZE + 1);
-        List<Mensaje> raw = mensajeRepository
-                .findBySolicitudIdAndFechaEnvioBeforeOrderByFechaEnvioDesc(solicitudId, antesDate, pageable);
+        List<Mensaje> raw = mensajeRepository.findBySolicitudIdAndFechaEnvioBeforeOrderByFechaEnvioDesc(solicitudId,
+                antesDate, PageRequest.of(0, LOAD_MORE_SIZE + 1));
 
         boolean hayMas = raw.size() > LOAD_MORE_SIZE;
         if (hayMas)
-            raw = raw.subList(0, LOAD_MORE_SIZE);
+            raw = new ArrayList<>(raw.subList(0, LOAD_MORE_SIZE));
         Collections.reverse(raw);
 
         List<Map<String, Object>> items = new ArrayList<>();
@@ -271,12 +287,11 @@ public class MensajeController {
         resp.put("mensajes", items);
         resp.put("hayMas", hayMas);
         if (!raw.isEmpty() && raw.get(0).getFechaEnvio() != null)
-            resp.put("primerFecha", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(raw.get(0).getFechaEnvio()));
+            resp.put("primera", raw.get(0).getFechaEnvio().getTime());
 
         return ResponseEntity.ok(resp);
     }
 
-    // fallback por si el JS no cargó
     @PostMapping("/chat/{solicitudId}")
     public String enviarMensaje(@PathVariable String solicitudId,
             @RequestParam String texto,
@@ -285,11 +300,11 @@ public class MensajeController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
-        crearMensaje(solicitudId, texto, session);
+        if (!pasoElLimite(session))
+            crearMensaje(solicitudId, texto, session);
         return "redirect:/chat/" + solicitudId;
     }
 
-    // este es el que usa el chat de verdad, para no recargar la página en cada mensaje
     @PostMapping(value = "/chat/{solicitudId}/enviar", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> enviarMensajeAjax(@PathVariable String solicitudId,
@@ -298,12 +313,18 @@ public class MensajeController {
 
         if (RoleGuard.sinSesion(session))
             return ResponseEntity.status(401).build();
+        if (pasoElLimite(session))
+            return ResponseEntity.status(429).body(Map.of("ok", false, "error", "limite"));
 
         Mensaje msg = crearMensaje(solicitudId, texto, session);
         if (msg == null)
             return ResponseEntity.badRequest().body(Map.of("ok", false));
 
         return ResponseEntity.ok(Map.of("ok", true, "mensaje", mensajeAJson(msg)));
+    }
+
+    private boolean pasoElLimite(HttpSession session) {
+        return limiteTasa.excedido("chat:" + RoleGuard.getId(session), MAX_MENSAJES_POR_MINUTO, 60_000L);
     }
 
     @GetMapping(value = "/chat/{solicitudId}/nuevos", produces = "application/json")
@@ -319,43 +340,50 @@ public class MensajeController {
         Optional<Solicitud> solOpt = solicitudRepository.findById(solicitudId);
         if (solOpt.isEmpty())
             return ResponseEntity.notFound().build();
-        Solicitud sol = solOpt.get();
-
-        Optional<Empleo> empOpt = empleoRepository.findById(sol.getEmpleoId());
+        Optional<Empleo> empOpt = empleoRepository.findById(solOpt.get().getEmpleoId());
         if (empOpt.isEmpty())
             return ResponseEntity.notFound().build();
-        Empleo emp = empOpt.get();
-
-        if (!userId.equals(sol.getUsuarioId()) && !userId.equals(emp.getEmpresaId()))
+        if (!participa(solOpt.get(), empOpt.get(), userId))
             return ResponseEntity.status(403).build();
 
-        Date despuesDate;
-        try {
-            despuesDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(despues);
-        } catch (java.text.ParseException e) {
-            return ResponseEntity.ok(Map.of("mensajes", List.of()));
-        }
+        Date despuesDate = aFecha(despues);
+        List<Mensaje> nuevos = despuesDate == null ? List.of()
+                : mensajeRepository.findBySolicitudIdAndFechaEnvioAfterOrderByFechaEnvioAsc(solicitudId, despuesDate);
 
-        List<Mensaje> nuevos = mensajeRepository
-                .findBySolicitudIdAndFechaEnvioAfterOrderByFechaEnvioAsc(solicitudId, despuesDate);
-
-        Query markQuery = Query.query(
-                Criteria.where("solicitudId").is(solicitudId)
-                        .and("destinatarioId").is(userId)
-                        .and("leido").is(false));
-        mongoTemplate.updateMulti(markQuery, Update.update("leido", true), Mensaje.class);
+        marcarLeidos(solicitudId, userId);
 
         List<Map<String, Object>> items = new ArrayList<>();
         for (Mensaje m : nuevos)
             items.add(mensajeAJson(m));
 
-        return ResponseEntity.ok(Map.of("mensajes", items));
+        Query propiosSinLeer = Query.query(Criteria.where("solicitudId").is(solicitudId).and("remitenteId").is(userId)
+                .and("leido").is(false));
+        propiosSinLeer.fields().include("_id");
+        propiosSinLeer.limit(200);
+        List<String> sinLeer = new ArrayList<>();
+        for (Mensaje m : mongoTemplate.find(propiosSinLeer, Mensaje.class))
+            sinLeer.add(m.getId());
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("mensajes", items);
+        resp.put("sinLeer", sinLeer);
+        return ResponseEntity.ok(resp);
     }
 
-    // devuelve null si algo no cuadra
+    private static Date aFecha(String marca) {
+        try {
+            return new Date(Long.parseLong(marca.trim()));
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     private Mensaje crearMensaje(String solicitudId, String texto, HttpSession session) {
         if (texto == null || texto.isBlank())
             return null;
+        texto = texto.trim();
+        if (texto.length() > MAX_TEXTO)
+            texto = texto.substring(0, MAX_TEXTO);
 
         String userId = RoleGuard.getId(session);
         String userName = RoleGuard.getNombre(session);
@@ -384,7 +412,7 @@ public class MensajeController {
         msg.setRemitenteId(userId);
         msg.setRemitenteNombre(senderName);
         msg.setDestinatarioId(destinatarioId);
-        msg.setTexto(texto.trim());
+        msg.setTexto(texto);
         msg.setFechaEnvio(new Date());
         mensajeRepository.save(msg);
 
@@ -405,44 +433,64 @@ public class MensajeController {
     }
 
     private Map<String, Object> mensajeAJson(Mensaje m) {
-        SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         Map<String, Object> item = new LinkedHashMap<>();
         item.put("id", m.getId());
         item.put("remitenteId", m.getRemitenteId());
         item.put("remitenteNombre", m.getRemitenteNombre());
         item.put("texto", m.getTexto());
-        item.put("fechaIso", m.getFechaEnvio() != null ? iso.format(m.getFechaEnvio()) : null);
+        item.put("t", m.getFechaEnvio() != null ? m.getFechaEnvio().getTime() : null);
         item.put("leido", m.isLeido());
         return item;
     }
 
     public static class ConversacionItem {
         private final Solicitud solicitud;
-        private final Mensaje ultimoMensaje;
-        private final long noLeidos;
         private final String otroNombre;
+        private final String ultimoTexto;
+        private final boolean ultimoPropio;
+        private final long ultimaMarca;
+        private final long noLeidos;
 
-        public ConversacionItem(Solicitud s, Mensaje m, long nl, String on) {
+        public ConversacionItem(Solicitud s, String otroNombre, String ultimoTexto, boolean ultimoPropio,
+                long ultimaMarca, long noLeidos) {
             this.solicitud = s;
-            this.ultimoMensaje = m;
-            this.noLeidos = nl;
-            this.otroNombre = on;
+            this.otroNombre = otroNombre;
+            this.ultimoTexto = ultimoTexto == null ? "" : ultimoTexto;
+            this.ultimoPropio = ultimoPropio;
+            this.ultimaMarca = ultimaMarca;
+            this.noLeidos = noLeidos;
         }
 
         public Solicitud getSolicitud() {
             return solicitud;
         }
 
-        public Mensaje getUltimoMensaje() {
-            return ultimoMensaje;
+        public String getOtroNombre() {
+            return otroNombre;
+        }
+
+        public String getUltimoTexto() {
+            return ultimoTexto;
+        }
+
+        public boolean isUltimoPropio() {
+            return ultimoPropio;
+        }
+
+        public long getUltimaMarca() {
+            return ultimaMarca;
         }
 
         public long getNoLeidos() {
             return noLeidos;
         }
 
-        public String getOtroNombre() {
-            return otroNombre;
+        public String getInicial() {
+            return otroNombre.isBlank() ? "?" : otroNombre.substring(0, 1).toUpperCase();
+        }
+
+        public int getTono() {
+            return Math.floorMod(otroNombre.toLowerCase().hashCode(), 4);
         }
     }
 

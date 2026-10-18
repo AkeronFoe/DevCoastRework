@@ -2,318 +2,39 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: meta}"></th:block>
-    <title>DevCoast | Mensajes</title>
-    <th:block th:replace="~{fragments/head :: assets}"></th:block>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/CSS/empleos.css}">
-    <link rel="stylesheet" th:href="@{/CSS/mensajes.css}">
-    <script th:src="@{/JS/ui-feedback.js}"></script>
-    <script th:src="@{/JS/transitions.js}" defer></script>
-    <script th:src="@{/JS/prefetch.js}" defer></script>
-    <script th:src="@{/JS/polish.js}" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script th:src="@{/JS/ws-shell.js}" defer></script>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <title>Mensajes | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/nautico-mensajes.css}">
     <script th:src="@{/JS/mensajes.js}" defer></script>
 </head>
 
-<body class="wsjobs" th:classappend="${usuarioActualTipo == 'empresa'} ? ' is-empresa' : ''">
+<body th:classappend="${session.usuarioActualTipo == 'empresa'} ? 'empresa'">
+    <a class="skip" href="#contenido">Saltar al contenido</a>
 
-    <div class="ws-boot" id="wsBoot" aria-hidden="true">
-        <div class="ws-boot-box">
-            <div class="ws-boot-line"><span class="ok">✓</span> resolviendo módulos…</div>
-            <div class="ws-boot-line"><span class="ok">✓</span> sincronizando conversaciones…</div>
-            <div class="ws-boot-line" id="bootLast">$ devcoast run mensajes.log</div>
-            <div class="ws-boot-track"><div class="ws-boot-fill" id="bootFill"></div></div>
+    <div class="app">
+        <aside th:replace="~{fragments/nautico :: sidebar('mensajes')}"></aside>
+        <div th:replace="~{fragments/nautico :: scrim}"></div>
+
+        <div class="main">
+            <header th:replace="~{fragments/nautico :: topbar('/mensajes', 'Buscar conversaciones', 'Busca por nombre o cargo', ${q})}"></header>
+
+            <main class="mx" id="contenido">
+                <th:block th:replace="~{fragments/mensajes :: lista(${conversaciones}, null, ${totalNoLeidos}, ${q})}"></th:block>
+
+                <section class="mx-thread mx-idle" aria-label="Ninguna conversación abierta">
+                    <div class="mx-idle-box">
+                        <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/>
+                            <th:block th:replace="~{fragments/nautico :: gull}"></th:block></svg>
+                        <h2>Elige una conversación.</h2>
+                        <p>Las charlas con
+                            <span th:text="${session.usuarioActualTipo == 'empresa'} ? 'tus candidatos' : 'las empresas'">las empresas</span>
+                            viven acá, con lo último arriba.</p>
+                    </div>
+                </section>
+            </main>
         </div>
     </div>
-
-    <div id="nav-progress" class="ws-navprogress"></div>
-    <button id="back-to-top" class="ws-to-top" aria-label="Volver arriba" title="Volver arriba">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-    </button>
-    <div class="ws-grain" aria-hidden="true"></div>
-    <div class="ws-vignette" aria-hidden="true"></div>
-    <div class="ws-scrim" id="scrim"></div>
-
-    <div class="ws-palette-scrim" id="paletteScrim">
-        <div class="ws-palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-            <div class="ws-palette-input-row">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="paletteInput" placeholder="Ir a una sección o acción…" autocomplete="off">
-                <kbd>Esc</kbd>
-            </div>
-            <div class="ws-palette-list" id="paletteList"></div>
-        </div>
-    </div>
-
-    <header class="ws-top">
-        <button class="ws-menu-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="side" aria-expanded="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-        <a class="ws-brand" th:href="@{/dashboard}">
-            <img class="ws-brand-mark" th:src="@{/img/DevCoast%20iconx256.png}" alt="DevCoast">
-            <span class="ws-brand-name">DevCoast</span><span class="ws-brand-sep">/</span><span class="ws-brand-path">mensajes</span>
-        </a>
-        <span class="ws-role-pill" th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-
-        <button class="ws-search" id="paletteOpen" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Buscar en el workspace…
-            <kbd>⌘K</kbd>
-        </button>
-
-        <div class="ws-bell" id="bellWrap">
-            <button class="ws-bell-btn" id="bellBtn" type="button" aria-label="Notificaciones" title="Notificaciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <span class="ws-bell-badge" th:if="${notifNoLeidas != null and notifNoLeidas > 0}" th:text="${notifNoLeidas}">1</span>
-            </button>
-            <div class="ws-bell-drop" id="bellDrop">
-                <div class="ws-bell-drop-head"><span class="ws-bell-drop-title">Notificaciones</span></div>
-                <div class="ws-bell-drop-list">
-                    <div th:if="${notifRecientes == null or #lists.isEmpty(notifRecientes)}" class="ws-bell-empty">Sin notificaciones nuevas</div>
-                </div>
-            </div>
-        </div>
-
-        <a th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}" class="ws-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <span class="lbl">Ver candidatos</span>
-        </a>
-        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}" class="ws-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-            <span class="lbl">Mis solicitudes</span>
-        </a>
-
-        <div class="ws-avatar" th:title="${usuarioActualNombre}"
-            th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''"
-            th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</div>
-    </header>
-
-    <div class="ws-body">
-        <aside class="ws-side" id="side" aria-label="Navegación">
-            <div class="ws-side-bar">
-                <span class="ws-side-bar-title">explorer</span>
-                <span class="ws-side-bar-tools" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
-                </span>
-            </div>
-
-            <div class="ws-side-profile">
-                <div class="ws-side-avatar"
-                    th:style="${usuarioActualFotoUrl != null} ? 'background-image:url(' + ${usuarioActualFotoUrl} + ')' : ''">
-                    <span th:text="${usuarioActualFotoUrl == null} ? (${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${#strings.toUpperCase(#strings.substring(usuarioActualNombre,0,1))} : 'D') : ''">D</span>
-                    <span class="ws-side-avatar-dot" aria-hidden="true"></span>
-                </div>
-                <div>
-                    <div class="ws-side-profile-name" th:text="${usuarioActualNombre != null and !#strings.isEmpty(usuarioActualNombre)} ? ${usuarioActualNombre} : 'Usuario'">Usuario</div>
-                    <div class="ws-side-profile-role" th:text="${usuarioActualTipo == 'empresa'} ? 'portal empresa' : 'talento creativo'">talento creativo</div>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    general<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link" th:href="@{/dashboard}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
-                        <span class="name">Dashboard</span> <span class="ext">.tsx</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/empleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/></svg></span>
-                        <span class="name">Empleos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/talentos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Talentos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/proyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
-                        <span class="name">Proyectos</span> <span class="ext">.fig</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/empleos/guardados}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Guardados</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/misProyectos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg></span>
-                        <span class="name">Mis proyectos</span> <span class="ext">/</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/misEmpleos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2Z"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9.5" y1="14.5" x2="14.5" y2="14.5"/></svg></span>
-                        <span class="name">Mis empleos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                        <span class="name">Candidatos</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/crearEmpleo}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
-                        <span class="name">Publicar</span> <span class="ext">+</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="ws-side-group">
-                <button type="button" class="ws-side-head" aria-expanded="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    cuenta<span class="slash">/</span>
-                </button>
-                <div class="ws-side-items">
-                    <a class="ws-side-link is-active" th:href="@{/mensajes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-                        <span class="name">Mensajes</span> <span class="ext">.log</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
-                        <span class="name">Solicitudes</span> <span class="ext">.json</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/perfil}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
-                        <span class="name">Perfil</span> <span class="ext">.md</span>
-                    </a>
-                    <a class="ws-side-link" th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/curriculum}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></span>
-                        <span class="name">Curriculum</span> <span class="ext">.pdf</span>
-                    </a>
-                    <a class="ws-side-link" th:href="@{/ajustes}">
-                        <span class="ws-tree-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                        <span class="name">Ajustes</span> <span class="ext">.yml</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        <main class="ws-main">
-            <span class="ws-gutter" id="gutterLines" aria-hidden="true"></span>
-            <div class="ws-content">
-                <div class="ws-crumb">
-                    <span>~</span><span class="sep">/</span>
-                    <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-                    <span class="sep">/</span><span class="cur">mensajes.log</span>
-                </div>
-
-                <div th:if="${flashMessage != null}" class="flash-banner" th:classappend="${flashType != null ? ' ' + flashType : ''}">
-                    <span th:text="${flashMessage}">Notificacion</span>
-                    <button class="flash-close" type="button" onclick="this.parentElement.remove()">×</button>
-                </div>
-
-                <div class="ws-page-head">
-                    <div>
-                        <p class="ws-eyebrow">// tus conversaciones<span class="ws-cursor" aria-hidden="true">▌</span></p>
-                        <h1 class="ws-big-head">
-                            <span class="ws-big-num" th:text="${#lists.size(conversaciones)}">0</span>
-                            <span class="ws-big-head-sub">conversaciones<br>activas</span>
-                        </h1>
-                        <p class="ws-page-sub" th:text="${usuarioActualTipo == 'empresa'} ? 'Conversaciones con candidatos que aplicaron a tus empleos.' : 'Conversaciones con las empresas donde has postulado.'">
-                            Conversaciones.</p>
-                    </div>
-                </div>
-
-                <div th:if="${conversaciones == null or #lists.isEmpty(conversaciones)}" class="empty-state">
-                    <div class="empty-state-code" aria-hidden="true">
-                        <span class="k">mensajes</span><span class="p">.log</span><span class="p">:</span>
-                        <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                    </div>
-                    <strong>Sin conversaciones aún</strong>
-                    <p>Los mensajes aparecerán aquí. Inicia una conversación desde el detalle de una solicitud.</p>
-                    <div class="empty-state-actions">
-                        <a th:if="${usuarioActualTipo == 'empresa'}" th:href="@{/candidatos}" class="btn btn-primary">Ver candidatos</a>
-                        <a th:if="${usuarioActualTipo != 'empresa'}" th:href="@{/solicitudes}" class="btn btn-primary">Ver mis solicitudes</a>
-                    </div>
-                </div>
-
-                <th:block th:unless="${conversaciones == null or #lists.isEmpty(conversaciones)}">
-                    <div class="mg-stat-row">
-                        <div class="mg-stat">
-                            <span class="mg-stat-icon mg-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-                            <span class="mg-stat-num" th:text="${#lists.size(conversaciones)}" th:attr="data-value=${#lists.size(conversaciones)}">0</span>
-                            <span class="mg-stat-label">Conversaciones</span>
-                        </div>
-                        <div class="mg-stat">
-                            <span class="mg-stat-icon mg-stat-icon--rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
-                            <span class="mg-stat-num" th:text="${totalNoLeidos ?: 0}" th:attr="data-value=${totalNoLeidos ?: 0}">0</span>
-                            <span class="mg-stat-label">Mensajes sin leer</span>
-                        </div>
-                    </div>
-
-                    <div class="mg-toolbar">
-                        <form class="ws-cmdbar" onsubmit="return false;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                            <span class="p">$</span><span class="ws-cmdbar-cmd">grep</span>
-                            <span class="ws-cmdbar-input-wrap"><input type="text" id="mg-search-input" placeholder="nombre o empleo…" aria-label="Buscar conversación"></span>
-                        </form>
-                        <div class="chip-row" id="mg-filter-bar">
-                            <span class="chip active" data-mg-filter="todos">Todos</span>
-                            <span class="chip" data-mg-filter="no-leidos">No leídos</span>
-                        </div>
-                    </div>
-
-                    <div class="empty-state" id="mg-filter-empty" hidden>
-                        <div class="empty-state-code" aria-hidden="true">
-                            <span class="k">filtro</span><span class="p">.log</span><span class="p">:</span>
-                            <span class="br">[</span><span class="ws-cursor">▌</span><span class="br">]</span>
-                        </div>
-                        <strong>Sin resultados</strong>
-                        <p>Prueba con otro término o filtro.</p>
-                        <div class="empty-state-actions">
-                            <button class="btn btn-outline" id="mg-filter-reset" type="button">Ver todos</button>
-                        </div>
-                    </div>
-
-                    <div class="mg-list" id="mg-list">
-                        <a th:each="conv, iter : ${conversaciones}" th:href="@{|/chat/${conv.solicitud.id}|}"
-                            th:style="'animation-delay:' + (${iter.index < 10 ? iter.index * 0.03 : 0.3}) + 's'"
-                            th:attr="data-search=${#strings.toLowerCase(conv.otroNombre + ' ' + (conv.solicitud.empleoTitulo ?: ''))}, data-unread=${conv.noLeidos > 0 ? 'true' : 'false'}"
-                            class="mg-row" th:classappend="${conv.noLeidos > 0} ? ' has-unread' : ''">
-
-                            <div class="mg-icon" th:attr="style='background:' + (${conv.solicitud.empleoColorIcono} ?: '#1d7fd0') + ';'">
-                                <th:block th:replace="~{fragments/icons :: iconoEmpleo(${conv.solicitud.empleoIcono})}" />
-                            </div>
-
-                            <div class="mg-body">
-                                <div class="mg-name" th:text="${conv.otroNombre}">Nombre</div>
-                                <div class="mg-job" th:text="${conv.solicitud.empleoTitulo ?: 'Empleo'}">Título</div>
-                                <div class="mg-preview" th:classappend="${conv.noLeidos > 0} ? ' is-unread' : ''" th:text="${conv.ultimoMensaje.texto ?: ''}">Último mensaje…</div>
-                            </div>
-
-                            <div class="mg-right">
-                                <span class="mg-time mg-rel-date" th:if="${conv.ultimoMensaje.fechaEnvio != null}"
-                                    th:attr="data-fecha-iso=${#dates.format(conv.ultimoMensaje.fechaEnvio,'yyyy-MM-dd''T''HH:mm:ss')}"
-                                    th:text="${#dates.format(conv.ultimoMensaje.fechaEnvio,'HH:mm')}"></span>
-                                <span class="mg-badge" th:if="${conv.noLeidos > 0}" th:text="${conv.noLeidos}">1</span>
-                            </div>
-                        </a>
-                    </div>
-                </th:block>
-            </div>
-        </main>
-    </div>
-
-    <footer class="ws-status">
-        <div class="ws-status-l">
-            <span class="ws-status-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                <span th:text="${usuarioActualTipo == 'empresa'} ? 'empresa' : 'talento'">talento</span>
-            </span>
-            <span class="sp">·</span>
-            <span>tu bandeja</span>
-        </div>
-        <div class="ws-status-r">
-            <span class="hide-sm">devcoast v2</span>
-            <span class="sp hide-sm">·</span>
-            <span id="clock">00:00:00</span>
-            <span class="sp">·</span>
-            <a th:href="@{/about-us}">¿Ayuda?</a>
-        </div>
-    </footer>
-
 </body>
 
 </html>

@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+// esto de acá le pone a cada página los numeritos de la campana, los mensajes sin leer y demás avisos
 @Component
 public class NotificacionInterceptor implements HandlerInterceptor {
 
@@ -32,11 +33,8 @@ public class NotificacionInterceptor implements HandlerInterceptor {
 
     private final MongoTemplate mongoTemplate;
 
-    // vistas que usan el shell náutico (fragments/nautico :: sidebar). Solo ellas piden los datos
-    // del menú lateral, para no gastar consultas en las páginas que todavía tienen el shell viejo.
-    // Al migrar una página al shell nuevo, agregar aquí el nombre de su vista.
     private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa",
-            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics", "empresa-perfil");
+            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics", "empresa-perfil", "mensajes", "chat");
 
     public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {
@@ -63,7 +61,6 @@ public class NotificacionInterceptor implements HandlerInterceptor {
         String uid = usuarioId.toString();
         boolean esTalento = "talento".equals(session.getAttribute("usuarioActualTipo"));
 
-        // el badge de invitaciones solo aplica a talento
         if (esTalento) {
             try {
                 long pendientes = invitacionRepository.countByTalentoIdAndEstado(uid, "pendiente");
@@ -99,15 +96,12 @@ public class NotificacionInterceptor implements HandlerInterceptor {
         }
     }
 
-    // datos del menú lateral: el total de ofertas activas (solo un conteo) y, para talento, el % de perfil completo
     private void cargarDatosShell(ModelAndView mav, String uid, boolean esTalento) {
         try {
-            // mismo criterio que el listado de /empleos: ACTIVO o sin estado (documentos viejos)
             Query activos = new Query(new Criteria().orOperator(
                     Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false)));
             mav.addObject("shellTotalOfertas", mongoTemplate.count(activos, Empleo.class));
         } catch (Exception ignored) {
-            // si falla el conteo el menú simplemente no muestra la insignia
         }
 
         if (!esTalento) {
@@ -115,11 +109,9 @@ public class NotificacionInterceptor implements HandlerInterceptor {
             return;
         }
         try {
-            // si el controlador ya cargó al usuario de la sesión no se vuelve a consultar
             Object ya = mav.getModel().get("usuario");
             Usuario u = (ya instanceof Usuario uu && uid.equals(uu.getId())) ? uu : null;
             if (u == null) {
-                // no es un conteo, pero es una sola lectura por _id y solo con los campos que mide getCompletitudPerfil()
                 Query q = new Query(Criteria.where("_id").is(uid));
                 q.fields().include("nombre", "rol_titulo", "bio", "stack", "email_contacto", "ubicacion", "modalidad",
                         "portfolio_url", "linkedin_url", "github_url", "cv_experiencias", "cv_educaciones");
@@ -127,12 +119,9 @@ public class NotificacionInterceptor implements HandlerInterceptor {
             }
             if (u != null) mav.addObject("shellCompletitud", u.getCompletitudPerfil());
         } catch (Exception ignored) {
-            // sin el dato el menú oculta el widget de perfil
         }
     }
 
-    // insignia "Postulaciones" del menú de Empresa: postulaciones en revisión de sus ofertas activas
-    // (si el controlador ya la calculó, no se repite)
     private void cargarPendientesEmpresa(ModelAndView mav, String uid) {
         if (mav.getModel().containsKey("solicitudesPendientesEmpresa")) return;
         try {
@@ -144,7 +133,6 @@ public class NotificacionInterceptor implements HandlerInterceptor {
                             com.example.devcoast.model.Solicitud.class);
             mav.addObject("solicitudesPendientesEmpresa", pendientes);
         } catch (Exception ignored) {
-            // sin el dato el menú no muestra la insignia
         }
     }
 }

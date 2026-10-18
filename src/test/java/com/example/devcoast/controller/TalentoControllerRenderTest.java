@@ -37,7 +37,6 @@ import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.ProyectoRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 
-// ronda 6: Directorio con el shell náutico y tarjetas de papel con datos reales
 @WebMvcTest(TalentoController.class)
 @Import(SecurityConfig.class)
 class TalentoControllerRenderTest {
@@ -131,7 +130,6 @@ class TalentoControllerRenderTest {
                 .andExpect(content().string(containsString("4 talentos con perfil público")))
                 .andExpect(content().string(containsString("Valentina Ríos")))
                 .andExpect(content().string(containsString("DESTACADO")))
-                // "frontend" guardado por el registro se ve como etiqueta, y Remoto / Full-time con el texto unificado
                 .andExpect(content().string(containsString("<span>Frontend</span>")))
                 .andExpect(content().string(containsString("Tiempo completo")))
                 .andExpect(content().string(containsString("1 proyecto en su portafolio")))
@@ -203,8 +201,6 @@ class TalentoControllerRenderTest {
     void sinSesionVaAlLogin() throws Exception {
         mockMvc.perform(get("/talentos")).andExpect(status().is3xxRedirection());
     }
-
-    // ───── página de un talento (Ver perfil) ─────
 
     private Usuario talentoCompleto() {
         Usuario u = talentoConDatos();

@@ -1,4 +1,3 @@
-/* DevCoast · Facturación: cada cobro es un recibo con forma de pase. Requiere nautico.css y nautico-pase.css. */
 .fa-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; margin: 24px 0 0; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .fa-nums > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; background: var(--panel); padding: 18px 22px; }
 .fa-nums dt { font: 700 11px var(--font-mono); letter-spacing: .08em; color: var(--mute); }

@@ -1,6 +1,3 @@
-/* DevCoast · Proyectos (docs/diseno/DEVCOAST-PROYECTOS-MOTION.md).
-   Filtros y búsqueda los resuelve el servidor (parámetros GET). Aquí queda lo de interfaz:
-   el diálogo para añadir y editar, el interruptor PÚBLICO/OCULTO y el aviso con "Deshacer". */
 (function () {
     'use strict';
 
@@ -9,7 +6,6 @@
     var T = function (t) { return typeof window.translateText === 'function' ? window.translateText(t) : t; };
     var toast = function (txt, opts) { if (window.DevCoast && window.DevCoast.toast) window.DevCoast.toast(txt, opts); };
 
-    /* ── "Cancelar" de la confirmación para eliminar (la confirmación es un <details>) ── */
     document.addEventListener('click', function (e) {
         var c = e.target.closest ? e.target.closest('[data-cancelar-del]') : null;
         if (!c) return;
@@ -17,7 +13,6 @@
         if (det) { det.open = false; var s = $('summary', det); if (s) s.focus(); }
     });
 
-    /* ── contador "N proyectos · M públicos" ── */
     function contar(deltaTotal, deltaPublicos) {
         var el = $('#conteo'); if (!el) return;
         var total = Math.max(0, +el.getAttribute('data-total') + deltaTotal), pub = Math.max(0, +el.getAttribute('data-publicos') + deltaPublicos);
@@ -25,7 +20,6 @@
         el.textContent = (total === 1 ? '1 ' + T('proyecto') : total + ' ' + T('proyectos')) + ' · ' + pub + ' ' + (pub === 1 ? T('público') : T('públicos'));
     }
 
-    /* ── interruptor de visibilidad: POST real (JSON); sin JavaScript se envía el formulario normal ── */
     function fijarVisibilidad(art, sw, publicado) {
         sw.setAttribute('aria-checked', publicado ? 'true' : 'false');
         $('span', sw).textContent = T(publicado ? 'PÚBLICO' : 'OCULTO');
@@ -61,7 +55,6 @@
         });
     });
 
-    /* ── diálogo: añadir y editar ── */
     var dlg = $('#dlg'), form = $('#pform');
     if (!dlg || !form) return;
     var campos = { nombre: $('#pNombre'), categoria: $('#pCategoria'), tipo: $('#pTipo'), descripcion: $('#pDesc'), link: $('#pLink') };
@@ -76,7 +69,6 @@
         setErr(campos.nombre, 'eNombre', ''); setErr(campos.categoria, 'eCategoria', ''); setErr(campos.tipo, 'eTipo', '');
         setErr(campos.descripcion, 'eDesc', ''); setErr(campos.link, 'eLink', '');
     }
-    // si el valor guardado no está entre las opciones (datos viejos), se agrega para no perderlo al editar
     function seleccionar(sel, valor) {
         if (valor && !$$('option', sel).some(function (o) { return o.value === valor; })) {
             var o = document.createElement('option'); o.value = valor; o.textContent = valor; sel.appendChild(o);
@@ -110,7 +102,6 @@
         campos.nombre.focus();
     }
 
-    // el botón y el mosaico "Añadir" son enlaces al editor completo; con JavaScript abren el diálogo
     $$('#addTop, #add').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); abrir(null, a); }); });
     $$('.pj .editar').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); abrir(a.closest('.pj'), a); }); });
     $('#pCancel').addEventListener('click', function () { dlg.close(); });

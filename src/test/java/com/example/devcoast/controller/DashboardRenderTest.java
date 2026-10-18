@@ -42,7 +42,6 @@ import com.example.devcoast.repository.NotificacionRepository;
 import com.example.devcoast.repository.SolicitudRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 
-// ronda 5: Dashboard de talento y de empresa con datos reales
 @WebMvcTest(DashboardController.class)
 @Import(SecurityConfig.class)
 class DashboardRenderTest {
@@ -128,17 +127,15 @@ class DashboardRenderTest {
         Files.writeString(dir.resolve(nombre), r.getResponse().getContentAsString());
     }
 
-    // ───────────── talento ─────────────
-
     @Test
     void talentoVeLasTresZonasDeLaCartaConSusFechas() throws Exception {
         when(usuarioRepository.findById("t1")).thenReturn(Optional.of(talento(true, true)));
         when(solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc("t1")).thenReturn(List.of(
-                solicitud("s1", "Desarrollo Backend", "Nordic Labs", "Programacion · Backend", "revision", 1, null),     // zarpando
-                solicitud("s2", "Diseño de interfaces", "Estudio Lumen", "Diseño · UI/UX", "revision", 10, null),         // alta mar
-                solicitud("s3", "Desarrollo móvil", "Capsula", "Programacion · Mobile", "aprobada", 20, 5),               // puerto
-                solicitud("s4", "API vieja", "Faro", "Programacion · Backend", "aprobada", 90, 70),                       // fuera de puerto
-                solicitud("s5", "API de pagos", "Faro", "Programacion · Backend", "rechazada", 3, 1)));                   // no se dibuja
+                solicitud("s1", "Desarrollo Backend", "Nordic Labs", "Programacion · Backend", "revision", 1, null),
+                solicitud("s2", "Diseño de interfaces", "Estudio Lumen", "Diseño · UI/UX", "revision", 10, null),
+                solicitud("s3", "Desarrollo móvil", "Capsula", "Programacion · Mobile", "aprobada", 20, 5),
+                solicitud("s4", "API vieja", "Faro", "Programacion · Backend", "aprobada", 90, 70),
+                solicitud("s5", "API de pagos", "Faro", "Programacion · Backend", "rechazada", 3, 1)));
 
         MvcResult r = mockMvc.perform(get("/dashboard").session(sesion("talento", "t1", "Valentina Ríos")))
                 .andExpect(status().isOk())
@@ -155,7 +152,6 @@ class DashboardRenderTest {
                 .andExpect(content().string(not(containsString("API vieja"))))
                 .andExpect(content().string(not(containsString("API de pagos, Faro"))))
                 .andExpect(content().string(containsString("data-n=\"3\"")))
-                // el diálogo de bienvenida no sale si ya completó el onboarding
                 .andExpect(content().string(not(containsString("id=\"ob\""))))
                 .andReturn();
         guardar("dashboard-talento.html", r);
@@ -174,9 +170,9 @@ class DashboardRenderTest {
         inv.setFechaEnvio(hace(1));
         when(invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc("t1")).thenReturn(List.of(inv));
         when(mongoTemplate.find(any(Query.class), eq(Empleo.class))).thenReturn(List.of(
-                oferta("o1", "Ingeniero Java", "Orion", "Java, Docker", 2),      // 100 %, nueva
-                oferta("o2", "Dev Java Senior", "Altamar", "Java, Docker, Kafka", 10),   // medio
-                oferta("o3", "Dev Go", "Boreal", "Go, Rust", 3)));                // sin coincidencia
+                oferta("o1", "Ingeniero Java", "Orion", "Java, Docker", 2),
+                oferta("o2", "Dev Java Senior", "Altamar", "Java, Docker, Kafka", 10),
+                oferta("o3", "Dev Go", "Boreal", "Go, Rust", 3)));
 
         MvcResult r = mockMvc.perform(get("/dashboard").session(sesion("talento", "t1", "Valentina Ríos")))
                 .andExpect(status().isOk())
@@ -218,8 +214,6 @@ class DashboardRenderTest {
                 .andReturn();
         guardar("dashboard-talento-onboarding.html", r);
     }
-
-    // ───────────── empresa ─────────────
 
     @Test
     void empresaVeSuCartaDeCandidatosSusNumerosYSusOfertas() throws Exception {

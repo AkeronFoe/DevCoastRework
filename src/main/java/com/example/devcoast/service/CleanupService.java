@@ -17,9 +17,7 @@ import com.example.devcoast.model.Proyecto;
 import com.example.devcoast.model.Solicitud;
 import com.example.devcoast.model.Usuario;
 
-// centraliza el borrado en cascada, sin esto quedan huérfanos por todos lados
-// (mensajes que nadie puede abrir pero siguen sumando en "no leídos", notificaciones
-// a páginas muertas, favoritos apuntando a empleos que ya no existen, etc.)
+// cuando se borra algo, esto limpia lo que quedaba colgado (mensajes, avisos...) para que no queden fantasmas dando vueltas
 @Service
 public class CleanupService {
 

@@ -6,13 +6,12 @@
     <title>DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/landing.css}">
-    <script th:src="@{/JS/i18n.js}"></script>
+    <script th:src="@{/JS/i18n.js}" defer></script>
     <script th:src="@{/JS/landing.js}" defer></script>
 </head>
 
 <body>
 <a class="skip" href="#hero">Saltar al contenido</a>
-<!-- HUD de profundidad -->
 <div class="hud" id="hud" aria-hidden="true">
   <div class="hud-n">−<span id="hudN">0</span> m</div>
   <div class="hud-bar" id="hudBar"><i></i><span class="hud-t" style="top:0%">0</span><span class="hud-t" style="top:25%">10</span><span class="hud-t" style="top:50%">20</span><span class="hud-t" style="top:75%">30</span><span class="hud-t" style="top:100%">40</span></div>
@@ -21,7 +20,6 @@
   <i class="bub" style="left:6%;width:14px;height:14px;--d:0s;--t:13s"></i><i class="bub" style="left:14%;width:9px;height:9px;--d:5s;--t:11s"></i><i class="bub" style="left:30%;width:18px;height:18px;--d:8s;--t:15s"></i><i class="bub" style="left:48%;width:10px;height:10px;--d:2s;--t:12s"></i><i class="bub" style="left:66%;width:16px;height:16px;--d:6s;--t:14s"></i><i class="bub" style="left:82%;width:11px;height:11px;--d:3s;--t:12s"></i><i class="bub" style="left:94%;width:15px;height:15px;--d:9s;--t:16s"></i>
 </div>
 
-<!-- ===== HERO ===== -->
 <section class="scene" id="hero" style="height:195vh">
 <div class="stick">
   <svg width="100%" height="100%" aria-hidden="true" style="position:absolute;left:0;top:0"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
@@ -52,7 +50,6 @@
     </div>
   </div>
 
-  <!-- mar que sube al hacer scroll -->
   <div id="sea" aria-hidden="true">
     <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
     <div class="seabody"></div>
@@ -62,7 +59,6 @@
 
 <main style="position:relative;z-index:1">
 
-<!-- ===== RUTA ===== -->
 <section class="scene" id="ruta" style="height:340vh">
 <div class="stick">
   <div class="rbox">
@@ -94,7 +90,6 @@
 </div>
 </section>
 
-<!-- ===== PASES ===== -->
 <section class="scene" id="pases" style="height:320vh" th:if="${!#lists.isEmpty(empleosLanding)}">
 <div class="stick">
   <div class="sec-h pases-h"><div class="eyebrow">// empleos</div><h2>Cada oferta es un pase de abordaje.</h2></div>
@@ -108,7 +103,6 @@
 </div>
 </section>
 
-<!-- ===== GAVIOTA ===== -->
 <section class="scene" id="gaviota" style="height:190vh">
 <div class="stick">
   <div class="gq">
@@ -118,7 +112,6 @@
 </div>
 </section>
 
-<!-- ===== MUELLES ===== -->
 <section class="scene" id="muelles" style="height:210vh">
 <div class="stick">
   <div class="sec-h pases-h" id="muellesH"><div class="eyebrow">// dos muelles</div><h2>Un mismo mar, dos formas de llegar.</h2></div>
@@ -129,7 +122,6 @@
 </div>
 </section>
 
-<!-- ===== FONDO ===== -->
 <section id="crear">
   <div class="x-wrap">
     <div class="xbox" aria-hidden="true"><div class="ring" id="xRing"></div><div class="xb" id="xA" style="transform:rotate(45deg)"></div><div class="xb" id="xB" style="transform:rotate(-45deg)"></div></div>

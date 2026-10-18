@@ -1,7 +1,3 @@
-/* DevCoast · Guardados.
-   Filtros y orden los resuelve el servidor (parámetros GET); aquí queda solo lo de interfaz:
-   enviar el orden al cambiar el selector y quitar una oferta de los marcadores (con "Deshacer").
-   El "Postularme" de cada pase lo maneja empleos-pase.js. */
 (function () {
     'use strict';
 
@@ -12,7 +8,6 @@
     var sub = $('#gdSub');
     var removidas = 0;
 
-    /* el contador del encabezado se recalcula con lo que queda visible en la lista */
     function actualizarResumen() {
         if (!lista || !sub) return;
         var vivas = Array.prototype.filter.call(lista.querySelectorAll('.jt'), function (a) { return !a.hidden; });
@@ -36,7 +31,6 @@
             .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
     }
 
-    /* quitar de guardados: POST al mismo endpoint que el marcador de Empleos (alterna el estado) */
     document.addEventListener('click', function (e) {
         var btn = e.target.closest ? e.target.closest('.unsave[data-empleo-id]') : null;
         if (!btn || btn.disabled) return;

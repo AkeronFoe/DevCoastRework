@@ -50,13 +50,11 @@ public class PlanService {
         return new Date(fecha.getTime() + dias * 24L * 60 * 60 * 1000);
     }
 
+    // cada madrugada baja a plan gratis a las empresas cuyo plan PRO ya se venció
     @Scheduled(cron = "0 0 3 * * *")
     public void degradarPlanesVencidos() {
         Date ahora = new Date();
-        List<Empresa> vencidas = empresaRepository.findAll().stream()
-                .filter(e -> PLAN_PRO.equals(e.getPlan()))
-                .filter(e -> e.getPlanVenceEn() != null && e.getPlanVenceEn().before(ahora))
-                .toList();
+        List<Empresa> vencidas = empresaRepository.findByPlanAndPlanVenceEnBefore(PLAN_PRO, ahora);
         for (Empresa e : vencidas) {
             e.setPlan(PLAN_GRATIS);
             empresaRepository.save(e);

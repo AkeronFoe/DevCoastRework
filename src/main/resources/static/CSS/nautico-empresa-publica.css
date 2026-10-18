@@ -1,5 +1,3 @@
-/* DevCoast · Página de una empresa (la ven Talento y otras cuentas): ficha de la empresa y sus ofertas activas como pases.
-   Requiere nautico.css y nautico-pase.css. */
 .ep-hero{flex-direction:row;align-items:flex-start;gap:20px;margin-top:26px;padding:22px 24px}
 .ep-av{width:72px;height:72px;border-radius:18px;background:var(--teal-d);color:#fff;display:grid;place-items:center;font:700 30px var(--font-display);flex-shrink:0;overflow:hidden;position:relative}
 .ep-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}

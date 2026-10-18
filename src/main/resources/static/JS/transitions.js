@@ -1,13 +1,6 @@
-/**
- * transitions.js — DevCoast
- * Barra de progreso + skeleton loaders de navegación.
- */
 (function () {
     'use strict';
 
-    /* ─────────────────────────────────────────
-       Helpers compartidos
-    ───────────────────────────────────────── */
     function isNavLink(a, e) {
         if (!a) return false;
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
@@ -15,14 +8,10 @@
         var href = a.getAttribute('href');
         if (!href || href === '#' || href.startsWith('javascript') || href.startsWith('mailto')) return false;
         if (href.startsWith('http') && !href.startsWith(location.origin)) return false;
-        /* No interceptar si tiene data-no-skeleton */
         if (a.dataset.noSkeleton !== undefined) return false;
         return true;
     }
 
-    /* ─────────────────────────────────────────
-       1. Barra de progreso (top)
-    ───────────────────────────────────────── */
     var navBar;
 
     function initNavProgress() {
@@ -64,20 +53,14 @@
         }, 150);
     }
 
-    /* ─────────────────────────────────────────
-       2. Skeleton loader
-    ───────────────────────────────────────── */
-    /* Genera una línea skeleton */
     function skel(w, h, extra) {
         return '<div class="dc-sk" style="width:' + w + ';height:' + (h||12) + 'px;'
             + 'border-radius:6px;' + (extra||'') + '"></div>';
     }
 
-    /* Genera el HTML del skeleton según el tipo de página */
     function buildSkelHTML() {
         var s = '';
 
-        /* Topbar */
         s += '<div style="display:flex;align-items:center;gap:12px;'
            + 'height:60px;border-bottom:1px solid var(--border);'
            + 'margin:-24px -28px 20px;padding:0 24px 0 28px;">';
@@ -87,7 +70,6 @@
         s += skel('32px', 32, 'border-radius:50%;');
         s += '</div>';
 
-        /* Card 1 — cabecera con icono */
         s += '<div class="dc-sk-card" style="display:flex;gap:16px;align-items:flex-start;">';
         s += skel('48px', 48, 'border-radius:10px;flex-shrink:0;');
         s += '<div style="flex:1;">';
@@ -97,7 +79,6 @@
         s += '</div>';
         s += '</div>';
 
-        /* Card 2 — grid de detalles */
         s += '<div class="dc-sk-card">';
         s += skel('38%', 15, 'margin-bottom:18px;');
         s += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;">';
@@ -110,7 +91,6 @@
         s += '</div>';
         s += '</div>';
 
-        /* Card 3 — lista de items */
         s += '<div class="dc-sk-card">';
         s += skel('42%', 15, 'margin-bottom:18px;');
         for (var j = 0; j < 3; j++) {
@@ -135,14 +115,11 @@
         var main = document.querySelector('.main');
         if (!main || document.getElementById('dc-skeleton')) return;
 
-        /* Copia el background actual para que el overlay sea opaco */
         var bg = getComputedStyle(main).backgroundColor;
-        /* Fallback por si el background es transparent */
         if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') {
             bg = getComputedStyle(document.body).backgroundColor || '#0f1117';
         }
 
-        /* El main necesita position:relative para el overlay absoluto */
         if (getComputedStyle(main).position === 'static') {
             main.style.position = 'relative';
         }
@@ -160,7 +137,6 @@
         overlay.innerHTML = buildSkelHTML();
         main.appendChild(overlay);
 
-        /* Failsafe: si la navegación falla, quitarlo tras 8s */
         clearTimeout(skelTimeout);
         skelTimeout = setTimeout(function () {
             var el = document.getElementById('dc-skeleton');
@@ -176,16 +152,12 @@
         }, true);
     }
 
-    /* ─────────────────────────────────────────
-       3. Animación de entrada de página (fade-up)
-    ───────────────────────────────────────── */
     function initPageFade() {
         if (document.getElementById('dc-transitions-style')) return;
 
         var style = document.createElement('style');
         style.id  = 'dc-transitions-style';
         style.textContent = [
-            /* Entrada de página */
             '@keyframes dcFadeUp{',
             '  from{opacity:0;transform:translateY(10px)}',
             '  to  {opacity:1;transform:translateY(0)}',
@@ -198,12 +170,10 @@
             '.main>*:nth-child(4){animation-delay:.12s}',
             '.main>*:nth-child(5){animation-delay:.16s}',
 
-            /* Entrada del skeleton */
             '@keyframes dcSkelIn{',
             '  from{opacity:0} to{opacity:1}',
             '}',
 
-            /* Pulso del skeleton */
             '@keyframes dcSkelPulse{',
             '  0%,100%{opacity:1} 50%{opacity:.35}',
             '}',
@@ -212,7 +182,6 @@
             '  display:block;',
             '  animation:dcSkelPulse 1.5s ease-in-out infinite;',
             '}',
-            /* stagger entre líneas del mismo card */
             '.dc-sk:nth-child(2){animation-delay:.15s}',
             '.dc-sk:nth-child(3){animation-delay:.3s}',
             '.dc-sk:nth-child(4){animation-delay:.45s}',
@@ -228,9 +197,6 @@
         document.head.appendChild(style);
     }
 
-    /* ─────────────────────────────────────────
-       4. Botón "volver arriba"
-    ───────────────────────────────────────── */
     function initBackToTop() {
         var btn = document.getElementById('back-to-top');
         if (!btn || btn.dataset.bttInit) return;
@@ -248,9 +214,6 @@
         });
     }
 
-    /* ─────────────────────────────────────────
-       Init
-    ───────────────────────────────────────── */
     function ready(fn) {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', fn);
@@ -259,7 +222,6 @@
         }
     }
 
-    /* Completa la barra al cargar cada página */
     window.addEventListener('pageshow', completeBar);
 
     ready(function () {
@@ -267,7 +229,6 @@
         initPageFade();
         initSkeletonLoader();
         initBackToTop();
-        /* Arranca la barra en la carga inicial también */
         completeBar();
     });
 

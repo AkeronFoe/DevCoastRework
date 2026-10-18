@@ -69,13 +69,9 @@ public class EmpleoController {
         this.planService = planService;
     }
 
-    // ofertas por página debajo del destacado
     private static final int OTRAS_POR_PAGINA = 10;
-    // tope de ofertas que se puntúan y ordenan en memoria (el match no está guardado en la base)
     private static final int CANDIDATOS_LIMITE = 600;
 
-    // Lista de empleos como pases de abordaje. Filtros, búsqueda y orden se resuelven aquí con parámetros GET:
-    // ?area=programacion|diseno|otras &modalidad=remoto|hibrido|presencial &hi=1 &q= &orden=match|recientes|salario &page=
     @GetMapping("/empleos")
     public String listarEmpleos(
             Model model, HttpSession session,
@@ -97,7 +93,6 @@ public class EmpleoController {
         boolean soloAlto = "1".equals(hi);
         String qSel = q == null ? "" : q.trim();
 
-        // base de datos: texto libre, modalidad y estado
         Criteria activas = new Criteria().orOperator(
                 Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false));
         List<Criteria> criterios = new ArrayList<>();
@@ -120,11 +115,12 @@ public class EmpleoController {
             criterios.add(Criteria.where("modalidad").regex(MODALIDAD_REGEX.get(modSel), "i"));
 
         long totalActivas = mongoTemplate.count(new Query(activas), Empleo.class);
-        Query consulta = new Query(new Criteria().andOperator(criterios.toArray(Criteria[]::new)))
-                .with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
+        Criteria coincidencias = new Criteria().andOperator(criterios.toArray(Criteria[]::new));
+        Query consulta = new Query(coincidencias).with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
         List<Empleo> candidatos = mongoTemplate.find(consulta, Empleo.class);
+        boolean ventanaLlena = candidatos.size() >= CANDIDATOS_LIMITE;
+        long totalCoincidencias = ventanaLlena ? mongoTemplate.count(new Query(coincidencias), Empleo.class) : candidatos.size();
 
-        // en memoria: área y match (se calculan sobre los candidatos ya filtrados)
         Map<String, MatchEmpleo.Resultado> matches = new HashMap<>();
         List<Empleo> lista = new ArrayList<>();
         for (Empleo e : candidatos) {
@@ -143,7 +139,6 @@ public class EmpleoController {
                 : (matchDisponible ? "match" : "recientes");
         if ("match".equals(orden) && !matchDisponible)
             ordenSel = "recientes";
-        // la lista llega por fecha (más reciente primero); sort() es estable, así que el empate conserva ese orden
         if ("match".equals(ordenSel))
             lista.sort((x, y) -> Integer.compare(
                     matches.containsKey(y.getId()) ? matches.get(y.getId()).porcentaje() : -1,
@@ -151,7 +146,6 @@ public class EmpleoController {
         else if ("salario".equals(ordenSel))
             lista.sort((x, y) -> Integer.compare(salarioVisible(y), salarioVisible(x)));
 
-        // destacado: el de mayor match de lo que se ve; sin match, la oferta que la empresa promociona
         Empleo destacado = null;
         String destacadoMotivo = null;
         if (matchDisponible) {
@@ -172,7 +166,6 @@ public class EmpleoController {
         int pagina = Math.min(Math.max(0, page), totalPaginas - 1);
         List<Empleo> pagItems = otras.subList(pagina * OTRAS_POR_PAGINA, Math.min(otras.size(), (pagina + 1) * OTRAS_POR_PAGINA));
 
-        // qué ofertas de esta página ya tienen solicitud del talento
         Set<String> solicitadas = new java.util.HashSet<>();
         if (talento != null) {
             List<String> ids = new ArrayList<>(pagItems.stream().map(Empleo::getId).toList());
@@ -203,6 +196,9 @@ public class EmpleoController {
         model.addAttribute("tarjetas", tarjetas);
         model.addAttribute("totalMostradas", lista.size());
         model.addAttribute("totalActivas", totalActivas);
+        model.addAttribute("ventanaLlena", ventanaLlena && totalCoincidencias > CANDIDATOS_LIMITE);
+        model.addAttribute("limiteVentana", CANDIDATOS_LIMITE);
+        model.addAttribute("totalCoincidencias", totalCoincidencias);
         model.addAttribute("conMatchAlto", conMatchAlto);
         model.addAttribute("matchDisponible", matchDisponible);
         model.addAttribute("talentoSinStack", talento != null && !tieneStack);
@@ -210,7 +206,6 @@ public class EmpleoController {
         model.addAttribute("area", areaSel == null ? "" : areaSel.clave());
         model.addAttribute("modalidadSel", modSel == null ? "" : modSel);
         model.addAttribute("hi", soloAlto ? "1" : "");
-        // los mismos valores como null cuando no hay filtro: así los enlaces no arrastran parámetros vacíos
         model.addAttribute("areaP", areaSel == null ? null : areaSel.clave());
         model.addAttribute("modP", modSel);
         model.addAttribute("hiP", soloAlto ? "1" : null);
@@ -234,7 +229,6 @@ public class EmpleoController {
         return MODALIDAD_REGEX.containsKey(m) ? m : null;
     }
 
-    // para ordenar por salario: solo cuenta el que la empresa decidió mostrar; el resto va al final
     private static int salarioVisible(Empleo e) {
         if (!e.isMostrarSalario())
             return -1;
@@ -242,8 +236,6 @@ public class EmpleoController {
         return v == null ? -1 : v;
     }
 
-    // Guardados: los mismos pases que Empleos (con match y habilidades) de las ofertas que el talento marcó.
-    // ?filtro=alta|pendientes &orden=recientes|match; "recientes" = la última guardada primero.
     @GetMapping("/empleos/guardados")
     public String empleosGuardados(@RequestParam(required = false) String filtro,
             @RequestParam(required = false) String orden,
@@ -264,7 +256,6 @@ public class EmpleoController {
         if (usuario != null && usuario.getEmpleosFavoritos() != null
                 && !usuario.getEmpleosFavoritos().isEmpty()) {
 
-            // más reciente primero
             List<String> ids = new ArrayList<>(usuario.getEmpleosFavoritos());
             java.util.Collections.reverse(ids);
 
@@ -272,7 +263,6 @@ public class EmpleoController {
                 empleoRepository.findById(id).ifPresent(guardados::add);
         }
 
-        // cuáles de las guardadas ya tienen solicitud del talento (una sola consulta)
         Set<String> solicitadas = new java.util.HashSet<>();
         String userId = RoleGuard.getId(session);
         if (userId != null && !guardados.isEmpty()) {
@@ -298,7 +288,6 @@ public class EmpleoController {
                         || ("alta".equals(filtroSel) && v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO)
                         || ("pendientes".equals(filtroSel) && !v.isSolicitada() && !v.isCerrada()))
                 .toList());
-        // sort() es estable: a igual match conserva el orden "última guardada primero"
         if ("match".equals(ordenSel))
             lista.sort((x, y) -> Integer.compare(y.getMatch() == null ? -1 : y.getMatch(), x.getMatch() == null ? -1 : x.getMatch()));
 
@@ -330,7 +319,6 @@ public class EmpleoController {
         List<Empleo> empleosActivos = empleoRepository
                 .findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO");
 
-        // preferimos los datos del registro de Empresa, y completamos con el primer Empleo si falta algo
         String nombreEmpresa, sectorEmpresa = null, webEmpresa,
                 tamanoEmpresa = null, descripcionEmpresa, logoUrl;
 
@@ -366,7 +354,6 @@ public class EmpleoController {
                 logoUrl = ref.getLogoUrl();
         }
 
-        // las ofertas activas con el mismo pase de Empleos: match con el talento (si tiene stack) y si ya postuló
         Usuario talento = RoleGuard.esTalento(session) ? obtenerUsuario(session) : null;
         Set<String> solicitadas = new java.util.HashSet<>();
         if (talento != null && !empleosActivos.isEmpty())
@@ -391,7 +378,6 @@ public class EmpleoController {
         model.addAttribute("inicial", inicial);
         model.addAttribute("empleosActivos", empleosActivos);
         model.addAttribute("tarjetas", tarjetas);
-        // el pase de oferta pregunta por esto: con el talento sin stack avisa que no hay match
         model.addAttribute("esTalento", talento != null);
         model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
         model.addAttribute("empresaId", empresaId);
@@ -438,7 +424,6 @@ public class EmpleoController {
             model.addAttribute("totalSolicitudesEmpleo", solicitudesEmpleo.size());
         }
 
-        // el encabezado de la ficha es un pase como los de Empleos: match, habilidades que tiene y que le faltan
         Long postulantes = esEmpresaPropietaria ? solicitudRepository.countByEmpleoId(id) : null;
         EmpleoVista vista = EmpleoVista.de(empleo, MatchEmpleo.calcular(talento, empleo), usuarioYaAplico, true,
                 postulantes, new java.util.Date());
@@ -555,7 +540,6 @@ public class EmpleoController {
         return "redirect:/misEmpleos";
     }
 
-    // null si está OK, si no devuelve el mensaje de error
     private String validarEmpleo(Empleo f) {
         if (esVacio(f.getTitulo()) || esVacio(f.getCategoria()) || esVacio(f.getSeniority())
                 || esVacio(f.getModalidad()) || esVacio(f.getContrato()) || esVacio(f.getEmpresaNombre())
@@ -576,8 +560,6 @@ public class EmpleoController {
         return s == null || s.isBlank();
     }
 
-    // ojo: nunca toca id/empresaId/empresaCorreo/estado/faseReclutamiento a propósito,
-    // esos campos se manejan aparte (sesión o endpoints dedicados) y no deberían venir del POST
     private void aplicarCamposFormulario(Empleo target, Empleo form) {
         target.setEmpresaNombre(form.getEmpresaNombre());
         target.setEmpresaSector(form.getEmpresaSector());
@@ -611,7 +593,6 @@ public class EmpleoController {
         target.setLogoUrl(form.getLogoUrl());
     }
 
-    // Mis ofertas (cuenta de Empresa): ?tab=activas|cerradas
     @GetMapping("/misEmpleos")
     public String misEmpleos(@RequestParam(required = false) String tab, Model model, HttpSession session, RedirectAttributes ra) {
         if (RoleGuard.soloEmpresa(session)) {
@@ -625,7 +606,6 @@ public class EmpleoController {
         List<Empleo> activos = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "ACTIVO");
         List<Empleo> cerrados = empleoRepository.findByEmpresaIdAndEstadoOrderByIdDesc(empresaId, "CERRADO");
 
-        // postulaciones de todas sus ofertas, agrupadas por oferta
         List<String> ids = new ArrayList<>();
         activos.forEach(e -> ids.add(e.getId()));
         cerrados.forEach(e -> ids.add(e.getId()));
@@ -728,8 +708,6 @@ public class EmpleoController {
         return ResponseEntity.ok(Map.of("ok", true, "fase", fase));
     }
 
-    // porcentaje de lo que pide la oferta que el talento ya tiene (0-100); ver MatchEmpleo.
-    // 0 si no se puede calcular (talento o oferta sin stack)
     public static int calcularScore(Usuario usuario, Empleo empleo) {
         return com.example.devcoast.service.MatchEmpleo.porcentaje(usuario, empleo);
     }
