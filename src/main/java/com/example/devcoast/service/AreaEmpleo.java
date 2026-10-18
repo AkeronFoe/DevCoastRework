@@ -68,13 +68,26 @@ public final class AreaEmpleo {
 
     /** "Programacion · Backend" se muestra como "Programación · Backend"; el resto queda igual. */
     public static String categoriaVisible(String categoria) {
-        if (categoria == null)
+        return textoVisible(categoria);
+    }
+
+    /**
+     * Los formularios guardan algunos valores sin tilde ("Hibrido", "Educacion", "Practicas"...). Al mostrarlos se
+     * escriben bien; lo guardado no cambia, porque filtros y formularios de edición dependen de esos valores.
+     */
+    public static String textoVisible(String texto) {
+        if (texto == null)
             return null;
-        return categoria
+        return texto
                 .replaceAll("\\bProgramacion\\b", "Programación")
                 .replaceAll("\\bDiseno\\b", "Diseño")
                 .replaceAll("\\bGrafico\\b", "Gráfico")
-                .replaceAll("\\bIlustracion\\b", "Ilustración");
+                .replaceAll("\\bIlustracion\\b", "Ilustración")
+                .replaceAll("\\bEducacion\\b", "Educación")
+                .replaceAll("\\bHibrido\\b", "Híbrido")
+                .replaceAll("\\bPracticas\\b", "Prácticas")
+                .replaceAll("\\brestriccion\\b", "restricción")
+                .replaceAll("\\bBasico\\b", "Básico");
     }
 
     private static String sinTildes(String s) {

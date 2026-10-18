@@ -28,6 +28,12 @@ por recientes se ven como en una plataforma en uso.
 - Si una siembra se interrumpe, no reintenta sola. Para reintentar (borra únicamente lo que esa siembra creó):
   arranca con `devcoast.seed.reintentar=true` (`DEVCOAST_SEED_REINTENTAR=true`).
 
+**Si tu base ya tiene los datos de ejemplo del seeder anterior** (desactualizados), arranca la primera vez con
+`SEED_ENABLED=true` y `SEED_LIMPIAR_ANTIGUOS=true`: antes de sembrar borra solo lo que reconoce de ese seeder
+(talentos con `portfolio.<usuario>.dev`, sus empresas de descripción fija, la demo vieja y todo lo que colgaba de eso:
+proyectos, ofertas, solicitudes, chats, notificaciones, invitaciones, cobros y favoritos). Cuentas creadas por personas
+de verdad no se tocan. Quita `SEED_LIMPIAR_ANTIGUOS` después de esa primera vez.
+
 Cuentas de demo (contraseña `demo1234`): `demo@devcoast.co` y `diseno@devcoast.co` (talentos),
 `empresa@devcoast.co` (plan PRO) y `startup@devcoast.co` (plan gratis). El resto de cuentas usa `devcoast123`.
 

@@ -56,7 +56,7 @@ class DataSeederTest {
         InetSocketAddress addr = server.bind();
         client = MongoClients.create("mongodb://" + addr.getHostString() + ":" + addr.getPort());
         mongo = new MongoTemplate(client, "devcoast_seed_test");
-        seeder = new DataSeeder(mongo, new BCryptPasswordEncoder(4), TALENTOS, EMPRESAS, false, false);
+        seeder = new DataSeeder(mongo, new BCryptPasswordEncoder(4), TALENTOS, EMPRESAS, false, false, false);
         seeder.sembrar();
     }
 

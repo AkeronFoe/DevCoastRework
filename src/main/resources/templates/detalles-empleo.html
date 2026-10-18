@@ -53,7 +53,7 @@
                             </span>
                             <a th:if="${empleo.empresaId != null}" th:href="@{/empresa/{id}(id=${empleo.empresaId})}" th:text="${v.empresaNombre}">Empresa</a>
                             <span th:if="${empleo.empresaId == null}" th:text="${v.empresaNombre}">Empresa</span>
-                            <span class="co-s" th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}" th:text="'· ' + ${empleo.empresaSector}">· Fintech</span>
+                            <span class="co-s" th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}" th:text="'· ' + ${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">· Fintech</span>
                         </div>
 
                         <dl class="facts">
@@ -127,11 +127,11 @@
                         <section class="pn" aria-labelledby="h-resumen">
                             <h2 id="h-resumen">Resumen del rol</h2>
                             <dl class="rg">
-                                <div><dt>MODALIDAD</dt><dd th:text="${empleo.modalidad ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>CONTRATO</dt><dd th:text="${empleo.contrato ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>SENIORITY</dt><dd th:text="${empleo.seniority ?: 'Sin definir'}">-</dd></div>
+                                <div><dt>MODALIDAD</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.modalidad) ?: 'Sin definir'}">-</dd></div>
+                                <div><dt>CONTRATO</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.contrato) ?: 'Sin definir'}">-</dd></div>
+                                <div><dt>SENIORITY</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.seniority) ?: 'Sin definir'}">-</dd></div>
                                 <div><dt>ZONA HORARIA</dt><dd th:text="${empleo.timezone ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>INGLÉS</dt><dd th:text="${empleo.ingles ?: 'Sin definir'}">-</dd></div>
+                                <div><dt>INGLÉS</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.ingles) ?: 'Sin definir'}">-</dd></div>
                                 <div><dt>VACANTES</dt><dd th:text="${empleo.vacantes}">-</dd></div>
                             </dl>
                         </section>
@@ -166,7 +166,7 @@
                             <h2 id="h-emp">La empresa</h2>
                             <dl class="rg one">
                                 <div><dt>NOMBRE</dt><dd th:text="${empleo.empresaNombre ?: '—'}">-</dd></div>
-                                <div th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}"><dt>SECTOR</dt><dd th:text="${empleo.empresaSector}">-</dd></div>
+                                <div th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}"><dt>SECTOR</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">-</dd></div>
                                 <div th:if="${empleo.empresaTamano != null and !#strings.isEmpty(empleo.empresaTamano)}"><dt>TAMAÑO</dt><dd th:text="${empleo.empresaTamano}">-</dd></div>
                                 <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}"><dt>SITIO WEB</dt><dd><a class="lnk" th:href="${empleo.empresaWeb}" target="_blank" rel="noopener" th:text="${empleo.empresaWeb}">Link</a></dd></div>
                             </dl>

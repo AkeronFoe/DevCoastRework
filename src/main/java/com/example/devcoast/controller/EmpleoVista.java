@@ -56,8 +56,8 @@ public class EmpleoVista {
         AreaEmpleo.Area area = AreaEmpleo.de(e.getCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
         v.categoria = e.getCategoriaMostrar();
-        v.modalidad = vacioANull(e.getModalidad());
-        v.seniority = vacioANull(e.getSeniority());
+        v.modalidad = AreaEmpleo.textoVisible(vacioANull(e.getModalidad()));
+        v.seniority = AreaEmpleo.textoVisible(vacioANull(e.getSeniority()));
         v.postulantes = postulantes;
         v.solicitada = solicitada;
         v.cerrada = e.getEstado() != null && !"ACTIVO".equalsIgnoreCase(e.getEstado());

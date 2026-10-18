@@ -134,8 +134,8 @@
                             <p class="cv-role" th:text="${usuario != null and usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo) ? usuario.rolTitulo : 'Tu rol profesional'}">Tu rol profesional</p>
                             <div class="cv-tags">
                                 <span class="cv-tag ok">Disponible</span>
-                                <span class="cv-tag" th:if="${usuario != null and usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}" th:text="${usuario.modalidad}">Remoto</span>
-                                <span class="cv-tag" th:if="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}" th:text="${usuario.disponibilidad}">Full-time</span>
+                                <span class="cv-tag" th:if="${usuario != null and usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).modalidad(usuario.modalidad)}">Remoto</span>
+                                <span class="cv-tag" th:if="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).disponibilidad(usuario.disponibilidad)}">Full-time</span>
                                 <span class="cv-tag" th:if="${usuario != null and usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}" th:text="${usuario.ubicacion}">Bogotá</span>
                             </div>
                         </div>
@@ -196,7 +196,7 @@
                             </p>
 
                             <div class="cv-pref" th:if="${usuario != null and ((usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)) or (usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)))}">
-                                <span class="cv-tag" th:if="${usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)}" th:text="${usuario.especialidad}">Backend</span>
+                                <span class="cv-tag" th:if="${usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).especialidad(usuario.especialidad)}">Backend</span>
                                 <span class="cv-tag" th:if="${usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)}" th:text="'Salario: ' + ${usuario.salarioEsperado}">Salario</span>
                             </div>
                         </section>

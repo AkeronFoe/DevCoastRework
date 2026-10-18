@@ -54,7 +54,8 @@ import com.example.devcoast.service.PlanService;
  * <li>Está apagado por defecto: se activa con {@code devcoast.seed.enabled=true} (variable {@code SEED_ENABLED}).</li>
  * <li>Corre en un hilo aparte, por lotes: la app arranca y responde mientras se siembra.</li>
  * <li>Es idempotente: al terminar deja una marca en la colección {@code seed_meta}; si ya existe no vuelve a sembrar.</li>
- * <li>Nunca modifica ni borra datos existentes. Si una siembra se interrumpe, no reintenta sola: se reintenta con
+ * <li>Nunca modifica ni borra datos existentes (salvo que se pida con {@code devcoast.seed.limpiar-antiguos=true},
+ * que quita solo lo que sembró el seeder anterior; ver {@link LimpiezaSeederAntiguo}). Si una siembra se interrumpe, no reintenta sola: se reintenta con
  * {@code devcoast.seed.reintentar=true}, que borra solo lo creado después de que empezó esa siembra.</li>
  * <li>No envía correos ni toca servicios externos: las cuentas y direcciones son ficticias.</li>
  * </ul>
@@ -88,18 +89,21 @@ public class DataSeeder implements ApplicationRunner {
     private final int nEmpresas;
     private final boolean asincrono;
     private final boolean reintentar;
+    private final boolean limpiarAntiguos;
 
     public DataSeeder(MongoTemplate mongo, BCryptPasswordEncoder encoder,
             @Value("${devcoast.seed.talentos:8000}") int nTalentos,
             @Value("${devcoast.seed.empresas:2000}") int nEmpresas,
             @Value("${devcoast.seed.async:true}") boolean asincrono,
-            @Value("${devcoast.seed.reintentar:false}") boolean reintentar) {
+            @Value("${devcoast.seed.reintentar:false}") boolean reintentar,
+            @Value("${devcoast.seed.limpiar-antiguos:false}") boolean limpiarAntiguos) {
         this.mongo = mongo;
         this.encoder = encoder;
         this.nTalentos = Math.max(0, nTalentos);
         this.nEmpresas = Math.max(0, nEmpresas);
         this.asincrono = asincrono;
         this.reintentar = reintentar;
+        this.limpiarAntiguos = limpiarAntiguos;
     }
 
     @Override
@@ -116,6 +120,8 @@ public class DataSeeder implements ApplicationRunner {
     /** Siembra de forma síncrona. Lo usan {@link #run} y las pruebas. */
     public void sembrar() {
         try {
+            if (limpiarAntiguos)
+                new LimpiezaSeederAntiguo(mongo).limpiar();
             Document marca = mongo.findById(MARCA_ID, Document.class, COLECCION_MARCA);
             if (marca != null && "completo".equals(marca.getString("estado")) && marca.getInteger("version", 0) >= VERSION) {
                 log.info("[DataSeeder] Los datos de ejemplo ya están sembrados (versión {}). No se hace nada.", marca.getInteger("version", 0));

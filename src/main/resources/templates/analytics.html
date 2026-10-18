@@ -157,12 +157,12 @@
                                     <td th:text="${i.count}" style="color:var(--mute);font-weight:700;">1</td>
                                     <td th:text="${row.titulo}" style="font-weight:600;color:var(--ink);">Título</td>
                                     <td>
-                                        <span class="pill" th:text="${row.categoria ?: '—'}">Cat</span>
+                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.categoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
                                             th:classappend="${row.modalidad == 'Remoto'} ? ' pill-blue' : (${row.modalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
-                                            th:text="${row.modalidad ?: '—'}">Remoto</span>
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.modalidad) ?: '—'}">Remoto</span>
                                     </td>
                                     <td>
                                         <span class="pill"
@@ -357,12 +357,12 @@
                                     <td style="font-weight:600;color:var(--ink);" th:text="${sol.empleoTitulo}">Título</td>
                                     <td th:text="${sol.empleoEmpresaNombre}">Empresa</td>
                                     <td>
-                                        <span class="pill" th:text="${sol.empleoCategoria ?: '—'}">Cat</span>
+                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoCategoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
                                             th:classappend="${sol.empleoModalidad == 'Remoto'} ? ' pill-blue' : (${sol.empleoModalidad == 'Presencial'} ? ' pill-amber' : ' pill-green')"
-                                            th:text="${sol.empleoModalidad ?: '—'}">Remoto</span>
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoModalidad) ?: '—'}">Remoto</span>
                                     </td>
                                     <td style="text-align:right;">
                                         <span class="pill pill-amber" th:if="${sol.estado == 'revision'}">En revisión</span>

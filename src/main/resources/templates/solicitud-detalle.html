@@ -72,11 +72,11 @@
                             <h2 id="h-vac">Vacante solicitada</h2>
                             <dl class="rg one">
                                 <div th:if="${solicitud.empleoEmpresaNombre}"><dt>EMPRESA</dt><dd th:text="${solicitud.empleoEmpresaNombre}">-</dd></div>
-                                <div th:if="${solicitud.empleoEmpresaSector}"><dt>SECTOR</dt><dd th:text="${solicitud.empleoEmpresaSector}">-</dd></div>
-                                <div th:if="${solicitud.empleoCategoria}"><dt>CATEGORÍA</dt><dd th:text="${solicitud.empleoCategoria}">-</dd></div>
-                                <div th:if="${solicitud.empleoModalidad}"><dt>MODALIDAD</dt><dd th:text="${solicitud.empleoModalidad}">-</dd></div>
-                                <div th:if="${solicitud.empleoSeniority}"><dt>SENIORITY</dt><dd th:text="${solicitud.empleoSeniority}">-</dd></div>
-                                <div th:if="${solicitud.empleoContrato}"><dt>CONTRATO</dt><dd th:text="${solicitud.empleoContrato}">-</dd></div>
+                                <div th:if="${solicitud.empleoEmpresaSector}"><dt>SECTOR</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoEmpresaSector)}">-</dd></div>
+                                <div th:if="${solicitud.empleoCategoria}"><dt>CATEGORÍA</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoCategoria)}">-</dd></div>
+                                <div th:if="${solicitud.empleoModalidad}"><dt>MODALIDAD</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoModalidad)}">-</dd></div>
+                                <div th:if="${solicitud.empleoSeniority}"><dt>SENIORITY</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoSeniority)}">-</dd></div>
+                                <div th:if="${solicitud.empleoContrato}"><dt>CONTRATO</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoContrato)}">-</dd></div>
                                 <div th:if="${solicitud.empleoVacantes != null}"><dt>VACANTES</dt><dd th:text="${solicitud.empleoVacantes}">-</dd></div>
                                 <div th:if="${solicitud.empleoMostrarSalario}"><dt>SALARIO</dt><dd th:text="(${solicitud.empleoSalarioMin != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMin, 1, 'POINT')} : '—') + ' – ' + (${solicitud.empleoSalarioMax != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMax, 1, 'POINT')} : '—') + ' ' + ${solicitud.empleoMoneda}">-</dd></div>
                             </dl>
