@@ -45,6 +45,8 @@ class PublicPagesRenderTest {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private com.example.devcoast.config.LimiteIntentosLogin limiteIntentos;
+    @MockitoBean
     private UsuarioRepository usuarioRepository;
     @MockitoBean
     private EmpleoRepository empleoRepository;

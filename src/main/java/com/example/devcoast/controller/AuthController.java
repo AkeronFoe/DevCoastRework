@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteIntentosLogin;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
@@ -22,12 +23,14 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final EmpresaRepository empresaRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final LimiteIntentosLogin limiteIntentos;
 
     public AuthController(UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository,
-            BCryptPasswordEncoder passwordEncoder) {
+            BCryptPasswordEncoder passwordEncoder, LimiteIntentosLogin limiteIntentos) {
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;
         this.passwordEncoder = passwordEncoder;
+        this.limiteIntentos = limiteIntentos;
     }
 
     @GetMapping("/login")
@@ -46,8 +49,15 @@ public class AuthController {
             RedirectAttributes ra) {
 
         String correoNorm = correo.trim().toLowerCase();
+        String equipo = request.getRemoteAddr();
+        if (limiteIntentos.bloqueado(equipo, correoNorm)) {
+            ra.addFlashAttribute("flashMessage", "Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/login";
+        }
         Usuario usuario = usuarioRepository.findByCorreo(correoNorm);
         if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
+            limiteIntentos.exito(equipo, correoNorm);
             session.invalidate();
             session = request.getSession(true);
             poblarSesion(session,
@@ -68,6 +78,7 @@ public class AuthController {
 
         Empresa empresa = empresaRepository.findByCorreo(correoNorm);
         if (empresa != null && passwordEncoder.matches(password, empresa.getPassword())) {
+            limiteIntentos.exito(equipo, correoNorm);
             session.invalidate();
             session = request.getSession(true);
             poblarSesion(session,
@@ -79,6 +90,7 @@ public class AuthController {
             return "redirect:/dashboard";
         }
 
+        limiteIntentos.fallo(equipo, correoNorm);
         ra.addFlashAttribute("flashMessage", "Correo o contraseña incorrectos");
         ra.addFlashAttribute("flashType", "error");
         return "redirect:/login";

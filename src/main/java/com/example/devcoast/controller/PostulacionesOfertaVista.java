@@ -38,4 +38,20 @@ public class PostulacionesOfertaVista {
         v.items = filtradas;
         return v;
     }
+
+    // la misma oferta con los mismos contadores, pero mostrando solo una parte de sus postulaciones (para paginar)
+    public PostulacionesOfertaVista conItems(List<SolicitudVista> parte) {
+        PostulacionesOfertaVista v = new PostulacionesOfertaVista();
+        v.id = id;
+        v.titulo = titulo;
+        v.categoria = categoria;
+        v.areaClave = areaClave;
+        v.activa = activa;
+        v.total = total;
+        v.revision = revision;
+        v.aceptadas = aceptadas;
+        v.noAvanzaron = noAvanzaron;
+        v.items = parte;
+        return v;
+    }
 }
