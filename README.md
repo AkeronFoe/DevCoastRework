@@ -53,6 +53,9 @@ Cuentas de demo (contraseña `demo1234`): `demo@devcoast.co` y `diseno@devcoast.
 - Login: tras 5 intentos fallidos seguidos de la misma cuenta desde el mismo equipo se bloquea 15 minutos (también se frenan
   30 fallos desde un mismo equipo o 20 contra una misma cuenta). Es en memoria: se reinicia al reiniciar la app. Si la app
   corre detrás de un proxy, define `server.forward-headers-strategy=framework` para que cuente la IP real de cada persona.
+- Registro: máximo 40 envíos del formulario cada 15 minutos por equipo (holgado para que una feria con una sola red
+  funcione). El mensaje de error nunca dice si el correo existe o es inválido. No hay endpoint público para consultar
+  si un correo ya tiene cuenta.
 - Cabeceras de seguridad (`SecurityConfig`): CSP, Referrer-Policy, Permissions-Policy, no permite meter la app en un iframe.
   La CSP deja scripts y estilos dentro de las páginas (`unsafe-inline`) porque la app los usa; si agregas un servicio externo
   (CDN, mapa, analítica) hay que sumarlo a la CSP o el navegador lo bloqueará.

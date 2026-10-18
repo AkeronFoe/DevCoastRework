@@ -69,7 +69,7 @@ html[data-theme="light"] .cv-pj-l a { color: #0F766E; }
 .cv-tl li::before { content: ""; position: absolute; left: -25px; top: 5px; width: 12px; height: 12px; border-radius: 3px; background: var(--paper-ink); box-shadow: 0 0 0 4px var(--paper); }
 .cv-tl li:first-child::before { background: var(--teal-d); }
 .cv-tl b { font-size: 17px; }
-.cv-em { font-weight: 600; color: var(--teal-d); font-size: 15px; }
+.cv-em { font-weight: 600; color: var(--teal-ink); font-size: 15px; }
 .cv-meta { font: 500 12.5px var(--font-mono); color: var(--paper-mute); }
 .cv-tl p { margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: #2B2E36; }
 .cv-pref { margin-top: 16px; }

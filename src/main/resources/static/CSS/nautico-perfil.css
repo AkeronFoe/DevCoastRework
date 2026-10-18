@@ -34,13 +34,13 @@
 .pf-av img{width:100%;height:100%;object-fit:cover;display:block}
 .pf-photo-b{display:flex;gap:14px}
 .pass .lnk,.pass .note a{font:500 12.5px var(--font-mono);color:var(--orange-ink);background:none;border:0;padding:2px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-body.empresa .pass .lnk{color:var(--teal-d)}
+body.empresa .pass .lnk{color:var(--teal-ink)}
 .pass .lnk:hover{color:var(--paper-ink)}
 .pass .lnk:focus-visible{outline:3px solid var(--paper-ink);outline-offset:2px;border-radius:3px}
 .pf-name{flex:1 1 240px;min-width:0}
 .grp{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:16px}
 .grp legend{padding:0 0 12px;width:100%;font:700 11px var(--font-mono);letter-spacing:.1em;color:var(--orange-ink);text-transform:uppercase;border-bottom:2px dashed rgba(16,17,20,.22);margin-bottom:4px}
-body.empresa .grp legend{color:var(--teal-d)}
+body.empresa .grp legend{color:var(--teal-ink)}
 .fields{display:flex;flex-direction:column;gap:16px}
 .fields.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}

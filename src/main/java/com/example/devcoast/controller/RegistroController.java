@@ -3,7 +3,6 @@ package com.example.devcoast.controller;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,15 +11,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.UsuarioRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -32,7 +32,15 @@ public class RegistroController {
 
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public RegistroController(UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, BCryptPasswordEncoder passwordEncoder) {
+    private final LimiteTasa limiteTasa;
+
+    // la gente de una feria puede registrarse desde una misma red: por eso el tope es holgado
+    private static final int MAX_REGISTROS = 40;
+    private static final long VENTANA_REGISTROS_MS = 15 * 60 * 1000L;
+
+    public RegistroController(UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository,
+            BCryptPasswordEncoder passwordEncoder, LimiteTasa limiteTasa) {
+        this.limiteTasa = limiteTasa;
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;
         this.passwordEncoder = passwordEncoder;
@@ -88,11 +96,17 @@ public class RegistroController {
             @RequestParam(required = false) String portfolioUrl,
             @RequestParam(required = false) String linkedinUrl,
             @RequestParam String password,
+            HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
         String correoNorm = correo.trim().toLowerCase();
 
+        if (limiteTasa.excedido("registro|" + request.getRemoteAddr(), MAX_REGISTROS, VENTANA_REGISTROS_MS)) {
+            reflashTalento(redirectAttributes, nombre, rolTitulo, bio, stack, especialidad, modalidad,
+                    salarioEsperado, disponibilidad, correo, emailContacto, telefono, portfolioUrl, linkedinUrl);
+            return "redirect:/register/talento?error=limite";
+        }
         if (!correoValido(correoNorm)
                 || usuarioRepository.findByCorreo(correoNorm) != null
                 || empresaRepository.findByCorreo(correoNorm) != null) {
@@ -142,17 +156,6 @@ public class RegistroController {
         return "redirect:/dashboard";
     }
 
-    @GetMapping(value = "/register/disponible", produces = "application/json")
-    @ResponseBody
-    public Map<String, Object> correoDisponible(@RequestParam(required = false) String correo) {
-        String norm = correo == null ? "" : correo.trim().toLowerCase();
-        boolean formatoValido = correoValido(norm);
-        boolean disponible = formatoValido
-                && usuarioRepository.findByCorreo(norm) == null
-                && empresaRepository.findByCorreo(norm) == null;
-        return Map.of("disponible", disponible, "formatoValido", formatoValido);
-    }
-
     private boolean correoValido(String correo) {
         return correo != null && correo.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     }
@@ -191,11 +194,17 @@ public class RegistroController {
             @RequestParam(required = false) String telefono,
             @RequestParam(required = false) String descripcion,
             @RequestParam String password,
+            HttpServletRequest request,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
         String correoNorm = correo.trim().toLowerCase();
 
+        if (limiteTasa.excedido("registro|" + request.getRemoteAddr(), MAX_REGISTROS, VENTANA_REGISTROS_MS)) {
+            reflashEmpresa(redirectAttributes, nombreEmpresa, nombreRepresentante, cargoRepresentante, sector,
+                    tamano, sitioWeb, correo, telefono, descripcion);
+            return "redirect:/register/empresa?error=limite";
+        }
         if (!correoValido(correoNorm)
                 || usuarioRepository.findByCorreo(correoNorm) != null
                 || empresaRepository.findByCorreo(correoNorm) != null) {
