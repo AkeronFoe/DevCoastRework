@@ -9,6 +9,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--sea0);color:var(--ink);font-family:var(--font-display);line-height:1.5;overflow-x:hidden}
+@supports (overflow:clip){body{overflow-x:clip}}
 a{color:var(--ink);text-decoration:none}
 a:focus-visible,button:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
 h1,h2,h3,p{margin:0}
