@@ -17,11 +17,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
@@ -35,28 +37,40 @@
                 </div>
 
                 <dl class="fa-nums" aria-label="Resumen de cobros">
-                    <div><dt>TOTAL COBRADO</dt><dd th:text="'$' + ${#numbers.formatDecimal(totalCobrado, 1, 2)}">$0.00</dd></div>
-                    <div><dt>COLOCACIONES COBRADAS</dt><dd th:text="${#lists.size(cobros)}">0</dd></div>
+                    <div>
+                        <dt>TOTAL COBRADO</dt>
+                        <dd th:text="'$' + ${#numbers.formatDecimal(totalCobrado, 1, 2)}">$0.00</dd>
+                    </div>
+                    <div>
+                        <dt>COLOCACIONES COBRADAS</dt>
+                        <dd th:text="${#lists.size(cobros)}">0</dd>
+                    </div>
                 </dl>
 
-                <p class="fa-note">Se cobra una tarifa fija por cada postulación aprobada mientras tu plan sea Gratis. Con el plan Pro no se cobra nada por contratar.</p>
+                <p class="fa-note">Se cobra una tarifa fija por cada postulación aprobada mientras tu plan sea Gratis.
+                    Con el plan Pro no se cobra nada por contratar.</p>
 
                 <section class="fa-list" aria-label="Recibos" th:unless="${cobros == null or #lists.isEmpty(cobros)}">
                     <article class="jt fa-rc" th:each="cobro, st : ${cobros}">
                         <div class="jt-main">
-                            <span class="k" th:text="${cobro.fecha != null} ? ${#dates.format(cobro.fecha, 'dd/MM/yyyy')} : 'sin fecha'">01/01/2026</span>
-                            <h2 class="jt-t" th:text="${cobro.empleoTitulo != null} ? ${cobro.empleoTitulo} : 'Vacante'">Vacante</h2>
+                            <span class="k"
+                                th:text="${cobro.fecha != null} ? ${#dates.format(cobro.fecha, 'dd/MM/yyyy')} : 'sin fecha'">01/01/2026</span>
+                            <h2 class="jt-t"
+                                th:text="${cobro.empleoTitulo != null} ? ${cobro.empleoTitulo} : 'Vacante'">Vacante</h2>
                             <p class="co" th:text="${cobro.motivo}">Motivo</p>
                         </div>
                         <div class="jt-stub md">
                             <span class="mt-k">MONTO</span>
-                            <div class="mt-n fa-m" th:text="'$' + ${#numbers.formatDecimal(cobro.monto, 1, 2)}">$0.00</div>
+                            <div class="mt-n fa-m" th:text="'$' + ${#numbers.formatDecimal(cobro.monto, 1, 2)}">$0.00
+                            </div>
                         </div>
                     </article>
                 </section>
 
                 <th:block th:if="${cobros == null or #lists.isEmpty(cobros)}">
-                    <div th:replace="~{fragments/nautico :: empty('Sin cobros.', 'Todavía no se te ha cobrado ninguna tarifa de colocación.', '/ajustes', 'Volver a Ajustes')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Sin cobros.', 'Todavía no se te ha cobrado ninguna tarifa de colocación.', '/ajustes', 'Volver a Ajustes')}">
+                    </div>
                 </th:block>
             </main>
         </div>

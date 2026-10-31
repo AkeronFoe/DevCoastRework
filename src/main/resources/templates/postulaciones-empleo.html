@@ -19,10 +19,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/candidatos', 'Buscar candidatos', 'Busca por nombre o cargo', ${null})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/candidatos', 'Buscar candidatos', 'Busca por nombre o cargo', ${null})}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
@@ -30,9 +33,11 @@
                         <div class="eyebrow">// postulaciones de la oferta</div>
                         <h1 th:text="${g.titulo}">Backend Java</h1>
                         <p class="sub" id="conteo" aria-live="polite">
-                            <span id="cTotal" th:text="${g.total}">0</span> <span th:text="${g.total == 1 ? 'postulación' : 'postulaciones'}">postulaciones</span> ·
+                            <span id="cTotal" th:text="${g.total}">0</span> <span
+                                th:text="${g.total == 1 ? 'postulación' : 'postulaciones'}">postulaciones</span> ·
                             <span id="cRevision" th:text="${g.revision}">0</span> en revisión ·
-                            <span id="cAceptadas" th:text="${g.aceptadas}">0</span> <span th:text="${g.aceptadas == 1 ? 'aceptada' : 'aceptadas'}">aceptadas</span>
+                            <span id="cAceptadas" th:text="${g.aceptadas}">0</span> <span
+                                th:text="${g.aceptadas == 1 ? 'aceptada' : 'aceptadas'}">aceptadas</span>
                         </p>
                     </div>
                     <div class="acts">
@@ -40,26 +45,43 @@
                     </div>
                 </div>
 
-                <p class="flash" role="note" th:if="${cobraColocacion}">Con el plan Gratis, aceptar una postulación registra la tarifa de colocación.
-                    <a href="/facturacion">Ver facturación</a></p>
+                <p class="flash" role="note" th:if="${cobraColocacion}">Con el plan Gratis, aceptar una postulación
+                    registra la tarifa de colocación.
+                    <a href="/facturacion">Ver facturación</a>
+                </p>
 
-                <div class="fase" role="group" aria-label="Fase del proceso de reclutamiento" th:attr="data-oferta=${empleo.id}">
+                <div class="fase" role="group" aria-label="Fase del proceso de reclutamiento"
+                    th:attr="data-oferta=${empleo.id}">
                     <span class="fase-l">Fase del proceso</span>
-                    <button type="button" class="ch" th:each="f : ${fasesReclutamiento}" th:attr="data-fase=${f},aria-pressed=${(empleo.faseReclutamiento == f or (empleo.faseReclutamiento == null and f == 'ABIERTO'))}"
+                    <button type="button" class="ch" th:each="f : ${fasesReclutamiento}"
+                        th:attr="data-fase=${f},aria-pressed=${(empleo.faseReclutamiento == f or (empleo.faseReclutamiento == null and f == 'ABIERTO'))}"
                         th:text="${f == 'ABIERTO' ? 'Abierto' : (f == 'SCREENING' ? 'Screening' : (f == 'ENTREVISTAS' ? 'Entrevistas' : (f == 'OFERTA' ? 'Oferta' : 'Cerrado')))}">Abierto</button>
                 </div>
 
-                <div class="tabs" role="group" aria-label="Estado de las postulaciones" th:attr="data-estado=${estadoSel}">
-                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}" th:attr="aria-current=${estadoSel == ''} ? 'true'">Todas <b id="tTotal" th:text="${g.total}">0</b></a>
-                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='revision')}" th:attr="aria-current=${estadoSel == 'revision'} ? 'true'">En revisión <b id="tRevision" th:text="${g.revision}">0</b></a>
-                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='aceptadas')}" th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b id="tAceptadas" th:text="${g.aceptadas}">0</b></a>
-                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='rechazadas')}" th:attr="aria-current=${estadoSel == 'rechazadas'} ? 'true'">No avanzaron <b id="tNoAvanzaron" th:text="${g.noAvanzaron}">0</b></a>
-                    <a class="clear" th:if="${hayFiltros}" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">limpiar filtros</a>
+                <div class="tabs" role="group" aria-label="Estado de las postulaciones"
+                    th:attr="data-estado=${estadoSel}">
+                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}"
+                        th:attr="aria-current=${estadoSel == ''} ? 'true'">Todas <b id="tTotal"
+                            th:text="${g.total}">0</b></a>
+                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='revision')}"
+                        th:attr="aria-current=${estadoSel == 'revision'} ? 'true'">En revisión <b id="tRevision"
+                            th:text="${g.revision}">0</b></a>
+                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='aceptadas')}"
+                        th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b id="tAceptadas"
+                            th:text="${g.aceptadas}">0</b></a>
+                    <a class="ch" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id},estado='rechazadas')}"
+                        th:attr="aria-current=${estadoSel == 'rechazadas'} ? 'true'">No avanzaron <b id="tNoAvanzaron"
+                            th:text="${g.noAvanzaron}">0</b></a>
+                    <a class="clear" th:if="${hayFiltros}"
+                        th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">limpiar filtros</a>
                 </div>
 
-                <section class="ofg" th:if="${!#lists.isEmpty(g.items)}" th:attr="aria-label='Postulaciones de ' + ${g.titulo},data-oferta=${g.id},data-activa=${g.activa},data-rev=${g.revision},data-ace=${g.aceptadas},data-no=${g.noAvanzaron}">
+                <section class="ofg" th:if="${!#lists.isEmpty(g.items)}"
+                    th:attr="aria-label='Postulaciones de ' + ${g.titulo},data-oferta=${g.id},data-activa=${g.activa},data-rev=${g.revision},data-ace=${g.aceptadas},data-no=${g.noAvanzaron}">
                     <header class="ofg-h">
-                        <p class="ofg-c" th:text="${g.revision} + ' en revisión · ' + ${g.aceptadas} + (${g.aceptadas} == 1 ? ' aceptada' : ' aceptadas') + ' · ' + ${g.noAvanzaron} + (${g.noAvanzaron} == 1 ? ' no avanzó' : ' no avanzaron')">2 en revisión · 1 aceptada</p>
+                        <p class="ofg-c"
+                            th:text="${g.revision} + ' en revisión · ' + ${g.aceptadas} + (${g.aceptadas} == 1 ? ' aceptada' : ' aceptadas') + ' · ' + ${g.noAvanzaron} + (${g.noAvanzaron} == 1 ? ' no avanzó' : ' no avanzaron')">
+                            2 en revisión · 1 aceptada</p>
                     </header>
                     <div class="reqs">
                         <th:block th:each="v, st : ${g.items}">
@@ -69,10 +91,14 @@
                 </section>
 
                 <th:block th:if="${#lists.isEmpty(g.items) and g.total == 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía nadie se ha postulado a esta oferta. Cuando lleguen postulaciones aparecerán aquí.', '/misEmpleos', 'Ver mis ofertas')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía nadie se ha postulado a esta oferta. Cuando lleguen postulaciones aparecerán aquí.', '/misEmpleos', 'Ver mis ofertas')}">
+                    </div>
                 </th:block>
                 <th:block th:if="${#lists.isEmpty(g.items) and g.total > 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay postulaciones con ese filtro.', '/empleos/' + ${empleo.id} + '/postulaciones', 'Limpiar filtros')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay postulaciones con ese filtro.', '/empleos/' + ${empleo.id} + '/postulaciones', 'Limpiar filtros')}">
+                    </div>
                 </th:block>
             </main>
         </div>

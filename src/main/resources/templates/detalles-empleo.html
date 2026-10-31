@@ -18,70 +18,113 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <a class="lnk back" th:href="${esEmpresaPropietaria} ? @{/misEmpleos} : @{/empleos}"
-                    th:text="${esEmpresaPropietaria} ? '← Volver a mis ofertas' : '← Volver a empleos'">← Volver a empleos</a>
+                    th:text="${esEmpresaPropietaria} ? '← Volver a mis ofertas' : '← Volver a empleos'">← Volver a
+                    empleos</a>
 
-                <article class="jt feat jd-hero" th:classappend="${v.cerrada} ? 'closed'" th:attr="data-id=${empleo.id}">
+                <article class="jt feat jd-hero" th:classappend="${v.cerrada} ? 'closed'"
+                    th:attr="data-id=${empleo.id}">
                     <div class="jt-main">
                         <div class="jt-top">
                             <span class="area" th:classappend="${v.areaClave}">
-                                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
-                                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
-                                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                                <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+                                </svg>
+                                <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z" />
+                                    <path d="M14.5 6.8l2.7 2.7" />
+                                </svg>
+                                <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="7" width="18" height="13" rx="2" />
+                                    <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                </svg>
                                 <span th:text="${v.categoria != null} ? ${v.categoria} : 'Oferta'">Programación</span>
                             </span>
                             <span class="when">
                                 <span class="tag" th:if="${v.cerrada}">CERRADA</span>
                                 <span class="tag" th:if="${v.nueva and !v.cerrada}">NUEVA</span>
-                                <span th:if="${v.hace != null}" th:text="'publicada ' + ${v.hace}">publicada hace 3 días</span>
+                                <span th:if="${v.hace != null}" th:text="'publicada ' + ${v.hace}">publicada hace 3
+                                    días</span>
                             </span>
                         </div>
 
                         <h1 class="jt-t" th:text="${v.titulo}">Cargo</h1>
 
                         <div class="co" th:if="${v.empresaNombre != null}">
-                            <span class="co-t" aria-hidden="true" th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')">
+                            <span class="co-t" aria-hidden="true"
+                                th:style="'background:' + (${v.empresaColor} ?: '#1F8F82')">
                                 <img th:if="${v.logoUrl != null}" th:src="${v.logoUrl}" alt="">
                                 <b th:if="${v.logoUrl == null}" th:text="${v.empresaInicial}">E</b>
                             </span>
-                            <a th:if="${empleo.empresaId != null}" th:href="@{/empresa/{id}(id=${empleo.empresaId})}" th:text="${v.empresaNombre}">Empresa</a>
+                            <a th:if="${empleo.empresaId != null}" th:href="@{/empresa/{id}(id=${empleo.empresaId})}"
+                                th:text="${v.empresaNombre}">Empresa</a>
                             <span th:if="${empleo.empresaId == null}" th:text="${v.empresaNombre}">Empresa</span>
-                            <span class="co-s" th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}" th:text="'· ' + ${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">· Fintech</span>
+                            <span class="co-s"
+                                th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}"
+                                th:text="'· ' + ${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">·
+                                Fintech</span>
                         </div>
 
                         <dl class="facts">
-                            <div th:if="${v.modalidad != null}"><dt>MODALIDAD</dt><dd th:text="${v.modalidad}">Remoto</dd></div>
-                            <div th:if="${v.seniority != null}"><dt>NIVEL</dt><dd th:text="${v.seniority}">Senior</dd></div>
-                            <div th:if="${v.salarioTexto != null}"><dt th:text="${v.salarioEtiqueta}">SALARIO</dt><dd th:text="${v.salarioTexto}">$5–7 M</dd></div>
-                            <div th:if="${empleo.vacantes > 0}"><dt>VACANTES</dt><dd th:text="${empleo.vacantes}">1</dd></div>
-                            <div th:if="${v.postulantes != null}"><dt>POSTULANTES</dt><dd th:text="${v.postulantes}">12</dd></div>
+                            <div th:if="${v.modalidad != null}">
+                                <dt>MODALIDAD</dt>
+                                <dd th:text="${v.modalidad}">Remoto</dd>
+                            </div>
+                            <div th:if="${v.seniority != null}">
+                                <dt>NIVEL</dt>
+                                <dd th:text="${v.seniority}">Senior</dd>
+                            </div>
+                            <div th:if="${v.salarioTexto != null}">
+                                <dt th:text="${v.salarioEtiqueta}">SALARIO</dt>
+                                <dd th:text="${v.salarioTexto}">$5–7 M</dd>
+                            </div>
+                            <div th:if="${empleo.vacantes > 0}">
+                                <dt>VACANTES</dt>
+                                <dd th:text="${empleo.vacantes}">1</dd>
+                            </div>
+                            <div th:if="${v.postulantes != null}">
+                                <dt>POSTULANTES</dt>
+                                <dd th:text="${v.postulantes}">12</dd>
+                            </div>
                         </dl>
 
                         <div class="why" th:if="${!#lists.isEmpty(v.habilidades)}">
-                            <div class="sk"><span class="k" th:text="${v.match != null} ? 'TU PERFIL VS. LA OFERTA' : 'HABILIDADES QUE PIDE'">TU PERFIL VS. LA OFERTA</span></div>
+                            <div class="sk"><span class="k"
+                                    th:text="${v.match != null} ? 'TU PERFIL VS. LA OFERTA' : 'HABILIDADES QUE PIDE'">TU
+                                    PERFIL VS. LA OFERTA</span></div>
                             <div class="sk">
                                 <th:block th:each="h : ${v.habilidades}">
                                     <span class="s y" th:if="${h.estado == 'tiene'}">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><span th:text="${h.nombre}">Java</span><span class="sr"> (lo tienes)</span>
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M5 12.5l4.5 4.5L19 7" />
+                                        </svg><span th:text="${h.nombre}">Java</span><span class="sr"> (lo
+                                            tienes)</span>
                                     </span>
-                                    <span class="s n" th:if="${h.estado == 'falta'}"><span th:text="${h.nombre}">Docker</span><span class="sr"> (te falta)</span></span>
+                                    <span class="s n" th:if="${h.estado == 'falta'}"><span
+                                            th:text="${h.nombre}">Docker</span><span class="sr"> (te
+                                            falta)</span></span>
                                     <span class="s nm" th:if="${h.estado == 'neutra'}" th:text="${h.nombre}">Java</span>
                                 </th:block>
-                                <span class="s more" th:if="${v.habilidadesRestantes > 0}" th:text="'+' + ${v.habilidadesRestantes}">+2</span>
+                                <span class="s more" th:if="${v.habilidadesRestantes > 0}"
+                                    th:text="'+' + ${v.habilidadesRestantes}">+2</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="jt-stub" th:classappend="${v.match != null} ? (${v.nivel == 'alto'} ? 'hi' : (${v.nivel == 'medio'} ? 'md' : 'lo')) : 'lo'">
+                    <div class="jt-stub"
+                        th:classappend="${v.match != null} ? (${v.nivel == 'alto'} ? 'hi' : (${v.nivel == 'medio'} ? 'md' : 'lo')) : 'lo'">
                         <th:block th:if="${v.match != null}">
                             <span class="mt-k" th:text="'MATCH ' + ${#strings.toUpperCase(v.nivel)}">MATCH ALTO</span>
-                            <div class="mt-n"><span class="sr">Match: </span><span th:text="${v.match}">94</span><small>%</small></div>
+                            <div class="mt-n"><span class="sr">Match: </span><span
+                                    th:text="${v.match}">94</span><small>%</small></div>
                             <div class="mt-bar" aria-hidden="true">
                                 <i th:each="c : ${#numbers.sequence(0, 9)}" th:class="${c < v.cubos} ? 'on'"></i>
                             </div>
@@ -89,24 +132,31 @@
                         <th:block th:if="${v.match == null}">
                             <span class="mt-k">MATCH</span>
                             <p class="nomatch" th:if="${esEmpresaPropietaria}">Esta es una de tus ofertas.</p>
-                            <p class="nomatch" th:if="${!esTalento and !esEmpresaPropietaria}">Es una oferta de otra empresa.</p>
-                            <p class="nomatch" th:if="${esTalento and talentoSinStack}">Agrega tu stack para ver tu match.</p>
-                            <p class="nomatch" th:if="${esTalento and !talentoSinStack}">La oferta no lista habilidades.</p>
+                            <p class="nomatch" th:if="${!esTalento and !esEmpresaPropietaria}">Es una oferta de otra
+                                empresa.</p>
+                            <p class="nomatch" th:if="${esTalento and talentoSinStack}">Agrega tu stack para ver tu
+                                match.</p>
+                            <p class="nomatch" th:if="${esTalento and !talentoSinStack}">La oferta no lista habilidades.
+                            </p>
                         </th:block>
 
                         <th:block th:if="${esTalento}">
-                            <button class="apply" type="button" id="btnAplicar" th:if="${!usuarioYaAplico and !v.cerrada}"
-                                aria-haspopup="dialog" th:attr="aria-label='Postularme a ' + ${v.titulo}">Postularme</button>
+                            <button class="apply" type="button" id="btnAplicar"
+                                th:if="${!usuarioYaAplico and !v.cerrada}" aria-haspopup="dialog"
+                                th:attr="aria-label='Postularme a ' + ${v.titulo}">Postularme</button>
                             <span class="apply done" th:if="${usuarioYaAplico}">✓ Ya aplicaste</span>
-                            <a class="apply ghost" th:if="${usuarioYaAplico}" th:href="@{/solicitudes}">Ver mi solicitud</a>
+                            <a class="apply ghost" th:if="${usuarioYaAplico}" th:href="@{/solicitudes}">Ver mi
+                                solicitud</a>
                             <span class="apply done off" th:if="${!usuarioYaAplico and v.cerrada}">Oferta cerrada</span>
-                            <button class="apply ghost save" type="button" id="btnGuardar" th:attr="data-empleo-id=${empleo.id},aria-pressed=${esFavorito} ? 'true' : 'false'">
+                            <button class="apply ghost save" type="button" id="btnGuardar"
+                                th:attr="data-empleo-id=${empleo.id},aria-pressed=${esFavorito} ? 'true' : 'false'">
                                 <span th:text="${esFavorito} ? 'Guardada ✓' : 'Guardar oferta'">Guardar oferta</span>
                             </button>
                         </th:block>
 
                         <th:block th:if="${esEmpresaPropietaria}">
-                            <a class="apply" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">Ver candidatos</a>
+                            <a class="apply" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">Ver
+                                candidatos</a>
                             <a class="apply ghost" th:href="@{/crearEmpleo(editar=${empleo.id})}">Editar oferta</a>
                         </th:block>
                         <th:block th:if="${session.usuarioActualTipo == 'empresa' and !esEmpresaPropietaria}">
@@ -115,42 +165,76 @@
                     </div>
                 </article>
 
-                <p class="legend" th:if="${session.usuarioActualTipo == 'empresa' and !esEmpresaPropietaria}"><span>Las empresas no pueden postularse a una oferta. ¿Buscas talento? <a th:href="@{/talentos}">Explora el directorio</a>.</span></p>
+                <p class="legend" th:if="${session.usuarioActualTipo == 'empresa' and !esEmpresaPropietaria}"><span>Las
+                        empresas no pueden postularse a una oferta. ¿Buscas talento? <a th:href="@{/talentos}">Explora
+                            el directorio</a>.</span></p>
 
                 <div class="jd">
                     <div class="jd-main">
                         <section class="pn" aria-labelledby="h-resumen">
                             <h2 id="h-resumen">Resumen del rol</h2>
                             <dl class="rg">
-                                <div><dt>MODALIDAD</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.modalidad) ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>CONTRATO</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.contrato) ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>SENIORITY</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.seniority) ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>ZONA HORARIA</dt><dd th:text="${empleo.timezone ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>INGLÉS</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.ingles) ?: 'Sin definir'}">-</dd></div>
-                                <div><dt>VACANTES</dt><dd th:text="${empleo.vacantes}">-</dd></div>
+                                <div>
+                                    <dt>MODALIDAD</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.modalidad) ?: 'Sin definir'}">
+                                        -</dd>
+                                </div>
+                                <div>
+                                    <dt>CONTRATO</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.contrato) ?: 'Sin definir'}">
+                                        -</dd>
+                                </div>
+                                <div>
+                                    <dt>SENIORITY</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.seniority) ?: 'Sin definir'}">
+                                        -</dd>
+                                </div>
+                                <div>
+                                    <dt>ZONA HORARIA</dt>
+                                    <dd th:text="${empleo.timezone ?: 'Sin definir'}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>INGLÉS</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.ingles) ?: 'Sin definir'}">
+                                        -</dd>
+                                </div>
+                                <div>
+                                    <dt>VACANTES</dt>
+                                    <dd th:text="${empleo.vacantes}">-</dd>
+                                </div>
                             </dl>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-desc" th:if="${empleo.descripcionRol != null and !#strings.isEmpty(empleo.descripcionRol)}">
+                        <section class="pn" aria-labelledby="h-desc"
+                            th:if="${empleo.descripcionRol != null and !#strings.isEmpty(empleo.descripcionRol)}">
                             <h2 id="h-desc">Descripción del rol</h2>
                             <p class="prose" th:text="${empleo.descripcionRol}">Descripción</p>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-stack" th:if="${empleo.stack != null and !#strings.isEmpty(empleo.stack)}">
+                        <section class="pn" aria-labelledby="h-stack"
+                            th:if="${empleo.stack != null and !#strings.isEmpty(empleo.stack)}">
                             <h2 id="h-stack">Stack tecnológico</h2>
                             <div class="sk">
-                                <span class="s nm" th:each="tech : ${#strings.arraySplit(empleo.stack, ',')}" th:text="${tech.trim()}">tech</span>
+                                <span class="s nm" th:each="tech : ${#strings.arraySplit(empleo.stack, ',')}"
+                                    th:text="${tech.trim()}">tech</span>
                             </div>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-soft" th:if="${empleo.softSkills != null and !#strings.isEmpty(empleo.softSkills)}">
+                        <section class="pn" aria-labelledby="h-soft"
+                            th:if="${empleo.softSkills != null and !#strings.isEmpty(empleo.softSkills)}">
                             <h2 id="h-soft">Soft skills</h2>
                             <div class="sk">
-                                <span class="s nm" th:each="skill : ${#strings.arraySplit(empleo.softSkills, ',')}" th:text="${skill.trim()}">skill</span>
+                                <span class="s nm" th:each="skill : ${#strings.arraySplit(empleo.softSkills, ',')}"
+                                    th:text="${skill.trim()}">skill</span>
                             </div>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-des" th:if="${empleo.requisitosDeseables != null and !#strings.isEmpty(empleo.requisitosDeseables)}">
+                        <section class="pn" aria-labelledby="h-des"
+                            th:if="${empleo.requisitosDeseables != null and !#strings.isEmpty(empleo.requisitosDeseables)}">
                             <h2 id="h-des">Requisitos deseables</h2>
                             <p class="prose" th:text="${empleo.requisitosDeseables}">Requisitos</p>
                         </section>
@@ -160,34 +244,69 @@
                         <section class="pn" aria-labelledby="h-emp">
                             <h2 id="h-emp">La empresa</h2>
                             <dl class="rg one">
-                                <div><dt>NOMBRE</dt><dd th:text="${empleo.empresaNombre ?: '—'}">-</dd></div>
-                                <div th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}"><dt>SECTOR</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">-</dd></div>
-                                <div th:if="${empleo.empresaTamano != null and !#strings.isEmpty(empleo.empresaTamano)}"><dt>TAMAÑO</dt><dd th:text="${empleo.empresaTamano}">-</dd></div>
-                                <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}"><dt>SITIO WEB</dt><dd><a class="lnk" th:href="${empleo.empresaWeb}" target="_blank" rel="noopener" th:text="${empleo.empresaWeb}">Link</a></dd></div>
+                                <div>
+                                    <dt>NOMBRE</dt>
+                                    <dd th:text="${empleo.empresaNombre ?: '—'}">-</dd>
+                                </div>
+                                <div
+                                    th:if="${empleo.empresaSector != null and !#strings.isEmpty(empleo.empresaSector)}">
+                                    <dt>SECTOR</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(empleo.empresaSector)}">
+                                        -</dd>
+                                </div>
+                                <div
+                                    th:if="${empleo.empresaTamano != null and !#strings.isEmpty(empleo.empresaTamano)}">
+                                    <dt>TAMAÑO</dt>
+                                    <dd th:text="${empleo.empresaTamano}">-</dd>
+                                </div>
+                                <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}">
+                                    <dt>SITIO WEB</dt>
+                                    <dd><a class="lnk" th:href="${empleo.empresaWeb}" target="_blank" rel="noopener"
+                                            th:text="${empleo.empresaWeb}">Link</a></dd>
+                                </div>
                             </dl>
-                            <p class="prose sm" th:if="${empleo.empresaDescripcion != null and !#strings.isEmpty(empleo.empresaDescripcion)}" th:text="${empleo.empresaDescripcion}">Descripción</p>
-                            <a class="lnk" th:if="${empleo.empresaId != null}" th:href="@{/empresa/{id}(id=${empleo.empresaId})}">Ver la página de la empresa →</a>
+                            <p class="prose sm"
+                                th:if="${empleo.empresaDescripcion != null and !#strings.isEmpty(empleo.empresaDescripcion)}"
+                                th:text="${empleo.empresaDescripcion}">Descripción</p>
+                            <a class="lnk" th:if="${empleo.empresaId != null}"
+                                th:href="@{/empresa/{id}(id=${empleo.empresaId})}">Ver la página de la empresa →</a>
                         </section>
 
                         <section class="pn" aria-labelledby="h-sal" th:if="${empleo.mostrarSalario}">
                             <h2 id="h-sal">Información salarial</h2>
                             <dl class="rg">
-                                <div><dt>MÍNIMO</dt><dd th:text="${empleo.formattedSalarioMin} + ' ' + ${empleo.moneda}">-</dd></div>
-                                <div><dt>MÁXIMO</dt><dd th:text="${empleo.formattedSalarioMax} + ' ' + ${empleo.moneda}">-</dd></div>
-                                <div><dt>PERÍODO</dt><dd th:text="${empleo.salarioPeriodo}">-</dd></div>
-                                <div><dt>MONEDA</dt><dd th:text="${empleo.moneda}">-</dd></div>
+                                <div>
+                                    <dt>MÍNIMO</dt>
+                                    <dd th:text="${empleo.formattedSalarioMin} + ' ' + ${empleo.moneda}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>MÁXIMO</dt>
+                                    <dd th:text="${empleo.formattedSalarioMax} + ' ' + ${empleo.moneda}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>PERÍODO</dt>
+                                    <dd th:text="${empleo.salarioPeriodo}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>MONEDA</dt>
+                                    <dd th:text="${empleo.moneda}">-</dd>
+                                </div>
                             </dl>
                         </section>
 
                         <section class="pn" aria-labelledby="h-cand" th:if="${esEmpresaPropietaria}">
                             <h2 id="h-cand">Candidatos</h2>
-                            <p class="prose sm"><b th:text="${totalSolicitudesEmpleo}">0</b> postulaciones recibidas.</p>
-                            <a class="btn-o" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">Ver candidatos →</a>
+                            <p class="prose sm"><b th:text="${totalSolicitudesEmpleo}">0</b> postulaciones recibidas.
+                            </p>
+                            <a class="btn-o" th:href="@{/empleos/{id}/postulaciones(id=${empleo.id})}">Ver candidatos
+                                →</a>
                             <form method="post" th:action="@{/empleos/eliminar/{id}(id=${empleo.id})}" class="jd-del">
                                 <details class="jd-ret">
                                     <summary>Eliminar oferta</summary>
                                     <div class="jd-ret-box">
-                                        <p>Se borran la oferta, sus postulaciones y sus invitaciones. No se puede deshacer.</p>
+                                        <p>Se borran la oferta, sus postulaciones y sus invitaciones. No se puede
+                                            deshacer.</p>
                                         <button class="btn-d" type="submit">Sí, eliminar</button>
                                         <button class="jd-no" type="button" data-cancelar>Cancelar</button>
                                     </div>
@@ -200,14 +319,16 @@
         </div>
     </div>
 
-    <dialog class="ap-dlg" id="dlgAplicar" aria-labelledby="t-aplicar" th:if="${esTalento and !usuarioYaAplico and !v.cerrada}">
+    <dialog class="ap-dlg" id="dlgAplicar" aria-labelledby="t-aplicar"
+        th:if="${esTalento and !usuarioYaAplico and !v.cerrada}">
         <form class="ap-f" method="post" th:action="@{/empleos/{id}/aplicar(id=${empleo.id})}" id="formAplicar">
             <h2 id="t-aplicar">Postularte a este empleo</h2>
             <p class="ap-sub" th:text="${empleo.titulo} + ' · ' + ${empleo.empresaNombre}">Cargo · Empresa</p>
 
             <div class="ap-fl">
                 <label for="apMsg">MENSAJE DE MOTIVACIÓN <span>(opcional)</span></label>
-                <textarea id="apMsg" name="mensajeMotivacion" rows="4" placeholder="Cuéntale a la empresa por qué eres el candidato ideal para este rol…"></textarea>
+                <textarea id="apMsg" name="mensajeMotivacion" rows="4"
+                    placeholder="Cuéntale a la empresa por qué eres el candidato ideal para este rol…"></textarea>
             </div>
 
             <fieldset class="ap-proy">
@@ -220,9 +341,13 @@
                 <div class="ap-grid" th:unless="${misProyectos == null or #lists.isEmpty(misProyectos)}">
                     <label class="ap-p" th:each="proy : ${misProyectos}">
                         <input type="checkbox" name="proyectosIds" th:value="${proy.id}">
-                        <span class="ap-pi" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')" aria-hidden="true"></span>
-                        <span class="ap-pt"><b th:text="${proy.nombre}">Proyecto</b><small th:text="${proy.categoria ?: proy.tipo}">Categoría</small></span>
-                        <span class="ap-pc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+                        <span class="ap-pi" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')"
+                            aria-hidden="true"></span>
+                        <span class="ap-pt"><b th:text="${proy.nombre}">Proyecto</b><small
+                                th:text="${proy.categoria ?: proy.tipo}">Categoría</small></span>
+                        <span class="ap-pc" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                <path d="M5 12.5l4.5 4.5L19 7" />
+                            </svg></span>
                     </label>
                 </div>
                 <p class="ap-warn" id="apMax" role="alert" hidden>Máximo 3 proyectos por solicitud.</p>

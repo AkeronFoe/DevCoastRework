@@ -1,23 +1,23 @@
 (function () {
-    var tokenMeta = document.querySelector('meta[name="_csrf"]');
-    var headerMeta = document.querySelector('meta[name="_csrf_header"]');
-    if (!tokenMeta || !headerMeta || !window.fetch) return;
+  var tokenMeta = document.querySelector('meta[name="_csrf"]');
+  var headerMeta = document.querySelector('meta[name="_csrf_header"]');
+  if (!tokenMeta || !headerMeta || !window.fetch) return;
 
-    var token = tokenMeta.getAttribute('content');
-    var headerName = headerMeta.getAttribute('content');
-    var metodosProtegidos = ['POST', 'PUT', 'PATCH', 'DELETE'];
-    var fetchOriginal = window.fetch;
+  var token = tokenMeta.getAttribute('content');
+  var headerName = headerMeta.getAttribute('content');
+  var metodosProtegidos = ['POST', 'PUT', 'PATCH', 'DELETE'];
+  var fetchOriginal = window.fetch;
 
-    window.fetch = function (input, init) {
-        init = init || {};
-        var metodo = (init.method || 'GET').toUpperCase();
-        if (metodosProtegidos.indexOf(metodo) !== -1) {
-            var headers = new Headers(init.headers || {});
-            if (!headers.has(headerName)) headers.set(headerName, token);
-            init = Object.assign({}, init, { headers: headers });
-        }
-        return fetchOriginal(input, init);
-    };
+  window.fetch = function (input, init) {
+    init = init || {};
+    var metodo = (init.method || 'GET').toUpperCase();
+    if (metodosProtegidos.indexOf(metodo) !== -1) {
+      var headers = new Headers(init.headers || {});
+      if (!headers.has(headerName)) headers.set(headerName, token);
+      init = Object.assign({}, init, { headers: headers });
+    }
+    return fetchOriginal(input, init);
+  };
 })();
 
 const THEMES = {

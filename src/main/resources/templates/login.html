@@ -11,70 +11,110 @@
 </head>
 
 <body class="acceso">
-<a class="skip" href="#main">Saltar al contenido</a>
-<div class="page" id="page">
-    <svg class="grat" aria-hidden="true"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="page" id="page">
+        <svg class="grat" aria-hidden="true">
+            <defs>
+                <pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse">
+                    <path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#graticula)" />
+        </svg>
 
-    <header class="nav fu">
-        <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
-            <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
-        </a>
-        <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/about-us}">volver al inicio</a><a class="btn btn-g" th:href="@{/register-options}">crear cuenta</a></nav>
-    </header>
+        <header class="nav fu">
+            <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
+                <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
+            </a>
+            <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/about-us}">volver al inicio</a><a
+                    class="btn btn-g" th:href="@{/register-options}">crear cuenta</a></nav>
+        </header>
 
-    <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
+        <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
 
-    <main class="stage" id="main">
-        <div class="left">
-            <div class="kicker"><span class="type">&gt; puerto de acceso</span><span class="caret">▌</span></div>
-            <h1><span class="mask"><span class="w" style="--d:.3s">Sube</span></span> <span class="mask"><span class="w" style="--d:.4s">a</span></span> <span class="bordo"><span class="mask"><span class="w" style="--d:.5s">bordo</span></span><svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;bottom:-4px"><path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none" stroke="#FF7B4F" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
-            <p class="alt fu" style="--d:1.1s">¿Primera vez a bordo? <a th:href="@{/register-options}">Crear cuenta</a></p>
+        <main class="stage" id="main">
+            <div class="left">
+                <div class="kicker"><span class="type">&gt; puerto de acceso</span><span class="caret">▌</span></div>
+                <h1><span class="mask"><span class="w" style="--d:.3s">Sube</span></span> <span class="mask"><span
+                            class="w" style="--d:.4s">a</span></span> <span class="bordo"><span class="mask"><span
+                                class="w" style="--d:.5s">bordo</span></span><svg viewBox="0 0 200 16" width="100%"
+                            height="16" preserveAspectRatio="none" aria-hidden="true"
+                            style="position:absolute;left:0;bottom:-4px">
+                            <path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none"
+                                stroke="#FF7B4F" stroke-width="5" stroke-linecap="round" />
+                        </svg></span>.</h1>
+                <p class="alt fu" style="--d:1.1s">¿Primera vez a bordo? <a th:href="@{/register-options}">Crear
+                        cuenta</a></p>
 
-            <div class="zone" id="zone">
-                <div class="pass" id="pass" th:attr="data-error=${flashType == 'error'} ? 'true'">
-                    <form class="pass-main" id="form" th:action="@{/login}" method="post" novalidate>
-                        <div class="tk-top"><span>PASE DE ACCESO</span><span>DEVCOAST</span></div>
-                        <div class="field">
-                            <label for="correo">CORREO</label>
-                            <div class="inp"><input id="correo" name="correo" type="email" inputmode="email" autocomplete="username" placeholder="tu@correo.com" required
-                                    data-req="Escribe tu correo." data-email aria-describedby="eCorreo" th:attr="aria-invalid=${flashType == 'error'} ? 'true' : 'false'"></div>
-                            <p class="err" id="eCorreo" hidden></p>
+                <div class="zone" id="zone">
+                    <div class="pass" id="pass" th:attr="data-error=${flashType == 'error'} ? 'true'">
+                        <form class="pass-main" id="form" th:action="@{/login}" method="post" novalidate>
+                            <div class="tk-top"><span>PASE DE ACCESO</span><span>DEVCOAST</span></div>
+                            <div class="field">
+                                <label for="correo">CORREO</label>
+                                <div class="inp"><input id="correo" name="correo" type="email" inputmode="email"
+                                        autocomplete="username" placeholder="tu@correo.com" required
+                                        data-req="Escribe tu correo." data-email aria-describedby="eCorreo"
+                                        th:attr="aria-invalid=${flashType == 'error'} ? 'true' : 'false'"></div>
+                                <p class="err" id="eCorreo" hidden></p>
+                            </div>
+                            <div class="field">
+                                <label for="password">CONTRASEÑA</label>
+                                <div class="inp has-eye"><input id="password" name="password" type="password"
+                                        autocomplete="current-password" placeholder="Tu contraseña" required data-pw
+                                        data-req="Escribe tu contraseña." aria-describedby="ePassword"
+                                        th:attr="aria-invalid=${flashType == 'error'} ? 'true' : 'false'"><button
+                                        type="button" class="eye" aria-pressed="false"
+                                        aria-label="Mostrar contraseña">ver</button></div>
+                                <p class="err" id="ePassword" hidden></p>
+                            </div>
+                            <p class="formok" role="status"
+                                th:if="${(flashMessage != null and flashType != 'error') or (flashMessage == null and param.registro != null)}"
+                                th:text="${flashMessage != null} ? ${flashMessage} : 'Cuenta creada. Ya puedes iniciar sesión.'">
+                                Cuenta creada.</p>
+                            <p class="formerr" id="formErr" role="alert"
+                                th:text="${flashMessage != null and flashType == 'error'} ? ${flashMessage}"></p>
+                        </form>
+                        <div class="pass-stub" id="stub">
+                            <button class="go" id="go" type="submit" form="form" data-label="Zarpar"
+                                data-busy="Zarpando…"><svg viewBox="0 0 20 24" width="18" height="22"
+                                    aria-hidden="true">
+                                    <path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114" />
+                                </svg><span id="goTxt">Zarpar</span></button>
+                            <svg class="bars" viewBox="0 0 60 60" width="46" height="46" aria-hidden="true">
+                                <rect x="0" width="3" height="60" fill="#101114" />
+                                <rect x="7" width="1.5" height="60" fill="#101114" />
+                                <rect x="12" width="5" height="60" fill="#101114" />
+                                <rect x="21" width="2" height="60" fill="#101114" />
+                                <rect x="27" width="4" height="60" fill="#101114" />
+                                <rect x="35" width="1.5" height="60" fill="#101114" />
+                                <rect x="40" width="5" height="60" fill="#101114" />
+                                <rect x="49" width="2" height="60" fill="#101114" />
+                                <rect x="55" width="4" height="60" fill="#101114" />
+                            </svg>
                         </div>
-                        <div class="field">
-                            <label for="password">CONTRASEÑA</label>
-                            <div class="inp has-eye"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required
-                                    data-pw data-req="Escribe tu contraseña." aria-describedby="ePassword" th:attr="aria-invalid=${flashType == 'error'} ? 'true' : 'false'"><button type="button" class="eye" aria-pressed="false" aria-label="Mostrar contraseña">ver</button></div>
-                            <p class="err" id="ePassword" hidden></p>
+                    </div>
+
+                    <div class="ok" id="ok" role="status">
+                        <div class="kicker">&gt; un momento</div>
+                        <h2>Seguimos <span>zarpando</span>…</h2>
+                        <p>La respuesta está tardando. Si no pasa nada, vuelve al formulario y prueba otra vez.</p>
+                        <div class="acts"><button class="again" id="okBack" type="button">volver al formulario</button>
                         </div>
-                        <p class="formok" role="status" th:if="${(flashMessage != null and flashType != 'error') or (flashMessage == null and param.registro != null)}"
-                            th:text="${flashMessage != null} ? ${flashMessage} : 'Cuenta creada. Ya puedes iniciar sesión.'">Cuenta creada.</p>
-                        <p class="formerr" id="formErr" role="alert" th:text="${flashMessage != null and flashType == 'error'} ? ${flashMessage}"></p>
-                    </form>
-                    <div class="pass-stub" id="stub">
-                        <button class="go" id="go" type="submit" form="form" data-label="Zarpar" data-busy="Zarpando…"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg><span id="goTxt">Zarpar</span></button>
-                        <svg class="bars" viewBox="0 0 60 60" width="46" height="46" aria-hidden="true"><rect x="0" width="3" height="60" fill="#101114"/><rect x="7" width="1.5" height="60" fill="#101114"/><rect x="12" width="5" height="60" fill="#101114"/><rect x="21" width="2" height="60" fill="#101114"/><rect x="27" width="4" height="60" fill="#101114"/><rect x="35" width="1.5" height="60" fill="#101114"/><rect x="40" width="5" height="60" fill="#101114"/><rect x="49" width="2" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg>
                     </div>
                 </div>
-
-                <div class="ok" id="ok" role="status">
-                    <div class="kicker">&gt; un momento</div>
-                    <h2>Seguimos <span>zarpando</span>…</h2>
-                    <p>La respuesta está tardando. Si no pasa nada, vuelve al formulario y prueba otra vez.</p>
-                    <div class="acts"><button class="again" id="okBack" type="button">volver al formulario</button></div>
-                </div>
             </div>
+        </main>
+
+        <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast con una gaviota posada en cubierta">
+            <div class="say" id="say" aria-hidden="true"></div>
+            <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
         </div>
-    </main>
 
-    <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast con una gaviota posada en cubierta">
-        <div class="say" id="say" aria-hidden="true"></div>
-        <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
+        <div class="sea" aria-hidden="true">
+            <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+        </div>
     </div>
-
-    <div class="sea" aria-hidden="true">
-        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
-    </div>
-</div>
 
 </body>
 

@@ -18,17 +18,22 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/proyectos', 'Buscar proyectos', 'Busca por título o herramienta', ${null})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/proyectos', 'Buscar proyectos', 'Busca por título o herramienta', ${null})}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
                         <div class="eyebrow">// proyecto</div>
                         <h1 th:text="${proyecto.nombre}">Nombre del proyecto</h1>
-                        <p class="sub" th:text="${(proyecto.categoria != null ? proyecto.categoria : 'Sin categoría') + (proyecto.tipo != null ? ' · ' + proyecto.tipo : '') + (proyecto.rol != null and !#strings.isEmpty(proyecto.rol) ? ' · ' + proyecto.rol : '')}">Frontend · Personal</p>
+                        <p class="sub"
+                            th:text="${(proyecto.categoria != null ? proyecto.categoria : 'Sin categoría') + (proyecto.tipo != null ? ' · ' + proyecto.tipo : '') + (proyecto.rol != null and !#strings.isEmpty(proyecto.rol) ? ' · ' + proyecto.rol : '')}">
+                            Frontend · Personal</p>
                     </div>
                     <div class="acts">
                         <a class="btn-d" th:href="@{/proyectos}">Mis proyectos</a>
@@ -42,40 +47,58 @@
                         <div class="pd-body">
                             <div class="pd-top">
                                 <span class="area" th:classappend="${v.areaClave}">
-                                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
-                                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
-                                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                                    <svg th:if="${v.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+                                    </svg>
+                                    <svg th:if="${v.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z" />
+                                        <path d="M14.5 6.8l2.7 2.7" />
+                                    </svg>
+                                    <svg th:if="${v.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="3" y="7" width="18" height="13" rx="2" />
+                                        <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                    </svg>
                                     <span th:text="${v.categoria != null} ? ${v.categoria} : 'Proyecto'">Frontend</span>
                                 </span>
-                                <span class="pd-est" th:classappend="${v.publicado} ? 'on'" th:text="${v.publicado} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span>
+                                <span class="pd-est" th:classappend="${v.publicado} ? 'on'"
+                                    th:text="${v.publicado} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span>
                             </div>
-                            <p class="pd-d" th:if="${v.descripcion != null}" th:text="${v.descripcion}">Descripción corta.</p>
-                            <th:block th:if="${proyecto.descripcionExtendida != null and !#strings.isEmpty(proyecto.descripcionExtendida)}">
+                            <p class="pd-d" th:if="${v.descripcion != null}" th:text="${v.descripcion}">Descripción
+                                corta.</p>
+                            <th:block
+                                th:if="${proyecto.descripcionExtendida != null and !#strings.isEmpty(proyecto.descripcionExtendida)}">
                                 <h2 class="pd-h">Descripción</h2>
                                 <p class="pd-x" th:text="${proyecto.descripcionExtendida}">Descripción larga.</p>
                             </th:block>
                             <th:block th:if="${!#lists.isEmpty(v.herramientas)}">
                                 <h2 class="pd-h">Stack tecnológico</h2>
-                                <div class="tools"><span class="tool" th:each="h : ${v.herramientas}" th:text="${h}">Java</span></div>
+                                <div class="tools"><span class="tool" th:each="h : ${v.herramientas}"
+                                        th:text="${h}">Java</span></div>
                             </th:block>
                             <th:block th:if="${!#lists.isEmpty(proyecto.etiquetas)}">
                                 <h2 class="pd-h">Etiquetas</h2>
-                                <div class="tools"><span class="tool etq" th:each="e : ${proyecto.etiquetas}" th:text="${e}">Etiqueta</span></div>
+                                <div class="tools"><span class="tool etq" th:each="e : ${proyecto.etiquetas}"
+                                        th:text="${e}">Etiqueta</span></div>
                             </th:block>
                             <div class="pj-f">
                                 <div class="pj-l">
-                                    <a th:if="${v.enlace != null}" th:href="${v.enlace}" target="_blank" rel="noopener noreferrer"
-                                        th:aria-label="|Abrir proyecto: ${v.nombre} (se abre en otra pestaña)|">Abrir proyecto</a>
-                                    <span class="pd-sin" th:unless="${v.enlace != null}">No se agregó enlace externo.</span>
+                                    <a th:if="${v.enlace != null}" th:href="${v.enlace}" target="_blank"
+                                        rel="noopener noreferrer"
+                                        th:aria-label="|Abrir proyecto: ${v.nombre} (se abre en otra pestaña)|">Abrir
+                                        proyecto</a>
+                                    <span class="pd-sin" th:unless="${v.enlace != null}">No se agregó enlace
+                                        externo.</span>
                                 </div>
                                 <details class="pj-d pd-del">
                                     <summary th:aria-label="|Eliminar ${v.nombre}|">Eliminar</summary>
                                     <div class="pj-del">
                                         <span>¿Eliminar este proyecto? No se puede deshacer.</span>
                                         <form method="post" th:action="@{/proyectos/eliminar/{id}(id=${proyecto.id})}">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <input type="hidden" th:name="${_csrf.parameterName}"
+                                                th:value="${_csrf.token}">
                                             <input type="hidden" name="volver" value="proyectos">
-                                            <button class="go-del" type="submit" th:aria-label="|Sí, eliminar ${v.nombre}|">Sí, eliminar</button>
+                                            <button class="go-del" type="submit"
+                                                th:aria-label="|Sí, eliminar ${v.nombre}|">Sí, eliminar</button>
                                         </form>
                                         <button class="no-del" type="button" data-cancelar-del>Cancelar</button>
                                     </div>
@@ -87,15 +110,43 @@
                     <aside class="pn pd-res" aria-labelledby="pd-res-t">
                         <h2 id="pd-res-t">Resumen</h2>
                         <dl class="pd-dl">
-                            <div><dt>Categoría</dt><dd th:text="${proyecto.categoria != null ? proyecto.categoria : 'Sin definir'}">-</dd></div>
-                            <div><dt>Tipo</dt><dd th:text="${proyecto.tipo != null ? proyecto.tipo : 'Sin definir'}">-</dd></div>
-                            <div><dt>Rol</dt><dd th:text="${proyecto.rol != null and !#strings.isEmpty(proyecto.rol) ? proyecto.rol : 'No especificado'}">-</dd></div>
-                            <div><dt>Duración</dt><dd th:text="${proyecto.duracion != null and !#strings.isEmpty(proyecto.duracion) ? proyecto.duracion : 'No especificada'}">-</dd></div>
-                            <div><dt>Año</dt><dd th:text="${proyecto.anio != null and !#strings.isEmpty(proyecto.anio) ? proyecto.anio : 'Sin año'}">-</dd></div>
-                            <div><dt>En el CV</dt><dd th:text="${proyecto.incluirCv} ? 'Incluido' : 'No incluido'">-</dd></div>
-                            <div><dt>Destacado</dt><dd th:text="${proyecto.destacar} ? 'Sí' : 'No'">-</dd></div>
+                            <div>
+                                <dt>Categoría</dt>
+                                <dd th:text="${proyecto.categoria != null ? proyecto.categoria : 'Sin definir'}">-</dd>
+                            </div>
+                            <div>
+                                <dt>Tipo</dt>
+                                <dd th:text="${proyecto.tipo != null ? proyecto.tipo : 'Sin definir'}">-</dd>
+                            </div>
+                            <div>
+                                <dt>Rol</dt>
+                                <dd
+                                    th:text="${proyecto.rol != null and !#strings.isEmpty(proyecto.rol) ? proyecto.rol : 'No especificado'}">
+                                    -</dd>
+                            </div>
+                            <div>
+                                <dt>Duración</dt>
+                                <dd
+                                    th:text="${proyecto.duracion != null and !#strings.isEmpty(proyecto.duracion) ? proyecto.duracion : 'No especificada'}">
+                                    -</dd>
+                            </div>
+                            <div>
+                                <dt>Año</dt>
+                                <dd
+                                    th:text="${proyecto.anio != null and !#strings.isEmpty(proyecto.anio) ? proyecto.anio : 'Sin año'}">
+                                    -</dd>
+                            </div>
+                            <div>
+                                <dt>En el CV</dt>
+                                <dd th:text="${proyecto.incluirCv} ? 'Incluido' : 'No incluido'">-</dd>
+                            </div>
+                            <div>
+                                <dt>Destacado</dt>
+                                <dd th:text="${proyecto.destacar} ? 'Sí' : 'No'">-</dd>
+                            </div>
                         </dl>
-                        <p class="note">Esta es tu vista privada. Cambia la visibilidad o edita los datos desde <a th:href="@{/proyectos}">Proyectos</a>.</p>
+                        <p class="note">Esta es tu vista privada. Cambia la visibilidad o edita los datos desde <a
+                                th:href="@{/proyectos}">Proyectos</a>.</p>
                     </aside>
                 </div>
             </main>

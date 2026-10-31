@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class EventoEstado {
     private String estado;
-    private Date   fecha;
+    private Date fecha;
     private String nota;
 
     public EventoEstado() {

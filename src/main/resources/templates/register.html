@@ -10,184 +10,287 @@
     <script th:src="@{/JS/acceso.js}" defer></script>
 </head>
 
-<body class="registro" th:with="esEmpresa=${tipoPreset == 'empresa'},errorParam=${param.error != null ? param.error[0] : null}">
-<a class="skip" href="#main">Saltar al contenido</a>
-<div class="page" id="page">
-    <svg class="grat" aria-hidden="true"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+<body class="registro"
+    th:with="esEmpresa=${tipoPreset == 'empresa'},errorParam=${param.error != null ? param.error[0] : null}">
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <div class="page" id="page">
+        <svg class="grat" aria-hidden="true">
+            <defs>
+                <pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse">
+                    <path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#graticula)" />
+        </svg>
 
-    <header class="nav fu">
-        <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
-            <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
-        </a>
-        <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/about-us}">volver al inicio</a><a class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
-    </header>
+        <header class="nav fu">
+            <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
+                <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
+            </a>
+            <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/about-us}">volver al inicio</a><a
+                    class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
+        </header>
 
-    <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
+        <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
 
-    <main class="stage" id="main">
-        <div class="left">
-            <h1><span class="mask"><span class="w" style="--d:.3s">Saca</span></span> <span class="mask"><span class="w" style="--d:.4s">tu</span></span> <span class="pase"><span class="mask"><span class="w" style="--d:.5s">pase</span></span><svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;bottom:-4px"><path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none" stroke="#FF7B4F" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
-            <p class="alt fu" style="--d:1.1s">¿Ya tienes cuenta? <a th:href="@{/login}">Ingresar</a></p>
+        <main class="stage" id="main">
+            <div class="left">
+                <h1><span class="mask"><span class="w" style="--d:.3s">Saca</span></span> <span class="mask"><span
+                            class="w" style="--d:.4s">tu</span></span> <span class="pase"><span class="mask"><span
+                                class="w" style="--d:.5s">pase</span></span><svg viewBox="0 0 200 16" width="100%"
+                            height="16" preserveAspectRatio="none" aria-hidden="true"
+                            style="position:absolute;left:0;bottom:-4px">
+                            <path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none"
+                                stroke="#FF7B4F" stroke-width="5" stroke-linecap="round" />
+                        </svg></span>.</h1>
+                <p class="alt fu" style="--d:1.1s">¿Ya tienes cuenta? <a th:href="@{/login}">Ingresar</a></p>
 
-            <div class="zone" id="zone">
-                <div class="pass" id="pass" th:attr="data-role=${esEmpresa} ? 'empresa' : 'talento',data-error=${errorParam != null} ? 'true'">
-                    <div class="pass-main">
-                        <div class="tk-top"><span id="passTitle" th:text="${esEmpresa} ? 'PASE · EMPRESA' : 'PASE · TALENTO'">PASE · TALENTO</span><span>DEVCOAST</span></div>
+                <div class="zone" id="zone">
+                    <div class="pass" id="pass"
+                        th:attr="data-role=${esEmpresa} ? 'empresa' : 'talento',data-error=${errorParam != null} ? 'true'">
+                        <div class="pass-main">
+                            <div class="tk-top"><span id="passTitle"
+                                    th:text="${esEmpresa} ? 'PASE · EMPRESA' : 'PASE · TALENTO'">PASE ·
+                                    TALENTO</span><span>DEVCOAST</span></div>
 
-                        <div class="field">
-                            <div class="roles" role="radiogroup" aria-label="Tipo de cuenta">
-                                <label class="role"><input type="radio" name="role" value="talento" th:checked="${!esEmpresa}"><span>Talento</span></label>
-                                <label class="role"><input type="radio" name="role" value="empresa" th:checked="${esEmpresa}"><span>Empresa</span></label>
+                            <div class="field">
+                                <div class="roles" role="radiogroup" aria-label="Tipo de cuenta">
+                                    <label class="role"><input type="radio" name="role" value="talento"
+                                            th:checked="${!esEmpresa}"><span>Talento</span></label>
+                                    <label class="role"><input type="radio" name="role" value="empresa"
+                                            th:checked="${esEmpresa}"><span>Empresa</span></label>
+                                </div>
                             </div>
-                        </div>
 
-                    <form class="fields" id="formTalento" data-role="talento" th:action="@{/register/talento}" method="post" novalidate th:hidden="${esEmpresa}">
-                        <div class="field">
-                            <label for="t-nombre">NOMBRE COMPLETO</label>
-                            <div class="inp"><input id="t-nombre" name="nombre" type="text" autocomplete="name" placeholder="Tu nombre" th:value="${fNombre}" required
-                                    data-req="Escribe tu nombre." aria-describedby="t-eNombre" aria-invalid="false"></div>
-                            <p class="err" id="t-eNombre" hidden></p>
-                        </div>
-                        <div class="field">
-                            <span class="lab" id="t-especLab">ESPECIALIDAD</span>
-                            <div class="roles chips" role="radiogroup" aria-labelledby="t-especLab" aria-describedby="t-eEspec" data-group-req="Elige tu especialidad.">
-                                <label class="role"><input type="radio" name="especialidad" value="frontend" th:checked="${fEspecialidad == 'frontend'}"><span>Frontend</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="backend" th:checked="${fEspecialidad == 'backend'}"><span>Backend</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="fullstack" th:checked="${fEspecialidad == 'fullstack'}"><span>Full Stack</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="ui-ux" th:checked="${fEspecialidad == 'ui-ux'}"><span>UI / UX</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="diseno-grafico" th:checked="${fEspecialidad == 'diseno-grafico'}"><span>Diseño gráfico</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="data" th:checked="${fEspecialidad == 'data'}"><span>Data / Analytics</span></label>
-                                <label class="role"><input type="radio" name="especialidad" value="mobile" th:checked="${fEspecialidad == 'mobile'}"><span>Mobile</span></label>
-                            </div>
-                            <p class="err" id="t-eEspec" hidden></p>
-                        </div>
-                        <div class="field">
-                            <label for="t-rolTitulo">CARGO</label>
-                            <div class="inp"><input id="t-rolTitulo" name="rolTitulo" type="text" autocomplete="organization-title" placeholder="Frontend Developer" th:value="${fRolTitulo}" required
-                                    data-req="Escribe tu cargo." aria-describedby="t-eRolTitulo" aria-invalid="false"></div>
-                            <p class="err" id="t-eRolTitulo" hidden></p>
-                        </div>
-                        <div class="field">
-                            <label for="t-stack">STACK</label>
-                            <div class="inp"><input id="t-stack" name="stack" type="text" autocomplete="off" placeholder="React, Java, Figma" th:value="${fStack}" required
-                                    data-req="Escribe al menos una tecnología." aria-describedby="t-eStack t-hStack" aria-invalid="false"></div>
-                            <p class="hint" id="t-hStack">Separa tecnologías con comas. Es lo que usamos para calcular tu match con las ofertas.</p>
-                            <p class="err" id="t-eStack" hidden></p>
-                        </div>
-                        <div class="field">
-                            <label for="t-correo">CORREO</label>
-                            <div class="inp"><input id="t-correo" name="correo" type="email" inputmode="email" autocomplete="email" placeholder="tu@correo.com" th:value="${fCorreo}" required
-                                    data-req="Escribe tu correo." data-email aria-describedby="t-eCorreo"
-                                    th:attr="aria-invalid=${errorParam == 'correo'} ? 'true' : 'false'"></div>
-                            <p class="err" id="t-eCorreo" th:hidden="${!(errorParam == 'correo')}" th:text="${errorParam == 'correo'} ? 'Ese correo no es válido o ya tiene una cuenta.'" hidden></p>
-                        </div>
-                        <div class="two">
-                            <div class="field">
-                                <label for="t-password">CONTRASEÑA</label>
-                                <div class="inp has-eye"><input id="t-password" name="password" type="password" autocomplete="new-password" placeholder="Mín. 8 caracteres" required
-                                        data-pw data-meter data-req="Escribe una contraseña." data-min="8" data-min-msg="Usa al menos 8 caracteres." aria-describedby="t-ePassword"
-                                        th:attr="aria-invalid=${errorParam == 'password'} ? 'true' : 'false'"><button type="button" class="eye" aria-pressed="false" aria-label="Mostrar contraseñas">ver</button></div>
-                                <p class="err" id="t-ePassword" th:hidden="${!(errorParam == 'password')}" th:text="${errorParam == 'password'} ? 'Usa al menos 8 caracteres.'" hidden></p>
-                            </div>
-                            <div class="field">
-                                <label for="t-passwordConfirm">REPÍTELA</label>
-                                <div class="inp"><input id="t-passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Otra vez" required
-                                        data-pw data-req="Repite la contraseña." data-same="#t-password" data-same-msg="Las contraseñas no coinciden." aria-describedby="t-ePasswordConfirm" aria-invalid="false"></div>
-                                <p class="err" id="t-ePasswordConfirm" hidden></p>
-                            </div>
-                        </div>
-                        <div class="meter" aria-hidden="false"><i></i><i></i><i></i><i></i><span class="meter-txt" aria-live="polite">fuerza de la contraseña</span></div>
-                    </form>
-                    <form class="fields" id="formEmpresa" data-role="empresa" th:action="@{/register/empresa}" method="post" novalidate th:hidden="${!esEmpresa}">
-                        <div class="field">
-                            <label for="e-nombreEmpresa">NOMBRE DE LA EMPRESA</label>
-                            <div class="inp"><input id="e-nombreEmpresa" name="nombreEmpresa" type="text" autocomplete="organization" placeholder="Nombre de tu empresa" th:value="${fNombreEmpresa}" required
-                                    data-req="Escribe el nombre de tu empresa." aria-describedby="e-eNombreEmpresa" aria-invalid="false"></div>
-                            <p class="err" id="e-eNombreEmpresa" hidden></p>
-                        </div>
-                        <div class="two">
-                            <div class="field">
-                                <label for="e-nombreRepresentante">REPRESENTANTE</label>
-                                <div class="inp"><input id="e-nombreRepresentante" name="nombreRepresentante" type="text" autocomplete="name" placeholder="Tu nombre" th:value="${fNombreRepresentante}" required
-                                        data-req="Escribe el nombre del representante." aria-describedby="e-eNombreRepresentante" aria-invalid="false"></div>
-                                <p class="err" id="e-eNombreRepresentante" hidden></p>
-                            </div>
-                            <div class="field">
-                                <label for="e-cargoRepresentante">CARGO</label>
-                                <div class="inp"><input id="e-cargoRepresentante" name="cargoRepresentante" type="text" autocomplete="organization-title" placeholder="Talent Lead" th:value="${fCargoRepresentante}" required
-                                        data-req="Escribe el cargo." aria-describedby="e-eCargoRepresentante" aria-invalid="false"></div>
-                                <p class="err" id="e-eCargoRepresentante" hidden></p>
-                            </div>
-                        </div>
-                        <div class="two">
-                            <div class="field">
-                                <label for="e-tamano">TAMAÑO DEL EQUIPO <span class="opt">(opcional)</span></label>
-                                <div class="inp"><select id="e-tamano" name="tamano">
-                                        <option value="" th:selected="${fTamano == null or fTamano == ''}">Seleccionar</option>
-                                        <option value="1-10" th:selected="${fTamano == '1-10'}">1 - 10</option>
-                                        <option value="11-50" th:selected="${fTamano == '11-50'}">11 - 50</option>
-                                        <option value="51-200" th:selected="${fTamano == '51-200'}">51 - 200</option>
-                                        <option value="201-500" th:selected="${fTamano == '201-500'}">201 - 500</option>
-                                        <option value="500+" th:selected="${fTamano == '500+'}">500+</option>
-                                    </select></div>
-                            </div>
-                            <div class="field">
-                                <label for="e-telefono">TELÉFONO <span class="opt">(opcional)</span></label>
-                                <div class="inp"><input id="e-telefono" name="telefono" type="tel" autocomplete="tel" placeholder="+57 300 000 0000" th:value="${fTelefono}"></div>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label for="e-correo">CORREO</label>
-                            <div class="inp"><input id="e-correo" name="correo" type="email" inputmode="email" autocomplete="email" placeholder="tu@correo.com" th:value="${fCorreo}" required
-                                    data-req="Escribe tu correo." data-email aria-describedby="e-eCorreo"
-                                    th:attr="aria-invalid=${errorParam == 'correo'} ? 'true' : 'false'"></div>
-                            <p class="err" id="e-eCorreo" th:hidden="${!(errorParam == 'correo')}" th:text="${errorParam == 'correo'} ? 'Ese correo no es válido o ya tiene una cuenta.'" hidden></p>
-                        </div>
-                        <div class="two">
-                            <div class="field">
-                                <label for="e-password">CONTRASEÑA</label>
-                                <div class="inp has-eye"><input id="e-password" name="password" type="password" autocomplete="new-password" placeholder="Mín. 8 caracteres" required
-                                        data-pw data-meter data-req="Escribe una contraseña." data-min="8" data-min-msg="Usa al menos 8 caracteres." aria-describedby="e-ePassword"
-                                        th:attr="aria-invalid=${errorParam == 'password'} ? 'true' : 'false'"><button type="button" class="eye" aria-pressed="false" aria-label="Mostrar contraseñas">ver</button></div>
-                                <p class="err" id="e-ePassword" th:hidden="${!(errorParam == 'password')}" th:text="${errorParam == 'password'} ? 'Usa al menos 8 caracteres.'" hidden></p>
-                            </div>
-                            <div class="field">
-                                <label for="e-passwordConfirm">REPÍTELA</label>
-                                <div class="inp"><input id="e-passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Otra vez" required
-                                        data-pw data-req="Repite la contraseña." data-same="#e-password" data-same-msg="Las contraseñas no coinciden." aria-describedby="e-ePasswordConfirm" aria-invalid="false"></div>
-                                <p class="err" id="e-ePasswordConfirm" hidden></p>
-                            </div>
-                        </div>
-                        <div class="meter" aria-hidden="false"><i></i><i></i><i></i><i></i><span class="meter-txt" aria-live="polite">fuerza de la contraseña</span></div>
-                    </form>
+                            <form class="fields" id="formTalento" data-role="talento" th:action="@{/register/talento}"
+                                method="post" novalidate th:hidden="${esEmpresa}">
+                                <div class="field">
+                                    <label for="t-nombre">NOMBRE COMPLETO</label>
+                                    <div class="inp"><input id="t-nombre" name="nombre" type="text" autocomplete="name"
+                                            placeholder="Tu nombre" th:value="${fNombre}" required
+                                            data-req="Escribe tu nombre." aria-describedby="t-eNombre"
+                                            aria-invalid="false"></div>
+                                    <p class="err" id="t-eNombre" hidden></p>
+                                </div>
+                                <div class="field">
+                                    <span class="lab" id="t-especLab">ESPECIALIDAD</span>
+                                    <div class="roles chips" role="radiogroup" aria-labelledby="t-especLab"
+                                        aria-describedby="t-eEspec" data-group-req="Elige tu especialidad.">
+                                        <label class="role"><input type="radio" name="especialidad" value="frontend"
+                                                th:checked="${fEspecialidad == 'frontend'}"><span>Frontend</span></label>
+                                        <label class="role"><input type="radio" name="especialidad" value="backend"
+                                                th:checked="${fEspecialidad == 'backend'}"><span>Backend</span></label>
+                                        <label class="role"><input type="radio" name="especialidad" value="fullstack"
+                                                th:checked="${fEspecialidad == 'fullstack'}"><span>Full
+                                                Stack</span></label>
+                                        <label class="role"><input type="radio" name="especialidad" value="ui-ux"
+                                                th:checked="${fEspecialidad == 'ui-ux'}"><span>UI / UX</span></label>
+                                        <label class="role"><input type="radio" name="especialidad"
+                                                value="diseno-grafico"
+                                                th:checked="${fEspecialidad == 'diseno-grafico'}"><span>Diseño
+                                                gráfico</span></label>
+                                        <label class="role"><input type="radio" name="especialidad" value="data"
+                                                th:checked="${fEspecialidad == 'data'}"><span>Data /
+                                                Analytics</span></label>
+                                        <label class="role"><input type="radio" name="especialidad" value="mobile"
+                                                th:checked="${fEspecialidad == 'mobile'}"><span>Mobile</span></label>
+                                    </div>
+                                    <p class="err" id="t-eEspec" hidden></p>
+                                </div>
+                                <div class="field">
+                                    <label for="t-rolTitulo">CARGO</label>
+                                    <div class="inp"><input id="t-rolTitulo" name="rolTitulo" type="text"
+                                            autocomplete="organization-title" placeholder="Frontend Developer"
+                                            th:value="${fRolTitulo}" required data-req="Escribe tu cargo."
+                                            aria-describedby="t-eRolTitulo" aria-invalid="false"></div>
+                                    <p class="err" id="t-eRolTitulo" hidden></p>
+                                </div>
+                                <div class="field">
+                                    <label for="t-stack">STACK</label>
+                                    <div class="inp"><input id="t-stack" name="stack" type="text" autocomplete="off"
+                                            placeholder="React, Java, Figma" th:value="${fStack}" required
+                                            data-req="Escribe al menos una tecnología."
+                                            aria-describedby="t-eStack t-hStack" aria-invalid="false"></div>
+                                    <p class="hint" id="t-hStack">Separa tecnologías con comas. Es lo que usamos para
+                                        calcular tu match con las ofertas.</p>
+                                    <p class="err" id="t-eStack" hidden></p>
+                                </div>
+                                <div class="field">
+                                    <label for="t-correo">CORREO</label>
+                                    <div class="inp"><input id="t-correo" name="correo" type="email" inputmode="email"
+                                            autocomplete="email" placeholder="tu@correo.com" th:value="${fCorreo}"
+                                            required data-req="Escribe tu correo." data-email
+                                            aria-describedby="t-eCorreo"
+                                            th:attr="aria-invalid=${errorParam == 'correo'} ? 'true' : 'false'"></div>
+                                    <p class="err" id="t-eCorreo" th:hidden="${!(errorParam == 'correo')}"
+                                        th:text="${errorParam == 'correo'} ? 'Ese correo no es válido o ya tiene una cuenta.'"
+                                        hidden></p>
+                                </div>
+                                <div class="two">
+                                    <div class="field">
+                                        <label for="t-password">CONTRASEÑA</label>
+                                        <div class="inp has-eye"><input id="t-password" name="password" type="password"
+                                                autocomplete="new-password" placeholder="Mín. 8 caracteres" required
+                                                data-pw data-meter data-req="Escribe una contraseña." data-min="8"
+                                                data-min-msg="Usa al menos 8 caracteres." aria-describedby="t-ePassword"
+                                                th:attr="aria-invalid=${errorParam == 'password'} ? 'true' : 'false'"><button
+                                                type="button" class="eye" aria-pressed="false"
+                                                aria-label="Mostrar contraseñas">ver</button></div>
+                                        <p class="err" id="t-ePassword" th:hidden="${!(errorParam == 'password')}"
+                                            th:text="${errorParam == 'password'} ? 'Usa al menos 8 caracteres.'" hidden>
+                                        </p>
+                                    </div>
+                                    <div class="field">
+                                        <label for="t-passwordConfirm">REPÍTELA</label>
+                                        <div class="inp"><input id="t-passwordConfirm" name="passwordConfirm"
+                                                type="password" autocomplete="new-password" placeholder="Otra vez"
+                                                required data-pw data-req="Repite la contraseña."
+                                                data-same="#t-password" data-same-msg="Las contraseñas no coinciden."
+                                                aria-describedby="t-ePasswordConfirm" aria-invalid="false"></div>
+                                        <p class="err" id="t-ePasswordConfirm" hidden></p>
+                                    </div>
+                                </div>
+                                <div class="meter" aria-hidden="false"><i></i><i></i><i></i><i></i><span
+                                        class="meter-txt" aria-live="polite">fuerza de la contraseña</span></div>
+                            </form>
+                            <form class="fields" id="formEmpresa" data-role="empresa" th:action="@{/register/empresa}"
+                                method="post" novalidate th:hidden="${!esEmpresa}">
+                                <div class="field">
+                                    <label for="e-nombreEmpresa">NOMBRE DE LA EMPRESA</label>
+                                    <div class="inp"><input id="e-nombreEmpresa" name="nombreEmpresa" type="text"
+                                            autocomplete="organization" placeholder="Nombre de tu empresa"
+                                            th:value="${fNombreEmpresa}" required
+                                            data-req="Escribe el nombre de tu empresa."
+                                            aria-describedby="e-eNombreEmpresa" aria-invalid="false"></div>
+                                    <p class="err" id="e-eNombreEmpresa" hidden></p>
+                                </div>
+                                <div class="two">
+                                    <div class="field">
+                                        <label for="e-nombreRepresentante">REPRESENTANTE</label>
+                                        <div class="inp"><input id="e-nombreRepresentante" name="nombreRepresentante"
+                                                type="text" autocomplete="name" placeholder="Tu nombre"
+                                                th:value="${fNombreRepresentante}" required
+                                                data-req="Escribe el nombre del representante."
+                                                aria-describedby="e-eNombreRepresentante" aria-invalid="false"></div>
+                                        <p class="err" id="e-eNombreRepresentante" hidden></p>
+                                    </div>
+                                    <div class="field">
+                                        <label for="e-cargoRepresentante">CARGO</label>
+                                        <div class="inp"><input id="e-cargoRepresentante" name="cargoRepresentante"
+                                                type="text" autocomplete="organization-title" placeholder="Talent Lead"
+                                                th:value="${fCargoRepresentante}" required data-req="Escribe el cargo."
+                                                aria-describedby="e-eCargoRepresentante" aria-invalid="false"></div>
+                                        <p class="err" id="e-eCargoRepresentante" hidden></p>
+                                    </div>
+                                </div>
+                                <div class="two">
+                                    <div class="field">
+                                        <label for="e-tamano">TAMAÑO DEL EQUIPO <span
+                                                class="opt">(opcional)</span></label>
+                                        <div class="inp"><select id="e-tamano" name="tamano">
+                                                <option value="" th:selected="${fTamano == null or fTamano == ''}">
+                                                    Seleccionar</option>
+                                                <option value="1-10" th:selected="${fTamano == '1-10'}">1 - 10</option>
+                                                <option value="11-50" th:selected="${fTamano == '11-50'}">11 - 50
+                                                </option>
+                                                <option value="51-200" th:selected="${fTamano == '51-200'}">51 - 200
+                                                </option>
+                                                <option value="201-500" th:selected="${fTamano == '201-500'}">201 - 500
+                                                </option>
+                                                <option value="500+" th:selected="${fTamano == '500+'}">500+</option>
+                                            </select></div>
+                                    </div>
+                                    <div class="field">
+                                        <label for="e-telefono">TELÉFONO <span class="opt">(opcional)</span></label>
+                                        <div class="inp"><input id="e-telefono" name="telefono" type="tel"
+                                                autocomplete="tel" placeholder="+57 300 000 0000"
+                                                th:value="${fTelefono}"></div>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="e-correo">CORREO</label>
+                                    <div class="inp"><input id="e-correo" name="correo" type="email" inputmode="email"
+                                            autocomplete="email" placeholder="tu@correo.com" th:value="${fCorreo}"
+                                            required data-req="Escribe tu correo." data-email
+                                            aria-describedby="e-eCorreo"
+                                            th:attr="aria-invalid=${errorParam == 'correo'} ? 'true' : 'false'"></div>
+                                    <p class="err" id="e-eCorreo" th:hidden="${!(errorParam == 'correo')}"
+                                        th:text="${errorParam == 'correo'} ? 'Ese correo no es válido o ya tiene una cuenta.'"
+                                        hidden></p>
+                                </div>
+                                <div class="two">
+                                    <div class="field">
+                                        <label for="e-password">CONTRASEÑA</label>
+                                        <div class="inp has-eye"><input id="e-password" name="password" type="password"
+                                                autocomplete="new-password" placeholder="Mín. 8 caracteres" required
+                                                data-pw data-meter data-req="Escribe una contraseña." data-min="8"
+                                                data-min-msg="Usa al menos 8 caracteres." aria-describedby="e-ePassword"
+                                                th:attr="aria-invalid=${errorParam == 'password'} ? 'true' : 'false'"><button
+                                                type="button" class="eye" aria-pressed="false"
+                                                aria-label="Mostrar contraseñas">ver</button></div>
+                                        <p class="err" id="e-ePassword" th:hidden="${!(errorParam == 'password')}"
+                                            th:text="${errorParam == 'password'} ? 'Usa al menos 8 caracteres.'" hidden>
+                                        </p>
+                                    </div>
+                                    <div class="field">
+                                        <label for="e-passwordConfirm">REPÍTELA</label>
+                                        <div class="inp"><input id="e-passwordConfirm" name="passwordConfirm"
+                                                type="password" autocomplete="new-password" placeholder="Otra vez"
+                                                required data-pw data-req="Repite la contraseña."
+                                                data-same="#e-password" data-same-msg="Las contraseñas no coinciden."
+                                                aria-describedby="e-ePasswordConfirm" aria-invalid="false"></div>
+                                        <p class="err" id="e-ePasswordConfirm" hidden></p>
+                                    </div>
+                                </div>
+                                <div class="meter" aria-hidden="false"><i></i><i></i><i></i><i></i><span
+                                        class="meter-txt" aria-live="polite">fuerza de la contraseña</span></div>
+                            </form>
 
-                        <p class="formerr" id="formErr" role="alert" th:text="${errorParam == 'limite'} ? 'Se crearon demasiadas cuentas desde este equipo. Espera unos minutos e inténtalo de nuevo.' : (${errorParam != null} ? 'Revisa los campos marcados para poder subir a bordo.')"></p>
+                            <p class="formerr" id="formErr" role="alert"
+                                th:text="${errorParam == 'limite'} ? 'Se crearon demasiadas cuentas desde este equipo. Espera unos minutos e inténtalo de nuevo.' : (${errorParam != null} ? 'Revisa los campos marcados para poder subir a bordo.')">
+                            </p>
+                        </div>
+                        <div class="pass-stub" id="stub">
+                            <button class="go" id="go" type="submit"
+                                th:attr="form=${esEmpresa} ? 'formEmpresa' : 'formTalento'" data-label="Crear cuenta"
+                                data-busy="Creando cuenta…"><svg viewBox="0 0 20 24" width="18" height="22"
+                                    aria-hidden="true">
+                                    <path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114" />
+                                </svg><span id="goTxt">Crear cuenta</span></button>
+                            <svg class="bars" viewBox="0 0 60 60" width="46" height="46" aria-hidden="true">
+                                <rect x="0" width="3" height="60" fill="#101114" />
+                                <rect x="7" width="1.5" height="60" fill="#101114" />
+                                <rect x="12" width="5" height="60" fill="#101114" />
+                                <rect x="21" width="2" height="60" fill="#101114" />
+                                <rect x="27" width="4" height="60" fill="#101114" />
+                                <rect x="35" width="1.5" height="60" fill="#101114" />
+                                <rect x="40" width="5" height="60" fill="#101114" />
+                                <rect x="49" width="2" height="60" fill="#101114" />
+                                <rect x="55" width="4" height="60" fill="#101114" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="pass-stub" id="stub">
-                        <button class="go" id="go" type="submit" th:attr="form=${esEmpresa} ? 'formEmpresa' : 'formTalento'" data-label="Crear cuenta" data-busy="Creando cuenta…"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg><span id="goTxt">Crear cuenta</span></button>
-                        <svg class="bars" viewBox="0 0 60 60" width="46" height="46" aria-hidden="true"><rect x="0" width="3" height="60" fill="#101114"/><rect x="7" width="1.5" height="60" fill="#101114"/><rect x="12" width="5" height="60" fill="#101114"/><rect x="21" width="2" height="60" fill="#101114"/><rect x="27" width="4" height="60" fill="#101114"/><rect x="35" width="1.5" height="60" fill="#101114"/><rect x="40" width="5" height="60" fill="#101114"/><rect x="49" width="2" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg>
-                    </div>
-                </div>
 
-                <div class="ok" id="ok" role="status">
-                    <div class="kicker">&gt; un momento</div>
-                    <h2>Seguimos <span>zarpando</span>…</h2>
-                    <p>La respuesta está tardando. Si no pasa nada, vuelve al formulario y prueba otra vez.</p>
-                    <div class="acts"><button class="again" id="okBack" type="button">volver al formulario</button></div>
+                    <div class="ok" id="ok" role="status">
+                        <div class="kicker">&gt; un momento</div>
+                        <h2>Seguimos <span>zarpando</span>…</h2>
+                        <p>La respuesta está tardando. Si no pasa nada, vuelve al formulario y prueba otra vez.</p>
+                        <div class="acts"><button class="again" id="okBack" type="button">volver al formulario</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </main>
+
+        <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast con una gaviota posada en cubierta">
+            <div class="say" id="say" aria-hidden="true"></div>
+            <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
         </div>
-    </main>
 
-    <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast con una gaviota posada en cubierta">
-        <div class="say" id="say" aria-hidden="true"></div>
-        <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
+        <div class="sea" aria-hidden="true">
+            <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+        </div>
     </div>
-
-    <div class="sea" aria-hidden="true">
-        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
-    </div>
-</div>
 
 </body>
 

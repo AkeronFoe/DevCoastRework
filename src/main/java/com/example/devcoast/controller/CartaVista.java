@@ -84,7 +84,8 @@ public class CartaVista {
         return Math.max(0, (ahora.getTime() - fecha.getTime()) / DIA);
     }
 
-    private static Zona zona(String titulo, String subtitulo, String filtro, List<Item> lista, String estado, boolean aceptada, int[] indice) {
+    private static Zona zona(String titulo, String subtitulo, String filtro, List<Item> lista, String estado,
+            boolean aceptada, int[] indice) {
         List<Barco> barcos = new ArrayList<>();
         for (Item s : lista) {
             if (barcos.size() >= MAX_POR_ZONA)
@@ -92,7 +93,7 @@ public class CartaVista {
             String area = "p".equals(s.areaClave()) ? "Programación" : "d".equals(s.areaClave()) ? "Diseño" : "Otras";
             String[] vela = "p".equals(s.areaClave()) ? new String[] { "#FF7B4F", "#EA6A44", "#CC4B27" }
                     : "d".equals(s.areaClave()) ? new String[] { "#2DD4BF", "#25B9A6", "#1F8F82" }
-                    : new String[] { "#CDD1DB", "#B0B4C0", "#8A8F9C" };
+                            : new String[] { "#CDD1DB", "#B0B4C0", "#8A8F9C" };
             String detalle = s.detalle() == null ? "" : s.detalle();
             String aria = s.titulo() + (detalle.isEmpty() ? "" : ", " + detalle) + ", " + estado
                     + (s.match() != null ? ", match " + s.match() + " por ciento" : "") + ", área " + area;

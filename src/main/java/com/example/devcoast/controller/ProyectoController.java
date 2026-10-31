@@ -198,7 +198,8 @@ public class ProyectoController {
         p.setNombre(nombre.trim());
         p.setCategoria(categoria.trim());
         p.setTipo(tipo.trim());
-        p.setDescripcionCorta(descripcion.trim().length() > 200 ? descripcion.trim().substring(0, 200) : descripcion.trim());
+        p.setDescripcionCorta(
+                descripcion.trim().length() > 200 ? descripcion.trim().substring(0, 200) : descripcion.trim());
         p.setAnio(safeTrim(anio));
         p.setLinkProyecto(safeTrim(linkProyecto));
         p.setBannerClase(isBlank(bannerClase) ? BANNER_DEFAULT : bannerClase.trim());
@@ -295,7 +296,8 @@ public class ProyectoController {
         p.setNombre(nombre.trim());
         p.setCategoria(categoria.trim());
         p.setTipo(tipo.trim());
-        p.setDescripcionCorta(descripcion.trim().length() > 200 ? descripcion.trim().substring(0, 200) : descripcion.trim());
+        p.setDescripcionCorta(
+                descripcion.trim().length() > 200 ? descripcion.trim().substring(0, 200) : descripcion.trim());
         p.setAnio(safeTrim(anio));
         p.setStack(splitCsv(stack));
         p.setLinkProyecto(safeTrim(linkProyecto));
@@ -313,13 +315,18 @@ public class ProyectoController {
             HttpSession session, RedirectAttributes ra) {
         boolean json = accept != null && accept.contains("application/json");
         if (RoleGuard.sinSesion(session))
-            return json ? ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión.")) : "redirect:/login";
+            return json ? ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión."))
+                    : "redirect:/login";
         if (RoleGuard.soloTalento(session))
-            return json ? ResponseEntity.status(403).body(Map.of("ok", false, "mensaje", "Las empresas no tienen proyectos.")) : "redirect:/dashboard";
+            return json
+                    ? ResponseEntity.status(403)
+                            .body(Map.of("ok", false, "mensaje", "Las empresas no tienen proyectos."))
+                    : "redirect:/dashboard";
 
         Optional<Proyecto> existente = proyectoRepository.findByIdAndUsuarioId(id, RoleGuard.getId(session));
         if (existente.isEmpty())
-            return json ? ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "Proyecto no encontrado.")) : "redirect:/proyectos";
+            return json ? ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "Proyecto no encontrado."))
+                    : "redirect:/proyectos";
 
         Proyecto p = existente.get();
         p.setPublicado(publicado);
@@ -327,7 +334,8 @@ public class ProyectoController {
         proyectoRepository.save(p);
         if (json)
             return ResponseEntity.ok(Map.of("ok", true, "publicado", publicado));
-        ra.addFlashAttribute("flashMessage", publicado ? "Ahora “" + p.getNombre() + "” es público." : "“" + p.getNombre() + "” quedó oculto.");
+        ra.addFlashAttribute("flashMessage",
+                publicado ? "Ahora “" + p.getNombre() + "” es público." : "“" + p.getNombre() + "” quedó oculto.");
         ra.addFlashAttribute("flashType", "success");
         return "redirect:/proyectos";
     }

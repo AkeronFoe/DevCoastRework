@@ -20,11 +20,12 @@
 
         <div class="main">
             <header
-                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}"></header>
+                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
@@ -41,14 +42,20 @@
                     </div>
                     <div class="ep-info">
                         <div class="ep-meta">
-                            <span class="ep-chip" th:if="${sectorEmpresa != null}" th:text="${sectorEmpresa}">Sector</span>
-                            <span class="ep-chip" th:if="${tamanoEmpresa != null}" th:text="${tamanoEmpresa}">Tamaño</span>
+                            <span class="ep-chip" th:if="${sectorEmpresa != null}"
+                                th:text="${sectorEmpresa}">Sector</span>
+                            <span class="ep-chip" th:if="${tamanoEmpresa != null}"
+                                th:text="${tamanoEmpresa}">Tamaño</span>
                             <span class="ep-chip on" th:if="${empleosActivos != null}"
-                                th:text="${#lists.size(empleosActivos)} + (${#lists.size(empleosActivos)} == 1 ? ' oferta activa' : ' ofertas activas')">0 ofertas activas</span>
+                                th:text="${#lists.size(empleosActivos)} + (${#lists.size(empleosActivos)} == 1 ? ' oferta activa' : ' ofertas activas')">0
+                                ofertas activas</span>
                         </div>
-                        <p class="ep-bio" th:if="${descripcionEmpresa != null and !#strings.isEmpty(descripcionEmpresa)}" th:text="${descripcionEmpresa}">Descripción</p>
-                        <a class="lnk" th:if="${webEmpresa != null and !#strings.isEmpty(webEmpresa)}" th:href="${webEmpresa}" target="_blank"
-                            rel="noopener noreferrer" th:text="${webEmpresa} + ' ↗'">sitio.com</a>
+                        <p class="ep-bio"
+                            th:if="${descripcionEmpresa != null and !#strings.isEmpty(descripcionEmpresa)}"
+                            th:text="${descripcionEmpresa}">Descripción</p>
+                        <a class="lnk" th:if="${webEmpresa != null and !#strings.isEmpty(webEmpresa)}"
+                            th:href="${webEmpresa}" target="_blank" rel="noopener noreferrer"
+                            th:text="${webEmpresa} + ' ↗'">sitio.com</a>
                     </div>
                 </section>
 
@@ -61,7 +68,9 @@
                 </div>
 
                 <th:block th:if="${#lists.isEmpty(tarjetas)}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Esta empresa no tiene posiciones abiertas en este momento.', '/empleos', 'Ver otras ofertas')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Esta empresa no tiene posiciones abiertas en este momento.', '/empleos', 'Ver otras ofertas')}">
+                    </div>
                 </th:block>
             </main>
         </div>

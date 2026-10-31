@@ -41,7 +41,6 @@ import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
 
-
 @Controller
 public class SolicitudController {
 
@@ -56,7 +55,11 @@ public class SolicitudController {
     private final CobroRepository cobroRepository;
     private final PlanService planService;
 
-    public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository, UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository, CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository, PlanService planService) {
+    public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository,
+            UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository,
+            InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
+            CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository,
+            PlanService planService) {
         this.solicitudRepository = solicitudRepository;
         this.empleoRepository = empleoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -119,7 +122,8 @@ public class SolicitudController {
             };
             if (!ok)
                 continue;
-            if (!qNorm.isEmpty() && !normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+            if (!qNorm.isEmpty()
+                    && !normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
                 continue;
             lista.add(v);
         }
@@ -129,11 +133,13 @@ public class SolicitudController {
         List<InvitacionVista> listaInv = new ArrayList<>();
         if ("invitaciones".equals(sel))
             for (InvitacionVista v : invitaciones)
-                if (qNorm.isEmpty() || normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
+                if (qNorm.isEmpty()
+                        || normalizar(v.getCargo() + " " + v.getEmpresa() + " " + v.getCategoria()).contains(qNorm))
                     listaInv.add(v);
 
         long invPendientes = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).count();
-        InvitacionVista primeraPendiente = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado())).findFirst().orElse(null);
+        InvitacionVista primeraPendiente = invitaciones.stream().filter(v -> "pendiente".equals(v.getEstado()))
+                .findFirst().orElse(null);
 
         model.addAttribute("solicitudes", lista);
         model.addAttribute("invitaciones", listaInv);
@@ -236,14 +242,18 @@ public class SolicitudController {
         if (RoleGuard.sinSesion(session))
             return ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "Inicia sesión para postularte."));
         if (RoleGuard.soloTalento(session))
-            return ResponseEntity.status(403).body(Map.of("ok", false, "mensaje", "Las empresas no pueden aplicar a empleos."));
+            return ResponseEntity.status(403)
+                    .body(Map.of("ok", false, "mensaje", "Las empresas no pueden aplicar a empleos."));
 
-        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session), null, null);
+        ResultadoAplicacion r = procesarAplicacion(id, RoleGuard.getId(session), RoleGuard.getCorreo(session), null,
+                null);
         switch (r.salida()) {
             case NO_DISPONIBLE:
-                return ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
+                return ResponseEntity.status(404)
+                        .body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
             case NO_ACTIVO:
-                return ResponseEntity.status(409).body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
+                return ResponseEntity.status(409)
+                        .body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
             case YA_APLICO:
                 return ResponseEntity.status(409).body(Map.of("ok", false, "yaAplicaste", true,
                         "mensaje", "Ya aplicaste a este empleo."));
@@ -258,9 +268,12 @@ public class SolicitudController {
         }
     }
 
-    private enum Salida { NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA }
+    private enum Salida {
+        NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA
+    }
 
-    private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {}
+    private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {
+    }
 
     private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
             List<String> proyectosIds, String mensajeMotivacion) {
@@ -345,7 +358,8 @@ public class SolicitudController {
                 EventoEstado evScreening = new EventoEstado(
                         "descartado", new Date(),
                         "Descartado automáticamente: stack no cumple los requisitos mínimos del empleo");
-                if (guardada.getHistorial() == null) guardada.setHistorial(new ArrayList<>());
+                if (guardada.getHistorial() == null)
+                    guardada.setHistorial(new ArrayList<>());
                 guardada.getHistorial().add(evScreening);
                 guardada = solicitudRepository.save(guardada);
                 descartadoPorScreening = true;
@@ -363,7 +377,8 @@ public class SolicitudController {
                 notif.setFechaCreacion(new Date());
                 notif.setUrl("/empleos/" + empleo.getId() + "/postulaciones/" + guardada.getId());
                 notificacionRepository.save(notif);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         return new ResultadoAplicacion(Salida.CREADA, guardada, descartadoPorScreening);
@@ -375,10 +390,12 @@ public class SolicitudController {
             @RequestParam(required = false) String estado,
             Model model, HttpSession session) {
 
-        if (RoleGuard.soloEmpresa(session)) return "redirect:/login";
+        if (RoleGuard.soloEmpresa(session))
+            return "redirect:/login";
 
         Optional<Empleo> empleoOpt = empleoRepository.findById(empleoId);
-        if (empleoOpt.isEmpty()) return "redirect:/misEmpleos";
+        if (empleoOpt.isEmpty())
+            return "redirect:/misEmpleos";
 
         Empleo empleo = empleoOpt.get();
         if (!Objects.equals(empleo.getEmpresaId(), RoleGuard.getId(session)))
@@ -413,8 +430,10 @@ public class SolicitudController {
             default -> true;
         }).toList();
 
-        com.example.devcoast.service.AreaEmpleo.Area area = com.example.devcoast.service.AreaEmpleo.de(empleo.getCategoria());
-        PostulacionesOfertaVista grupo = PostulacionesOfertaVista.de(empleo.getId(), empleo.getTitulo(), empleo.getCategoriaMostrar(),
+        com.example.devcoast.service.AreaEmpleo.Area area = com.example.devcoast.service.AreaEmpleo
+                .de(empleo.getCategoria());
+        PostulacionesOfertaVista grupo = PostulacionesOfertaVista.de(empleo.getId(), empleo.getTitulo(),
+                empleo.getCategoriaMostrar(),
                 area == com.example.devcoast.service.AreaEmpleo.Area.PROGRAMACION ? "p"
                         : area == com.example.devcoast.service.AreaEmpleo.Area.DISENO ? "d" : "o",
                 !"CERRADO".equalsIgnoreCase(empleo.getEstado()), vistas, filtradas);
@@ -425,7 +444,8 @@ public class SolicitudController {
         model.addAttribute("hayFiltros", !filtro.isEmpty());
         model.addAttribute("fasesReclutamiento",
                 List.of("ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA", "CERRADO_PROCESO"));
-        model.addAttribute("cobraColocacion", !planService.esPro(empresaRepository.findById(RoleGuard.getId(session)).orElse(null)));
+        model.addAttribute("cobraColocacion",
+                !planService.esPro(empresaRepository.findById(RoleGuard.getId(session)).orElse(null)));
         agregarSesion(session, model);
         return "postulaciones-empleo";
     }
@@ -481,8 +501,7 @@ public class SolicitudController {
         return cambiarEstado(empleoId, solicitudId, "rechazada", session, ra);
     }
 
-    @PostMapping(value = "/empleos/{empleoId}/postulaciones/{solicitudId}/estado",
-                 produces = "application/json")
+    @PostMapping(value = "/empleos/{empleoId}/postulaciones/{solicitudId}/estado", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> cambiarEstadoAjax(
             @PathVariable String empleoId, @PathVariable String solicitudId,
@@ -508,9 +527,10 @@ public class SolicitudController {
         s.setEstado(nuevoEstado);
         EventoEstado ev = new EventoEstado(nuevoEstado, new Date(),
                 "aprobada".equals(nuevoEstado) ? "Aceptada por la empresa"
-                : "rechazada".equals(nuevoEstado) ? "Rechazada por la empresa"
-                : "Vuelto a revisión");
-        if (s.getHistorial() == null) s.setHistorial(new ArrayList<>());
+                        : "rechazada".equals(nuevoEstado) ? "Rechazada por la empresa"
+                                : "Vuelto a revisión");
+        if (s.getHistorial() == null)
+            s.setHistorial(new ArrayList<>());
         s.getHistorial().add(ev);
         solicitudRepository.save(s);
         cobrarSiAplica(empleoOpt.get().getEmpresaId(), s, estadoAnterior, nuevoEstado);
@@ -520,14 +540,17 @@ public class SolicitudController {
                 Notificacion notif = new Notificacion();
                 notif.setDestinatarioId(s.getUsuarioId());
                 notif.setTipo("ESTADO_SOLICITUD");
-                notif.setTitulo("aprobada".equals(nuevoEstado) ? "¡Tu postulación fue aceptada! 🎉" : "Actualización de tu postulación");
+                notif.setTitulo("aprobada".equals(nuevoEstado) ? "¡Tu postulación fue aceptada! 🎉"
+                        : "Actualización de tu postulación");
                 notif.setMensaje(s.getEmpleoEmpresaNombre()
-                        + ("aprobada".equals(nuevoEstado) ? " aceptó tu postulación a " : " actualizó tu postulación a ")
+                        + ("aprobada".equals(nuevoEstado) ? " aceptó tu postulación a "
+                                : " actualizó tu postulación a ")
                         + s.getEmpleoTitulo());
                 notif.setFechaCreacion(new Date());
                 notif.setUrl("/solicitudes/" + solicitudId);
                 notificacionRepository.save(notif);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return ResponseEntity.ok(Map.of("ok", true, "estado", nuevoEstado));
     }
@@ -546,7 +569,8 @@ public class SolicitudController {
             s.setEstado(estado);
             EventoEstado ev = new EventoEstado(estado, new Date(),
                     "aprobada".equals(estado) ? "Aceptada por la empresa" : "Rechazada por la empresa");
-            if (s.getHistorial() == null) s.setHistorial(new ArrayList<>());
+            if (s.getHistorial() == null)
+                s.setHistorial(new ArrayList<>());
             s.getHistorial().add(ev);
             solicitudRepository.save(s);
             cobrarSiAplica(empleoOpt.get().getEmpresaId(), s, estadoAnterior, estado);
@@ -564,7 +588,8 @@ public class SolicitudController {
                 notif.setFechaCreacion(new Date());
                 notif.setUrl("/solicitudes/" + solicitudId);
                 notificacionRepository.save(notif);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
 
         ra.addFlashAttribute("flashMessage",
@@ -590,7 +615,8 @@ public class SolicitudController {
             }
         });
         if (json)
-            return retirada[0] ? ResponseEntity.ok(Map.of("ok", true)) : ResponseEntity.status(404).body(Map.of("ok", false));
+            return retirada[0] ? ResponseEntity.ok(Map.of("ok", true))
+                    : ResponseEntity.status(404).body(Map.of("ok", false));
         if (retirada[0]) {
             ra.addFlashAttribute("flashMessage", "Solicitud retirada.");
             ra.addFlashAttribute("flashType", "success");
@@ -631,7 +657,8 @@ public class SolicitudController {
                 .collect(java.util.stream.Collectors.toList());
         for (String kw : keywords.split(",")) {
             String kwLower = kw.trim().toLowerCase();
-            if (kwLower.isBlank()) continue;
+            if (kwLower.isBlank())
+                continue;
             if (stackLower.stream().anyMatch(s -> s.contains(kwLower) || kwLower.contains(s)))
                 return true;
         }

@@ -56,7 +56,8 @@ final class DashboardCalculos {
         return p;
     }
 
-    static List<Evento> eventosTalento(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora, int max) {
+    static List<Evento> eventosTalento(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora,
+            int max) {
         List<Evento> out = new ArrayList<>();
         for (Solicitud s : solicitudes) {
             String que = (s.getEmpleoEmpresaNombre() != null ? s.getEmpleoEmpresaNombre() : "la empresa")
@@ -73,9 +74,14 @@ final class DashboardCalculos {
                 String estado = e.getEstado() == null ? "" : e.getEstado();
                 switch (estado) {
                     case "aprobada" -> out.add(evento(que + " aceptó tu solicitud.", "t", e.getFecha(), ahora));
-                    case "rechazada" -> out.add(evento(que + " decidió no continuar con tu solicitud.", "g", e.getFecha(), ahora));
-                    case "descartado" -> out.add(evento("Tu solicitud a " + que + " se descartó por los requisitos mínimos.", "g", e.getFecha(), ahora));
-                    default -> out.add(evento(primero ? "Enviaste tu solicitud a " + que + "." : "Tu solicitud a " + que + " volvió a revisión.",
+                    case "rechazada" ->
+                        out.add(evento(que + " decidió no continuar con tu solicitud.", "g", e.getFecha(), ahora));
+                    case "descartado" ->
+                        out.add(evento("Tu solicitud a " + que + " se descartó por los requisitos mínimos.", "g",
+                                e.getFecha(), ahora));
+                    default -> out.add(evento(
+                            primero ? "Enviaste tu solicitud a " + que + "."
+                                    : "Tu solicitud a " + que + " volvió a revisión.",
                             "g", e.getFecha(), ahora));
                 }
                 primero = false;
@@ -84,12 +90,15 @@ final class DashboardCalculos {
         for (Invitacion i : invitaciones)
             if (i.getFechaEnvio() != null)
                 out.add(evento((i.getEmpresaNombre() != null ? i.getEmpresaNombre() : "Una empresa") + " te invitó"
-                        + (i.getEmpleoTitulo() != null && !i.getEmpleoTitulo().isBlank() ? " a " + i.getEmpleoTitulo() : "") + ".",
+                        + (i.getEmpleoTitulo() != null && !i.getEmpleoTitulo().isBlank() ? " a " + i.getEmpleoTitulo()
+                                : "")
+                        + ".",
                         "t", i.getFechaEnvio(), ahora));
         return recientes(out, max);
     }
 
-    static List<Evento> eventosEmpresa(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora, int max) {
+    static List<Evento> eventosEmpresa(List<Solicitud> solicitudes, List<Invitacion> invitaciones, Date ahora,
+            int max) {
         List<Evento> out = new ArrayList<>();
         for (Solicitud s : solicitudes) {
             String quien = s.getUsuarioNombre() != null ? s.getUsuarioNombre() : "Alguien";
@@ -105,9 +114,13 @@ final class DashboardCalculos {
                     continue;
                 String estado = e.getEstado() == null ? "" : e.getEstado();
                 switch (estado) {
-                    case "aprobada" -> out.add(evento("Aceptaste a " + quien + " en " + cargo + ".", "g", e.getFecha(), ahora));
-                    case "rechazada" -> out.add(evento("Descartaste a " + quien + " en " + cargo + ".", "g", e.getFecha(), ahora));
-                    case "descartado" -> out.add(evento(quien + " se descartó solo por los requisitos de " + cargo + ".", "g", e.getFecha(), ahora));
+                    case "aprobada" ->
+                        out.add(evento("Aceptaste a " + quien + " en " + cargo + ".", "g", e.getFecha(), ahora));
+                    case "rechazada" ->
+                        out.add(evento("Descartaste a " + quien + " en " + cargo + ".", "g", e.getFecha(), ahora));
+                    case "descartado" ->
+                        out.add(evento(quien + " se descartó solo por los requisitos de " + cargo + ".", "g",
+                                e.getFecha(), ahora));
                     default -> {
                         if (primero)
                             out.add(evento(quien + " se postuló a " + cargo + ".", "t", e.getFecha(), ahora));
@@ -119,7 +132,9 @@ final class DashboardCalculos {
         for (Invitacion i : invitaciones)
             if (i.getFechaEnvio() != null)
                 out.add(evento("Invitaste a " + (i.getTalentoNombre() != null ? i.getTalentoNombre() : "un talento")
-                        + (i.getEmpleoTitulo() != null && !i.getEmpleoTitulo().isBlank() ? " a " + i.getEmpleoTitulo() : "") + ".",
+                        + (i.getEmpleoTitulo() != null && !i.getEmpleoTitulo().isBlank() ? " a " + i.getEmpleoTitulo()
+                                : "")
+                        + ".",
                         "g", i.getFechaEnvio(), ahora));
         return recientes(out, max);
     }
@@ -144,7 +159,8 @@ final class DashboardCalculos {
         if (fecha == null)
             return "";
         long dias = Math.max(0, (ahora.getTime() - fecha.getTime()) / 86_400_000L);
-        return dias == 0 ? "hoy" : dias == 1 ? "ayer" : dias < 30 ? "hace " + dias + " días" : SolicitudVista.corta(fecha);
+        return dias == 0 ? "hoy"
+                : dias == 1 ? "ayer" : dias < 30 ? "hace " + dias + " días" : SolicitudVista.corta(fecha);
     }
 
     private static boolean vacio(String s) {

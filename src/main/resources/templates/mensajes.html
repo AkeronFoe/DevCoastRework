@@ -17,19 +17,29 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/mensajes', 'Buscar conversaciones', 'Busca por nombre o cargo', ${q})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/mensajes', 'Buscar conversaciones', 'Busca por nombre o cargo', ${q})}">
+            </header>
 
             <main class="mx" id="contenido">
-                <th:block th:replace="~{fragments/mensajes :: lista(${conversaciones}, null, ${totalNoLeidos}, ${q})}"></th:block>
+                <th:block th:replace="~{fragments/mensajes :: lista(${conversaciones}, null, ${totalNoLeidos}, ${q})}">
+                </th:block>
 
                 <section class="mx-thread mx-idle" aria-label="Ninguna conversación abierta">
                     <div class="mx-idle-box">
-                        <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/>
-                            <th:block th:replace="~{fragments/nautico :: gull}"></th:block></svg>
+                        <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta">
+                            <rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8" />
+                            <rect x="96" y="397" width="186" height="40" fill="#F3F4F8" />
+                            <rect x="96" y="410" width="186" height="9" fill="#2DD4BF" />
+                            <th:block th:replace="~{fragments/nautico :: gull}"></th:block>
+                        </svg>
                         <h2>Elige una conversación.</h2>
                         <p>Las charlas con
-                            <span th:text="${session.usuarioActualTipo == 'empresa'} ? 'tus candidatos' : 'las empresas'">las empresas</span>
-                            viven acá, con lo último arriba.</p>
+                            <span
+                                th:text="${session.usuarioActualTipo == 'empresa'} ? 'tus candidatos' : 'las empresas'">las
+                                empresas</span>
+                            viven acá, con lo último arriba.
+                        </p>
                     </div>
                 </section>
             </main>

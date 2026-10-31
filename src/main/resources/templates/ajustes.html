@@ -20,11 +20,12 @@
 
         <div class="main">
             <header
-                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}"></header>
+                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <section class="aj-hello" aria-label="Ajustes">
                     <div class="aj-hello-t">
@@ -41,7 +42,9 @@
                 <article class="jt aj-id" aria-label="Tu cuenta">
                     <div class="jt-main">
                         <span class="k">TU CUENTA</span>
-                        <h2 class="jt-t" th:text="${session.usuarioActualNombre != null and !#strings.isEmpty(session.usuarioActualNombre)} ? ${session.usuarioActualNombre} : 'Cuenta DevCoast'">[Nombre]</h2>
+                        <h2 class="jt-t"
+                            th:text="${session.usuarioActualNombre != null and !#strings.isEmpty(session.usuarioActualNombre)} ? ${session.usuarioActualNombre} : 'Cuenta DevCoast'">
+                            [Nombre]</h2>
                         <p class="co" th:text="${usuarioActualCorreo}">[correo@ejemplo.com]</p>
                         <dl class="facts">
                             <div>
@@ -50,7 +53,8 @@
                             </div>
                             <div th:unless="${esEmpresa}">
                                 <dt>PERFIL</dt>
-                                <dd th:text="${usuario != null ? usuario.completitudPerfil : 0} + '% completo'">80% completo</dd>
+                                <dd th:text="${usuario != null ? usuario.completitudPerfil : 0} + '% completo'">80%
+                                    completo</dd>
                             </div>
                             <div th:if="${esEmpresa}">
                                 <dt>PLAN</dt>
@@ -58,25 +62,32 @@
                             </div>
                             <div th:unless="${esEmpresa}">
                                 <dt>EN EL DIRECTORIO</dt>
-                                <dd id="idDirectorio" th:text="${usuario != null and usuario.perfilPublico} ? 'Sí, visible' : 'No, oculto'">Sí, visible</dd>
+                                <dd id="idDirectorio"
+                                    th:text="${usuario != null and usuario.perfilPublico} ? 'Sí, visible' : 'No, oculto'">
+                                    Sí, visible</dd>
                             </div>
                         </dl>
                     </div>
                     <div class="jt-stub hi">
                         <span class="mt-k">ESTADO</span>
                         <div class="aj-st">Activa</div>
-                        <a class="apply aj-go" th:href="@{/perfil}" th:text="${esEmpresa} ? 'Ver mi empresa' : 'Ver mi perfil'">Ver mi perfil</a>
+                        <a class="apply aj-go" th:href="@{/perfil}"
+                            th:text="${esEmpresa} ? 'Ver mi empresa' : 'Ver mi perfil'">Ver mi perfil</a>
                     </div>
                 </article>
 
                 <nav class="filters aj-tabs" aria-label="Secciones de ajustes">
                     <div class="chs" id="ajTabs">
                         <button class="ch" type="button" data-sec="cuenta" aria-pressed="true">Cuenta</button>
-                        <button class="ch" type="button" data-sec="plan" aria-pressed="false" th:if="${esEmpresa}">Plan</button>
+                        <button class="ch" type="button" data-sec="plan" aria-pressed="false"
+                            th:if="${esEmpresa}">Plan</button>
                         <button class="ch" type="button" data-sec="apariencia" aria-pressed="false">Apariencia</button>
-                        <button class="ch" type="button" data-sec="privacidad" aria-pressed="false" th:unless="${esEmpresa}">Privacidad</button>
-                        <button class="ch" type="button" data-sec="notificaciones" aria-pressed="false">Notificaciones</button>
-                        <button class="ch" type="button" data-sec="accesibilidad" aria-pressed="false">Accesibilidad</button>
+                        <button class="ch" type="button" data-sec="privacidad" aria-pressed="false"
+                            th:unless="${esEmpresa}">Privacidad</button>
+                        <button class="ch" type="button" data-sec="notificaciones"
+                            aria-pressed="false">Notificaciones</button>
+                        <button class="ch" type="button" data-sec="accesibilidad"
+                            aria-pressed="false">Accesibilidad</button>
                     </div>
                     <button class="ch dg" type="button" data-sec="peligro" aria-pressed="false">Zona de peligro</button>
                 </nav>
@@ -85,26 +96,44 @@
                     <section class="aj-pn" aria-labelledby="h-info">
                         <h2 id="h-info">Información <span>2 datos</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-                            <div class="aj-rt"><b>Correo</b><span th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <path d="m2 7 10 6 10-6" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Correo</b><span
+                                    th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
                             <div class="aj-ctl"><span class="aj-chip">PRINCIPAL</span></div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></svg></span>
-                            <div class="aj-rt"><b>Tipo de cuenta</b><span th:text="${esEmpresa} ? 'Empresa' : 'Talento creativo'">Talento creativo</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="m17 11 2 2 4-4" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Tipo de cuenta</b><span
+                                    th:text="${esEmpresa} ? 'Empresa' : 'Talento creativo'">Talento creativo</span>
+                            </div>
                             <div class="aj-ctl"><span class="aj-chip">ACTIVA</span></div>
                         </div>
                     </section>
                     <section class="aj-pn" aria-labelledby="h-seg">
                         <h2 id="h-seg">Seguridad <span>acceso a tu cuenta</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
-                            <div class="aj-rt"><b>Correo electrónico</b><span th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
-                            <div class="aj-ctl"><button class="aj-btn" type="button" id="btnCorreo">Cambiar</button></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Correo electrónico</b><span
+                                    th:text="${usuarioActualCorreo ?: '—'}">[correo@ejemplo.com]</span></div>
+                            <div class="aj-ctl"><button class="aj-btn" type="button" id="btnCorreo">Cambiar</button>
+                            </div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                            <div class="aj-rt"><b>Contraseña</b><span>Cambia tu contraseña de acceso a DevCoast.</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Contraseña</b><span>Cambia tu contraseña de acceso a DevCoast.</span>
+                            </div>
                             <div class="aj-ctl"><a class="aj-btn" th:href="@{/cambiarPassword}">Cambiar</a></div>
                         </div>
                     </section>
@@ -114,33 +143,51 @@
                     <section class="aj-pn" aria-labelledby="h-plan">
                         <h2 id="h-plan">Tu plan <span th:text="${plan == 'PRO'} ? 'Pro' : 'Gratis'">Gratis</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                                    <path d="M2 10h20" />
+                                </svg></span>
                             <div class="aj-rt"><b>Plan actual</b>
-                                <span th:if="${plan == 'PRO'}" th:text="'Pro · vence el ' + ${#dates.format(planVenceEn, 'dd/MM/yyyy')}">Pro</span>
+                                <span th:if="${plan == 'PRO'}"
+                                    th:text="'Pro · vence el ' + ${#dates.format(planVenceEn, 'dd/MM/yyyy')}">Pro</span>
                                 <span th:unless="${plan == 'PRO'}">Gratis</span>
                             </div>
                             <div class="aj-ctl">
-                                <button class="btn-o" type="button" id="btnPro" th:unless="${plan == 'PRO'}">Actualizar a Pro</button>
+                                <button class="btn-o" type="button" id="btnPro" th:unless="${plan == 'PRO'}">Actualizar
+                                    a Pro</button>
                                 <span class="aj-chip" th:if="${plan == 'PRO'}">ACTIVO</span>
                             </div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-                            <div class="aj-rt"><b>Vacantes activas</b><span th:text="${vacantesActivas} + ' de ' + ${limiteVacantes}">1 de 2</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="7" height="7" />
+                                    <rect x="14" y="3" width="7" height="7" />
+                                    <rect x="14" y="14" width="7" height="7" />
+                                    <rect x="3" y="14" width="7" height="7" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Vacantes activas</b><span
+                                    th:text="${vacantesActivas} + ' de ' + ${limiteVacantes}">1 de 2</span></div>
                             <div class="aj-ctl aj-bar">
-                                <div class="pbar" role="progressbar" aria-label="Vacantes usadas" aria-valuemin="0" aria-valuemax="100"
+                                <div class="pbar" role="progressbar" aria-label="Vacantes usadas" aria-valuemin="0"
+                                    aria-valuemax="100"
                                     th:attr="aria-valuenow=${limiteVacantes > 0 ? (vacantesActivas * 100 / limiteVacantes > 100 ? 100 : vacantesActivas * 100 / limiteVacantes) : 0}">
-                                    <i th:style="'width:' + ${limiteVacantes > 0 ? (vacantesActivas * 100 / limiteVacantes > 100 ? 100 : vacantesActivas * 100 / limiteVacantes) : 0} + '%'"></i>
+                                    <i
+                                        th:style="'width:' + ${limiteVacantes > 0 ? (vacantesActivas * 100 / limiteVacantes > 100 ? 100 : vacantesActivas * 100 / limiteVacantes) : 0} + '%'"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2 15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></span>
-                            <div class="aj-rt"><b>Destacados</b><span th:text="${destacadosActivos} + ' de ' + ${limiteDestacados}">0 de 0</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M12 2 15 9l7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Destacados</b><span
+                                    th:text="${destacadosActivos} + ' de ' + ${limiteDestacados}">0 de 0</span></div>
                             <div class="aj-ctl aj-bar">
-                                <div class="pbar" role="progressbar" aria-label="Destacados usados" aria-valuemin="0" aria-valuemax="100"
+                                <div class="pbar" role="progressbar" aria-label="Destacados usados" aria-valuemin="0"
+                                    aria-valuemax="100"
                                     th:attr="aria-valuenow=${limiteDestacados > 0 ? (destacadosActivos * 100 / limiteDestacados > 100 ? 100 : destacadosActivos * 100 / limiteDestacados) : 0}">
-                                    <i th:style="'width:' + ${limiteDestacados > 0 ? (destacadosActivos * 100 / limiteDestacados > 100 ? 100 : destacadosActivos * 100 / limiteDestacados) : 0} + '%'"></i>
+                                    <i
+                                        th:style="'width:' + ${limiteDestacados > 0 ? (destacadosActivos * 100 / limiteDestacados > 100 ? 100 : destacadosActivos * 100 / limiteDestacados) : 0} + '%'"></i>
                                 </div>
                             </div>
                         </div>
@@ -148,8 +195,13 @@
                     <section class="aj-pn" aria-labelledby="h-fact">
                         <h2 id="h-fact">Facturación <span>historial</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></span>
-                            <div class="aj-rt"><b>Historial</b><span>Tarifas de colocación cobradas mientras estuviste en el plan Gratis.</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <path d="M14 2v6h6" />
+                                    <path d="M8 13h8M8 17h5" />
+                                </svg></span>
+                            <div class="aj-rt"><b>Historial</b><span>Tarifas de colocación cobradas mientras estuviste
+                                    en el plan Gratis.</span></div>
                             <div class="aj-ctl"><a class="aj-btn" th:href="@{/facturacion}">Ver historial</a></div>
                         </div>
                     </section>
@@ -159,7 +211,8 @@
                     <section class="aj-pn" aria-labelledby="h-tema">
                         <h2 id="h-tema">Tema <span>se recuerda en este navegador</span></h2>
                         <div class="aj-row aj-row-col">
-                            <div class="aj-rt"><b id="l-tema">Color del sitio</b><span>Elige cómo se ve DevCoast: de noche en el puerto, de día o a medianoche.</span></div>
+                            <div class="aj-rt"><b id="l-tema">Color del sitio</b><span>Elige cómo se ve DevCoast: de
+                                    noche en el puerto, de día o a medianoche.</span></div>
                             <div class="aj-themes" role="group" aria-labelledby="l-tema">
                                 <button class="aj-theme" type="button" data-theme-opt="dark" aria-pressed="false">
                                     <span class="aj-prev" style="background:#101114" aria-hidden="true">
@@ -191,17 +244,34 @@
                     <section class="aj-pn" aria-labelledby="h-dens">
                         <h2 id="h-dens">Densidad y texto <span>se aplica al instante</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="18" y2="18"/></svg></span>
-                            <div class="aj-rt"><b id="l-dens">Espaciado</b><span>Cuánto aire hay entre las tarjetas y los bloques de cada página.</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <line x1="4" y1="6" x2="20" y2="6" />
+                                    <line x1="4" y1="12" x2="14" y2="12" />
+                                    <line x1="4" y1="18" x2="18" y2="18" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-dens">Espaciado</b><span>Cuánto aire hay entre las tarjetas y
+                                    los bloques de cada página.</span></div>
                             <div class="aj-dens" role="group" aria-labelledby="l-dens">
-                                <button class="aj-dopt" type="button" data-dens="compact" aria-pressed="false"><span class="aj-dl" style="gap:3px"><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:65%"></i><i style="width:80%"></i></span>compacto</button>
-                                <button class="aj-dopt" type="button" data-dens="normal" aria-pressed="false"><span class="aj-dl" style="gap:6px"><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:65%"></i></span>normal</button>
-                                <button class="aj-dopt" type="button" data-dens="spacious" aria-pressed="false"><span class="aj-dl" style="gap:10px"><i></i><i style="width:75%"></i><i style="width:90%"></i></span>amplio</button>
+                                <button class="aj-dopt" type="button" data-dens="compact" aria-pressed="false"><span
+                                        class="aj-dl" style="gap:3px"><i></i><i style="width:75%"></i><i
+                                            style="width:90%"></i><i style="width:65%"></i><i
+                                            style="width:80%"></i></span>compacto</button>
+                                <button class="aj-dopt" type="button" data-dens="normal" aria-pressed="false"><span
+                                        class="aj-dl" style="gap:6px"><i></i><i style="width:75%"></i><i
+                                            style="width:90%"></i><i style="width:65%"></i></span>normal</button>
+                                <button class="aj-dopt" type="button" data-dens="spacious" aria-pressed="false"><span
+                                        class="aj-dl" style="gap:10px"><i></i><i style="width:75%"></i><i
+                                            style="width:90%"></i></span>amplio</button>
                             </div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
-                            <div class="aj-rt"><b id="l-txt">Tamaño de texto</b><span>Ajusta la legibilidad del contenido de las páginas.</span></div>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <polyline points="4 7 4 4 20 4 20 7" />
+                                    <line x1="9" y1="20" x2="15" y2="20" />
+                                    <line x1="12" y1="4" x2="12" y2="20" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-txt">Tamaño de texto</b><span>Ajusta la legibilidad del
+                                    contenido de las páginas.</span></div>
                             <div class="chs" role="group" aria-labelledby="l-txt">
                                 <button class="ch" type="button" data-text="small" aria-pressed="false">pequeño</button>
                                 <button class="ch" type="button" data-text="normal" aria-pressed="false">normal</button>
@@ -221,26 +291,47 @@
                     <section class="aj-pn" aria-labelledby="h-vis">
                         <h2 id="h-vis">Visibilidad <span>quién te ve</span></h2>
                         <div class="aj-vis" role="status" aria-live="polite">
-                            <div class="aj-vi"><span class="aj-dot" id="dotPerfil"></span><div><b>Perfil</b><span id="valPerfil">—</span></div></div>
-                            <div class="aj-vi"><span class="aj-dot" id="dotCorreo"></span><div><b>Correo</b><span id="valCorreo">—</span></div></div>
-                            <div class="aj-vi"><span class="aj-dot" id="dotMensajes"></span><div><b>Contacto</b><span id="valMensajes">—</span></div></div>
+                            <div class="aj-vi"><span class="aj-dot" id="dotPerfil"></span>
+                                <div><b>Perfil</b><span id="valPerfil">—</span></div>
+                            </div>
+                            <div class="aj-vi"><span class="aj-dot" id="dotCorreo"></span>
+                                <div><b>Correo</b><span id="valCorreo">—</span></div>
+                            </div>
+                            <div class="aj-vi"><span class="aj-dot" id="dotMensajes"></span>
+                                <div><b>Contacto</b><span id="valMensajes">—</span></div>
+                            </div>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
-                            <div class="aj-rt"><b id="l-perfil">Perfil público</b><span>Tu perfil aparece en el directorio de talentos para empresas.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-perfil" data-priv="perfilPublico"
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-perfil">Perfil público</b><span>Tu perfil aparece en el
+                                    directorio de talentos para empresas.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-perfil"
+                                data-priv="perfilPublico"
                                 th:attr="aria-checked=${usuario != null and usuario.perfilPublico} ? 'true' : 'false'"></button>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-                            <div class="aj-rt"><b id="l-correo">Mostrar correo</b><span>Visible en tu perfil público para empresas interesadas.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-correo" data-priv="mostrarCorreo"
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <path d="m2 7 10 6 10-6" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-correo">Mostrar correo</b><span>Visible en tu perfil público
+                                    para empresas interesadas.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-correo"
+                                data-priv="mostrarCorreo"
                                 th:attr="aria-checked=${usuario != null and usuario.mostrarCorreo} ? 'true' : 'false'"></button>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-                            <div class="aj-rt"><b id="l-mensajes">Permitir mensajes</b><span>Las empresas pueden enviarte invitaciones directamente.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mensajes" data-priv="permitirMensajes"
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-mensajes">Permitir mensajes</b><span>Las empresas pueden
+                                    enviarte invitaciones directamente.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mensajes"
+                                data-priv="permitirMensajes"
                                 th:attr="aria-checked=${usuario == null or usuario.permitirMensajes == null or usuario.permitirMensajes} ? 'true' : 'false'"></button>
                         </div>
                     </section>
@@ -250,21 +341,42 @@
                     <section class="aj-pn" aria-labelledby="h-al">
                         <h2 id="h-al">Alertas <span>qué quieres que te avisemos</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
-                            <div class="aj-rt"><b id="l-inv" th:text="${esEmpresa} ? 'Respuestas a invitaciones' : 'Invitaciones'">Invitaciones</b><span th:text="${esEmpresa} ? 'Cuando un talento acepte o rechace tu invitación.' : 'Cuando una empresa te contacte directamente.'">Cuando una empresa te contacte directamente.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-inv" data-notif="invitaciones" aria-checked="true"></button>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="8.5" cy="7" r="4" />
+                                    <line x1="20" y1="8" x2="20" y2="14" />
+                                    <line x1="23" y1="11" x2="17" y2="11" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-inv"
+                                    th:text="${esEmpresa} ? 'Respuestas a invitaciones' : 'Invitaciones'">Invitaciones</b><span
+                                    th:text="${esEmpresa} ? 'Cuando un talento acepte o rechace tu invitación.' : 'Cuando una empresa te contacte directamente.'">Cuando
+                                    una empresa te contacte directamente.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-inv"
+                                data-notif="invitaciones" aria-checked="true"></button>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
-                            <div class="aj-rt"><b id="l-sol" th:text="${esEmpresa} ? 'Postulaciones' : 'Solicitudes'">Solicitudes</b><span th:text="${esEmpresa} ? 'Cuando un talento se postule a una de tus ofertas.' : 'Cuando una empresa revise o responda tu solicitud.'">Cuando una empresa revise o responda tu solicitud.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-sol" data-notif="solicitudes" aria-checked="true"></button>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-sol"
+                                    th:text="${esEmpresa} ? 'Postulaciones' : 'Solicitudes'">Solicitudes</b><span
+                                    th:text="${esEmpresa} ? 'Cuando un talento se postule a una de tus ofertas.' : 'Cuando una empresa revise o responda tu solicitud.'">Cuando
+                                    una empresa revise o responda tu solicitud.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-sol"
+                                data-notif="solicitudes" aria-checked="true"></button>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
-                            <div class="aj-rt"><b id="l-prod">Novedades del producto</b><span>Nuevas funciones y actualizaciones de la plataforma.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-prod" data-notif="producto" aria-checked="false"></button>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-prod">Novedades del producto</b><span>Nuevas funciones y
+                                    actualizaciones de la plataforma.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-prod"
+                                data-notif="producto" aria-checked="false"></button>
                         </div>
-                        <p class="aj-note"><b>Nota:</b> estas preferencias se guardan en este navegador. Las notificaciones de la campana siguen llegando igual.</p>
+                        <p class="aj-note"><b>Nota:</b> estas preferencias se guardan en este navegador. Las
+                            notificaciones de la campana siguen llegando igual.</p>
                     </section>
                 </div>
 
@@ -272,20 +384,31 @@
                     <section class="aj-pn" aria-labelledby="h-a11y">
                         <h2 id="h-a11y">Lectura y percepción <span>pruébalos: cambian esta página</span></h2>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none"/></svg></span>
-                            <div class="aj-rt"><b id="l-contraste">Contraste alto</b><span>Aumenta el contraste visual para mejor legibilidad.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-contraste" data-pref="contrast" aria-checked="false"></button>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor" stroke="none" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-contraste">Contraste alto</b><span>Aumenta el contraste visual
+                                    para mejor legibilidad.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-contraste"
+                                data-pref="contrast" aria-checked="false"></button>
                         </div>
                         <div class="aj-row">
-                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></span>
-                            <div class="aj-rt"><b id="l-mov">Reducir movimiento</b><span>Detiene el oleaje, el barco, la gaviota y las transiciones de página.</span></div>
-                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mov" data-pref="motion" aria-checked="false"></button>
+                            <span class="aj-ico" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                                </svg></span>
+                            <div class="aj-rt"><b id="l-mov">Reducir movimiento</b><span>Detiene el oleaje, el barco, la
+                                    gaviota y las transiciones de página.</span></div>
+                            <button class="aj-tg" type="button" role="switch" aria-labelledby="l-mov" data-pref="motion"
+                                aria-checked="false"></button>
                         </div>
                     </section>
                 </div>
 
                 <div class="aj-stack" id="sec-peligro" data-panel="peligro" hidden>
-                    <p class="aj-dznote">// zona de peligro: aquí las acciones te sacan de tu cuenta o no tienen vuelta atrás.</p>
+                    <p class="aj-dznote">// zona de peligro: aquí las acciones te sacan de tu cuenta o no tienen vuelta
+                        atrás.</p>
                     <article class="jt aj-dz">
                         <div class="jt-main">
                             <span class="k">SESIÓN</span>
@@ -303,8 +426,11 @@
                             <span class="k aj-errk">ZONA DE PELIGRO</span>
                             <h2 class="jt-t">Eliminar cuenta</h2>
                             <p class="desc">Elimina permanentemente tu cuenta y todos tus datos
-                                <span th:unless="${esEmpresa}">(perfil, proyectos, solicitudes e invitaciones)</span><span th:if="${esEmpresa}">(empresa, ofertas, postulaciones e invitaciones)</span>.
-                                Esta acción es irreversible.</p>
+                                <span th:unless="${esEmpresa}">(perfil, proyectos, solicitudes e
+                                    invitaciones)</span><span th:if="${esEmpresa}">(empresa, ofertas, postulaciones e
+                                    invitaciones)</span>.
+                                Esta acción es irreversible.
+                            </p>
                         </div>
                         <div class="jt-stub er">
                             <span class="mt-k">ESTADO</span>
@@ -322,11 +448,13 @@
             <h2 id="t-correo">Cambiar correo electrónico</h2>
             <div class="aj-fl">
                 <label for="inCorreo">NUEVO CORREO</label>
-                <input id="inCorreo" type="email" inputmode="email" autocomplete="email" placeholder="nuevo@correo.com" aria-describedby="errCorreo">
+                <input id="inCorreo" type="email" inputmode="email" autocomplete="email" placeholder="nuevo@correo.com"
+                    aria-describedby="errCorreo">
             </div>
             <div class="aj-fl">
                 <label for="inPassCorreo">CONTRASEÑA ACTUAL</label>
-                <input id="inPassCorreo" type="password" autocomplete="current-password" placeholder="Para confirmar tu identidad" aria-describedby="errCorreo">
+                <input id="inPassCorreo" type="password" autocomplete="current-password"
+                    placeholder="Para confirmar tu identidad" aria-describedby="errCorreo">
             </div>
             <p class="aj-err" id="errCorreo" role="alert" hidden></p>
             <div class="aj-dacts">
@@ -346,7 +474,8 @@
             </div>
             <div class="aj-fl">
                 <label for="inPassDel">TU CONTRASEÑA ACTUAL</label>
-                <input id="inPassDel" name="password" type="password" autocomplete="current-password" placeholder="Contraseña">
+                <input id="inPassDel" name="password" type="password" autocomplete="current-password"
+                    placeholder="Contraseña">
             </div>
             <div class="aj-dacts">
                 <button class="aj-ghost" type="button" id="cancelEliminar">Cancelar</button>

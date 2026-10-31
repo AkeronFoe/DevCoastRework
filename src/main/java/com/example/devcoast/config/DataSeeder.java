@@ -47,8 +47,10 @@ import com.example.devcoast.service.MatchEmpleo;
 import com.example.devcoast.service.PlanService;
 
 @Component
-// oigan, esto de acá llena la base con datos de mentiritas (talentos, empresas, ofertas, chats...) para poder probar todo
-// como si la plataforma ya estuviera en uso. Solo se prende con SEED_ENABLED=true y no toca lo que ya existe.
+// oigan, esto de acá llena la base con datos de mentiritas (talentos, empresas,
+// ofertas, chats...) para poder probar todo
+// como si la plataforma ya estuviera en uso. Solo se prende con
+// SEED_ENABLED=true y no toca lo que ya existe.
 @ConditionalOnProperty(name = "devcoast.seed.enabled", havingValue = "true")
 public class DataSeeder implements ApplicationRunner {
 
@@ -60,7 +62,8 @@ public class DataSeeder implements ApplicationRunner {
     private static final long SEMILLA = 20260101L;
     private static final long DIA = 86_400_000L;
     private static final int LOTE = 1000;
-    private static final String[] COLECCIONES = { "usuarios", "empresas", "empleos", "proyectos", "solicitudes", "invitaciones",
+    private static final String[] COLECCIONES = { "usuarios", "empresas", "empleos", "proyectos", "solicitudes",
+            "invitaciones",
             "mensajes", "notificaciones", "cobros" };
 
     private static final String DEMO_TALENTO = "demo@devcoast.co";
@@ -107,14 +110,17 @@ public class DataSeeder implements ApplicationRunner {
             if (limpiarAntiguos)
                 new LimpiezaSeederAntiguo(mongo).limpiar();
             Document marca = mongo.findById(MARCA_ID, Document.class, COLECCION_MARCA);
-            if (marca != null && "completo".equals(marca.getString("estado")) && marca.getInteger("version", 0) >= VERSION) {
-                log.info("[DataSeeder] Los datos de ejemplo ya están sembrados (versión {}). No se hace nada.", marca.getInteger("version", 0));
+            if (marca != null && "completo".equals(marca.getString("estado"))
+                    && marca.getInteger("version", 0) >= VERSION) {
+                log.info("[DataSeeder] Los datos de ejemplo ya están sembrados (versión {}). No se hace nada.",
+                        marca.getInteger("version", 0));
                 return;
             }
             if (marca != null && "en_progreso".equals(marca.getString("estado"))) {
                 if (!reintentar) {
-                    log.warn("[DataSeeder] Una siembra anterior no terminó. No se toca nada. Para reintentar (borra solo lo creado "
-                            + "desde que esa siembra empezó) arranca con devcoast.seed.reintentar=true.");
+                    log.warn(
+                            "[DataSeeder] Una siembra anterior no terminó. No se toca nada. Para reintentar (borra solo lo creado "
+                                    + "desde que esa siembra empezó) arranca con devcoast.seed.reintentar=true.");
                     return;
                 }
                 deshacerParcial();
@@ -131,8 +137,10 @@ public class DataSeeder implements ApplicationRunner {
             nueva.put("fin", new Date());
             nueva.put("resumen", g.resumen());
             mongo.save(nueva, COLECCION_MARCA);
-            log.info("[DataSeeder] Siembra completa en {} s. {}", (System.currentTimeMillis() - t0) / 1000, g.resumen().toJson());
-            log.info("[DataSeeder] Cuentas de demo (contraseña demo1234): {}, {}, {}, {}", DEMO_TALENTO, DEMO_DISENO, DEMO_EMPRESA,
+            log.info("[DataSeeder] Siembra completa en {} s. {}", (System.currentTimeMillis() - t0) / 1000,
+                    g.resumen().toJson());
+            log.info("[DataSeeder] Cuentas de demo (contraseña demo1234): {}, {}, {}, {}", DEMO_TALENTO, DEMO_DISENO,
+                    DEMO_EMPRESA,
                     DEMO_STARTUP);
         } catch (Exception e) {
             log.error("[DataSeeder] La siembra falló y quedó incompleta: {}", e.toString(), e);
@@ -152,7 +160,8 @@ public class DataSeeder implements ApplicationRunner {
             List<ObjectId> ids = reg.getList("ids", ObjectId.class);
             long borrados = 0;
             for (int i = 0; i < ids.size(); i += 5000)
-                borrados += mongo.remove(new Query(Criteria.where("_id").in(ids.subList(i, Math.min(ids.size(), i + 5000)))), c)
+                borrados += mongo
+                        .remove(new Query(Criteria.where("_id").in(ids.subList(i, Math.min(ids.size(), i + 5000)))), c)
                         .getDeletedCount();
             mongo.remove(new Query(Criteria.where("_id").is(coleccionDeIds(c))), COLECCION_MARCA);
             log.warn("[DataSeeder]   {}: {} documentos borrados", c, borrados);
@@ -262,7 +271,8 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         Document resumen() {
-            return new Document("empresas", empresas.size()).append("ofertas", empleosGen.size()).append("talentos", talentosGen.size())
+            return new Document("empresas", empresas.size()).append("ofertas", empleosGen.size())
+                    .append("talentos", talentosGen.size())
                     .append("proyectos", proyectos.size()).append("solicitudes", solicitudes.size())
                     .append("invitaciones", invitaciones.size()).append("mensajes", mensajes.size())
                     .append("notificaciones", notificaciones.size()).append("cobros", cobros.size());
@@ -328,7 +338,8 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         String sinAcentos(String s) {
-            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").replace('ñ', 'n').replace('Ñ', 'N');
+            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").replace('ñ', 'n').replace('Ñ',
+                    'N');
         }
 
         String slug(String s) {
@@ -366,13 +377,15 @@ public class DataSeeder implements ApplicationRunner {
             List<Date> fechas = fechasOrdenadas(nEmpresas + 2, 20, 900);
             int f = 0;
             if (demoEmpresa) {
-                eDemoEmpresa = empresa("DevCoast Labs", "SaaS / Software", "51 – 200 personas", DEMO_EMPRESA, true, "Mariana Torres Cardona",
+                eDemoEmpresa = empresa("DevCoast Labs", "SaaS / Software", "51 – 200 personas", DEMO_EMPRESA, true,
+                        "Mariana Torres Cardona",
                         "CTO", "Medellín, Colombia", atras(900), hashDemo,
                         "DevCoast Labs desarrolla plataformas de talento tech con operación en Colombia y México: producto, datos y comunidad en un solo equipo.");
                 eDemoEmpresa.setPlanVenceEn(mas(ahora, 21));
             }
             if (demoStartup) {
-                eDemoStartup = empresa("Marea Studio", "Startup", "11 – 50 personas", DEMO_STARTUP, false, "Andrés Felipe Rueda Ibarra",
+                eDemoStartup = empresa("Marea Studio", "Startup", "11 – 50 personas", DEMO_STARTUP, false,
+                        "Andrés Felipe Rueda Ibarra",
                         "Cofundador", "Cartagena, Colombia", atras(430), hashDemo,
                         "Marea Studio es una startup de turismo digital en el Caribe: reservas, experiencias locales y una app que ya tiene usuarios activos.");
             }
@@ -385,7 +398,8 @@ public class DataSeeder implements ApplicationRunner {
                     correo = correoBase + n + SeedCatalogo.DOMINIOS_EMPRESA[0];
                 String desc = String.format(pick(SeedCatalogo.DESCRIPCION_EMPRESA.get(sector)), nombre);
                 String rep = nombrePersona(prob(0.5)).completo();
-                Empresa e = empresa(nombre, sector, SeedCatalogo.TAMANOS[peso(SeedCatalogo.PESO_TAMANOS)], correo, prob(0.18), rep,
+                Empresa e = empresa(nombre, sector, SeedCatalogo.TAMANOS[peso(SeedCatalogo.PESO_TAMANOS)], correo,
+                        prob(0.18), rep,
                         pick(SeedCatalogo.CARGOS_REP), pick(SeedCatalogo.CIUDADES), fechas.get(f++), hash, desc);
                 if (PlanService.PLAN_PRO.equals(e.getPlan()))
                     e.setPlanVenceEn(mas(ahora, 3 + rnd.nextInt(26)));
@@ -393,7 +407,8 @@ public class DataSeeder implements ApplicationRunner {
             empresas.sort(Comparator.comparing(Empresa::getCreadoEn));
         }
 
-        Empresa empresa(String nombre, String sector, String tamano, String correo, boolean pro, String representante, String cargo,
+        Empresa empresa(String nombre, String sector, String tamano, String correo, boolean pro, String representante,
+                String cargo,
                 String ubicacion, Date creado, String password, String descripcion) {
             Empresa e = new Empresa();
             e.setTipo("empresa");
@@ -426,7 +441,8 @@ public class DataSeeder implements ApplicationRunner {
             }
             String n;
             do {
-                n = pick(SeedCatalogo.EMPRESA_A) + " " + pick(SeedCatalogo.EMPRESA_B) + " " + pick(SeedCatalogo.EMPRESA_C);
+                n = pick(SeedCatalogo.EMPRESA_A) + " " + pick(SeedCatalogo.EMPRESA_B) + " "
+                        + pick(SeedCatalogo.EMPRESA_C);
             } while (!nombresEmpresa.add(n));
             return n;
         }
@@ -474,7 +490,8 @@ public class DataSeeder implements ApplicationRunner {
             String contrato = tier == 0 && prob(0.08) ? "Practicas"
                     : SeedCatalogo.CONTRATOS[peso(78, 4, 10, 8, 0)];
             boolean usd = "Remoto".equals(modalidad) && prob(0.4);
-            boolean blando = !grupo.equals("frontend") && !grupo.equals("backend") && !grupo.equals("fullstack") && !grupo.equals("mobile")
+            boolean blando = !grupo.equals("frontend") && !grupo.equals("backend") && !grupo.equals("fullstack")
+                    && !grupo.equals("mobile")
                     && !grupo.equals("data") && !grupo.equals("devops");
             double factor = blando ? 0.85 : 1.0;
 
@@ -521,10 +538,11 @@ public class DataSeeder implements ApplicationRunner {
             e.setTimezone(prob(0.55) ? "Latam · UTC-5" : prob(0.4) ? pick(SeedCatalogo.TIMEZONES) : null);
             e.setIngles(tier == 0 && prob(0.5) ? null : SeedCatalogo.INGLES[peso(25, 50, 25)]);
             String producto = pick(SeedCatalogo.PRODUCTO_POR_SECTOR.get(sector));
-            e.setDescripcionRol("En " + em.getNombreEmpresa() + " buscamos sumar a nuestro equipo el perfil de " + titulo
-                    + ". Participarás en la construcción de " + producto + ", trabajando con " + stack
-                    + " en ciclos cortos, con revisiones de código y contacto directo con producto. Ofrecemos "
-                    + pick(SeedCatalogo.BENEFICIOS) + " y " + pick(SeedCatalogo.BENEFICIOS) + ".");
+            e.setDescripcionRol(
+                    "En " + em.getNombreEmpresa() + " buscamos sumar a nuestro equipo el perfil de " + titulo
+                            + ". Participarás en la construcción de " + producto + ", trabajando con " + stack
+                            + " en ciclos cortos, con revisiones de código y contacto directo con producto. Ofrecemos "
+                            + pick(SeedCatalogo.BENEFICIOS) + " y " + pick(SeedCatalogo.BENEFICIOS) + ".");
             e.setRequisitosDeseables(pick(SeedCatalogo.REQUISITOS_DESEABLES));
             e.setStack(stack);
             e.setSoftSkills(String.join(", ", pickVarios(SeedCatalogo.SOFT_SKILLS, 3 + rnd.nextInt(2))));
@@ -545,7 +563,8 @@ public class DataSeeder implements ApplicationRunner {
                 };
                 pub = atras(dias);
                 e.setEstado("ACTIVO");
-                e.setFaseReclutamiento(new String[] { "ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA" }[peso(55, 20, 17, 8)]);
+                e.setFaseReclutamiento(
+                        new String[] { "ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA" }[peso(55, 20, 17, 8)]);
             } else {
                 pub = atras(40 + rnd.nextDouble() * 220);
                 e.setEstado("CERRADO");
@@ -680,13 +699,15 @@ public class DataSeeder implements ApplicationRunner {
             u.setTipo("talento");
             u.setNombre(n.completo());
             u.setRolTitulo(rol);
-            u.setBio(String.format(pick(SeedCatalogo.BIOS), rol, anios(anios), enfoque, stack.get(0), stack.get(Math.min(1, stack.size() - 1)),
+            u.setBio(String.format(pick(SeedCatalogo.BIOS), rol, anios(anios), enfoque, stack.get(0),
+                    stack.get(Math.min(1, stack.size() - 1)),
                     ciudad.substring(0, ciudad.indexOf(',')), stack.get(Math.min(2, stack.size() - 1))));
             u.setStack(stack);
             u.setEspecialidad(arq.clave());
             String modalidad = SeedCatalogo.MODALIDADES_TALENTO[peso(45, 35, 20)];
             u.setModalidad(modalidad);
-            u.setDisponibilidad(tier == 0 && prob(0.25) ? "practicas" : SeedCatalogo.DISPONIBILIDADES[peso(58, 12, 30, 0)]);
+            u.setDisponibilidad(
+                    tier == 0 && prob(0.25) ? "practicas" : SeedCatalogo.DISPONIBILIDADES[peso(58, 12, 30, 0)]);
             u.setSalarioEsperado(salarioEsperado(tier, modalidad, u.getDisponibilidad(), grupo));
             u.setCorreo(correo);
             u.setEmailContacto(correo);
@@ -728,9 +749,11 @@ public class DataSeeder implements ApplicationRunner {
                 long lo = redondear(b[tier][0] + (long) (rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.6), 100);
                 return "USD " + miles(lo) + " – " + miles(redondear((long) (lo * 1.3), 100)) + " / mes";
             }
-            long[][] b = { { 2_400_000, 4_500_000 }, { 4_500_000, 8_000_000 }, { 8_000_000, 14_000_000 }, { 13_000_000, 22_000_000 } };
+            long[][] b = { { 2_400_000, 4_500_000 }, { 4_500_000, 8_000_000 }, { 8_000_000, 14_000_000 },
+                    { 13_000_000, 22_000_000 } };
             double f = grupo.equals("ui-ux") || grupo.equals("diseno-grafico") ? 0.85 : 1.0;
-            long lo = redondear((long) ((b[tier][0] + rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.6) * f), 100_000);
+            long lo = redondear((long) ((b[tier][0] + rnd.nextDouble() * (b[tier][1] - b[tier][0]) * 0.6) * f),
+                    100_000);
             return "COP " + miles(lo) + " – " + miles(redondear((long) (lo * 1.3), 100_000)) + " / mes";
         }
 
@@ -739,7 +762,8 @@ public class DataSeeder implements ApplicationRunner {
             List<Usuario.CvExperiencia> lista = new ArrayList<>();
             int fin = anioActual;
             for (int i = 0; i < n; i++) {
-                int dur = i == n - 1 ? Math.max(1, anios - (anioActual - fin)) : Math.max(1, Math.round(anios / (float) n));
+                int dur = i == n - 1 ? Math.max(1, anios - (anioActual - fin))
+                        : Math.max(1, Math.round(anios / (float) n));
                 int inicio = fin - dur;
                 Usuario.CvExperiencia x = new Usuario.CvExperiencia();
                 x.setCargo(i == 0 ? rol : (i == n - 1 && tier > 0 ? "Junior " + rolBase : rolBase));
@@ -784,11 +808,15 @@ public class DataSeeder implements ApplicationRunner {
             String dominio = pick(SeedCatalogo.DOMINIOS_PROYECTO);
             String marca = pick(SeedCatalogo.NOMBRES_MARCA);
             if (nombre == null)
-                nombre = marca + " · " + (diseno ? pick(SeedCatalogo.PRODUCTOS_PROYECTO_DISENO) : pick(SeedCatalogo.PRODUCTOS_PROYECTO_PROG));
-            List<String> herramientas = new ArrayList<>(u.getStack().subList(0, Math.min(u.getStack().size(), 2 + rnd.nextInt(3))));
+                nombre = marca + " · " + (diseno ? pick(SeedCatalogo.PRODUCTOS_PROYECTO_DISENO)
+                        : pick(SeedCatalogo.PRODUCTOS_PROYECTO_PROG));
+            List<String> herramientas = new ArrayList<>(
+                    u.getStack().subList(0, Math.min(u.getStack().size(), 2 + rnd.nextInt(3))));
             String corta = descripcion != null ? descripcion
-                    : diseno ? "Propuesta de diseño para " + dominio + ": investigación, exploración visual y entrega final lista para desarrollo."
-                            : "Solución para " + dominio + " construida con " + String.join(", ", herramientas) + ", con foco en rendimiento y mantenibilidad.";
+                    : diseno ? "Propuesta de diseño para " + dominio
+                            + ": investigación, exploración visual y entrega final lista para desarrollo."
+                            : "Solución para " + dominio + " construida con " + String.join(", ", herramientas)
+                                    + ", con foco en rendimiento y mantenibilidad.";
             Proyecto p = new Proyecto();
             p.setUsuarioId(u.getId());
             p.setUsuarioCorreo(u.getCorreo());
@@ -796,7 +824,8 @@ public class DataSeeder implements ApplicationRunner {
             p.setCategoria(categoria);
             p.setTipo(SeedCatalogo.TIPOS_PROYECTO[peso(SeedCatalogo.PESO_TIPOS_PROYECTO)]);
             p.setDescripcionCorta(corta.length() > 200 ? corta.substring(0, 200) : corta);
-            p.setDescripcionExtendida(corta + " Trabajé de punta a punta en el proceso: definición del problema, iteraciones con usuarios y entrega documentada.");
+            p.setDescripcionExtendida(corta
+                    + " Trabajé de punta a punta en el proceso: definición del problema, iteraciones con usuarios y entrega documentada.");
             p.setAnio(String.valueOf(Math.max(2022, anioActual - peso(40, 30, 15, 10, 5))));
             p.setLinkProyecto(prob(0.65) ? "https://example.com/proyectos/" + slug(nombre) : null);
             p.setBannerClase(diseno ? pick(SeedCatalogo.COVERS_DISENO) : "cover-terminal");
@@ -809,7 +838,8 @@ public class DataSeeder implements ApplicationRunner {
             p.setPublicado(prob(0.88));
             p.setIncluirCv(prob(0.7));
             p.setDestacar(destacar);
-            Date c = limitar(mas(u.getCreadoEn(), rnd.nextDouble() * Math.max(1, (ahora.getTime() - u.getCreadoEn().getTime()) / (double) DIA)));
+            Date c = limitar(mas(u.getCreadoEn(),
+                    rnd.nextDouble() * Math.max(1, (ahora.getTime() - u.getCreadoEn().getTime()) / (double) DIA)));
             p.setCreadoEn(c);
             p.setActualizadoEn(c);
             p.setId(idEn(c));
@@ -863,7 +893,8 @@ public class DataSeeder implements ApplicationRunner {
                 if (dec != null && dec.before(fecha))
                     dec = fecha;
                 if (dec != null) {
-                    double pAprob = cerrada ? 0.3 : "OFERTA".equals(fase) ? 0.5 : "ENTREVISTAS".equals(fase) ? 0.35 : 0.2;
+                    double pAprob = cerrada ? 0.3
+                            : "OFERTA".equals(fase) ? 0.5 : "ENTREVISTAS".equals(fase) ? 0.35 : 0.2;
                     int cupo = e.getVacantes() == null ? 1 : e.getVacantes();
                     if (prob(pAprob) && aprobadasPorEmpleo.getOrDefault(e.getId(), 0) < cupo) {
                         estado = "aprobada";
@@ -916,7 +947,8 @@ public class DataSeeder implements ApplicationRunner {
             s.setEstado(estado);
             s.setFechaSolicitud(fecha);
             String stackOferta = e.getStack() == null ? "mi stack" : e.getStack().split(",")[0].trim();
-            s.setMensajeMotivacion(String.format(pick(SeedCatalogo.MENSAJES_MOTIVACION), e.getTitulo(), e.getEmpresaNombre(), stackOferta));
+            s.setMensajeMotivacion(String.format(pick(SeedCatalogo.MENSAJES_MOTIVACION), e.getTitulo(),
+                    e.getEmpresaNombre(), stackOferta));
             List<String> ids = new ArrayList<>();
             List<Proyecto> propios = proyectosPorUsuario.getOrDefault(u.getId(), List.of());
             if (!propios.isEmpty() && prob(0.55)) {
@@ -956,7 +988,8 @@ public class DataSeeder implements ApplicationRunner {
                 for (int i = 0; i < objetivo; i++) {
                     Empresa em = !pro.isEmpty() && prob(0.6) ? pick(pro) : pick(conOfertas);
                     Empleo emp = prob(0.75) ? pick(activosPorEmpresa.get(em.getId())) : null;
-                    List<TalentoGen> pool = emp != null ? talentosPorGrupo.get(grupoDeEmpleo.get(emp.getId())) : talentosGen;
+                    List<TalentoGen> pool = emp != null ? talentosPorGrupo.get(grupoDeEmpleo.get(emp.getId()))
+                            : talentosGen;
                     if (pool == null || pool.isEmpty())
                         continue;
                     TalentoGen tg = pick(pool);
@@ -969,7 +1002,8 @@ public class DataSeeder implements ApplicationRunner {
                     invitaciones.add(invitacion(em, t, emp, estado, atras(rnd.nextDouble() * 60)));
                 }
             if (uDemoTalento != null && eDemoEmpresa != null && activosPorEmpresa.containsKey(eDemoEmpresa.getId())) {
-                invitaciones.add(invitacion(eDemoEmpresa, uDemoTalento, activosPorEmpresa.get(eDemoEmpresa.getId()).get(0), "pendiente", atras(1.5)));
+                invitaciones.add(invitacion(eDemoEmpresa, uDemoTalento,
+                        activosPorEmpresa.get(eDemoEmpresa.getId()).get(0), "pendiente", atras(1.5)));
                 if (eDemoStartup != null)
                     invitaciones.add(invitacion(eDemoStartup, uDemoTalento, null, "pendiente", atras(4)));
             }
@@ -999,10 +1033,12 @@ public class DataSeeder implements ApplicationRunner {
                 i.setEmpleoSalarioMax(emp.getSalarioMax());
                 i.setEmpleoMoneda(emp.getMoneda());
                 i.setEmpleoMostrarSalario(emp.isMostrarSalario());
-                i.setMensaje("Hola " + pila + ", revisamos tu perfil y creemos que encajas con el rol de " + emp.getTitulo()
+                i.setMensaje("Hola " + pila + ", revisamos tu perfil y creemos que encajas con el rol de "
+                        + emp.getTitulo()
                         + " en " + em.getNombreEmpresa() + ". ¿Tienes disponibilidad esta semana para conversar?");
             } else {
-                i.setMensaje("Hola " + pila + ", nos gustó tu portafolio y queremos tenerte en cuenta para próximas vacantes en "
+                i.setMensaje("Hola " + pila
+                        + ", nos gustó tu portafolio y queremos tenerte en cuenta para próximas vacantes en "
                         + em.getNombreEmpresa() + ". ¿Te interesa que hablemos?");
             }
             i.setEstado(estado);
@@ -1032,8 +1068,11 @@ public class DataSeeder implements ApplicationRunner {
                     m.setRemitenteId(deEmpresa ? em.getId() : s.getUsuarioId());
                     m.setRemitenteNombre(deEmpresa ? em.getNombreEmpresa() : s.getUsuarioNombre());
                     m.setDestinatarioId(deEmpresa ? s.getUsuarioId() : em.getId());
-                    String texto = deEmpresa ? SeedCatalogo.MENSAJES_CHAT_EMPRESA[Math.min(i / 2, SeedCatalogo.MENSAJES_CHAT_EMPRESA.length - 1)]
-                            : SeedCatalogo.MENSAJES_CHAT_TALENTO[Math.min(i / 2, SeedCatalogo.MENSAJES_CHAT_TALENTO.length - 1)];
+                    String texto = deEmpresa
+                            ? SeedCatalogo.MENSAJES_CHAT_EMPRESA[Math.min(i / 2,
+                                    SeedCatalogo.MENSAJES_CHAT_EMPRESA.length - 1)]
+                            : SeedCatalogo.MENSAJES_CHAT_TALENTO[Math.min(i / 2,
+                                    SeedCatalogo.MENSAJES_CHAT_TALENTO.length - 1)];
                     m.setTexto(String.format(texto, s.getUsuarioNombre().split(" ")[0], s.getEmpleoTitulo()));
                     m.setFechaEnvio(t);
                     m.setLeido(true);
@@ -1085,7 +1124,9 @@ public class DataSeeder implements ApplicationRunner {
                         boolean ok = "aprobada".equals(est);
                         notificaciones.add(notif(s.getUsuarioId(), "ESTADO_SOLICITUD",
                                 ok ? "¡Tu postulación fue aceptada! 🎉" : "Actualización de tu postulación",
-                                s.getEmpleoEmpresaNombre() + (ok ? " aceptó tu postulación a " : " actualizó tu postulación a ") + s.getEmpleoTitulo(),
+                                s.getEmpleoEmpresaNombre()
+                                        + (ok ? " aceptó tu postulación a " : " actualizó tu postulación a ")
+                                        + s.getEmpleoTitulo(),
                                 f, "/solicitudes/" + s.getId()));
                     }
                 }
@@ -1093,18 +1134,21 @@ public class DataSeeder implements ApplicationRunner {
             for (Invitacion i : invitaciones) {
                 if ("pendiente".equals(i.getEstado()) && i.getFechaEnvio().after(atras(30)))
                     notificaciones.add(notif(i.getTalentoId(), "NUEVA_INVITACION", "Una empresa quiere conocerte",
-                            i.getEmpresaNombre() + " te envió una invitación", i.getFechaEnvio(), "/solicitudes?estado=invitaciones"));
+                            i.getEmpresaNombre() + " te envió una invitación", i.getFechaEnvio(),
+                            "/solicitudes?estado=invitaciones"));
                 else if (!"pendiente".equals(i.getEstado()) && i.getFechaEnvio().after(atras(30)))
                     notificaciones.add(notif(i.getEmpresaId(), "ESTADO_INVITACION",
                             "aceptada".equals(i.getEstado()) ? "Invitación aceptada" : "Invitación rechazada",
-                            i.getTalentoNombre() + ("aceptada".equals(i.getEstado()) ? " aceptó" : " rechazó") + " tu invitación",
+                            i.getTalentoNombre() + ("aceptada".equals(i.getEstado()) ? " aceptó" : " rechazó")
+                                    + " tu invitación",
                             mas(i.getFechaEnvio(), 1 + rnd.nextInt(3)), "/talentos/" + i.getTalentoId()));
             }
             for (Map.Entry<String, List<Mensaje>> h : hilos.entrySet()) {
                 Mensaje ultimo = h.getValue().get(h.getValue().size() - 1);
                 if (!ultimo.isLeido())
                     notificaciones.add(notif(ultimo.getDestinatarioId(), "NUEVO_MENSAJE", "Nuevo mensaje",
-                            ultimo.getRemitenteNombre() + " te escribió", ultimo.getFechaEnvio(), "/chat/" + h.getKey()));
+                            ultimo.getRemitenteNombre() + " te escribió", ultimo.getFechaEnvio(),
+                            "/chat/" + h.getKey()));
             }
             for (Notificacion n : notificaciones)
                 n.setLeida(n.getFechaCreacion().before(atras(10)) || prob(0.35));
@@ -1131,9 +1175,11 @@ public class DataSeeder implements ApplicationRunner {
             u.setTipo("talento");
             u.setNombre("Carlos Andrés Ramírez");
             u.setRolTitulo("Full Stack Developer");
-            u.setBio("Desarrollador con 4 años de experiencia en Java y React, apasionado por construir productos digitales de alto impacto. "
-                    + "Me gustan los equipos pequeños, el código bien probado y compartir lo que aprendo.");
-            u.setStack(new ArrayList<>(List.of("Java", "Spring Boot", "React", "TypeScript", "PostgreSQL", "Docker", "Git")));
+            u.setBio(
+                    "Desarrollador con 4 años de experiencia en Java y React, apasionado por construir productos digitales de alto impacto. "
+                            + "Me gustan los equipos pequeños, el código bien probado y compartir lo que aprendo.");
+            u.setStack(new ArrayList<>(
+                    List.of("Java", "Spring Boot", "React", "TypeScript", "PostgreSQL", "Docker", "Git")));
             u.setEspecialidad("fullstack");
             u.setModalidad("hibrido");
             u.setSalarioEsperado("COP 7.000.000 – 9.000.000 / mes");
@@ -1154,22 +1200,26 @@ public class DataSeeder implements ApplicationRunner {
             u.setUbicacion("Bogotá, Colombia");
             u.setNivelEspanol(5);
             u.setNivelIngles(4);
-            u.setHabilidadesBlandas(new ArrayList<>(List.of("Trabajo en equipo", "Comunicación asertiva", "Resolución de problemas",
-                    "Liderazgo", "Adaptabilidad", "Proactividad")));
-            u.setCvBullets(new ArrayList<>(List.of(SeedCatalogo.CV_BULLETS[0], SeedCatalogo.CV_BULLETS[1], SeedCatalogo.CV_BULLETS[2],
-                    SeedCatalogo.CV_BULLETS[3])));
+            u.setHabilidadesBlandas(
+                    new ArrayList<>(List.of("Trabajo en equipo", "Comunicación asertiva", "Resolución de problemas",
+                            "Liderazgo", "Adaptabilidad", "Proactividad")));
+            u.setCvBullets(new ArrayList<>(
+                    List.of(SeedCatalogo.CV_BULLETS[0], SeedCatalogo.CV_BULLETS[1], SeedCatalogo.CV_BULLETS[2],
+                            SeedCatalogo.CV_BULLETS[3])));
             Usuario.CvExperiencia e1 = new Usuario.CvExperiencia();
             e1.setCargo("Full Stack Developer");
             e1.setEmpresa("Andina Software");
             e1.setPeriodo((anioActual - 3) + " – Presente");
             e1.setModalidad("Remoto");
-            e1.setDescripcion("Desarrollo de microservicios con Spring Boot y frontends en React para clientes del sector financiero.");
+            e1.setDescripcion(
+                    "Desarrollo de microservicios con Spring Boot y frontends en React para clientes del sector financiero.");
             Usuario.CvExperiencia e2 = new Usuario.CvExperiencia();
             e2.setCargo("Backend Developer");
             e2.setEmpresa("Costa Pay");
             e2.setPeriodo((anioActual - 5) + " – " + (anioActual - 3));
             e2.setModalidad("Presencial");
-            e2.setDescripcion("APIs REST para banca digital con Java y PostgreSQL, con pruebas automáticas y despliegue continuo.");
+            e2.setDescripcion(
+                    "APIs REST para banca digital con Java y PostgreSQL, con pruebas automáticas y despliegue continuo.");
             u.setCvExperiencias(new ArrayList<>(List.of(e1, e2)));
             Usuario.CvEducacion ed = new Usuario.CvEducacion();
             ed.setInstitucion("Universidad Nacional");
@@ -1189,9 +1239,11 @@ public class DataSeeder implements ApplicationRunner {
             u.setTipo("talento");
             u.setNombre("Laura Camila Ospina");
             u.setRolTitulo("Product Designer");
-            u.setBio("Diseñadora de producto con 5 años creando interfaces y sistemas de diseño para equipos de software. "
-                    + "Trabajo de la investigación al handoff, con foco en accesibilidad.");
-            u.setStack(new ArrayList<>(List.of("Figma", "Design Systems", "Prototipado", "User Research", "Accesibilidad", "Framer")));
+            u.setBio(
+                    "Diseñadora de producto con 5 años creando interfaces y sistemas de diseño para equipos de software. "
+                            + "Trabajo de la investigación al handoff, con foco en accesibilidad.");
+            u.setStack(new ArrayList<>(
+                    List.of("Figma", "Design Systems", "Prototipado", "User Research", "Accesibilidad", "Framer")));
             u.setEspecialidad("ui-ux");
             u.setModalidad("remoto");
             u.setSalarioEsperado("COP 6.000.000 – 8.000.000 / mes");
@@ -1209,14 +1261,16 @@ public class DataSeeder implements ApplicationRunner {
             u.setUbicacion("Medellín, Colombia");
             u.setNivelEspanol(5);
             u.setNivelIngles(4);
-            u.setHabilidadesBlandas(new ArrayList<>(List.of("Empatía", "Comunicación asertiva", "Creatividad", "Pensamiento crítico")));
+            u.setHabilidadesBlandas(
+                    new ArrayList<>(List.of("Empatía", "Comunicación asertiva", "Creatividad", "Pensamiento crítico")));
             u.setCvBullets(new ArrayList<>(List.of(SeedCatalogo.CV_BULLETS[6], SeedCatalogo.CV_BULLETS[4])));
             Usuario.CvExperiencia e1 = new Usuario.CvExperiencia();
             e1.setCargo("Product Designer");
             e1.setEmpresa("Estudio Faro");
             e1.setPeriodo((anioActual - 3) + " – Presente");
             e1.setModalidad("Remoto");
-            e1.setDescripcion("Diseño de un sistema de diseño adoptado por tres equipos de producto y pruebas de usabilidad quincenales.");
+            e1.setDescripcion(
+                    "Diseño de un sistema de diseño adoptado por tres equipos de producto y pruebas de usabilidad quincenales.");
             u.setCvExperiencias(new ArrayList<>(List.of(e1)));
             Usuario.CvEducacion ed = new Usuario.CvEducacion();
             ed.setInstitucion("Universidad Pontificia Bolivariana");
@@ -1257,8 +1311,9 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         void solicitudesDemo() {
-            List<Empleo> deLabs = eDemoEmpresa == null ? List.of() : empleosGen.stream().map(EmpleoGen::e)
-                    .filter(e -> eDemoEmpresa.getId().equals(e.getEmpresaId())).toList();
+            List<Empleo> deLabs = eDemoEmpresa == null ? List.of()
+                    : empleosGen.stream().map(EmpleoGen::e)
+                            .filter(e -> eDemoEmpresa.getId().equals(e.getEmpresaId())).toList();
             if (uDemoTalento != null) {
                 TalentoGen tg = talentoGenPorId.get(uDemoTalento.getId());
                 String[] estados = { "aprobada", "revision", "rechazada" };
@@ -1266,9 +1321,11 @@ public class DataSeeder implements ApplicationRunner {
                 for (int i = 0; i < Math.min(3, activos.size()); i++) {
                     Empleo e = activos.get(i);
                     Date f = atras(18 - i * 4);
-                    solicitudes.add(construirSolicitud(tg, e, estados[i], f, "revision".equals(estados[i]) ? null : mas(f, 3)));
+                    solicitudes.add(
+                            construirSolicitud(tg, e, estados[i], f, "revision".equals(estados[i]) ? null : mas(f, 3)));
                 }
-                String[] ext = { "revision", "aprobada", "revision", "rechazada", "revision", "aprobada", "revision", "revision" };
+                String[] ext = { "revision", "aprobada", "revision", "rechazada", "revision", "aprobada", "revision",
+                        "revision" };
                 List<Empleo> afines = new ArrayList<>(activosPorGrupo.getOrDefault("fullstack", List.of()));
                 afines.addAll(activosPorGrupo.getOrDefault("backend", List.of()));
                 afines.sort(Comparator.comparingInt((Empleo e) -> -MatchEmpleo.porcentaje(uDemoTalento, e)));
@@ -1276,10 +1333,12 @@ public class DataSeeder implements ApplicationRunner {
                 for (Empleo e : afines) {
                     if (hechos >= ext.length)
                         break;
-                    if (eDemoEmpresa != null && eDemoEmpresa.getId().equals(e.getEmpresaId()) || paresSolicitud.contains(uDemoTalento.getId() + "|" + e.getId()))
+                    if (eDemoEmpresa != null && eDemoEmpresa.getId().equals(e.getEmpresaId())
+                            || paresSolicitud.contains(uDemoTalento.getId() + "|" + e.getId()))
                         continue;
                     Date f = atras(3 + hechos * 6 + rnd.nextInt(4));
-                    solicitudes.add(construirSolicitud(tg, e, ext[hechos], f, "revision".equals(ext[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(5)))));
+                    solicitudes.add(construirSolicitud(tg, e, ext[hechos], f,
+                            "revision".equals(ext[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(5)))));
                     hechos++;
                 }
             }
@@ -1296,14 +1355,16 @@ public class DataSeeder implements ApplicationRunner {
                     if (paresSolicitud.contains(uDemoDiseno.getId() + "|" + e.getId()))
                         continue;
                     Date f = atras(2 + hechos * 5 + rnd.nextInt(3));
-                    solicitudes.add(construirSolicitud(tg, e, est[hechos], f, "revision".equals(est[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(4)))));
+                    solicitudes.add(construirSolicitud(tg, e, est[hechos], f,
+                            "revision".equals(est[hechos]) ? null : limitar(mas(f, 2 + rnd.nextInt(4)))));
                     hechos++;
                 }
             }
             int[] porOferta = { 24, 10, 3, 7, 0, 14, 5, 2, 9 };
             List<Empleo> objetivo = new ArrayList<>(deLabs);
             if (eDemoStartup != null)
-                empleosGen.stream().map(EmpleoGen::e).filter(e -> eDemoStartup.getId().equals(e.getEmpresaId())).forEach(objetivo::add);
+                empleosGen.stream().map(EmpleoGen::e).filter(e -> eDemoStartup.getId().equals(e.getEmpresaId()))
+                        .forEach(objetivo::add);
             for (int i = 0; i < objetivo.size(); i++) {
                 Empleo e = objetivo.get(i);
                 int cuantos = i < porOferta.length ? porOferta[i] : 4;

@@ -17,27 +17,32 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', ${q})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', ${q})}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
                         <div class="eyebrow">// ofertas</div>
                         <h1>Empleos</h1>
                         <p class="sub" aria-live="polite"
-                            th:text="(${ventanaLlena} ? |Mostrando las ${limiteVentana} más recientes de ${totalCoincidencias} ofertas · usa la búsqueda o los filtros para ver otras| : |Mostrando ${totalMostradas} de ${totalActivas} ofertas|) + (${matchDisponible} ? | · ${conMatchAlto} con match alto| : '')">Mostrando 8 de 8 ofertas</p>
+                            th:text="(${ventanaLlena} ? |Mostrando las ${limiteVentana} más recientes de ${totalCoincidencias} ofertas · usa la búsqueda o los filtros para ver otras| : |Mostrando ${totalMostradas} de ${totalActivas} ofertas|) + (${matchDisponible} ? | · ${conMatchAlto} con match alto| : '')">
+                            Mostrando 8 de 8 ofertas</p>
                     </div>
                     <form class="sort" method="get" th:action="@{/empleos}" id="sortForm">
                         <input type="hidden" name="area" th:value="${area}" th:disabled="${area == ''}">
-                        <input type="hidden" name="modalidad" th:value="${modalidadSel}" th:disabled="${modalidadSel == ''}">
+                        <input type="hidden" name="modalidad" th:value="${modalidadSel}"
+                            th:disabled="${modalidadSel == ''}">
                         <input type="hidden" name="hi" th:value="${hi}" th:disabled="${hi == ''}">
                         <input type="hidden" name="q" th:value="${q}" th:disabled="${q == null}">
                         <label class="sort"><span class="lab">ORDEN</span>
                             <select name="orden" id="sort">
-                                <option value="match" th:if="${matchDisponible}" th:selected="${orden == 'match'}">Mejor match</option>
+                                <option value="match" th:if="${matchDisponible}" th:selected="${orden == 'match'}">Mejor
+                                    match</option>
                                 <option value="recientes" th:selected="${orden == 'recientes'}">Más recientes</option>
                                 <option value="salario" th:selected="${orden == 'salario'}">Mayor salario</option>
                             </select>
@@ -46,35 +51,58 @@
                     </form>
                 </div>
 
-                <p class="legend" th:if="${matchDisponible}"><span><b>MATCH</b> = cuánto de lo que pide la oferta ya está en tu perfil.</span>
-                    <span class="lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>lo tienes</span>
+                <p class="legend" th:if="${matchDisponible}"><span><b>MATCH</b> = cuánto de lo que pide la oferta ya
+                        está en tu perfil.</span>
+                    <span class="lg"><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12.5l4.5 4.5L19 7" />
+                        </svg>lo tienes</span>
                     <span class="lg"><i class="dash" aria-hidden="true"></i>te falta</span>
                     <span class="lg"><i class="sw hi" aria-hidden="true"></i>Alto 85%+</span>
                     <span class="lg"><i class="sw md" aria-hidden="true"></i>Medio 65–84%</span>
-                    <span class="lg"><i class="sw lo" aria-hidden="true"></i>Bajo</span></p>
-                <p class="legend" th:if="${talentoSinStack}"><span>Agrega tu stack en <a th:href="@{/perfil}">tu perfil</a> para ver cuánto encajas con cada oferta.</span></p>
+                    <span class="lg"><i class="sw lo" aria-hidden="true"></i>Bajo</span>
+                </p>
+                <p class="legend" th:if="${talentoSinStack}"><span>Agrega tu stack en <a th:href="@{/perfil}">tu
+                            perfil</a> para ver cuánto encajas con cada oferta.</span></p>
 
                 <div class="filters">
                     <div class="fg" role="group" aria-labelledby="fArea"><span class="lab" id="fArea">ÁREA</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/empleos(modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${area == ''} ? 'true'">Todas</a>
-                            <a class="ch" th:href="@{/empleos(area='programacion',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${area == 'programacion'} ? 'true'">Programación</a>
-                            <a class="ch" th:href="@{/empleos(area='diseno',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${area == 'diseno'} ? 'true'">Diseño</a>
-                            <a class="ch" th:href="@{/empleos(area='otras',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${area == 'otras'} ? 'true'">Otras</a>
+                            <a class="ch" th:href="@{/empleos(modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${area == ''} ? 'true'">Todas</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area='programacion',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${area == 'programacion'} ? 'true'">Programación</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area='diseno',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${area == 'diseno'} ? 'true'">Diseño</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area='otras',modalidad=${modP},hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${area == 'otras'} ? 'true'">Otras</a>
                         </div>
                     </div>
                     <div class="fg" role="group" aria-labelledby="fMod"><span class="lab" id="fMod">MODALIDAD</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/empleos(area=${areaP},hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${modalidadSel == ''} ? 'true'">Todas</a>
-                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad='remoto',hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${modalidadSel == 'remoto'} ? 'true'">Remoto</a>
-                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad='hibrido',hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${modalidadSel == 'hibrido'} ? 'true'">Híbrido</a>
-                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad='presencial',hi=${hiP},q=${q},orden=${orden})}" th:attr="aria-current=${modalidadSel == 'presencial'} ? 'true'">Presencial</a>
+                            <a class="ch" th:href="@{/empleos(area=${areaP},hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${modalidadSel == ''} ? 'true'">Todas</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area=${areaP},modalidad='remoto',hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${modalidadSel == 'remoto'} ? 'true'">Remoto</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area=${areaP},modalidad='hibrido',hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${modalidadSel == 'hibrido'} ? 'true'">Híbrido</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area=${areaP},modalidad='presencial',hi=${hiP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${modalidadSel == 'presencial'} ? 'true'">Presencial</a>
                         </div>
                     </div>
-                    <div class="fg" role="group" aria-labelledby="fHi" th:if="${esTalento}"><span class="lab" id="fHi">MATCH</span>
+                    <div class="fg" role="group" aria-labelledby="fHi" th:if="${esTalento}"><span class="lab"
+                            id="fHi">MATCH</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad=${modP},q=${q},orden=${orden})}" th:attr="aria-current=${hi == ''} ? 'true'">Todos</a>
-                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad=${modP},hi='1',q=${q},orden=${orden})}" th:attr="aria-current=${hi == '1'} ? 'true'">Alto (85%+)</a>
+                            <a class="ch" th:href="@{/empleos(area=${areaP},modalidad=${modP},q=${q},orden=${orden})}"
+                                th:attr="aria-current=${hi == ''} ? 'true'">Todos</a>
+                            <a class="ch"
+                                th:href="@{/empleos(area=${areaP},modalidad=${modP},hi='1',q=${q},orden=${orden})}"
+                                th:attr="aria-current=${hi == '1'} ? 'true'">Alto (85%+)</a>
                         </div>
                     </div>
                     <a class="clear" th:if="${hayFiltros}" th:href="@{/empleos}">limpiar filtros</a>
@@ -84,22 +112,33 @@
                     <th:block th:replace="~{fragments/pase :: ticket(${destacado}, true, 0)}"></th:block>
                 </section>
 
-                <h2 class="sec" th:if="${!#lists.isEmpty(tarjetas)}">Otras ofertas <span th:text="'(' + ${#lists.size(tarjetas)} + ')'">(7)</span></h2>
+                <h2 class="sec" th:if="${!#lists.isEmpty(tarjetas)}">Otras ofertas <span
+                        th:text="'(' + ${#lists.size(tarjetas)} + ')'">(7)</span></h2>
                 <section class="jobs" aria-label="Lista de ofertas" th:if="${!#lists.isEmpty(tarjetas)}">
-                    <th:block th:each="t, st : ${tarjetas}"><th:block th:replace="~{fragments/pase :: ticket(${t}, false, ${st.count})}"></th:block></th:block>
+                    <th:block th:each="t, st : ${tarjetas}">
+                        <th:block th:replace="~{fragments/pase :: ticket(${t}, false, ${st.count})}"></th:block>
+                    </th:block>
                 </section>
 
                 <nav class="pager" aria-label="Páginas de ofertas" th:if="${totalPaginas > 1}">
-                    <a th:if="${pagina > 0}" th:href="@{/empleos(area=${areaP},modalidad=${modP},hi=${hiP},q=${q},orden=${orden},page=${pagina - 1})}" rel="prev">← Anterior</a>
+                    <a th:if="${pagina > 0}"
+                        th:href="@{/empleos(area=${areaP},modalidad=${modP},hi=${hiP},q=${q},orden=${orden},page=${pagina - 1})}"
+                        rel="prev">← Anterior</a>
                     <span th:text="|Página ${pagina + 1} de ${totalPaginas}|">Página 1 de 2</span>
-                    <a th:if="${pagina < totalPaginas - 1}" th:href="@{/empleos(area=${areaP},modalidad=${modP},hi=${hiP},q=${q},orden=${orden},page=${pagina + 1})}" rel="next">Siguiente →</a>
+                    <a th:if="${pagina < totalPaginas - 1}"
+                        th:href="@{/empleos(area=${areaP},modalidad=${modP},hi=${hiP},q=${q},orden=${orden},page=${pagina + 1})}"
+                        rel="next">Siguiente →</a>
                 </nav>
 
                 <th:block th:if="${totalMostradas == 0 and totalActivas > 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay ofertas con esos filtros. Prueba con otra área o modalidad.', '/empleos', 'Limpiar filtros')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay ofertas con esos filtros. Prueba con otra área o modalidad.', '/empleos', 'Limpiar filtros')}">
+                    </div>
                 </th:block>
                 <th:block th:if="${totalActivas == 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía no hay ofertas activas.', null, null)}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía no hay ofertas activas.', null, null)}">
+                    </div>
                 </th:block>
             </main>
         </div>

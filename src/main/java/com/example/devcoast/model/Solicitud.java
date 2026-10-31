@@ -15,9 +15,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @CompoundIndexes({
-    @CompoundIndex(name = "usuario_fecha_idx", def = "{'usuarioId': 1, 'fechaSolicitud': -1}"),
-    @CompoundIndex(name = "empleo_fecha_idx",  def = "{'empleoId': 1,  'fechaSolicitud': -1}"),
-    @CompoundIndex(name = "usuario_empleo_unique_idx", def = "{'usuarioId': 1, 'empleoId': 1}", unique = true)
+        @CompoundIndex(name = "usuario_fecha_idx", def = "{'usuarioId': 1, 'fechaSolicitud': -1}"),
+        @CompoundIndex(name = "empleo_fecha_idx", def = "{'empleoId': 1,  'fechaSolicitud': -1}"),
+        @CompoundIndex(name = "usuario_empleo_unique_idx", def = "{'usuarioId': 1, 'empleoId': 1}", unique = true)
 })
 @Document(collection = "solicitudes")
 public class Solicitud {
@@ -57,9 +57,9 @@ public class Solicitud {
     private boolean empleoMostrarSalario;
 
     private String estado;
-    private Date   fechaSolicitud;
+    private Date fechaSolicitud;
 
-    private List<String>      proyectosIds      = new ArrayList<>();
-    private String            mensajeMotivacion;
-    private List<EventoEstado> historial         = new ArrayList<>();
+    private List<String> proyectosIds = new ArrayList<>();
+    private String mensajeMotivacion;
+    private List<EventoEstado> historial = new ArrayList<>();
 }

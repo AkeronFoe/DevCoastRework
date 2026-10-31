@@ -137,7 +137,8 @@ public class UsuarioController {
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
         if ("empresa".equals(session.getAttribute("usuarioActualTipo")))
-            return ResponseEntity.status(400).body(Map.of("ok", false, "error", "El currículum es solo para cuentas de talento"));
+            return ResponseEntity.status(400)
+                    .body(Map.of("ok", false, "error", "El currículum es solo para cuentas de talento"));
 
         Usuario usuario = repository.findById(id).orElse(null);
         if (usuario == null)
@@ -266,7 +267,8 @@ public class UsuarioController {
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
         if (!"talento".equals(session.getAttribute("usuarioActualTipo")))
-            return ResponseEntity.status(400).body(Map.of("ok", false, "error", "Solo el talento puede guardar empleos"));
+            return ResponseEntity.status(400)
+                    .body(Map.of("ok", false, "error", "Solo el talento puede guardar empleos"));
         if (!empleoRepository.existsById(empleoId))
             return ResponseEntity.status(404).body(Map.of("ok", false, "error", "Empleo no encontrado"));
 
@@ -302,7 +304,8 @@ public class UsuarioController {
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
         if ("empresa".equals(session.getAttribute("usuarioActualTipo")))
-            return ResponseEntity.status(400).body(Map.of("ok", false, "error", "Estas opciones son solo para cuentas de talento"));
+            return ResponseEntity.status(400)
+                    .body(Map.of("ok", false, "error", "Estas opciones son solo para cuentas de talento"));
 
         Usuario usuario = repository.findById(id).orElse(null);
         if (usuario == null)
@@ -353,9 +356,11 @@ public class UsuarioController {
             if (empresa == null)
                 return ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "Cuenta no encontrada"));
             if (!passwordEncoder.matches(password, empresa.getPassword()))
-                return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
             if (!nuevoCorreo.equalsIgnoreCase(empresa.getCorreo())
-                    && (empresaRepository.findByCorreo(nuevoCorreo) != null || repository.findByCorreo(nuevoCorreo) != null))
+                    && (empresaRepository.findByCorreo(nuevoCorreo) != null
+                            || repository.findByCorreo(nuevoCorreo) != null))
                 return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ese correo ya está en uso"));
             empresa.setCorreo(nuevoCorreo);
             empresaRepository.save(empresa);
@@ -364,9 +369,11 @@ public class UsuarioController {
             if (usuario == null)
                 return ResponseEntity.status(404).body(Map.of("ok", false, "mensaje", "Cuenta no encontrada"));
             if (!passwordEncoder.matches(password, usuario.getPassword()))
-                return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
             if (!nuevoCorreo.equalsIgnoreCase(usuario.getCorreo())
-                    && (repository.findByCorreo(nuevoCorreo) != null || empresaRepository.findByCorreo(nuevoCorreo) != null))
+                    && (repository.findByCorreo(nuevoCorreo) != null
+                            || empresaRepository.findByCorreo(nuevoCorreo) != null))
                 return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ese correo ya está en uso"));
             usuario.setCorreo(nuevoCorreo);
             usuario.setActualizadoEn(new Date());
@@ -454,7 +461,8 @@ public class UsuarioController {
             return ResponseEntity.status(404).body(Map.of("ok", false));
 
         planService.actualizarAPro(empresa);
-        return ResponseEntity.ok(Map.of("ok", true, "plan", empresa.getPlan(), "planVenceEn", empresa.getPlanVenceEn()));
+        return ResponseEntity
+                .ok(Map.of("ok", true, "plan", empresa.getPlan(), "planVenceEn", empresa.getPlanVenceEn()));
     }
 
 }

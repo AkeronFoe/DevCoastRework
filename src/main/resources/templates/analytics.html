@@ -19,56 +19,89 @@
 
         <div class="main">
             <header
-                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}"></header>
+                th:replace="~{fragments/nautico :: topbar(${esEmpresa} ? '/talentos' : '/empleos', ${esEmpresa} ? 'Buscar talentos' : 'Buscar ofertas', ${esEmpresa} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content an" id="contenido">
                 <div class="head">
                     <div>
                         <div class="eyebrow">// métricas</div>
                         <h1 th:text="${esEmpresa} ? 'Mis analytics' : 'Mi actividad'">Analytics</h1>
-                        <p class="sub" th:text="${esEmpresa} ? 'Métricas de tus ofertas y candidatos.' : 'Tu historial de postulaciones y actividad en la plataforma.'">Métricas personalizadas</p>
+                        <p class="sub"
+                            th:text="${esEmpresa} ? 'Métricas de tus ofertas y candidatos.' : 'Tu historial de postulaciones y actividad en la plataforma.'">
+                            Métricas personalizadas</p>
                     </div>
                 </div>
 
-                                <th:block th:if="${usuarioActualTipo == 'empresa'}">
+                <th:block th:if="${usuarioActualTipo == 'empresa'}">
 
                     <div class="dash-stat-row">
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${empSolTotal ?: 0}">0</span>
                             <span class="dash-stat-label">Solicitudes recibidas</span>
-                            <span th:if="${empSolRevision > 0}" class="dash-stat-flag dash-stat-flag--amber" th:text="${empSolRevision} + ' en revisión'">0 en revisión</span>
+                            <span th:if="${empSolRevision > 0}" class="dash-stat-flag dash-stat-flag--amber"
+                                th:text="${empSolRevision} + ' en revisión'">0 en revisión</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${empSolAprobadas ?: 0}">0</span>
                             <span class="dash-stat-label">Candidatos aprobados</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--rose"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${empSolRechazadas ?: 0}">0</span>
                             <span class="dash-stat-label">Rechazados</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="18" y1="20" x2="18" y2="10" />
+                                        <line x1="12" y1="20" x2="12" y2="4" />
+                                        <line x1="6" y1="20" x2="6" y2="14" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${empTasa ?: 0} + '%'">0%</span>
                             <span class="dash-stat-label">Tasa de conversión</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--violet"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${empInvAceptadas ?: 0}">0</span>
                             <span class="dash-stat-label">Invitaciones aceptadas</span>
-                            <span th:if="${empInvEnviadas > 0}" class="dash-stat-flag dash-stat-flag--mint" th:text="'de ' + ${empInvEnviadas} + ' enviadas'">de 0 enviadas</span>
+                            <span th:if="${empInvEnviadas > 0}" class="dash-stat-flag dash-stat-flag--mint"
+                                th:text="'de ' + ${empInvEnviadas} + ' enviadas'">de 0 enviadas</span>
                         </div>
                     </div>
 
@@ -157,7 +190,8 @@
                                     <td th:text="${i.count}" style="color:var(--mute);font-weight:700;">1</td>
                                     <td th:text="${row.titulo}" style="font-weight:600;color:var(--ink);">Título</td>
                                     <td>
-                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.categoria) ?: '—'}">Cat</span>
+                                        <span class="pill"
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(row.categoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
@@ -189,43 +223,76 @@
                     <div class="dash-stat-row">
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talSolTotal ?: 0}">0</span>
                             <span class="dash-stat-label">Solicitudes enviadas</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--mint"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talSolAprobadas ?: 0}">0</span>
                             <span class="dash-stat-label">Aprobadas</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--amber"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talSolRevision ?: 0}">0</span>
                             <span class="dash-stat-label">En revisión</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--dim"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="18" y1="20" x2="18" y2="10" />
+                                        <line x1="12" y1="20" x2="12" y2="4" />
+                                        <line x1="6" y1="20" x2="6" y2="14" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talTasa ?: 0} + '%'">0%</span>
                             <span class="dash-stat-label">Tasa de éxito</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.28h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8a16 16 0 0 0 5.94 5.94l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--violet"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.28h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8a16 16 0 0 0 5.94 5.94l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talInvRecibidas ?: 0}">0</span>
                             <span class="dash-stat-label">Invitaciones recibidas</span>
-                            <span th:if="${talInvPendientes > 0}" class="dash-stat-flag dash-stat-flag--amber" th:text="${talInvPendientes} + ' pendientes'">0 pendientes</span>
+                            <span th:if="${talInvPendientes > 0}" class="dash-stat-flag dash-stat-flag--amber"
+                                th:text="${talInvPendientes} + ' pendientes'">0 pendientes</span>
                         </div>
                         <div class="dash-stat">
                             <div class="dash-stat-top">
-                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                                <span class="dash-stat-icon dash-stat-icon--cyan"><svg viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg></span>
                             </div>
                             <span class="dash-stat-num" th:text="${talProyectos ?: 0}">0</span>
                             <span class="dash-stat-label">Proyectos publicados</span>
@@ -294,46 +361,67 @@
                             <div class="chart-subtitle">Basado en tu actividad</div>
                             <div class="analytics-tip" th:if="${talSolTotal == 0}">
                                 <div class="analytics-tip-icon c1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-                                        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-                                        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-                                        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                                        <path
+                                            d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                                        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                                        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
                                     </svg>
                                 </div>
                                 <p>Aún no tienes postulaciones. Explora empleos y da el primer paso.</p>
                                 <a th:href="@{/empleos}" class="btn-o sm">Ver empleos</a>
                             </div>
-                            <div class="analytics-tip" th:if="${talSolTotal > 0 and talSolAprobadas == 0 and talSolRevision > 0}">
+                            <div class="analytics-tip"
+                                th:if="${talSolTotal > 0 and talSolAprobadas == 0 and talSolRevision > 0}">
                                 <div class="analytics-tip-icon c3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M5 22h14"/><path d="M5 2h14"/>
-                                        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/>
-                                        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M5 22h14" />
+                                        <path d="M5 2h14" />
+                                        <path
+                                            d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                                        <path
+                                            d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
                                     </svg>
                                 </div>
-                                <p>Tienes <strong th:text="${talSolRevision}">0</strong> postulación(es) activa(s). ¡Las empresas están revisando tu perfil!</p>
+                                <p>Tienes <strong th:text="${talSolRevision}">0</strong> postulación(es) activa(s). ¡Las
+                                    empresas están revisando tu perfil!</p>
                             </div>
                             <div class="analytics-tip" th:if="${talSolAprobadas > 0}">
                                 <div class="analytics-tip-icon c2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                                        <path d="M4 22h16"/>
-                                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                                        <path d="M4 22h16" />
+                                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
                                     </svg>
                                 </div>
-                                <p>¡Llevas <strong th:text="${talSolAprobadas}">0</strong> aprobación(es)! Sigue postulando para mejorar tus opciones.</p>
+                                <p>¡Llevas <strong th:text="${talSolAprobadas}">0</strong> aprobación(es)! Sigue
+                                    postulando para mejorar tus opciones.</p>
                             </div>
-                            <div class="analytics-tip" th:if="${talSolTotal > 5 and talTasa < 10 and talSolAprobadas == 0}">
+                            <div class="analytics-tip"
+                                th:if="${talSolTotal > 5 and talTasa < 10 and talSolAprobadas == 0}">
                                 <div class="analytics-tip-icon c4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
-                                        <path d="M9 18h6"/><path d="M10 22h4"/>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                                        <path d="M9 18h6" />
+                                        <path d="M10 22h4" />
                                     </svg>
                                 </div>
-                                <p>Muchas postulaciones sin respuesta. Considera actualizar tu perfil o CV para destacar más.</p>
+                                <p>Muchas postulaciones sin respuesta. Considera actualizar tu perfil o CV para destacar
+                                    más.</p>
                                 <a th:href="@{/curriculum}" class="lnk">Ver curriculum</a>
                             </div>
                         </div>
@@ -354,10 +442,12 @@
                             </thead>
                             <tbody>
                                 <tr th:each="sol : ${talRecentSolicitudes}">
-                                    <td style="font-weight:600;color:var(--ink);" th:text="${sol.empleoTitulo}">Título</td>
+                                    <td style="font-weight:600;color:var(--ink);" th:text="${sol.empleoTitulo}">Título
+                                    </td>
                                     <td th:text="${sol.empleoEmpresaNombre}">Empresa</td>
                                     <td>
-                                        <span class="pill" th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoCategoria) ?: '—'}">Cat</span>
+                                        <span class="pill"
+                                            th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoCategoria) ?: '—'}">Cat</span>
                                     </td>
                                     <td>
                                         <span class="pill"
@@ -365,12 +455,19 @@
                                             th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(sol.empleoModalidad) ?: '—'}">Remoto</span>
                                     </td>
                                     <td style="text-align:right;">
-                                        <span class="pill pill-amber" th:if="${sol.estado == 'revision'}">En revisión</span>
-                                        <span class="pill pill-green" th:if="${sol.estado == 'aprobada'}" style="display:inline-flex;align-items:center;gap:4px;">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span class="pill pill-amber" th:if="${sol.estado == 'revision'}">En
+                                            revisión</span>
+                                        <span class="pill pill-green" th:if="${sol.estado == 'aprobada'}"
+                                            style="display:inline-flex;align-items:center;gap:4px;">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
                                             Aprobada
                                         </span>
-                                        <span class="pill pill-red" th:if="${sol.estado == 'rechazada'}">Rechazada</span>
+                                        <span class="pill pill-red"
+                                            th:if="${sol.estado == 'rechazada'}">Rechazada</span>
                                     </td>
                                 </tr>
                                 <tr th:if="${talRecentSolicitudes == null or talRecentSolicitudes.isEmpty()}">
@@ -417,13 +514,13 @@
     <div th:replace="~{fragments/nautico :: toast}"></div>
 
     <script th:inline="javascript">
-        const PALETTE      = ['#FF7B4F','#2DD4BF','#CC4B27','#1F8F82','#A6ABB8','#F2B544','#7C8CF8','#E85D9A'];
-        const MODAL_COLORS = { 'Remoto':'#2DD4BF', 'Presencial':'#FF7B4F', 'Híbrido':'#7C8CF8', 'Hibrido':'#7C8CF8' };
-        const css       = getComputedStyle(document.documentElement);
+        const PALETTE = ['#FF7B4F', '#2DD4BF', '#CC4B27', '#1F8F82', '#A6ABB8', '#F2B544', '#7C8CF8', '#E85D9A'];
+        const MODAL_COLORS = { 'Remoto': '#2DD4BF', 'Presencial': '#FF7B4F', 'Híbrido': '#7C8CF8', 'Hibrido': '#7C8CF8' };
+        const css = getComputedStyle(document.documentElement);
         const gridColor = css.getPropertyValue('--line').trim() || 'rgba(255,255,255,0.08)';
         const textColor = css.getPropertyValue('--mute').trim() || '#A6ABB8';
-        const vacio     = css.getPropertyValue('--line2').trim() || '#3A3D47';
-        const baseFont  = { family: "'JetBrains Mono', monospace", size: 11 };
+        const vacio = css.getPropertyValue('--line2').trim() || '#3A3D47';
+        const baseFont = { family: "'JetBrains Mono', monospace", size: 11 };
         const _charts = [];
 
         function buildModalLegend(containerId, labels, values, colors) {
@@ -443,115 +540,162 @@
     </script>
 
     <script th:if="${usuarioActualTipo == 'empresa'}" th:inline="javascript">
-    (function () {
-        const rev  = /*[[${empSolRevision  ?: 0}]]*/ 0;
-        const apr  = /*[[${empSolAprobadas ?: 0}]]*/ 0;
-        const rec  = /*[[${empSolRechazadas?: 0}]]*/ 0;
-        const mLbl = /*[[${empModalidadLabels ?: {}}]]*/ [];
-        const mVal = /*[[${empModalidadValues ?: {}}]]*/ [];
-        const cLbl = /*[[${empCategoriaLabels ?: {}}]]*/ [];
-        const cVal = /*[[${empCategoriaValues ?: {}}]]*/ [];
-        const sLbl = /*[[${empSeniorityLabels ?: {}}]]*/ [];
-        const sVal = /*[[${empSeniorityValues ?: {}}]]*/ [];
-        const tLbl = /*[[${empTopLabels ?: {}}]]*/ [];
-        const tVal = /*[[${empTopValues  ?: {}}]]*/ [];
-        const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
+        (function () {
+            const rev = /*[[${empSolRevision  ?: 0}]]*/ 0;
+            const apr = /*[[${empSolAprobadas ?: 0}]]*/ 0;
+            const rec = /*[[${empSolRechazadas?: 0}]]*/ 0;
+            const mLbl = /*[[${empModalidadLabels ?: {}}]]*/[];
+            const mVal = /*[[${empModalidadValues ?: {}}]]*/[];
+            const cLbl = /*[[${empCategoriaLabels ?: {}}]]*/[];
+            const cVal = /*[[${empCategoriaValues ?: {}}]]*/[];
+            const sLbl = /*[[${empSeniorityLabels ?: {}}]]*/[];
+            const sVal = /*[[${empSeniorityValues ?: {}}]]*/[];
+            const tLbl = /*[[${empTopLabels ?: {}}]]*/[];
+            const tVal = /*[[${empTopValues  ?: {}}]]*/[];
+            const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
 
-        _charts.push(new Chart(document.getElementById('empChartEstado'), {
-            type: 'doughnut',
-            data: { labels:['En revisión','Aprobados','Rechazados'],
-                datasets:[{data:[rev,apr,rec], backgroundColor:['#FF7B4F','#2DD4BF','#A6ABB8'], borderWidth:0, hoverOffset:6}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
-                plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}} }
-        }));
+            _charts.push(new Chart(document.getElementById('empChartEstado'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['En revisión', 'Aprobados', 'Rechazados'],
+                    datasets: [{ data: [rev, apr, rec], backgroundColor: ['#FF7B4F', '#2DD4BF', '#A6ABB8'], borderWidth: 0, hoverOffset: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}` } } }
+                }
+            }));
 
-        _charts.push(new Chart(document.getElementById('empChartTopEmpleos'), {
-            type: 'bar',
-            data: { labels: tLbl.length ? tLbl : ['Sin empleos'],
-                datasets:[{data: tVal.length ? tVal : [0], backgroundColor:'#2DD4BF', borderRadius:5, borderWidth:0}] },
-            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-                scales:{ x:{grid:{color:gridColor}, ticks:{color:textColor,font:baseFont,precision:0}},
-                         y:{grid:{display:false}, ticks:{color:textColor,font:{...baseFont,size:10}}} } }
-        }));
+            _charts.push(new Chart(document.getElementById('empChartTopEmpleos'), {
+                type: 'bar',
+                data: {
+                    labels: tLbl.length ? tLbl : ['Sin empleos'],
+                    datasets: [{ data: tVal.length ? tVal : [0], backgroundColor: '#2DD4BF', borderRadius: 5, borderWidth: 0 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, font: baseFont, precision: 0 } },
+                        y: { grid: { display: false }, ticks: { color: textColor, font: { ...baseFont, size: 10 } } }
+                    }
+                }
+            }));
 
-        _charts.push(new Chart(document.getElementById('empChartModalidad'), {
-            type: 'doughnut',
-            data: { labels: mLbl.length ? mLbl : ['Sin datos'],
-                datasets:[{data: mVal.length ? mVal : [1],
-                    backgroundColor: mLbl.length ? mClr : [vacio], borderWidth:0, hoverOffset:4}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
-        }));
-        buildModalLegend('empModalLegend', mLbl, mVal, mClr);
+            _charts.push(new Chart(document.getElementById('empChartModalidad'), {
+                type: 'doughnut',
+                data: {
+                    labels: mLbl.length ? mLbl : ['Sin datos'],
+                    datasets: [{
+                        data: mVal.length ? mVal : [1],
+                        backgroundColor: mLbl.length ? mClr : [vacio], borderWidth: 0, hoverOffset: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+            }));
+            buildModalLegend('empModalLegend', mLbl, mVal, mClr);
 
-        _charts.push(new Chart(document.getElementById('empChartCategorias'), {
-            type: 'bar',
-            data: { labels: cLbl.length ? cLbl : ['Sin datos'],
-                datasets:[{data: cVal.length ? cVal : [0], backgroundColor:PALETTE, borderRadius:5, borderWidth:0}] },
-            options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-                scales:{ x:{grid:{display:false}, ticks:{color:textColor,font:{...baseFont,size:9},maxRotation:30}},
-                         y:{grid:{color:gridColor}, ticks:{color:textColor,font:baseFont,precision:0}} } }
-        }));
+            _charts.push(new Chart(document.getElementById('empChartCategorias'), {
+                type: 'bar',
+                data: {
+                    labels: cLbl.length ? cLbl : ['Sin datos'],
+                    datasets: [{ data: cVal.length ? cVal : [0], backgroundColor: PALETTE, borderRadius: 5, borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { ...baseFont, size: 9 }, maxRotation: 30 } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, font: baseFont, precision: 0 } }
+                    }
+                }
+            }));
 
-        _charts.push(new Chart(document.getElementById('empChartSeniority'), {
-            type: 'doughnut',
-            data: { labels: sLbl.length ? sLbl : ['Sin datos'],
-                datasets:[{data: sVal.length ? sVal : [1],
-                    backgroundColor: sLbl.length ? PALETTE : [vacio], borderWidth:0, hoverOffset:6}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'55%',
-                plugins:{legend:{position:'bottom', labels:{color:textColor,font:baseFont,boxWidth:10,padding:10}}} }
-        }));
-    })();
+            _charts.push(new Chart(document.getElementById('empChartSeniority'), {
+                type: 'doughnut',
+                data: {
+                    labels: sLbl.length ? sLbl : ['Sin datos'],
+                    datasets: [{
+                        data: sVal.length ? sVal : [1],
+                        backgroundColor: sLbl.length ? PALETTE : [vacio], borderWidth: 0, hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '55%',
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor, font: baseFont, boxWidth: 10, padding: 10 } } }
+                }
+            }));
+        })();
     </script>
 
     <script th:unless="${usuarioActualTipo == 'empresa'}" th:inline="javascript">
-    (function () {
-        const rev  = /*[[${talSolRevision  ?: 0}]]*/ 0;
-        const apr  = /*[[${talSolAprobadas ?: 0}]]*/ 0;
-        const rec  = /*[[${talSolRechazadas?: 0}]]*/ 0;
-        const cLbl = /*[[${talCategoriaLabels ?: {}}]]*/ [];
-        const cVal = /*[[${talCategoriaValues ?: {}}]]*/ [];
-        const mLbl = /*[[${talModalidadLabels ?: {}}]]*/ [];
-        const mVal = /*[[${talModalidadValues ?: {}}]]*/ [];
-        const sLbl = /*[[${talSeniorityLabels ?: {}}]]*/ [];
-        const sVal = /*[[${talSeniorityValues ?: {}}]]*/ [];
-        const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
+        (function () {
+            const rev = /*[[${talSolRevision  ?: 0}]]*/ 0;
+            const apr = /*[[${talSolAprobadas ?: 0}]]*/ 0;
+            const rec = /*[[${talSolRechazadas?: 0}]]*/ 0;
+            const cLbl = /*[[${talCategoriaLabels ?: {}}]]*/[];
+            const cVal = /*[[${talCategoriaValues ?: {}}]]*/[];
+            const mLbl = /*[[${talModalidadLabels ?: {}}]]*/[];
+            const mVal = /*[[${talModalidadValues ?: {}}]]*/[];
+            const sLbl = /*[[${talSeniorityLabels ?: {}}]]*/[];
+            const sVal = /*[[${talSeniorityValues ?: {}}]]*/[];
+            const mClr = mLbl.map(l => MODAL_COLORS[l] || PALETTE[0]);
 
-        _charts.push(new Chart(document.getElementById('talChartEstado'), {
-            type: 'doughnut',
-            data: { labels:['En revisión','Aprobadas','Rechazadas'],
-                datasets:[{data:[rev,apr,rec], backgroundColor:['#FF7B4F','#2DD4BF','#A6ABB8'], borderWidth:0, hoverOffset:6}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
-                plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}} }
-        }));
+            _charts.push(new Chart(document.getElementById('talChartEstado'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['En revisión', 'Aprobadas', 'Rechazadas'],
+                    datasets: [{ data: [rev, apr, rec], backgroundColor: ['#FF7B4F', '#2DD4BF', '#A6ABB8'], borderWidth: 0, hoverOffset: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}` } } }
+                }
+            }));
 
-        _charts.push(new Chart(document.getElementById('talChartCategorias'), {
-            type: 'bar',
-            data: { labels: cLbl.length ? cLbl : ['Sin postulaciones aún'],
-                datasets:[{data: cVal.length ? cVal : [0], backgroundColor:PALETTE, borderRadius:5, borderWidth:0}] },
-            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-                scales:{ x:{grid:{color:gridColor}, ticks:{color:textColor,font:baseFont,precision:0}},
-                         y:{grid:{display:false}, ticks:{color:textColor,font:{...baseFont,size:10}}} } }
-        }));
+            _charts.push(new Chart(document.getElementById('talChartCategorias'), {
+                type: 'bar',
+                data: {
+                    labels: cLbl.length ? cLbl : ['Sin postulaciones aún'],
+                    datasets: [{ data: cVal.length ? cVal : [0], backgroundColor: PALETTE, borderRadius: 5, borderWidth: 0 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, font: baseFont, precision: 0 } },
+                        y: { grid: { display: false }, ticks: { color: textColor, font: { ...baseFont, size: 10 } } }
+                    }
+                }
+            }));
 
-        _charts.push(new Chart(document.getElementById('talChartModalidad'), {
-            type: 'doughnut',
-            data: { labels: mLbl.length ? mLbl : ['Sin datos'],
-                datasets:[{data: mVal.length ? mVal : [1],
-                    backgroundColor: mLbl.length ? mClr : [vacio], borderWidth:0, hoverOffset:4}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
-        }));
-        buildModalLegend('talModalLegend', mLbl, mVal, mClr);
+            _charts.push(new Chart(document.getElementById('talChartModalidad'), {
+                type: 'doughnut',
+                data: {
+                    labels: mLbl.length ? mLbl : ['Sin datos'],
+                    datasets: [{
+                        data: mVal.length ? mVal : [1],
+                        backgroundColor: mLbl.length ? mClr : [vacio], borderWidth: 0, hoverOffset: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+            }));
+            buildModalLegend('talModalLegend', mLbl, mVal, mClr);
 
-        _charts.push(new Chart(document.getElementById('talChartSeniority'), {
-            type: 'doughnut',
-            data: { labels: sLbl.length ? sLbl : ['Sin datos'],
-                datasets:[{data: sVal.length ? sVal : [1],
-                    backgroundColor: sLbl.length ? PALETTE : [vacio], borderWidth:0, hoverOffset:6}] },
-            options:{ responsive:true, maintainAspectRatio:false, cutout:'55%',
-                plugins:{legend:{position:'bottom', labels:{color:textColor,font:baseFont,boxWidth:10,padding:10}}} }
-        }));
-    })();
+            _charts.push(new Chart(document.getElementById('talChartSeniority'), {
+                type: 'doughnut',
+                data: {
+                    labels: sLbl.length ? sLbl : ['Sin datos'],
+                    datasets: [{
+                        data: sVal.length ? sVal : [1],
+                        backgroundColor: sLbl.length ? PALETTE : [vacio], borderWidth: 0, hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '55%',
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor, font: baseFont, boxWidth: 10, padding: 10 } } }
+                }
+            }));
+        })();
     </script>
 
 </body>
+
 </html>

@@ -69,7 +69,8 @@ public class CandidatosController {
         List<Solicitud> todas = empleoIds.isEmpty() ? List.of() : solicitudRepository.findByEmpleoIdIn(empleoIds);
 
         Map<String, Usuario> candidatos = new HashMap<>();
-        Set<String> usuarioIds = todas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        Set<String> usuarioIds = todas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
         if (!usuarioIds.isEmpty())
             usuarioRepository.findAllById(usuarioIds).forEach(u -> candidatos.put(u.getId(), u));
 
@@ -85,8 +86,10 @@ public class CandidatosController {
         for (Empleo e : empleos) {
             List<SolicitudVista> deLaOferta = vistasPorOferta.getOrDefault(e.getId(), List.of());
             deLaOferta = deLaOferta.stream().sorted((a, b) -> {
-                if (a.getFecha() == null) return 1;
-                if (b.getFecha() == null) return -1;
+                if (a.getFecha() == null)
+                    return 1;
+                if (b.getFecha() == null)
+                    return -1;
                 return b.getFecha().compareTo(a.getFecha());
             }).collect(Collectors.toList());
             final String f = filtro;
@@ -126,8 +129,10 @@ public class CandidatosController {
         return "candidatos";
     }
 
-    // deja solo las postulaciones [desde, hasta) contando todas las ofertas en orden; las ofertas sin nada en esa página se omiten
-    private static List<PostulacionesOfertaVista> recortar(List<PostulacionesOfertaVista> grupos, int desde, int hasta) {
+    // deja solo las postulaciones [desde, hasta) contando todas las ofertas en
+    // orden; las ofertas sin nada en esa página se omiten
+    private static List<PostulacionesOfertaVista> recortar(List<PostulacionesOfertaVista> grupos, int desde,
+            int hasta) {
         List<PostulacionesOfertaVista> res = new ArrayList<>();
         int inicio = 0;
         for (PostulacionesOfertaVista g : grupos) {
@@ -152,7 +157,8 @@ public class CandidatosController {
     private static boolean coincideBusqueda(SolicitudVista v, String q) {
         if (q.isEmpty())
             return true;
-        String pajar = sinTildes((v.getCandidato() == null ? "" : v.getCandidato()) + " " + (v.getCandidatoRol() == null ? "" : v.getCandidatoRol()));
+        String pajar = sinTildes((v.getCandidato() == null ? "" : v.getCandidato()) + " "
+                + (v.getCandidatoRol() == null ? "" : v.getCandidatoRol()));
         for (String token : sinTildes(q).split("\\s+"))
             if (!token.isEmpty() && !pajar.contains(token))
                 return false;

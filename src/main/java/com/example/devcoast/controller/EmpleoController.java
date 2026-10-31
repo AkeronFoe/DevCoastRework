@@ -119,7 +119,8 @@ public class EmpleoController {
         Query consulta = new Query(coincidencias).with(Sort.by(Sort.Direction.DESC, "_id")).limit(CANDIDATOS_LIMITE);
         List<Empleo> candidatos = mongoTemplate.find(consulta, Empleo.class);
         boolean ventanaLlena = candidatos.size() >= CANDIDATOS_LIMITE;
-        long totalCoincidencias = ventanaLlena ? mongoTemplate.count(new Query(coincidencias), Empleo.class) : candidatos.size();
+        long totalCoincidencias = ventanaLlena ? mongoTemplate.count(new Query(coincidencias), Empleo.class)
+                : candidatos.size();
 
         Map<String, MatchEmpleo.Resultado> matches = new HashMap<>();
         List<Empleo> lista = new ArrayList<>();
@@ -135,8 +136,9 @@ public class EmpleoController {
         }
 
         boolean matchDisponible = !matches.isEmpty();
-        String ordenSel = "salario".equals(orden) ? "salario" : "recientes".equals(orden) ? "recientes"
-                : (matchDisponible ? "match" : "recientes");
+        String ordenSel = "salario".equals(orden) ? "salario"
+                : "recientes".equals(orden) ? "recientes"
+                        : (matchDisponible ? "match" : "recientes");
         if ("match".equals(orden) && !matchDisponible)
             ordenSel = "recientes";
         if ("match".equals(ordenSel))
@@ -151,7 +153,8 @@ public class EmpleoController {
         if (matchDisponible) {
             for (Empleo e : lista)
                 if (matches.containsKey(e.getId())
-                        && (destacado == null || matches.get(e.getId()).porcentaje() > matches.get(destacado.getId()).porcentaje()))
+                        && (destacado == null
+                                || matches.get(e.getId()).porcentaje() > matches.get(destacado.getId()).porcentaje()))
                     destacado = e;
             destacadoMotivo = "match";
         } else {
@@ -164,7 +167,8 @@ public class EmpleoController {
 
         int totalPaginas = Math.max(1, (int) Math.ceil(otras.size() / (double) OTRAS_POR_PAGINA));
         int pagina = Math.min(Math.max(0, page), totalPaginas - 1);
-        List<Empleo> pagItems = otras.subList(pagina * OTRAS_POR_PAGINA, Math.min(otras.size(), (pagina + 1) * OTRAS_POR_PAGINA));
+        List<Empleo> pagItems = otras.subList(pagina * OTRAS_POR_PAGINA,
+                Math.min(otras.size(), (pagina + 1) * OTRAS_POR_PAGINA));
 
         Set<String> solicitadas = new java.util.HashSet<>();
         if (talento != null) {
@@ -179,15 +183,18 @@ public class EmpleoController {
         EmpleoVista destacadoVista = null;
         if (destacado != null && pagina == 0) {
             long postulantes = solicitudRepository.countByEmpleoId(destacado.getId());
-            destacadoVista = EmpleoVista.de(destacado, matches.get(destacado.getId()), solicitadas.contains(destacado.getId()),
+            destacadoVista = EmpleoVista.de(destacado, matches.get(destacado.getId()),
+                    solicitadas.contains(destacado.getId()),
                     true, postulantes, ahora);
         }
         List<EmpleoVista> tarjetas = new ArrayList<>();
         for (Empleo e : pagItems)
-            tarjetas.add(EmpleoVista.de(e, matches.get(e.getId()), solicitadas.contains(e.getId()), false, null, ahora));
+            tarjetas.add(
+                    EmpleoVista.de(e, matches.get(e.getId()), solicitadas.contains(e.getId()), false, null, ahora));
 
         long conMatchAlto = lista.stream()
-                .filter(e -> matches.containsKey(e.getId()) && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_ALTO)
+                .filter(e -> matches.containsKey(e.getId())
+                        && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_ALTO)
                 .count();
         boolean hayFiltros = areaSel != null || modSel != null || soloAlto || !qSel.isEmpty();
 
@@ -274,13 +281,16 @@ public class EmpleoController {
         java.util.Date ahora = new java.util.Date();
         List<EmpleoVista> todas = new ArrayList<>();
         for (Empleo e : guardados)
-            todas.add(EmpleoVista.de(e, MatchEmpleo.calcular(usuario, e), solicitadas.contains(e.getId()), false, null, ahora));
+            todas.add(EmpleoVista.de(e, MatchEmpleo.calcular(usuario, e), solicitadas.contains(e.getId()), false, null,
+                    ahora));
 
-        long altaCompat = todas.stream().filter(v -> v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO).count();
+        long altaCompat = todas.stream().filter(v -> v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO)
+                .count();
         long yaSolicitadas = todas.stream().filter(EmpleoVista::isSolicitada).count();
         boolean matchDisponible = todas.stream().anyMatch(v -> v.getMatch() != null);
 
-        String filtroSel = "alta".equals(filtro) && matchDisponible ? "alta" : "pendientes".equals(filtro) ? "pendientes" : "";
+        String filtroSel = "alta".equals(filtro) && matchDisponible ? "alta"
+                : "pendientes".equals(filtro) ? "pendientes" : "";
         String ordenSel = "match".equals(orden) && matchDisponible ? "match" : "recientes";
 
         List<EmpleoVista> lista = new ArrayList<>(todas.stream()
@@ -289,7 +299,8 @@ public class EmpleoController {
                         || ("pendientes".equals(filtroSel) && !v.isSolicitada() && !v.isCerrada()))
                 .toList());
         if ("match".equals(ordenSel))
-            lista.sort((x, y) -> Integer.compare(y.getMatch() == null ? -1 : y.getMatch(), x.getMatch() == null ? -1 : x.getMatch()));
+            lista.sort((x, y) -> Integer.compare(y.getMatch() == null ? -1 : y.getMatch(),
+                    x.getMatch() == null ? -1 : x.getMatch()));
 
         model.addAttribute("tarjetas", lista);
         model.addAttribute("guardTotal", todas.size());
@@ -363,7 +374,8 @@ public class EmpleoController {
         java.util.Date ahora = new java.util.Date();
         List<EmpleoVista> tarjetas = new ArrayList<>();
         for (Empleo e : empleosActivos)
-            tarjetas.add(EmpleoVista.de(e, MatchEmpleo.calcular(talento, e), solicitadas.contains(e.getId()), false, null, ahora));
+            tarjetas.add(EmpleoVista.de(e, MatchEmpleo.calcular(talento, e), solicitadas.contains(e.getId()), false,
+                    null, ahora));
 
         String inicial = (nombreEmpresa != null && !nombreEmpresa.isBlank())
                 ? nombreEmpresa.substring(0, 1).toUpperCase()
@@ -379,7 +391,8 @@ public class EmpleoController {
         model.addAttribute("empleosActivos", empleosActivos);
         model.addAttribute("tarjetas", tarjetas);
         model.addAttribute("esTalento", talento != null);
-        model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
+        model.addAttribute("talentoSinStack",
+                talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
         model.addAttribute("empresaId", empresaId);
         agregarSesion(session, model);
         return "empresa-perfil";
@@ -435,7 +448,8 @@ public class EmpleoController {
         model.addAttribute("usuarioYaAplico", usuarioYaAplico);
         model.addAttribute("esEmpresaPropietaria", esEmpresaPropietaria);
         model.addAttribute("esTalento", RoleGuard.esTalento(session));
-        model.addAttribute("talentoSinStack", talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
+        model.addAttribute("talentoSinStack",
+                talento != null && (talento.getStack() == null || talento.getStack().isEmpty()));
         model.addAttribute("esFavorito", esFavorito);
         model.addAttribute("score", score);
         agregarSesion(session, model);
@@ -468,7 +482,8 @@ public class EmpleoController {
         agregarSesion(session, model);
 
         Empresa empresa = empresaRepository.findById(RoleGuard.getId(session)).orElse(null);
-        long destacadosActivos = empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(RoleGuard.getId(session), "ACTIVO");
+        long destacadosActivos = empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(RoleGuard.getId(session),
+                "ACTIVO");
         model.addAttribute("destacadosActivos", destacadosActivos);
         model.addAttribute("limiteDestacados", planService.limiteDestacados(empresa));
 
@@ -485,7 +500,8 @@ public class EmpleoController {
             ra.addFlashAttribute("flashMessage", errorValidacion);
             ra.addFlashAttribute("flashType", "error");
             String idParaEditar = empleoForm.getId();
-            return "redirect:/crearEmpleo" + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
+            return "redirect:/crearEmpleo"
+                    + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
         }
 
         String empresaId = RoleGuard.getId(session);
@@ -528,14 +544,16 @@ public class EmpleoController {
                         "Alcanzaste el límite de vacantes destacadas de tu plan.");
                 ra.addFlashAttribute("flashType", "error");
                 String idParaEditar = empleoForm.getId();
-                return "redirect:/crearEmpleo" + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
+                return "redirect:/crearEmpleo"
+                        + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
             }
         }
 
         aplicarCamposFormulario(empleo, empleoForm);
         empleoRepository.save(empleo);
 
-        ra.addFlashAttribute("flashMessage", esEdicion ? "Empleo actualizado correctamente" : "Empleo publicado correctamente");
+        ra.addFlashAttribute("flashMessage",
+                esEdicion ? "Empleo actualizado correctamente" : "Empleo publicado correctamente");
         ra.addFlashAttribute("flashType", "success");
         return "redirect:/misEmpleos";
     }
@@ -594,7 +612,8 @@ public class EmpleoController {
     }
 
     @GetMapping("/misEmpleos")
-    public String misEmpleos(@RequestParam(required = false) String tab, Model model, HttpSession session, RedirectAttributes ra) {
+    public String misEmpleos(@RequestParam(required = false) String tab, Model model, HttpSession session,
+            RedirectAttributes ra) {
         if (RoleGuard.soloEmpresa(session)) {
             if (RoleGuard.sinSesion(session))
                 return "redirect:/login";
@@ -631,7 +650,8 @@ public class EmpleoController {
         model.addAttribute("nCerradas", vistasCerradas.size());
         model.addAttribute("limiteActivas", limite);
         model.addAttribute("puedePublicar", vistasActivas.size() < limite);
-        model.addAttribute("nPostulacionesRevision", vistasActivas.stream().mapToInt(OfertaEmpresaVista::getEnRevision).sum());
+        model.addAttribute("nPostulacionesRevision",
+                vistasActivas.stream().mapToInt(OfertaEmpresaVista::getEnRevision).sum());
         agregarSesion(session, model);
         return "misEmpleos";
     }

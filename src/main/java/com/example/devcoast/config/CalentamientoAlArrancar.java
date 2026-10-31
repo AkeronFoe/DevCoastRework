@@ -48,7 +48,8 @@ public class CalentamientoAlArrancar {
             encoder.matches("calentamiento", encoder.encode("calentamiento"));
             log.info("[Calentamiento] Conexión con la base lista en {} ms", System.currentTimeMillis() - t0);
         } catch (Exception e) {
-            log.warn("[Calentamiento] No se pudo calentar la conexión ({} ms): {}", System.currentTimeMillis() - t0, e.toString());
+            log.warn("[Calentamiento] No se pudo calentar la conexión ({} ms): {}", System.currentTimeMillis() - t0,
+                    e.toString());
         }
     }
 }

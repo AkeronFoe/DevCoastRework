@@ -17,11 +17,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/solicitudes', 'Buscar solicitudes', 'Busca por cargo o empresa', ${q})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/solicitudes', 'Buscar solicitudes', 'Busca por cargo o empresa', ${q})}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
@@ -29,14 +31,17 @@
                         <h1>Solicitudes</h1>
                         <p class="sub" id="conteo" aria-live="polite" th:with="enProceso=${nProceso}"
                             th:attr="data-todas=${nTodas},data-proceso=${nProceso}"
-                            th:text="${nTodas == 1 ? '1 solicitud' : nTodas + ' solicitudes'} + ' · ' + ${nProceso} + ' en proceso' + (${invPendientes} > 0 ? ' · ' + ${invPendientes} + (${invPendientes} == 1 ? ' invitación por responder' : ' invitaciones por responder') : '')">7 solicitudes · 5 en proceso</p>
+                            th:text="${nTodas == 1 ? '1 solicitud' : nTodas + ' solicitudes'} + ' · ' + ${nProceso} + ' en proceso' + (${invPendientes} > 0 ? ' · ' + ${invPendientes} + (${invPendientes} == 1 ? ' invitación por responder' : ' invitaciones por responder') : '')">
+                            7 solicitudes · 5 en proceso</p>
                     </div>
                     <form class="sort" method="get" th:action="@{/solicitudes}" th:if="${estadoSel != 'invitaciones'}">
-                        <input type="hidden" name="estado" th:value="${estadoSel}" th:disabled="${estadoSel == 'todas'}">
+                        <input type="hidden" name="estado" th:value="${estadoSel}"
+                            th:disabled="${estadoSel == 'todas'}">
                         <input type="hidden" name="q" th:value="${q}" th:disabled="${q == null}">
                         <label class="sort"><span class="lab">ORDEN</span>
                             <select name="orden" id="sort">
-                                <option value="recientes" th:selected="${ordenSel == 'recientes'}">Más recientes</option>
+                                <option value="recientes" th:selected="${ordenSel == 'recientes'}">Más recientes
+                                </option>
                                 <option value="estado" th:selected="${ordenSel == 'estado'}">Por estado</option>
                             </select>
                         </label>
@@ -45,27 +50,48 @@
                 </div>
 
                 <div class="alertbar" role="status" th:if="${invPendientes > 0 and estadoSel != 'invitaciones'}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/></svg>
-                    <div class="txt"><b th:text="${invPendientes == 1 ? 'Tienes 1 invitación por responder.' : 'Tienes ' + invPendientes + ' invitaciones por responder.'}">Tienes 1 invitación por responder.</b>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 5h18v14H3z" />
+                        <path d="M3 6l9 7 9-7" />
+                    </svg>
+                    <div class="txt"><b
+                            th:text="${invPendientes == 1 ? 'Tienes 1 invitación por responder.' : 'Tienes ' + invPendientes + ' invitaciones por responder.'}">Tienes
+                            1 invitación por responder.</b>
                         <span th:if="${primeraPendiente != null}"
-                            th:text="${(primeraPendiente.cargo != null ? primeraPendiente.cargo + ' · ' : '') + (primeraPendiente.empresa != null ? primeraPendiente.empresa : '')}">Cargo · Empresa</span></div>
+                            th:text="${(primeraPendiente.cargo != null ? primeraPendiente.cargo + ' · ' : '') + (primeraPendiente.empresa != null ? primeraPendiente.empresa : '')}">Cargo
+                            · Empresa</span>
+                    </div>
                     <a class="btn-o sm" th:href="@{/solicitudes(estado='invitaciones')}">Ver invitaciones</a>
                 </div>
 
                 <div class="tabs" role="group" aria-label="Estado de las solicitudes">
-                    <a class="ch" th:href="@{/solicitudes(orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'todas'} ? 'true'">Todas <b th:text="${nTodas}">0</b></a>
-                    <a class="ch" th:href="@{/solicitudes(estado='proceso',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'proceso'} ? 'true'">En proceso <b th:text="${nProceso}">0</b></a>
-                    <a class="ch" th:href="@{/solicitudes(estado='aceptadas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b th:text="${nAceptadas}">0</b></a>
-                    <a class="ch" th:href="@{/solicitudes(estado='cerradas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}" th:attr="aria-current=${estadoSel == 'cerradas'} ? 'true'">Cerradas <b th:text="${nCerradas}">0</b></a>
-                    <a class="ch" th:href="@{/solicitudes(estado='invitaciones',q=${q})}" th:attr="aria-current=${estadoSel == 'invitaciones'} ? 'true',title='Invitaciones por responder'">Invitaciones <b th:text="${invPendientes}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}"
+                        th:attr="aria-current=${estadoSel == 'todas'} ? 'true'">Todas <b th:text="${nTodas}">0</b></a>
+                    <a class="ch"
+                        th:href="@{/solicitudes(estado='proceso',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}"
+                        th:attr="aria-current=${estadoSel == 'proceso'} ? 'true'">En proceso <b
+                            th:text="${nProceso}">0</b></a>
+                    <a class="ch"
+                        th:href="@{/solicitudes(estado='aceptadas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}"
+                        th:attr="aria-current=${estadoSel == 'aceptadas'} ? 'true'">Aceptadas <b
+                            th:text="${nAceptadas}">0</b></a>
+                    <a class="ch"
+                        th:href="@{/solicitudes(estado='cerradas',orden=${ordenSel == 'estado' ? 'estado' : null},q=${q})}"
+                        th:attr="aria-current=${estadoSel == 'cerradas'} ? 'true'">Cerradas <b
+                            th:text="${nCerradas}">0</b></a>
+                    <a class="ch" th:href="@{/solicitudes(estado='invitaciones',q=${q})}"
+                        th:attr="aria-current=${estadoSel == 'invitaciones'} ? 'true',title='Invitaciones por responder'">Invitaciones
+                        <b th:text="${invPendientes}">0</b></a>
                 </div>
 
-                <section class="reqs" aria-label="Lista de solicitudes" th:if="${estadoSel != 'invitaciones' and !#lists.isEmpty(solicitudes)}">
+                <section class="reqs" aria-label="Lista de solicitudes"
+                    th:if="${estadoSel != 'invitaciones' and !#lists.isEmpty(solicitudes)}">
                     <th:block th:each="v, st : ${solicitudes}">
                         <th:block th:replace="~{fragments/pase :: solicitud(${v}, ${st.index})}"></th:block>
                     </th:block>
                 </section>
-                <section class="reqs" aria-label="Lista de invitaciones" th:if="${estadoSel == 'invitaciones' and !#lists.isEmpty(invitaciones)}">
+                <section class="reqs" aria-label="Lista de invitaciones"
+                    th:if="${estadoSel == 'invitaciones' and !#lists.isEmpty(invitaciones)}">
                     <th:block th:each="v, st : ${invitaciones}">
                         <th:block th:replace="~{fragments/pase :: invitacion(${v}, ${st.index})}"></th:block>
                     </th:block>
@@ -73,14 +99,20 @@
 
                 <th:block th:if="${estadoSel != 'invitaciones' and #lists.isEmpty(solicitudes)}">
                     <th:block th:if="${nTodas == 0}">
-                        <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'Todavía no te has postulado a ninguna oferta.', '/empleos', 'Ver empleos')}"></div>
+                        <div
+                            th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'Todavía no te has postulado a ninguna oferta.', '/empleos', 'Ver empleos')}">
+                        </div>
                     </th:block>
                     <th:block th:unless="${nTodas == 0}">
-                        <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes solicitudes en esta categoría.', '/solicitudes', 'Ver todas')}"></div>
+                        <div
+                            th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes solicitudes en esta categoría.', '/solicitudes', 'Ver todas')}">
+                        </div>
                     </th:block>
                 </th:block>
                 <th:block th:if="${estadoSel == 'invitaciones' and #lists.isEmpty(invitaciones)}">
-                    <div th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes invitaciones. Cuando una empresa te invite, aparecerá aquí.', '/solicitudes', 'Ver solicitudes')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Nada por aquí.', 'No tienes invitaciones. Cuando una empresa te invite, aparecerá aquí.', '/solicitudes', 'Ver solicitudes')}">
+                    </div>
                 </th:block>
             </main>
         </div>

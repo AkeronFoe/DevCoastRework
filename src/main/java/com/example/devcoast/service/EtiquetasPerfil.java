@@ -14,8 +14,8 @@ public final class EtiquetasPerfil {
             "frontend", "Frontend", "backend", "Backend", "fullstack", "Full Stack", "ui-ux", "UI / UX",
             "diseno-grafico", "Diseño gráfico", "data", "Data / Analytics", "mobile", "Mobile");
 
-    public static final java.util.List<String> CLAVES_ESPECIALIDAD =
-            java.util.List.of("frontend", "backend", "fullstack", "ui-ux", "diseno-grafico", "data", "mobile");
+    public static final java.util.List<String> CLAVES_ESPECIALIDAD = java.util.List.of("frontend", "backend",
+            "fullstack", "ui-ux", "diseno-grafico", "data", "mobile");
 
     private static String base(String v) {
         if (v == null)

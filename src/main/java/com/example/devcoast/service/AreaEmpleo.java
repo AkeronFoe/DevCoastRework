@@ -60,7 +60,8 @@ public final class AreaEmpleo {
         return textoVisible(categoria);
     }
 
-    // los formularios guardan algunas palabras sin tilde (Hibrido, Educacion...). Esto las escribe bien solo al mostrarlas; lo guardado no se toca
+    // los formularios guardan algunas palabras sin tilde (Hibrido, Educacion...).
+    // Esto las escribe bien solo al mostrarlas; lo guardado no se toca
     public static String textoVisible(String texto) {
         if (texto == null)
             return null;
@@ -79,6 +80,7 @@ public final class AreaEmpleo {
     private static String sinTildes(String s) {
         if (s == null)
             return "";
-        return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").replace('ñ', 'n').replace('Ñ', 'N');
+        return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}+", "").replace('ñ', 'n').replace('Ñ',
+                'N');
     }
 }

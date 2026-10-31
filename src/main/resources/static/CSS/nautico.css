@@ -110,6 +110,7 @@ h2 {
     color: var(--mute);
     letter-spacing: .06em;
 }
+
 .app {
     display: grid;
     grid-template-columns: 248px minmax(0, 1fr);
@@ -206,6 +207,7 @@ h2 {
 .mi[aria-current="page"] svg {
     color: var(--teal);
 }
+
 .menu-h {
     margin: 14px 14px 2px;
     font-family: var(--font-mono);
@@ -571,6 +573,7 @@ h2 {
     font-size: 11px;
     color: var(--mute);
 }
+
 .bell {
     position: relative;
 }
@@ -692,6 +695,7 @@ h2 {
     cursor: pointer;
     text-align: left;
 }
+
 .content {
     padding: 30px var(--gx) 80px;
     max-width: 1240px;
@@ -762,6 +766,7 @@ h2 {
     font: 500 13px var(--font-mono);
     color: var(--mute);
 }
+
 .filters {
     display: flex;
     flex-wrap: wrap;
@@ -785,6 +790,7 @@ h2 {
     flex-wrap: wrap;
     gap: 8px;
 }
+
 .ch {
     display: inline-flex;
     align-items: center;
@@ -830,6 +836,7 @@ h2 {
     display: inline-flex;
     align-items: center;
 }
+
 .btn-o {
     display: inline-flex;
     align-items: center;
@@ -875,6 +882,7 @@ h2 {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
+
 .empty {
     display: flex;
     flex-direction: column;
@@ -899,6 +907,7 @@ h2 {
     color: var(--mute);
     max-width: 36ch;
 }
+
 .toast {
     position: fixed;
     left: 50%;
@@ -933,6 +942,7 @@ h2 {
     outline: 3px solid var(--paper-ink);
     outline-offset: 2px;
 }
+
 .stamp {
     padding: 6px 12px;
     border: 3px solid var(--err);
@@ -942,6 +952,7 @@ h2 {
     letter-spacing: .08em;
     transform: rotate(-8deg);
 }
+
 @media (max-width: 900px) {
     .app {
         grid-template-columns: minmax(0, 1fr);
@@ -999,6 +1010,7 @@ h2 {
         transform: none;
     }
 }
+
 @media (prefers-reduced-motion: no-preference) {
     @keyframes rock {
 
@@ -1317,6 +1329,7 @@ h2 {
     transform: rotate(calc(var(--look, 0) * 1deg));
     transition: transform .25s ease;
 }
+
 @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -1328,6 +1341,7 @@ h2 {
         scroll-behavior: auto !important;
     }
 }
+
 @media (pointer: coarse) {
 
     .ch,
@@ -1341,6 +1355,7 @@ h2 {
         height: 44px;
     }
 }
+
 .search input {
     text-overflow: ellipsis;
 }

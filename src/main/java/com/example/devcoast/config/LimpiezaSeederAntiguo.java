@@ -63,12 +63,14 @@ final class LimpiezaSeederAntiguo {
             log.info("[DataSeeder] Limpieza: no se encontraron datos del seeder anterior.");
             return borrados;
         }
-        log.warn("[DataSeeder] Limpieza: {} talentos y {} empresas del seeder anterior; se borran junto con lo que colgaba de ellos.",
+        log.warn(
+                "[DataSeeder] Limpieza: {} talentos y {} empresas del seeder anterior; se borran junto con lo que colgaba de ellos.",
                 usuarios.size(), empresas.size());
 
         List<String> empleos = new ArrayList<>();
         for (List<String> lote : trozos(empresas))
-            mongo.find(new Query(Criteria.where("empresaId").in(lote)), Empleo.class).forEach(e -> empleos.add(e.getId()));
+            mongo.find(new Query(Criteria.where("empresaId").in(lote)), Empleo.class)
+                    .forEach(e -> empleos.add(e.getId()));
 
         List<Solicitud> solicitudes = new ArrayList<>();
         for (List<String> lote : trozos(usuarios))
@@ -81,34 +83,55 @@ final class LimpiezaSeederAntiguo {
                 .map(Solicitud::getId).distinct().toList();
 
         for (List<String> lote : trozos(solicitudIds)) {
-            borrados.merge("mensajes", mongo.remove(new Query(Criteria.where("solicitudId").in(lote)), Mensaje.class).getDeletedCount(), Long::sum);
-            borrados.merge("solicitudes", mongo.remove(new Query(Criteria.where("id").in(lote)), Solicitud.class).getDeletedCount(), Long::sum);
+            borrados.merge("mensajes",
+                    mongo.remove(new Query(Criteria.where("solicitudId").in(lote)), Mensaje.class).getDeletedCount(),
+                    Long::sum);
+            borrados.merge("solicitudes",
+                    mongo.remove(new Query(Criteria.where("id").in(lote)), Solicitud.class).getDeletedCount(),
+                    Long::sum);
         }
         for (List<String> lote : trozos(solicitudesDeOtros)) {
             String alternativas = String.join("|", lote.stream().map(Pattern::quote).toList());
-            borrados.merge("notificaciones", mongo.remove(new Query(Criteria.where("url").regex(alternativas)), Notificacion.class).getDeletedCount(), Long::sum);
+            borrados.merge("notificaciones", mongo
+                    .remove(new Query(Criteria.where("url").regex(alternativas)), Notificacion.class).getDeletedCount(),
+                    Long::sum);
         }
         List<String> destinatarios = new ArrayList<>(usuarios);
         destinatarios.addAll(empresas);
         for (List<String> lote : trozos(destinatarios))
-            borrados.merge("notificaciones", mongo.remove(new Query(Criteria.where("destinatarioId").in(lote)), Notificacion.class).getDeletedCount(), Long::sum);
+            borrados.merge("notificaciones", mongo
+                    .remove(new Query(Criteria.where("destinatarioId").in(lote)), Notificacion.class).getDeletedCount(),
+                    Long::sum);
 
         for (List<String> lote : trozos(usuarios)) {
-            borrados.merge("proyectos", mongo.remove(new Query(Criteria.where("usuarioId").in(lote)), Proyecto.class).getDeletedCount(), Long::sum);
-            borrados.merge("invitaciones", mongo.remove(new Query(Criteria.where("talentoId").in(lote)), Invitacion.class).getDeletedCount(), Long::sum);
+            borrados.merge("proyectos",
+                    mongo.remove(new Query(Criteria.where("usuarioId").in(lote)), Proyecto.class).getDeletedCount(),
+                    Long::sum);
+            borrados.merge("invitaciones",
+                    mongo.remove(new Query(Criteria.where("talentoId").in(lote)), Invitacion.class).getDeletedCount(),
+                    Long::sum);
         }
         for (List<String> lote : trozos(empresas)) {
-            borrados.merge("invitaciones", mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Invitacion.class).getDeletedCount(), Long::sum);
-            borrados.merge("cobros", mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Cobro.class).getDeletedCount(), Long::sum);
-            borrados.merge("empleos", mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Empleo.class).getDeletedCount(), Long::sum);
+            borrados.merge("invitaciones",
+                    mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Invitacion.class).getDeletedCount(),
+                    Long::sum);
+            borrados.merge("cobros",
+                    mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Cobro.class).getDeletedCount(),
+                    Long::sum);
+            borrados.merge("empleos",
+                    mongo.remove(new Query(Criteria.where("empresaId").in(lote)), Empleo.class).getDeletedCount(),
+                    Long::sum);
         }
         for (List<String> lote : trozos(empleos))
-            mongo.updateMulti(new Query(Criteria.where("empleosFavoritos").in(lote)), new Update().pullAll("empleosFavoritos", lote.toArray()), Usuario.class);
+            mongo.updateMulti(new Query(Criteria.where("empleosFavoritos").in(lote)),
+                    new Update().pullAll("empleosFavoritos", lote.toArray()), Usuario.class);
 
         for (List<String> lote : trozos(usuarios))
-            borrados.merge("usuarios", mongo.remove(new Query(Criteria.where("id").in(lote)), Usuario.class).getDeletedCount(), Long::sum);
+            borrados.merge("usuarios",
+                    mongo.remove(new Query(Criteria.where("id").in(lote)), Usuario.class).getDeletedCount(), Long::sum);
         for (List<String> lote : trozos(empresas))
-            borrados.merge("empresas", mongo.remove(new Query(Criteria.where("id").in(lote)), Empresa.class).getDeletedCount(), Long::sum);
+            borrados.merge("empresas",
+                    mongo.remove(new Query(Criteria.where("id").in(lote)), Empresa.class).getDeletedCount(), Long::sum);
 
         log.warn("[DataSeeder] Limpieza terminada: {}", borrados);
         return borrados;

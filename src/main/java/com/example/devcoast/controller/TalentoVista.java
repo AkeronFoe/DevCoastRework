@@ -58,7 +58,8 @@ public class TalentoVista {
         v.areaClave = area == Area.PROGRAMACION ? "p" : area == Area.DISENO ? "d" : "o";
         v.categoria = v.especialidad != null ? v.especialidad : null;
         if (u.getStack() != null) {
-            List<String> limpio = u.getStack().stream().filter(s -> s != null && !s.isBlank()).map(String::trim).toList();
+            List<String> limpio = u.getStack().stream().filter(s -> s != null && !s.isBlank()).map(String::trim)
+                    .toList();
             v.stack = new ArrayList<>(limpio.subList(0, Math.min(MAX_STACK, limpio.size())));
             v.stackExtra = Math.max(0, limpio.size() - MAX_STACK);
         }

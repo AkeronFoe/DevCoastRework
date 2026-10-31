@@ -19,11 +19,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
@@ -31,45 +33,68 @@
                         <h1>Guardados</h1>
                         <p class="sub" aria-live="polite" id="gdSub"
                             th:attr="data-total=${guardTotal},data-alta=${guardAltaCompat},data-sol=${guardYaAplico},data-match=${matchDisponible}"
-                            th:text="${guardTotal == 1 ? '1 oferta guardada' : guardTotal + ' ofertas guardadas'} + (${matchDisponible} ? | · ${guardAltaCompat} con match alto| : '') + (${guardYaAplico} > 0 ? | · ${guardYaAplico} ya solicitadas| : '')">3 ofertas guardadas</p>
+                            th:text="${guardTotal == 1 ? '1 oferta guardada' : guardTotal + ' ofertas guardadas'} + (${matchDisponible} ? | · ${guardAltaCompat} con match alto| : '') + (${guardYaAplico} > 0 ? | · ${guardYaAplico} ya solicitadas| : '')">
+                            3 ofertas guardadas</p>
                     </div>
-                    <form class="sort" method="get" th:action="@{/empleos/guardados}" id="sortForm" th:if="${guardTotal > 1}">
+                    <form class="sort" method="get" th:action="@{/empleos/guardados}" id="sortForm"
+                        th:if="${guardTotal > 1}">
                         <input type="hidden" name="filtro" th:value="${filtroP}" th:disabled="${filtroP == null}">
                         <label class="sort"><span class="lab">ORDEN</span>
                             <select name="orden" id="sort">
-                                <option value="recientes" th:selected="${orden == 'recientes'}">Últimas guardadas</option>
-                                <option value="match" th:if="${matchDisponible}" th:selected="${orden == 'match'}">Mejor match</option>
+                                <option value="recientes" th:selected="${orden == 'recientes'}">Últimas guardadas
+                                </option>
+                                <option value="match" th:if="${matchDisponible}" th:selected="${orden == 'match'}">Mejor
+                                    match</option>
                             </select>
                         </label>
                         <noscript><button class="clear" type="submit">aplicar</button></noscript>
                     </form>
                 </div>
 
-                <p class="legend" th:if="${talentoSinStack and guardTotal > 0}"><span>Agrega tu stack en <a th:href="@{/perfil}">tu perfil</a> para ver cuánto encajas con cada oferta guardada.</span></p>
+                <p class="legend" th:if="${talentoSinStack and guardTotal > 0}"><span>Agrega tu stack en <a
+                            th:href="@{/perfil}">tu perfil</a> para ver cuánto encajas con cada oferta guardada.</span>
+                </p>
 
                 <div class="filters" th:if="${guardTotal > 0}">
                     <div class="fg" role="group" aria-labelledby="fVer"><span class="lab" id="fVer">VER</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/empleos/guardados(orden=${orden == 'recientes' ? null : orden})}" th:attr="aria-current=${filtro == ''} ? 'true'">Todas<b th:text="${guardTotal}">3</b></a>
-                            <a class="ch" th:if="${matchDisponible}" th:href="@{/empleos/guardados(filtro='alta',orden=${orden == 'recientes' ? null : orden})}" th:attr="aria-current=${filtro == 'alta'} ? 'true'">Match alto<b th:text="${guardAltaCompat}">1</b></a>
-                            <a class="ch" th:href="@{/empleos/guardados(filtro='pendientes',orden=${orden == 'recientes' ? null : orden})}" th:attr="aria-current=${filtro == 'pendientes'} ? 'true'">Sin solicitar<b th:text="${guardTotal - guardYaAplico}">2</b></a>
+                            <a class="ch" th:href="@{/empleos/guardados(orden=${orden == 'recientes' ? null : orden})}"
+                                th:attr="aria-current=${filtro == ''} ? 'true'">Todas<b
+                                    th:text="${guardTotal}">3</b></a>
+                            <a class="ch" th:if="${matchDisponible}"
+                                th:href="@{/empleos/guardados(filtro='alta',orden=${orden == 'recientes' ? null : orden})}"
+                                th:attr="aria-current=${filtro == 'alta'} ? 'true'">Match alto<b
+                                    th:text="${guardAltaCompat}">1</b></a>
+                            <a class="ch"
+                                th:href="@{/empleos/guardados(filtro='pendientes',orden=${orden == 'recientes' ? null : orden})}"
+                                th:attr="aria-current=${filtro == 'pendientes'} ? 'true'">Sin solicitar<b
+                                    th:text="${guardTotal - guardYaAplico}">2</b></a>
                         </div>
                     </div>
                     <a class="clear" th:if="${hayFiltros}" th:href="@{/empleos/guardados}">limpiar filtros</a>
                 </div>
 
-                <section class="jobs" id="guardadosLista" aria-label="Ofertas guardadas" th:if="${!#lists.isEmpty(tarjetas)}">
-                    <th:block th:each="t, st : ${tarjetas}"><th:block th:replace="~{fragments/pase :: ticket(${t}, false, ${st.count})}"></th:block></th:block>
+                <section class="jobs" id="guardadosLista" aria-label="Ofertas guardadas"
+                    th:if="${!#lists.isEmpty(tarjetas)}">
+                    <th:block th:each="t, st : ${tarjetas}">
+                        <th:block th:replace="~{fragments/pase :: ticket(${t}, false, ${st.count})}"></th:block>
+                    </th:block>
                 </section>
 
                 <th:block th:if="${guardTotal == 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Nada guardado todavía.', 'Marca una oferta en Empleos y la encuentras aquí, con su match, cuando quieras decidir.', '/empleos', 'Explorar empleos')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Nada guardado todavía.', 'Marca una oferta en Empleos y la encuentras aquí, con su match, cuando quieras decidir.', '/empleos', 'Explorar empleos')}">
+                    </div>
                 </th:block>
                 <th:block th:if="${guardTotal > 0 and totalMostradas == 0}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Ninguna de tus ofertas guardadas cumple ese filtro.', '/empleos/guardados', 'Ver todas')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Ninguna de tus ofertas guardadas cumple ese filtro.', '/empleos/guardados', 'Ver todas')}">
+                    </div>
                 </th:block>
                 <div id="guardadosVacio" hidden>
-                    <div th:replace="~{fragments/nautico :: empty('Nada guardado todavía.', 'Marca una oferta en Empleos y la encuentras aquí, con su match, cuando quieras decidir.', '/empleos', 'Explorar empleos')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Nada guardado todavía.', 'Marca una oferta en Empleos y la encuentras aquí, con su match, cuando quieras decidir.', '/empleos', 'Explorar empleos')}">
+                    </div>
                 </div>
             </main>
         </div>

@@ -50,7 +50,11 @@ public class PageController {
     private final CobroRepository cobroRepository;
     private final PlanService planService;
 
-    public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository, SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository, InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository, BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService, CobroRepository cobroRepository, PlanService planService) {
+    public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository,
+            SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository,
+            InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository,
+            BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService, CobroRepository cobroRepository,
+            PlanService planService) {
         this.usuarioRepository = usuarioRepository;
         this.empleoRepository = empleoRepository;
         this.solicitudRepository = solicitudRepository;
@@ -86,12 +90,12 @@ public class PageController {
 
         Usuario usuario = (Usuario) model.asMap().get("usuario");
         List<Proyecto> proyectosUsuario = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(id);
-        long invTotal   = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id).size();
-        long solTotal   = solicitudRepository.countByUsuarioId(id);
-        long solAcept   = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
-        model.addAttribute("statProyectos",            proyectosUsuario.size());
-        model.addAttribute("statInvitacionesTotal",    invTotal);
-        model.addAttribute("statSolicitudesTotal",     solTotal);
+        long invTotal = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id).size();
+        long solTotal = solicitudRepository.countByUsuarioId(id);
+        long solAcept = solicitudRepository.countByUsuarioIdAndEstado(id, "aprobada");
+        model.addAttribute("statProyectos", proyectosUsuario.size());
+        model.addAttribute("statInvitacionesTotal", invTotal);
+        model.addAttribute("statSolicitudesTotal", solTotal);
         model.addAttribute("statSolicitudesAceptadas", solAcept);
 
         List<String> previewColores = proyectosUsuario.stream()
@@ -112,7 +116,8 @@ public class PageController {
             model.addAttribute("extraModalidad", mod.isEmpty() ? sinVacios(usuario.getModalidad()) : null);
             model.addAttribute("extraDisponibilidad", disp.isEmpty() ? sinVacios(usuario.getDisponibilidad()) : null);
             model.addAttribute("extraEspecialidad", esp.isEmpty() ? sinVacios(usuario.getEspecialidad()) : null);
-            model.addAttribute("preview", TalentoVista.de(usuario, (int) publicados, previewColores, usuario.isDestacar(), false));
+            model.addAttribute("preview",
+                    TalentoVista.de(usuario, (int) publicados, previewColores, usuario.isDestacar(), false));
             List<LogrosPerfil.Logro> logros = LogrosPerfil.de(usuario, proyectosUsuario.size(), invTotal, solAcept);
             model.addAttribute("logros", logros);
             model.addAttribute("logrosDesbloqueados", logros.stream().filter(LogrosPerfil.Logro::desbloqueado).count());
@@ -205,7 +210,7 @@ public class PageController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
-        String id   = RoleGuard.getId(session);
+        String id = RoleGuard.getId(session);
         String tipo = RoleGuard.getTipo(session);
 
         if (passwordNueva == null || passwordNueva.trim().length() < 8) {
@@ -249,7 +254,7 @@ public class PageController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
-        String id   = RoleGuard.getId(session);
+        String id = RoleGuard.getId(session);
         String tipo = RoleGuard.getTipo(session);
 
         if ("empresa".equals(tipo)) {
@@ -297,12 +302,15 @@ public class PageController {
 
     @GetMapping("/perfil/preview")
     public String perfilPreview(HttpSession session, Model model) {
-        if (RoleGuard.sinSesion(session))  return "redirect:/login";
-        if (RoleGuard.esEmpresa(session))  return "redirect:/perfil";
+        if (RoleGuard.sinSesion(session))
+            return "redirect:/login";
+        if (RoleGuard.esEmpresa(session))
+            return "redirect:/perfil";
 
         String id = RoleGuard.getId(session);
         Usuario talento = usuarioRepository.findById(id).orElse(null);
-        if (talento == null) return "redirect:/perfil";
+        if (talento == null)
+            return "redirect:/perfil";
 
         model.addAttribute("talento", talento);
         model.addAttribute("tv", TalentoVista.de(talento, 0, null, false, false));
@@ -310,10 +318,10 @@ public class PageController {
         model.addAttribute("esEmpresa", false);
         model.addAttribute("yaInvitado", false);
         model.addAttribute("misEmpleos", java.util.Collections.emptyList());
-        model.addAttribute("usuarioActualId",     RoleGuard.getId(session));
+        model.addAttribute("usuarioActualId", RoleGuard.getId(session));
         model.addAttribute("usuarioActualCorreo", RoleGuard.getCorreo(session));
         model.addAttribute("usuarioActualNombre", RoleGuard.getNombre(session));
-        model.addAttribute("usuarioActualTipo",   RoleGuard.getTipo(session));
+        model.addAttribute("usuarioActualTipo", RoleGuard.getTipo(session));
         model.addAttribute("usuarioActualFotoUrl", session.getAttribute("usuarioActualFotoUrl"));
         return "talento-perfil";
     }
@@ -400,9 +408,9 @@ public class PageController {
         long aceptadas = mongoTemplate.count(
                 Query.query(Criteria.where("estado").is("aceptada")),
                 com.example.devcoast.model.Invitacion.class);
-        model.addAttribute("platTalentos",   usuarioRepository.count());
-        model.addAttribute("platEmpresas",   empresaRepository.count());
-        model.addAttribute("platEmpleos",    empleoRepository.count());
+        model.addAttribute("platTalentos", usuarioRepository.count());
+        model.addAttribute("platEmpresas", empresaRepository.count());
+        model.addAttribute("platEmpleos", empleoRepository.count());
         model.addAttribute("platConexiones", aprobadas + aceptadas);
     }
 
@@ -415,40 +423,43 @@ public class PageController {
                 ? java.util.Collections.emptyList()
                 : solicitudRepository.findByEmpleoIdIn(misIds);
 
-        long activos       = misEmpleos.stream().filter(e -> "ACTIVO".equalsIgnoreCase(e.getEstado())).count();
-        long cerrados      = misEmpleos.stream().filter(e -> "CERRADO".equalsIgnoreCase(e.getEstado())).count();
-        long solTotal      = misSolicitudes.size();
-        long solAprobadas  = misSolicitudes.stream().filter(s -> "aprobada".equals(s.getEstado())).count();
+        long activos = misEmpleos.stream().filter(e -> "ACTIVO".equalsIgnoreCase(e.getEstado())).count();
+        long cerrados = misEmpleos.stream().filter(e -> "CERRADO".equalsIgnoreCase(e.getEstado())).count();
+        long solTotal = misSolicitudes.size();
+        long solAprobadas = misSolicitudes.stream().filter(s -> "aprobada".equals(s.getEstado())).count();
         long solRechazadas = misSolicitudes.stream().filter(s -> "rechazada".equals(s.getEstado())).count();
-        long solRevision   = misSolicitudes.stream().filter(s -> "revision".equals(s.getEstado())).count();
-        long tasa          = solTotal > 0 ? Math.round(solAprobadas * 100.0 / solTotal) : 0;
+        long solRevision = misSolicitudes.stream().filter(s -> "revision".equals(s.getEstado())).count();
+        long tasa = solTotal > 0 ? Math.round(solAprobadas * 100.0 / solTotal) : 0;
 
-        List<com.example.devcoast.model.Invitacion> misInvs =
-                invitacionRepository.findByEmpresaIdOrderByFechaEnvioDesc(empresaId);
+        List<com.example.devcoast.model.Invitacion> misInvs = invitacionRepository
+                .findByEmpresaIdOrderByFechaEnvioDesc(empresaId);
         long invAceptadas = misInvs.stream().filter(i -> "aceptada".equals(i.getEstado())).count();
 
-        model.addAttribute("empActivos",       activos);
-        model.addAttribute("empCerrados",      cerrados);
-        model.addAttribute("empSolTotal",      solTotal);
-        model.addAttribute("empSolAprobadas",  solAprobadas);
+        model.addAttribute("empActivos", activos);
+        model.addAttribute("empCerrados", cerrados);
+        model.addAttribute("empSolTotal", solTotal);
+        model.addAttribute("empSolAprobadas", solAprobadas);
         model.addAttribute("empSolRechazadas", solRechazadas);
-        model.addAttribute("empSolRevision",   solRevision);
-        model.addAttribute("empTasa",          tasa);
-        model.addAttribute("empInvEnviadas",   (long) misInvs.size());
-        model.addAttribute("empInvAceptadas",  invAceptadas);
+        model.addAttribute("empSolRevision", solRevision);
+        model.addAttribute("empTasa", tasa);
+        model.addAttribute("empInvEnviadas", (long) misInvs.size());
+        model.addAttribute("empInvAceptadas", invAceptadas);
 
         anBreakdown(model, "empModalidad", misEmpleos.stream()
                 .filter(e -> e.getModalidad() != null && !e.getModalidad().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        e -> anCapFirst(e.getModalidad()), java.util.stream.Collectors.counting())), 99);
+                        e -> anCapFirst(e.getModalidad()), java.util.stream.Collectors.counting())),
+                99);
         anBreakdown(model, "empCategoria", misEmpleos.stream()
                 .filter(e -> e.getCategoria() != null && !e.getCategoria().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        Empleo::getCategoria, java.util.stream.Collectors.counting())), 6);
+                        Empleo::getCategoria, java.util.stream.Collectors.counting())),
+                6);
         anBreakdown(model, "empSeniority", misEmpleos.stream()
                 .filter(e -> e.getSeniority() != null && !e.getSeniority().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        Empleo::getSeniority, java.util.stream.Collectors.counting())), 99);
+                        Empleo::getSeniority, java.util.stream.Collectors.counting())),
+                99);
 
         java.util.Map<String, Long> solPorEmpleo = misSolicitudes.stream()
                 .collect(java.util.stream.Collectors.groupingBy(
@@ -457,10 +468,10 @@ public class PageController {
         List<java.util.Map<String, Object>> topEmpleos = misEmpleos.stream()
                 .map(e -> {
                     java.util.Map<String, Object> row = new java.util.LinkedHashMap<>();
-                    row.put("titulo",           e.getTitulo());
-                    row.put("modalidad",        e.getModalidad());
-                    row.put("estado",           e.getEstado());
-                    row.put("categoria",        e.getCategoria());
+                    row.put("titulo", e.getTitulo());
+                    row.put("modalidad", e.getModalidad());
+                    row.put("estado", e.getEstado());
+                    row.put("categoria", e.getCategoria());
                     row.put("totalSolicitudes", solPorEmpleo.getOrDefault(e.getId(), 0L));
                     return row;
                 })
@@ -481,51 +492,54 @@ public class PageController {
     }
 
     private void analyticsTalentoStats(String usuarioId, Model model) {
-        List<Solicitud> misSolicitudes =
-                solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId);
+        List<Solicitud> misSolicitudes = solicitudRepository.findByUsuarioIdOrderByFechaSolicitudDesc(usuarioId);
 
-        long solTotal      = misSolicitudes.size();
-        long solAprobadas  = misSolicitudes.stream().filter(s -> "aprobada".equals(s.getEstado())).count();
+        long solTotal = misSolicitudes.size();
+        long solAprobadas = misSolicitudes.stream().filter(s -> "aprobada".equals(s.getEstado())).count();
         long solRechazadas = misSolicitudes.stream().filter(s -> "rechazada".equals(s.getEstado())).count();
-        long solRevision   = misSolicitudes.stream().filter(s -> "revision".equals(s.getEstado())).count();
-        long tasa          = solTotal > 0 ? Math.round(solAprobadas * 100.0 / solTotal) : 0;
+        long solRevision = misSolicitudes.stream().filter(s -> "revision".equals(s.getEstado())).count();
+        long tasa = solTotal > 0 ? Math.round(solAprobadas * 100.0 / solTotal) : 0;
 
-        List<com.example.devcoast.model.Invitacion> misInvs =
-                invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(usuarioId);
+        List<com.example.devcoast.model.Invitacion> misInvs = invitacionRepository
+                .findByTalentoIdOrderByFechaEnvioDesc(usuarioId);
         long invPendientes = misInvs.stream().filter(i -> "pendiente".equals(i.getEstado())).count();
-        long proyectos     = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(usuarioId).size();
+        long proyectos = proyectoRepository.findByUsuarioIdOrderByCreadoEnDesc(usuarioId).size();
 
-        model.addAttribute("talSolTotal",      solTotal);
-        model.addAttribute("talSolAprobadas",  solAprobadas);
+        model.addAttribute("talSolTotal", solTotal);
+        model.addAttribute("talSolAprobadas", solAprobadas);
         model.addAttribute("talSolRechazadas", solRechazadas);
-        model.addAttribute("talSolRevision",   solRevision);
-        model.addAttribute("talTasa",          tasa);
-        model.addAttribute("talInvRecibidas",  (long) misInvs.size());
+        model.addAttribute("talSolRevision", solRevision);
+        model.addAttribute("talTasa", tasa);
+        model.addAttribute("talInvRecibidas", (long) misInvs.size());
         model.addAttribute("talInvPendientes", invPendientes);
-        model.addAttribute("talProyectos",     proyectos);
+        model.addAttribute("talProyectos", proyectos);
 
         anBreakdown(model, "talCategoria", misSolicitudes.stream()
                 .filter(s -> s.getEmpleoCategoria() != null && !s.getEmpleoCategoria().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        Solicitud::getEmpleoCategoria, java.util.stream.Collectors.counting())), 6);
+                        Solicitud::getEmpleoCategoria, java.util.stream.Collectors.counting())),
+                6);
         anBreakdown(model, "talModalidad", misSolicitudes.stream()
                 .filter(s -> s.getEmpleoModalidad() != null && !s.getEmpleoModalidad().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        s -> anCapFirst(s.getEmpleoModalidad()), java.util.stream.Collectors.counting())), 99);
+                        s -> anCapFirst(s.getEmpleoModalidad()), java.util.stream.Collectors.counting())),
+                99);
         anBreakdown(model, "talSeniority", misSolicitudes.stream()
                 .filter(s -> s.getEmpleoSeniority() != null && !s.getEmpleoSeniority().isBlank())
                 .collect(java.util.stream.Collectors.groupingBy(
-                        Solicitud::getEmpleoSeniority, java.util.stream.Collectors.counting())), 99);
+                        Solicitud::getEmpleoSeniority, java.util.stream.Collectors.counting())),
+                99);
 
         model.addAttribute("talRecentSolicitudes",
                 misSolicitudes.stream().limit(8).collect(java.util.stream.Collectors.toList()));
     }
 
     private void anBreakdown(Model model, String prefix,
-                              java.util.Map<String, Long> raw, int limit) {
+            java.util.Map<String, Long> raw, int limit) {
         List<java.util.Map.Entry<String, Long>> entries = new ArrayList<>(raw.entrySet());
         entries.sort((a, b) -> Long.compare(b.getValue(), a.getValue()));
-        if (entries.size() > limit) entries = entries.subList(0, limit);
+        if (entries.size() > limit)
+            entries = entries.subList(0, limit);
         model.addAttribute(prefix + "Labels", entries.stream()
                 .map(java.util.Map.Entry::getKey).collect(java.util.stream.Collectors.toList()));
         model.addAttribute(prefix + "Values", entries.stream()
@@ -533,12 +547,14 @@ public class PageController {
     }
 
     private static String anCapFirst(String s) {
-        if (s == null || s.isBlank()) return s;
+        if (s == null || s.isBlank())
+            return s;
         return Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase();
     }
 
     private static String anTruncate(String s, int max) {
-        if (s == null) return "";
+        if (s == null)
+            return "";
         return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 

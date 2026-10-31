@@ -16,8 +16,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @CompoundIndexes({
-    @CompoundIndex(name = "dest_fecha_idx", def = "{'destinatario_id': 1, 'fecha_creacion': -1}"),
-    @CompoundIndex(name = "dest_leida_idx", def = "{'destinatario_id': 1, 'leida': 1}")
+        @CompoundIndex(name = "dest_fecha_idx", def = "{'destinatario_id': 1, 'fecha_creacion': -1}"),
+        @CompoundIndex(name = "dest_leida_idx", def = "{'destinatario_id': 1, 'leida': 1}")
 })
 @Document(collection = "notificaciones")
 public class Notificacion {

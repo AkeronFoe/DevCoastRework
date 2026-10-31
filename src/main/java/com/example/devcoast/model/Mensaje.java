@@ -13,8 +13,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @CompoundIndexes({
-    @CompoundIndex(name = "sol_fecha_idx",  def = "{'solicitudId': 1, 'fechaEnvio': -1}"),
-    @CompoundIndex(name = "dest_leido_idx", def = "{'destinatarioId': 1, 'leido': 1}")
+        @CompoundIndex(name = "sol_fecha_idx", def = "{'solicitudId': 1, 'fechaEnvio': -1}"),
+        @CompoundIndex(name = "dest_leido_idx", def = "{'destinatarioId': 1, 'leido': 1}")
 })
 @Document(collection = "mensajes")
 public class Mensaje {
@@ -29,7 +29,7 @@ public class Mensaje {
 
     private String destinatarioId;
 
-    private String  texto;
-    private Date    fechaEnvio;
+    private String texto;
+    private Date fechaEnvio;
     private boolean leido = false;
 }

@@ -31,7 +31,8 @@ public class NotificacionController {
     @GetMapping("/notificaciones/{id}/ir")
     public String irANotificacion(@PathVariable String id, HttpSession session) {
         String uid = (String) session.getAttribute("usuarioActualId");
-        if (uid == null) return "redirect:/login";
+        if (uid == null)
+            return "redirect:/login";
 
         Notificacion n = notificacionRepository.findById(id).orElse(null);
         if (n != null && uid.equals(n.getDestinatarioId())) {
@@ -46,7 +47,8 @@ public class NotificacionController {
     @PostMapping("/notificaciones/leer-todas")
     public ResponseEntity<Map<String, Object>> leerTodas(HttpSession session) {
         String uid = (String) session.getAttribute("usuarioActualId");
-        if (uid == null) return ResponseEntity.status(401).body(Map.of("ok", false));
+        if (uid == null)
+            return ResponseEntity.status(401).body(Map.of("ok", false));
 
         mongoTemplate.updateMulti(
                 Query.query(Criteria.where("destinatarioId").is(uid).and("leida").is(false)),

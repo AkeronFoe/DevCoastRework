@@ -12,12 +12,16 @@
                 <h1 id="mx-h">Bandeja</h1>
             </div>
             <p class="mx-count" id="mxCount" aria-live="polite"
-                th:text="${totalNoLeidos == 0} ? 'Todo al día' : (${totalNoLeidos == 1} ? '1 sin leer' : ${totalNoLeidos} + ' sin leer')">3 sin leer</p>
+                th:text="${totalNoLeidos == 0} ? 'Todo al día' : (${totalNoLeidos == 1} ? '1 sin leer' : ${totalNoLeidos} + ' sin leer')">
+                3 sin leer</p>
         </header>
 
-        <div class="mx-tabs" role="group" aria-label="Filtrar conversaciones" th:unless="${#lists.isEmpty(conversaciones)}">
-            <button class="ch" type="button" data-filtro="todos" aria-pressed="true">Todas <b th:text="${#lists.size(conversaciones)}">0</b></button>
-            <button class="ch" type="button" data-filtro="sin-leer" aria-pressed="false">Sin leer <b id="mxSinLeer" th:text="${#lists.size(conversaciones.?[noLeidos > 0])}">0</b></button>
+        <div class="mx-tabs" role="group" aria-label="Filtrar conversaciones"
+            th:unless="${#lists.isEmpty(conversaciones)}">
+            <button class="ch" type="button" data-filtro="todos" aria-pressed="true">Todas <b
+                    th:text="${#lists.size(conversaciones)}">0</b></button>
+            <button class="ch" type="button" data-filtro="sin-leer" aria-pressed="false">Sin leer <b id="mxSinLeer"
+                    th:text="${#lists.size(conversaciones.?[noLeidos > 0])}">0</b></button>
         </div>
 
         <p class="mx-q" th:if="${q != null and !#strings.isEmpty(q)}">
@@ -29,7 +33,8 @@
                 <a class="mx-it" th:href="@{/chat/{s}(s=${c.solicitud.id})}"
                     th:attr="aria-current=${c.solicitud.id == activaId} ? 'page'"
                     th:classappend="${c.noLeidos > 0} ? 'unread'">
-                    <span class="mx-av" th:classappend="'t' + ${c.tono}" aria-hidden="true" th:text="${c.inicial}">N</span>
+                    <span class="mx-av" th:classappend="'t' + ${c.tono}" aria-hidden="true"
+                        th:text="${c.inicial}">N</span>
                     <span class="mx-it-b">
                         <span class="mx-it-top">
                             <b class="mx-name" th:text="${c.otroNombre}">Nordic Labs</b>
@@ -37,7 +42,8 @@
                                 th:text="${#dates.format(new java.util.Date(c.ultimaMarca), 'dd/MM HH:mm')}">12:30</time>
                         </span>
                         <span class="mx-job" th:text="${c.solicitud.empleoTitulo ?: 'Oferta'}">Frontend Developer</span>
-                        <span class="mx-prev"><i th:if="${c.ultimoPropio}">Tú: </i><span th:text="${c.ultimoTexto}">Último mensaje</span></span>
+                        <span class="mx-prev"><i th:if="${c.ultimoPropio}">Tú: </i><span
+                                th:text="${c.ultimoTexto}">Último mensaje</span></span>
                     </span>
                     <span class="mx-n" th:if="${c.noLeidos > 0}" th:text="${c.noLeidos > 99 ? '99+' : c.noLeidos}"
                         th:attr="aria-label=|${c.noLeidos} sin leer|">2</span>
@@ -48,13 +54,20 @@
         <p class="mx-none" id="mxNone" hidden>No hay conversaciones con ese filtro.</p>
 
         <div class="mx-vacio" th:if="${#lists.isEmpty(conversaciones)}">
-            <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/>
-                <th:block th:replace="~{fragments/nautico :: gull}"></th:block></svg>
-            <h2 th:text="${q != null and !#strings.isEmpty(q)} ? 'Sin resultados.' : 'Aún no hay mensajes.'">Aún no hay mensajes.</h2>
+            <svg viewBox="96 270 186 156" role="img" aria-label="La gaviota espera en cubierta">
+                <rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8" />
+                <rect x="96" y="397" width="186" height="40" fill="#F3F4F8" />
+                <rect x="96" y="410" width="186" height="9" fill="#2DD4BF" />
+                <th:block th:replace="~{fragments/nautico :: gull}"></th:block>
+            </svg>
+            <h2 th:text="${q != null and !#strings.isEmpty(q)} ? 'Sin resultados.' : 'Aún no hay mensajes.'">Aún no hay
+                mensajes.</h2>
             <p th:if="${q == null or #strings.isEmpty(q)}"
-                th:text="${session.usuarioActualTipo == 'empresa'} ? 'Escríbele a un candidato desde sus postulaciones y la charla aparecerá aquí.' : 'Cuando una empresa te escriba, o tú le escribas desde una solicitud, la charla aparecerá aquí.'">Texto</p>
+                th:text="${session.usuarioActualTipo == 'empresa'} ? 'Escríbele a un candidato desde sus postulaciones y la charla aparecerá aquí.' : 'Cuando una empresa te escriba, o tú le escribas desde una solicitud, la charla aparecerá aquí.'">
+                Texto</p>
             <a class="btn-o" th:href="@{${session.usuarioActualTipo == 'empresa' ? '/candidatos' : '/solicitudes'}}"
-                th:text="${session.usuarioActualTipo == 'empresa'} ? 'Ver postulaciones' : 'Ver mis solicitudes'">Ver solicitudes</a>
+                th:text="${session.usuarioActualTipo == 'empresa'} ? 'Ver postulaciones' : 'Ver mis solicitudes'">Ver
+                solicitudes</a>
         </div>
     </section>
 

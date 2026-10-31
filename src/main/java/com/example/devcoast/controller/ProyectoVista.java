@@ -60,7 +60,8 @@ public class ProyectoVista {
         if (src == null)
             return null;
         String s = src.trim();
-        return s.matches("(?i)^https?://[^\\s]+$") || s.matches("(?i)^data:image/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$") ? s : null;
+        return s.matches("(?i)^https?://[^\\s]+$")
+                || s.matches("(?i)^data:image/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$") ? s : null;
     }
 
     private static String vacioANull(String s) {

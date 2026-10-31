@@ -33,10 +33,15 @@ public class NotificacionInterceptor implements HandlerInterceptor {
 
     private final MongoTemplate mongoTemplate;
 
-    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard", "dashboard-empresa",
-            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes", "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle", "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics", "empresa-perfil", "mensajes", "chat");
+    private static final Set<String> VISTAS_SHELL_NAUTICO = Set.of("empleos", "solicitudes", "proyectos", "dashboard",
+            "dashboard-empresa",
+            "talentos", "talento-perfil", "perfil", "perfil-empresa", "misEmpleos", "candidatos", "ajustes",
+            "empleos-guardados", "detalles-empleo", "curriculum", "facturacion", "solicitud-detalle",
+            "postulaciones-empleo", "crearEmpleo", "subirProyecto", "cambiarPassword", "detalle-proyecto", "analytics",
+            "empresa-perfil", "mensajes", "chat");
 
-    public NotificacionInterceptor(InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
+    public NotificacionInterceptor(InvitacionRepository invitacionRepository,
+            NotificacionRepository notificacionRepository,
             MensajeRepository mensajeRepository, MongoTemplate mongoTemplate) {
         this.invitacionRepository = invitacionRepository;
         this.notificacionRepository = notificacionRepository;
@@ -48,15 +53,19 @@ public class NotificacionInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler, ModelAndView modelAndView) {
 
-        if (modelAndView == null || modelAndView.getViewName() == null) return;
+        if (modelAndView == null || modelAndView.getViewName() == null)
+            return;
         String view = modelAndView.getViewName();
-        if (view.startsWith("redirect:") || view.startsWith("forward:")) return;
+        if (view.startsWith("redirect:") || view.startsWith("forward:"))
+            return;
 
         HttpSession session = request.getSession(false);
-        if (session == null) return;
+        if (session == null)
+            return;
 
         Object usuarioId = session.getAttribute("usuarioActualId");
-        if (usuarioId == null) return;
+        if (usuarioId == null)
+            return;
 
         String uid = usuarioId.toString();
         boolean esTalento = "talento".equals(session.getAttribute("usuarioActualTipo"));
@@ -117,13 +126,15 @@ public class NotificacionInterceptor implements HandlerInterceptor {
                         "portfolio_url", "linkedin_url", "github_url", "cv_experiencias", "cv_educaciones");
                 u = mongoTemplate.findOne(q, Usuario.class);
             }
-            if (u != null) mav.addObject("shellCompletitud", u.getCompletitudPerfil());
+            if (u != null)
+                mav.addObject("shellCompletitud", u.getCompletitudPerfil());
         } catch (Exception ignored) {
         }
     }
 
     private void cargarPendientesEmpresa(ModelAndView mav, String uid) {
-        if (mav.getModel().containsKey("solicitudesPendientesEmpresa")) return;
+        if (mav.getModel().containsKey("solicitudesPendientesEmpresa"))
+            return;
         try {
             Query ofertas = new Query(Criteria.where("empresaId").is(uid).and("estado").is("ACTIVO"));
             ofertas.fields().include("_id");

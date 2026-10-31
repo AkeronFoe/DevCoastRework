@@ -12,21 +12,21 @@ import com.example.devcoast.model.Mensaje;
 
 public interface MensajeRepository extends MongoRepository<Mensaje, String> {
 
-    List<Mensaje> findBySolicitudIdOrderByFechaEnvioAsc(String solicitudId);
+        List<Mensaje> findBySolicitudIdOrderByFechaEnvioAsc(String solicitudId);
 
-    long countBySolicitudIdAndDestinatarioIdAndLeidoFalse(String solicitudId, String destinatarioId);
+        long countBySolicitudIdAndDestinatarioIdAndLeidoFalse(String solicitudId, String destinatarioId);
 
-    long countByDestinatarioIdAndLeidoFalse(String destinatarioId);
+        long countByDestinatarioIdAndLeidoFalse(String destinatarioId);
 
-    Optional<Mensaje> findFirstBySolicitudIdOrderByFechaEnvioDesc(String solicitudId);
+        Optional<Mensaje> findFirstBySolicitudIdOrderByFechaEnvioDesc(String solicitudId);
 
-    List<Mensaje> findBySolicitudIdInOrderByFechaEnvioDesc(List<String> solicitudIds);
+        List<Mensaje> findBySolicitudIdInOrderByFechaEnvioDesc(List<String> solicitudIds);
 
-    Page<Mensaje> findBySolicitudIdOrderByFechaEnvioDesc(String solicitudId, Pageable pageable);
+        Page<Mensaje> findBySolicitudIdOrderByFechaEnvioDesc(String solicitudId, Pageable pageable);
 
-    List<Mensaje> findBySolicitudIdAndFechaEnvioBeforeOrderByFechaEnvioDesc(
-            String solicitudId, Date fecha, Pageable pageable);
+        List<Mensaje> findBySolicitudIdAndFechaEnvioBeforeOrderByFechaEnvioDesc(
+                        String solicitudId, Date fecha, Pageable pageable);
 
-    List<Mensaje> findBySolicitudIdAndFechaEnvioAfterOrderByFechaEnvioAsc(
-            String solicitudId, Date fecha);
+        List<Mensaje> findBySolicitudIdAndFechaEnvioAfterOrderByFechaEnvioAsc(
+                        String solicitudId, Date fecha);
 }

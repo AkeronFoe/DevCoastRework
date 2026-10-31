@@ -17,10 +17,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
@@ -28,7 +31,8 @@
                         <div class="eyebrow">// mis ofertas</div>
                         <h1>Mis ofertas</h1>
                         <p class="sub" aria-live="polite"
-                            th:text="${nActivas} + ' de ' + ${limiteActivas} + (${nActivas} == 1 ? ' oferta activa' : ' ofertas activas') + ' · ' + ${nPostulacionesRevision} + (${nPostulacionesRevision} == 1 ? ' postulación en revisión' : ' postulaciones en revisión')">2 de 3 ofertas activas</p>
+                            th:text="${nActivas} + ' de ' + ${limiteActivas} + (${nActivas} == 1 ? ' oferta activa' : ' ofertas activas') + ' · ' + ${nPostulacionesRevision} + (${nPostulacionesRevision} == 1 ? ' postulación en revisión' : ' postulaciones en revisión')">
+                            2 de 3 ofertas activas</p>
                     </div>
                     <div class="acts">
                         <a class="btn-o sm" th:if="${puedePublicar}" th:href="@{/crearEmpleo}">Publicar oferta</a>
@@ -36,15 +40,25 @@
                 </div>
 
                 <div class="alertbar" role="status" th:unless="${puedePublicar}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-                    <div class="txt"><b th:text="'Llegaste al límite de ' + ${limiteActivas} + ' ofertas activas.'">Llegaste al límite de 3 ofertas activas.</b>
-                        <span>Cierra una oferta o cambia de plan para publicar otra.</span></div>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 8v5M12 16.5v.5" />
+                        <path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+                    </svg>
+                    <div class="txt"><b
+                            th:text="'Llegaste al límite de ' + ${limiteActivas} + ' ofertas activas.'">Llegaste al
+                            límite de 3 ofertas activas.</b>
+                        <span>Cierra una oferta o cambia de plan para publicar otra.</span>
+                    </div>
                     <a class="btn-o sm" th:href="@{/facturacion}">Ver plan</a>
                 </div>
 
                 <div class="tabs" role="group" aria-label="Estado de las ofertas">
-                    <a class="ch" th:href="@{/misEmpleos}" th:attr="aria-current=${tabSel == 'activas'} ? 'true'">Activas <b th:text="${nActivas}">0</b></a>
-                    <a class="ch" th:href="@{/misEmpleos(tab='cerradas')}" th:attr="aria-current=${tabSel == 'cerradas'} ? 'true'">Cerradas <b th:text="${nCerradas}">0</b></a>
+                    <a class="ch" th:href="@{/misEmpleos}"
+                        th:attr="aria-current=${tabSel == 'activas'} ? 'true'">Activas <b
+                            th:text="${nActivas}">0</b></a>
+                    <a class="ch" th:href="@{/misEmpleos(tab='cerradas')}"
+                        th:attr="aria-current=${tabSel == 'cerradas'} ? 'true'">Cerradas <b
+                            th:text="${nCerradas}">0</b></a>
                 </div>
 
                 <section class="reqs" aria-label="Lista de ofertas" th:if="${!#lists.isEmpty(ofertas)}">
@@ -54,10 +68,14 @@
                 </section>
 
                 <th:block th:if="${#lists.isEmpty(ofertas) and tabSel == 'activas'}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No tienes ofertas activas. Publica una para empezar a recibir candidatos.', '/crearEmpleo', 'Publicar oferta')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No tienes ofertas activas. Publica una para empezar a recibir candidatos.', '/crearEmpleo', 'Publicar oferta')}">
+                    </div>
                 </th:block>
                 <th:block th:if="${#lists.isEmpty(ofertas) and tabSel == 'cerradas'}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No tienes ofertas cerradas. Las que cierres se guardan aquí.', '/misEmpleos', 'Ver activas')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No tienes ofertas cerradas. Las que cierres se guardan aquí.', '/misEmpleos', 'Ver activas')}">
+                    </div>
                 </th:block>
             </main>
         </div>

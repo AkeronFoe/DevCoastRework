@@ -30,7 +30,8 @@ public class CloudinaryController {
     private final EmpresaRepository empresaRepository;
     private final ProyectoRepository proyectoRepository;
 
-    public CloudinaryController(CloudinaryService cloudinaryService, UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, ProyectoRepository proyectoRepository) {
+    public CloudinaryController(CloudinaryService cloudinaryService, UsuarioRepository usuarioRepository,
+            EmpresaRepository empresaRepository, ProyectoRepository proyectoRepository) {
         this.cloudinaryService = cloudinaryService;
         this.usuarioRepository = usuarioRepository;
         this.empresaRepository = empresaRepository;

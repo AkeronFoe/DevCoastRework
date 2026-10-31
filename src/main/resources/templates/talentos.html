@@ -17,19 +17,22 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', ${q})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/talentos', 'Buscar talentos', 'Busca por nombre, cargo o tecnología', ${q})}">
+            </header>
 
             <main class="content" id="contenido"
                 th:with="modP=${modalidadSel == '' ? null : modalidadSel}, dispP=${disponibilidadSel == '' ? null : disponibilidadSel}, qP=${q == '' ? null : q}">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
                         <div class="eyebrow">// directorio</div>
                         <h1>Directorio</h1>
                         <p class="sub" aria-live="polite"
-                            th:text="${totalResultados == 1 ? '1 talento' : totalResultados + ' talentos'} + (${hayFiltros} ? ' con estos filtros' : ' con perfil público')">12 talentos con perfil público</p>
+                            th:text="${totalResultados == 1 ? '1 talento' : totalResultados + ' talentos'} + (${hayFiltros} ? ' con estos filtros' : ' con perfil público')">
+                            12 talentos con perfil público</p>
                     </div>
                     <form class="sort" method="get" th:action="@{/talentos}" id="sortForm">
                         <input type="hidden" name="modalidad" th:value="${modP}" th:disabled="${modP == null}">
@@ -46,47 +49,84 @@
                 </div>
 
                 <dl class="dstats" aria-label="Cifras del directorio" th:if="${totalPublico != null}">
-                    <div><dt>PERFILES PÚBLICOS</dt><dd th:text="${totalPublico}">0</dd></div>
-                    <div><dt>NUEVOS ESTA SEMANA</dt><dd th:text="'+' + ${nuevosEstaSemana}">+0</dd></div>
-                    <div th:if="${pctRemoto != null}"><dt>TRABAJAN REMOTO</dt><dd th:text="${pctRemoto} + '%'">0%</dd></div>
-                    <div th:if="${especialidadTop != null}"><dt>ESPECIALIDAD MÁS COMÚN</dt><dd class="txt" th:text="${especialidadTop}">Frontend</dd></div>
+                    <div>
+                        <dt>PERFILES PÚBLICOS</dt>
+                        <dd th:text="${totalPublico}">0</dd>
+                    </div>
+                    <div>
+                        <dt>NUEVOS ESTA SEMANA</dt>
+                        <dd th:text="'+' + ${nuevosEstaSemana}">+0</dd>
+                    </div>
+                    <div th:if="${pctRemoto != null}">
+                        <dt>TRABAJAN REMOTO</dt>
+                        <dd th:text="${pctRemoto} + '%'">0%</dd>
+                    </div>
+                    <div th:if="${especialidadTop != null}">
+                        <dt>ESPECIALIDAD MÁS COMÚN</dt>
+                        <dd class="txt" th:text="${especialidadTop}">Frontend</dd>
+                    </div>
                 </dl>
 
                 <div class="filters">
                     <div class="fg" role="group" aria-labelledby="fMod"><span class="lab" id="fMod">MODALIDAD</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/talentos(disponibilidad=${dispP},q=${qP},sort=${sort})}" th:attr="aria-current=${modalidadSel == ''} ? 'true'">Todas</a>
-                            <a class="ch" th:href="@{/talentos(modalidad='remoto',disponibilidad=${dispP},q=${qP},sort=${sort})}" th:attr="aria-current=${modalidadSel == 'remoto'} ? 'true'">Remoto</a>
-                            <a class="ch" th:href="@{/talentos(modalidad='hibrido',disponibilidad=${dispP},q=${qP},sort=${sort})}" th:attr="aria-current=${modalidadSel == 'hibrido'} ? 'true'">Híbrido</a>
-                            <a class="ch" th:href="@{/talentos(modalidad='presencial',disponibilidad=${dispP},q=${qP},sort=${sort})}" th:attr="aria-current=${modalidadSel == 'presencial'} ? 'true'">Presencial</a>
+                            <a class="ch" th:href="@{/talentos(disponibilidad=${dispP},q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${modalidadSel == ''} ? 'true'">Todas</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad='remoto',disponibilidad=${dispP},q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${modalidadSel == 'remoto'} ? 'true'">Remoto</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad='hibrido',disponibilidad=${dispP},q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${modalidadSel == 'hibrido'} ? 'true'">Híbrido</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad='presencial',disponibilidad=${dispP},q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${modalidadSel == 'presencial'} ? 'true'">Presencial</a>
                         </div>
                     </div>
-                    <div class="fg" role="group" aria-labelledby="fDis"><span class="lab" id="fDis">DISPONIBILIDAD</span>
+                    <div class="fg" role="group" aria-labelledby="fDis"><span class="lab"
+                            id="fDis">DISPONIBILIDAD</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/talentos(modalidad=${modP},q=${qP},sort=${sort})}" th:attr="aria-current=${disponibilidadSel == ''} ? 'true'">Todas</a>
-                            <a class="ch" th:href="@{/talentos(modalidad=${modP},disponibilidad='full-time',q=${qP},sort=${sort})}" th:attr="aria-current=${disponibilidadSel == 'full-time'} ? 'true'">Tiempo completo</a>
-                            <a class="ch" th:href="@{/talentos(modalidad=${modP},disponibilidad='part-time',q=${qP},sort=${sort})}" th:attr="aria-current=${disponibilidadSel == 'part-time'} ? 'true'">Medio tiempo</a>
-                            <a class="ch" th:href="@{/talentos(modalidad=${modP},disponibilidad='freelance',q=${qP},sort=${sort})}" th:attr="aria-current=${disponibilidadSel == 'freelance'} ? 'true'">Freelance</a>
+                            <a class="ch" th:href="@{/talentos(modalidad=${modP},q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${disponibilidadSel == ''} ? 'true'">Todas</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad=${modP},disponibilidad='full-time',q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${disponibilidadSel == 'full-time'} ? 'true'">Tiempo completo</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad=${modP},disponibilidad='part-time',q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${disponibilidadSel == 'part-time'} ? 'true'">Medio tiempo</a>
+                            <a class="ch"
+                                th:href="@{/talentos(modalidad=${modP},disponibilidad='freelance',q=${qP},sort=${sort})}"
+                                th:attr="aria-current=${disponibilidadSel == 'freelance'} ? 'true'">Freelance</a>
                         </div>
                     </div>
                     <a class="clear" th:if="${hayFiltros}" th:href="@{/talentos}">limpiar filtros</a>
                 </div>
 
                 <section class="tcs" aria-label="Lista de talentos" th:if="${!#lists.isEmpty(tarjetas)}">
-                    <th:block th:each="t, st : ${tarjetas}"><th:block th:replace="~{fragments/pase :: talento(${t}, ${st.count})}"></th:block></th:block>
+                    <th:block th:each="t, st : ${tarjetas}">
+                        <th:block th:replace="~{fragments/pase :: talento(${t}, ${st.count})}"></th:block>
+                    </th:block>
                 </section>
 
                 <nav class="pager" aria-label="Páginas del directorio" th:if="${totalPaginas > 1}">
-                    <a th:if="${pagina > 0}" th:href="@{/talentos(modalidad=${modP},disponibilidad=${dispP},q=${qP},sort=${sort},page=${pagina - 1})}" rel="prev">← Anterior</a>
+                    <a th:if="${pagina > 0}"
+                        th:href="@{/talentos(modalidad=${modP},disponibilidad=${dispP},q=${qP},sort=${sort},page=${pagina - 1})}"
+                        rel="prev">← Anterior</a>
                     <span th:text="|Página ${pagina + 1} de ${totalPaginas}|">Página 1 de 2</span>
-                    <a th:if="${pagina < totalPaginas - 1}" th:href="@{/talentos(modalidad=${modP},disponibilidad=${dispP},q=${qP},sort=${sort},page=${pagina + 1})}" rel="next">Siguiente →</a>
+                    <a th:if="${pagina < totalPaginas - 1}"
+                        th:href="@{/talentos(modalidad=${modP},disponibilidad=${dispP},q=${qP},sort=${sort},page=${pagina + 1})}"
+                        rel="next">Siguiente →</a>
                 </nav>
 
                 <th:block th:if="${#lists.isEmpty(tarjetas) and hayFiltros}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay talentos con esos filtros. Prueba con otra modalidad o disponibilidad.', '/talentos', 'Limpiar filtros')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay talentos con esos filtros. Prueba con otra modalidad o disponibilidad.', '/talentos', 'Limpiar filtros')}">
+                    </div>
                 </th:block>
                 <th:block th:if="${#lists.isEmpty(tarjetas) and !hayFiltros}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía no hay talentos con perfil público. Los perfiles que activen su visibilidad aparecerán aquí.', null, null)}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'Todavía no hay talentos con perfil público. Los perfiles que activen su visibilidad aparecerán aquí.', null, null)}">
+                    </div>
                 </th:block>
             </main>
         </div>

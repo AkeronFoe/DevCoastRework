@@ -74,7 +74,8 @@ public class DashboardController {
         CartaVista carta = CartaVista.de(CartaVista.deSolicitudes(vistas), ahora);
 
         List<Invitacion> invitaciones = invitacionRepository.findByTalentoIdOrderByFechaEnvioDesc(id);
-        Invitacion pendiente = invitaciones.stream().filter(i -> "pendiente".equals(i.getEstado())).findFirst().orElse(null);
+        Invitacion pendiente = invitaciones.stream().filter(i -> "pendiente".equals(i.getEstado())).findFirst()
+                .orElse(null);
         long invPendientes = invitaciones.stream().filter(i -> "pendiente".equals(i.getEstado())).count();
 
         boolean tieneStack = talento != null && talento.getStack() != null && !talento.getStack().isEmpty();
@@ -112,7 +113,8 @@ public class DashboardController {
 
         List<Empleo> avist = new ArrayList<>();
         for (Empleo e : candidatas)
-            if (e != mejor && dias(e, ahora) <= DIAS_AVISTADAS && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_MEDIO)
+            if (e != mejor && dias(e, ahora) <= DIAS_AVISTADAS
+                    && matches.get(e.getId()).porcentaje() >= MatchEmpleo.NIVEL_MEDIO)
                 avist.add(e);
         avist.sort((x, y) -> Integer.compare(matches.get(y.getId()).porcentaje(), matches.get(x.getId()).porcentaje()));
         List<EmpleoVista> avistadas = new ArrayList<>();
@@ -121,7 +123,10 @@ public class DashboardController {
 
         List<Integer> matchesEnRuta = new ArrayList<>();
         for (CartaVista.Zona z : carta.getZonas())
-            z.barcos().forEach(b -> { if (b.match() != null) matchesEnRuta.add(b.match()); });
+            z.barcos().forEach(b -> {
+                if (b.match() != null)
+                    matchesEnRuta.add(b.match());
+            });
 
         model.addAttribute("carta", carta.conTextos("/solicitudes",
                 "Todavía no has zarpado. Postúlate a una oferta desde Empleos."));
@@ -158,11 +163,13 @@ public class DashboardController {
 
         List<Solicitud> recibidas = empleoIds.isEmpty() ? List.of()
                 : solicitudRepository.findByEmpleoIdIn(empleoIds).stream()
-                        .sorted(Comparator.comparing(Solicitud::getFechaSolicitud, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .sorted(Comparator.comparing(Solicitud::getFechaSolicitud,
+                                Comparator.nullsLast(Comparator.reverseOrder())))
                         .limit(300).collect(Collectors.toList());
         Map<String, Usuario> candidatos = new HashMap<>();
         if (!recibidas.isEmpty()) {
-            Set<String> ids = recibidas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+            Set<String> ids = recibidas.stream().map(Solicitud::getUsuarioId).filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toSet());
             usuarioRepository.findAllById(ids).forEach(u -> candidatos.put(u.getId(), u));
         }
 
@@ -173,17 +180,21 @@ public class DashboardController {
             SolicitudVista v = SolicitudVista.de(s, candidatos.get(s.getUsuarioId()), ahora);
             vistas.add(v);
             porOferta.merge(s.getEmpleoId(), 1L, Long::sum);
-            items.add(new CartaVista.Item(v.getId(), v.getCandidato() != null ? v.getCandidato() : "Candidato", v.getCargo(), v.getMatch(),
+            items.add(new CartaVista.Item(v.getId(), v.getCandidato() != null ? v.getCandidato() : "Candidato",
+                    v.getCargo(), v.getMatch(),
                     v.getAreaClave(), v.getEstado(), v.getFechaEnvio(), v.getFechaDecision(),
                     "/empleos/" + s.getEmpleoId() + "/postulaciones/" + s.getId()));
         }
         CartaVista carta = CartaVista.de(items, ahora).conTextos("/candidatos",
                 "Todavía no recibes postulaciones. Publica una oferta para empezar.").paraEmpresa();
 
-        List<SolicitudVista> enRevision = vistas.stream().filter(v -> "revision".equals(v.getEstado())).collect(Collectors.toList());
-        long candidatosAltos = enRevision.stream().filter(v -> v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO).count();
+        List<SolicitudVista> enRevision = vistas.stream().filter(v -> "revision".equals(v.getEstado()))
+                .collect(Collectors.toList());
+        long candidatosAltos = enRevision.stream()
+                .filter(v -> v.getMatch() != null && v.getMatch() >= MatchEmpleo.NIVEL_ALTO).count();
         List<SolicitudVista> mejores = enRevision.stream().filter(v -> v.getMatch() != null)
-                .sorted(Comparator.comparingInt(SolicitudVista::getMatch).reversed()).limit(3).collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(SolicitudVista::getMatch).reversed()).limit(3)
+                .collect(Collectors.toList());
 
         List<Invitacion> invitaciones = invitacionRepository.findByEmpresaIdOrderByFechaEnvioDesc(id);
 
@@ -198,8 +209,10 @@ public class DashboardController {
 
         model.addAttribute("carta", carta);
         model.addAttribute("nActivas", activos.size());
-        long enRevisionTotal = activos.isEmpty() ? 0 : mongoTemplate.count(
-                Query.query(Criteria.where("empleoId").in(activosIds(activos)).and("estado").is("revision")), Solicitud.class);
+        long enRevisionTotal = activos.isEmpty() ? 0
+                : mongoTemplate.count(
+                        Query.query(Criteria.where("empleoId").in(activosIds(activos)).and("estado").is("revision")),
+                        Solicitud.class);
         model.addAttribute("nNuevas", enRevisionTotal);
         model.addAttribute("solicitudesPendientesEmpresa", enRevisionTotal);
         model.addAttribute("nCandidatosAltos", candidatosAltos);

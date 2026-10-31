@@ -12,8 +12,10 @@ import org.springframework.security.web.header.writers.StaticHeadersWriter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // la app usa scripts y estilos dentro de las propias páginas, así que se permite 'unsafe-inline'; lo demás queda cerrado:
-    // nada de otros sitios cargando scripts, ni de meter la app en un iframe, ni de enviar formularios a otro dominio
+    // la app usa scripts y estilos dentro de las propias páginas, así que se
+    // permite 'unsafe-inline'; lo demás queda cerrado:
+    // nada de otros sitios cargando scripts, ni de meter la app en un iframe, ni de
+    // enviar formularios a otro dominio
     static final String CSP = "default-src 'self'; "
             + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
@@ -27,7 +29,8 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // ojo: acá todo queda abierto a propósito. La seguridad de verdad la hace RoleGuard revisando la sesión en cada página
+    // ojo: acá todo queda abierto a propósito. La seguridad de verdad la hace
+    // RoleGuard revisando la sesión en cada página
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

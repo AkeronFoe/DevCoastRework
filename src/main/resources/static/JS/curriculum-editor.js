@@ -164,15 +164,19 @@
         $$('#expLista .cv-item', dlg).forEach(function (it) {
             var cargo = texto(it, '.exp-cargo'), empresa = texto(it, '.exp-empresa');
             if (!cargo && !empresa) return;
-            cvExperiencias.push({ cargo: cargo, empresa: empresa, periodo: texto(it, '.exp-periodo'),
-                modalidad: texto(it, '.exp-modalidad'), descripcion: texto(it, '.exp-desc') });
+            cvExperiencias.push({
+                cargo: cargo, empresa: empresa, periodo: texto(it, '.exp-periodo'),
+                modalidad: texto(it, '.exp-modalidad'), descripcion: texto(it, '.exp-desc')
+            });
         });
         var cvEducaciones = [];
         $$('#eduLista .cv-item', dlg).forEach(function (it) {
             var institucion = texto(it, '.edu-institucion'), titulo = texto(it, '.edu-titulo');
             if (!institucion && !titulo) return;
-            cvEducaciones.push({ institucion: institucion, titulo: titulo, periodo: texto(it, '.edu-periodo'),
-                descripcion: texto(it, '.edu-descripcion') });
+            cvEducaciones.push({
+                institucion: institucion, titulo: titulo, periodo: texto(it, '.edu-periodo'),
+                descripcion: texto(it, '.edu-descripcion')
+            });
         });
         var lineas = logros.value.trim();
 

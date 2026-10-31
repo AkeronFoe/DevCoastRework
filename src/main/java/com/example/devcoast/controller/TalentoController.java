@@ -51,7 +51,10 @@ public class TalentoController {
     private final ProyectoRepository proyectoRepository;
     private final MongoTemplate mongoTemplate;
 
-    public TalentoController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository, EmpresaRepository empresaRepository, InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository, ProyectoRepository proyectoRepository, MongoTemplate mongoTemplate) {
+    public TalentoController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository,
+            EmpresaRepository empresaRepository, InvitacionRepository invitacionRepository,
+            NotificacionRepository notificacionRepository, ProyectoRepository proyectoRepository,
+            MongoTemplate mongoTemplate) {
         this.usuarioRepository = usuarioRepository;
         this.empleoRepository = empleoRepository;
         this.empresaRepository = empresaRepository;
@@ -101,7 +104,8 @@ public class TalentoController {
 
         String disponibilidadClave = EtiquetasPerfil.disponibilidadClave(disponibilidad);
         if (!disponibilidadClave.isEmpty())
-            criteriaList.add(Criteria.where("disponibilidad").regex(EtiquetasPerfil.disponibilidadRegex(disponibilidadClave), "i"));
+            criteriaList.add(Criteria.where("disponibilidad")
+                    .regex(EtiquetasPerfil.disponibilidadRegex(disponibilidadClave), "i"));
 
         boolean hayFiltros = !query.isBlank() || !modalidadClave.isEmpty() || !disponibilidadClave.isEmpty();
 
@@ -120,8 +124,10 @@ public class TalentoController {
         try {
             List<String> idsPagina = items.stream().map(Usuario::getId).toList();
             if (!idsPagina.isEmpty())
-                proyectosPorTalento = proyectoRepository.findByUsuarioIdInAndPublicadoTrueOrderByCreadoEnDesc(idsPagina).stream()
-                        .collect(Collectors.groupingBy(Proyecto::getUsuarioId, LinkedHashMap::new, Collectors.toList()));
+                proyectosPorTalento = proyectoRepository.findByUsuarioIdInAndPublicadoTrueOrderByCreadoEnDesc(idsPagina)
+                        .stream()
+                        .collect(
+                                Collectors.groupingBy(Proyecto::getUsuarioId, LinkedHashMap::new, Collectors.toList()));
         } catch (Exception ignored) {
         }
 
@@ -169,9 +175,11 @@ public class TalentoController {
                     .map(u -> EtiquetasPerfil.especialidad(u.getEspecialidad()))
                     .filter(e -> e != null && !e.isBlank())
                     .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-            especialidadTop = conteo.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(null);
+            especialidadTop = conteo.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey)
+                    .orElse(null);
 
-            ObjectId haceUnaSemana = new ObjectId(Date.from(java.time.Instant.now().minus(java.time.Duration.ofDays(7))));
+            ObjectId haceUnaSemana = new ObjectId(
+                    Date.from(java.time.Instant.now().minus(java.time.Duration.ofDays(7))));
             nuevosEstaSemana = mongoTemplate.count(new Query(new Criteria().andOperator(basePublico,
                     Criteria.where("_id").gte(haceUnaSemana))), Usuario.class);
         } catch (Exception ignored) {

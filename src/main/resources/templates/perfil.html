@@ -19,18 +19,21 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
                         <div class="eyebrow">// mi perfil</div>
                         <h1>Tu perfil</h1>
                         <p class="sub" aria-live="polite" id="pfSub"
-                            th:text="${usuario != null} ? ${'Tu perfil está al ' + usuario.completitudPerfil + ' %'} : 'No encontramos tu perfil'">Tu perfil está al 80 %</p>
+                            th:text="${usuario != null} ? ${'Tu perfil está al ' + usuario.completitudPerfil + ' %'} : 'No encontramos tu perfil'">
+                            Tu perfil está al 80 %</p>
                     </div>
                     <div class="pf-acts" th:if="${usuario != null and usuario.perfilPublico}">
                         <a class="lnk" th:href="@{/talentos/{id}(id=${usuario.id})}">Ver mi perfil público</a>
@@ -43,21 +46,26 @@
                         <div class="pass-main">
                             <div class="pf-id">
                                 <div class="pf-photo">
-                                    <button class="pf-av" type="button" id="pfAvatar" aria-label="Cambiar foto de perfil"
+                                    <button class="pf-av" type="button" id="pfAvatar"
+                                        aria-label="Cambiar foto de perfil"
                                         th:attr="data-inicial=${#strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1))}">
-                                        <img th:if="${usuario.fotoUrl != null and !#strings.isEmpty(usuario.fotoUrl)}" th:src="${usuario.fotoUrl}" alt="">
-                                        <b th:if="${usuario.fotoUrl == null or #strings.isEmpty(usuario.fotoUrl)}" th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1))}">V</b>
+                                        <img th:if="${usuario.fotoUrl != null and !#strings.isEmpty(usuario.fotoUrl)}"
+                                            th:src="${usuario.fotoUrl}" alt="">
+                                        <b th:if="${usuario.fotoUrl == null or #strings.isEmpty(usuario.fotoUrl)}"
+                                            th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1))}">V</b>
                                     </button>
                                     <input type="file" id="pfFile" accept="image/*" hidden>
                                     <div class="pf-photo-b">
                                         <button class="lnk" type="button" id="pfFoto">Cambiar foto</button>
-                                        <button class="lnk" type="button" id="pfQuitar" th:hidden="${usuario.fotoUrl == null or #strings.isEmpty(usuario.fotoUrl)}">Quitar</button>
+                                        <button class="lnk" type="button" id="pfQuitar"
+                                            th:hidden="${usuario.fotoUrl == null or #strings.isEmpty(usuario.fotoUrl)}">Quitar</button>
                                     </div>
                                 </div>
                                 <div class="field pf-name">
                                     <label for="pfNombre">NOMBRE</label>
-                                    <div class="inp"><input id="pfNombre" type="text" autocomplete="name" required aria-describedby="pfNombreE"
-                                            placeholder="Tu nombre completo" th:value="${usuario.nombre}"></div>
+                                    <div class="inp"><input id="pfNombre" type="text" autocomplete="name" required
+                                            aria-describedby="pfNombreE" placeholder="Tu nombre completo"
+                                            th:value="${usuario.nombre}"></div>
                                     <p class="err" id="pfNombreE" hidden>Escribe tu nombre.</p>
                                 </div>
                             </div>
@@ -67,36 +75,54 @@
                                 <div class="fields two">
                                     <div class="field">
                                         <label for="pfRol">CARGO O TÍTULO PROFESIONAL</label>
-                                        <div class="inp"><input id="pfRol" type="text" autocomplete="organization-title" placeholder="Frontend Developer" th:value="${usuario.rolTitulo}"></div>
+                                        <div class="inp"><input id="pfRol" type="text" autocomplete="organization-title"
+                                                placeholder="Frontend Developer" th:value="${usuario.rolTitulo}"></div>
                                     </div>
                                     <div class="field">
                                         <label for="pfUbi">UBICACIÓN</label>
-                                        <div class="inp"><input id="pfUbi" type="text" autocomplete="address-level2" placeholder="Cartagena, Colombia" th:value="${usuario.ubicacion}"></div>
+                                        <div class="inp"><input id="pfUbi" type="text" autocomplete="address-level2"
+                                                placeholder="Cartagena, Colombia" th:value="${usuario.ubicacion}"></div>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label for="pfEsp">ESPECIALIDAD</label>
                                     <div class="inp"><select id="pfEsp">
-                                            <option value="" th:selected="${selEspecialidad == '' and extraEspecialidad == null}">Seleccionar</option>
-                                            <option th:each="c : ${T(com.example.devcoast.service.EtiquetasPerfil).CLAVES_ESPECIALIDAD}" th:value="${c}"
-                                                th:text="${T(com.example.devcoast.service.EtiquetasPerfil).especialidad(c)}" th:selected="${selEspecialidad == c}">Frontend</option>
-                                            <option th:if="${extraEspecialidad != null}" th:value="${extraEspecialidad}" th:text="${#strings.capitalize(extraEspecialidad)}" selected>Otra</option>
+                                            <option value=""
+                                                th:selected="${selEspecialidad == '' and extraEspecialidad == null}">
+                                                Seleccionar</option>
+                                            <option
+                                                th:each="c : ${T(com.example.devcoast.service.EtiquetasPerfil).CLAVES_ESPECIALIDAD}"
+                                                th:value="${c}"
+                                                th:text="${T(com.example.devcoast.service.EtiquetasPerfil).especialidad(c)}"
+                                                th:selected="${selEspecialidad == c}">Frontend</option>
+                                            <option th:if="${extraEspecialidad != null}" th:value="${extraEspecialidad}"
+                                                th:text="${#strings.capitalize(extraEspecialidad)}" selected>Otra
+                                            </option>
                                         </select></div>
                                 </div>
                                 <div class="field">
                                     <label for="pfBio">BIOGRAFÍA</label>
-                                    <div class="inp"><textarea id="pfBio" rows="4" maxlength="400" aria-describedby="pfBioN"
-                                            placeholder="Quién eres, qué haces mejor y qué proyectos te interesan." th:text="${usuario.bio}"></textarea></div>
-                                    <span class="hint" id="pfBioN" aria-live="off"><span id="pfBioC" th:text="${usuario.bio != null ? #strings.length(usuario.bio) : 0}">0</span> / 400</span>
+                                    <div class="inp"><textarea id="pfBio" rows="4" maxlength="400"
+                                            aria-describedby="pfBioN"
+                                            placeholder="Quién eres, qué haces mejor y qué proyectos te interesan."
+                                            th:text="${usuario.bio}"></textarea></div>
+                                    <span class="hint" id="pfBioN" aria-live="off"><span id="pfBioC"
+                                            th:text="${usuario.bio != null ? #strings.length(usuario.bio) : 0}">0</span>
+                                        / 400</span>
                                 </div>
                                 <div class="field">
                                     <label for="stackIn" id="stackLab">STACK O HERRAMIENTAS</label>
-                                    <div class="chips-in" id="stackBox" data-lista="stack"><input id="stackIn" type="text" placeholder="Escribe y presiona Enter" aria-describedby="stackH" aria-labelledby="stackLab"></div>
-                                    <span class="hint" id="stackH">Enter o coma para agregar. Lo usamos para calcular tu match con cada oferta.</span>
+                                    <div class="chips-in" id="stackBox" data-lista="stack"><input id="stackIn"
+                                            type="text" placeholder="Escribe y presiona Enter" aria-describedby="stackH"
+                                            aria-labelledby="stackLab"></div>
+                                    <span class="hint" id="stackH">Enter o coma para agregar. Lo usamos para calcular tu
+                                        match con cada oferta.</span>
                                 </div>
                                 <div class="field">
                                     <label for="habIn" id="habLab">HABILIDADES BLANDAS</label>
-                                    <div class="chips-in" id="habBox" data-lista="hab"><input id="habIn" type="text" placeholder="Escribe y presiona Enter" aria-describedby="habH" aria-labelledby="habLab"></div>
+                                    <div class="chips-in" id="habBox" data-lista="hab"><input id="habIn" type="text"
+                                            placeholder="Escribe y presiona Enter" aria-describedby="habH"
+                                            aria-labelledby="habLab"></div>
                                     <span class="hint" id="habH">Enter o coma para agregar.</span>
                                 </div>
                             </fieldset>
@@ -107,28 +133,48 @@
                                     <div class="field">
                                         <label for="pfMod">MODALIDAD</label>
                                         <div class="inp"><select id="pfMod">
-                                                <option value="" th:selected="${selModalidad == '' and extraModalidad == null}">Seleccionar</option>
-                                                <option value="remoto" th:selected="${selModalidad == 'remoto'}">Remoto</option>
-                                                <option value="hibrido" th:selected="${selModalidad == 'hibrido'}">Híbrido</option>
-                                                <option value="presencial" th:selected="${selModalidad == 'presencial'}">Presencial</option>
-                                                <option th:if="${extraModalidad != null}" th:value="${extraModalidad}" th:text="${#strings.capitalize(extraModalidad)}" selected>Otra</option>
+                                                <option value=""
+                                                    th:selected="${selModalidad == '' and extraModalidad == null}">
+                                                    Seleccionar</option>
+                                                <option value="remoto" th:selected="${selModalidad == 'remoto'}">Remoto
+                                                </option>
+                                                <option value="hibrido" th:selected="${selModalidad == 'hibrido'}">
+                                                    Híbrido</option>
+                                                <option value="presencial"
+                                                    th:selected="${selModalidad == 'presencial'}">Presencial</option>
+                                                <option th:if="${extraModalidad != null}" th:value="${extraModalidad}"
+                                                    th:text="${#strings.capitalize(extraModalidad)}" selected>Otra
+                                                </option>
                                             </select></div>
                                     </div>
                                     <div class="field">
                                         <label for="pfDisp">DISPONIBILIDAD</label>
                                         <div class="inp"><select id="pfDisp">
-                                                <option value="" th:selected="${selDisponibilidad == '' and extraDisponibilidad == null}">Seleccionar</option>
-                                                <option value="full-time" th:selected="${selDisponibilidad == 'full-time'}">Tiempo completo</option>
-                                                <option value="part-time" th:selected="${selDisponibilidad == 'part-time'}">Medio tiempo</option>
-                                                <option value="freelance" th:selected="${selDisponibilidad == 'freelance'}">Freelance</option>
-                                                <option value="practicas" th:selected="${selDisponibilidad == 'practicas'}">Prácticas</option>
-                                                <option th:if="${extraDisponibilidad != null}" th:value="${extraDisponibilidad}" th:text="${#strings.capitalize(extraDisponibilidad)}" selected>Otra</option>
+                                                <option value=""
+                                                    th:selected="${selDisponibilidad == '' and extraDisponibilidad == null}">
+                                                    Seleccionar</option>
+                                                <option value="full-time"
+                                                    th:selected="${selDisponibilidad == 'full-time'}">Tiempo completo
+                                                </option>
+                                                <option value="part-time"
+                                                    th:selected="${selDisponibilidad == 'part-time'}">Medio tiempo
+                                                </option>
+                                                <option value="freelance"
+                                                    th:selected="${selDisponibilidad == 'freelance'}">Freelance</option>
+                                                <option value="practicas"
+                                                    th:selected="${selDisponibilidad == 'practicas'}">Prácticas</option>
+                                                <option th:if="${extraDisponibilidad != null}"
+                                                    th:value="${extraDisponibilidad}"
+                                                    th:text="${#strings.capitalize(extraDisponibilidad)}" selected>Otra
+                                                </option>
                                             </select></div>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label for="pfSal">EXPECTATIVA SALARIAL</label>
-                                    <div class="inp"><input id="pfSal" type="text" placeholder="COP 5.000.000 – 7.000.000 / mes" th:value="${usuario.salarioEsperado}"></div>
+                                    <div class="inp"><input id="pfSal" type="text"
+                                            placeholder="COP 5.000.000 – 7.000.000 / mes"
+                                            th:value="${usuario.salarioEsperado}"></div>
                                 </div>
                             </fieldset>
 
@@ -137,29 +183,40 @@
                                 <div class="fields two">
                                     <div class="field">
                                         <label for="pfEmail">CORREO PROFESIONAL</label>
-                                        <div class="inp"><input id="pfEmail" type="email" inputmode="email" autocomplete="email" placeholder="nombre@correo.com"
-                                                th:value="${usuario.emailContacto != null and !#strings.isEmpty(usuario.emailContacto)} ? ${usuario.emailContacto} : ${usuario.correo}"></div>
+                                        <div class="inp"><input id="pfEmail" type="email" inputmode="email"
+                                                autocomplete="email" placeholder="nombre@correo.com"
+                                                th:value="${usuario.emailContacto != null and !#strings.isEmpty(usuario.emailContacto)} ? ${usuario.emailContacto} : ${usuario.correo}">
+                                        </div>
                                     </div>
                                     <div class="field">
                                         <label for="pfTel">TELÉFONO</label>
-                                        <div class="inp"><input id="pfTel" type="tel" autocomplete="tel" placeholder="+57 300 000 0000" th:value="${usuario.telefono}"></div>
+                                        <div class="inp"><input id="pfTel" type="tel" autocomplete="tel"
+                                                placeholder="+57 300 000 0000" th:value="${usuario.telefono}"></div>
                                     </div>
                                 </div>
                                 <div class="field">
                                     <label for="pfWeb">PORTAFOLIO</label>
-                                    <div class="inp"><input id="pfWeb" type="url" data-url inputmode="url" placeholder="https://tuportafolio.com" aria-describedby="pfWebE" th:value="${usuario.portfolioUrl}"></div>
+                                    <div class="inp"><input id="pfWeb" type="url" data-url inputmode="url"
+                                            placeholder="https://tuportafolio.com" aria-describedby="pfWebE"
+                                            th:value="${usuario.portfolioUrl}"></div>
                                     <p class="err" id="pfWebE" hidden>El enlace debe empezar con http:// o https://.</p>
                                 </div>
                                 <div class="fields two">
                                     <div class="field">
                                         <label for="pfLi">LINKEDIN</label>
-                                        <div class="inp"><input id="pfLi" type="url" data-url inputmode="url" placeholder="https://linkedin.com/in/tuusuario" aria-describedby="pfLiE" th:value="${usuario.linkedinUrl}"></div>
-                                        <p class="err" id="pfLiE" hidden>El enlace debe empezar con http:// o https://.</p>
+                                        <div class="inp"><input id="pfLi" type="url" data-url inputmode="url"
+                                                placeholder="https://linkedin.com/in/tuusuario" aria-describedby="pfLiE"
+                                                th:value="${usuario.linkedinUrl}"></div>
+                                        <p class="err" id="pfLiE" hidden>El enlace debe empezar con http:// o https://.
+                                        </p>
                                     </div>
                                     <div class="field">
                                         <label for="pfGh">GITHUB</label>
-                                        <div class="inp"><input id="pfGh" type="url" data-url inputmode="url" placeholder="https://github.com/tuusuario" aria-describedby="pfGhE" th:value="${usuario.githubUrl}"></div>
-                                        <p class="err" id="pfGhE" hidden>El enlace debe empezar con http:// o https://.</p>
+                                        <div class="inp"><input id="pfGh" type="url" data-url inputmode="url"
+                                                placeholder="https://github.com/tuusuario" aria-describedby="pfGhE"
+                                                th:value="${usuario.githubUrl}"></div>
+                                        <p class="err" id="pfGhE" hidden>El enlace debe empezar con http:// o https://.
+                                        </p>
                                     </div>
                                 </div>
                             </fieldset>
@@ -168,68 +225,114 @@
                         <div class="pass-stub">
                             <div class="stub-l">
                                 <span class="k">PERFIL</span>
-                                <div class="pbar big" role="progressbar" id="pfBar" th:attr="aria-valuenow=${usuario.completitudPerfil}" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo"><i th:style="'width:' + ${usuario.completitudPerfil} + '%'"></i></div>
-                                <span class="stub-n"><b id="pfPct" th:text="${usuario.completitudPerfil}">80</b> % completo</span>
+                                <div class="pbar big" role="progressbar" id="pfBar"
+                                    th:attr="aria-valuenow=${usuario.completitudPerfil}" aria-valuemin="0"
+                                    aria-valuemax="100" aria-label="Perfil completo"><i
+                                        th:style="'width:' + ${usuario.completitudPerfil} + '%'"></i></div>
+                                <span class="stub-n"><b id="pfPct" th:text="${usuario.completitudPerfil}">80</b> %
+                                    completo</span>
                             </div>
                             <div class="stub-r">
                                 <p class="formst" id="pfStatus" role="status" aria-live="polite"></p>
                                 <button class="go" type="submit" id="pfSave">Guardar cambios</button>
                             </div>
-                            <svg class="bars" viewBox="0 0 60 36" width="60" height="36" aria-hidden="true"><path d="M2 0v36M7 0v36M13 0v36M17 0v36M24 0v36M29 0v36M34 0v36M41 0v36M46 0v36M52 0v36M58 0v36" stroke="#101114" stroke-width="2.4"/></svg>
+                            <svg class="bars" viewBox="0 0 60 36" width="60" height="36" aria-hidden="true">
+                                <path
+                                    d="M2 0v36M7 0v36M13 0v36M17 0v36M24 0v36M29 0v36M34 0v36M41 0v36M46 0v36M52 0v36M58 0v36"
+                                    stroke="#101114" stroke-width="2.4" />
+                            </svg>
                         </div>
                     </form>
 
                     <div class="pf-side">
                         <section class="pn" aria-labelledby="hPrev">
                             <h2 id="hPrev">Así te ven en el Directorio
-                                <span class="lab" th:text="${usuario.perfilPublico} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span></h2>
+                                <span class="lab"
+                                    th:text="${usuario.perfilPublico} ? 'PÚBLICO' : 'OCULTO'">PÚBLICO</span>
+                            </h2>
                             <div id="pfPreview">
                                 <th:block th:replace="~{fragments/pase :: talento(${preview}, 0)}"></th:block>
                             </div>
-                            <p class="note" th:if="${usuario.perfilPublico}">Esta es tu tarjeta en el Directorio. Se actualiza al guardar.</p>
-                            <p class="note" th:unless="${usuario.perfilPublico}">Tu perfil está oculto: las empresas no te ven en el Directorio. Actívalo en
-                                <a class="lnk" th:href="@{/ajustes}">Ajustes</a>.</p>
+                            <p class="note" th:if="${usuario.perfilPublico}">Esta es tu tarjeta en el Directorio. Se
+                                actualiza al guardar.</p>
+                            <p class="note" th:unless="${usuario.perfilPublico}">Tu perfil está oculto: las empresas no
+                                te ven en el Directorio. Actívalo en
+                                <a class="lnk" th:href="@{/ajustes}">Ajustes</a>.
+                            </p>
                             <div class="swrow">
-                                <span id="destL"><b>Destacar mi perfil</b><br><small>Aparece primero en el Directorio.</small></span>
-                                <button class="swt" type="button" id="pfDestacar" role="switch" th:attr="aria-checked=${usuario.destacar}" aria-labelledby="destL"><i></i><span th:text="${usuario.destacar} ? 'SÍ' : 'NO'">NO</span></button>
+                                <span id="destL"><b>Destacar mi perfil</b><br><small>Aparece primero en el
+                                        Directorio.</small></span>
+                                <button class="swt" type="button" id="pfDestacar" role="switch"
+                                    th:attr="aria-checked=${usuario.destacar}" aria-labelledby="destL"><i></i><span
+                                        th:text="${usuario.destacar} ? 'SÍ' : 'NO'">NO</span></button>
                             </div>
                         </section>
 
                         <section class="pn" aria-labelledby="hPend" id="pfPend">
                             <h2 id="hPend">Para completar tu perfil</h2>
                             <ul class="todo" th:if="${!#lists.isEmpty(pendientes)}">
-                                <li th:each="p : ${pendientes}"><span class="bx" aria-hidden="true"></span><a th:href="@{${p.href}}" th:text="${p.texto}">Agregar tu GitHub</a></li>
+                                <li th:each="p : ${pendientes}"><span class="bx" aria-hidden="true"></span><a
+                                        th:href="@{${p.href}}" th:text="${p.texto}">Agregar tu GitHub</a></li>
                             </ul>
-                            <p class="note" th:if="${#lists.isEmpty(pendientes)}">Tu perfil está completo. Buen viento.</p>
+                            <p class="note" th:if="${#lists.isEmpty(pendientes)}">Tu perfil está completo. Buen viento.
+                            </p>
                         </section>
 
                         <section class="pn" aria-labelledby="hNum">
                             <h2 id="hNum">Tu actividad</h2>
                             <dl class="nums2">
-                                <div><dt>SOLICITUDES ENVIADAS</dt><dd><a th:href="@{/solicitudes}" th:text="${statSolicitudesTotal}">0</a></dd></div>
-                                <div><dt>SOLICITUDES ACEPTADAS</dt><dd><a th:href="@{/solicitudes}" th:text="${statSolicitudesAceptadas}">0</a></dd></div>
-                                <div><dt>PROYECTOS</dt><dd><a th:href="@{/proyectos}" th:text="${statProyectos}">0</a></dd></div>
-                                <div><dt>INVITACIONES RECIBIDAS</dt><dd><a th:href="@{/solicitudes(tab='invitaciones')}" th:text="${statInvitacionesTotal}">0</a></dd></div>
+                                <div>
+                                    <dt>SOLICITUDES ENVIADAS</dt>
+                                    <dd><a th:href="@{/solicitudes}" th:text="${statSolicitudesTotal}">0</a></dd>
+                                </div>
+                                <div>
+                                    <dt>SOLICITUDES ACEPTADAS</dt>
+                                    <dd><a th:href="@{/solicitudes}" th:text="${statSolicitudesAceptadas}">0</a></dd>
+                                </div>
+                                <div>
+                                    <dt>PROYECTOS</dt>
+                                    <dd><a th:href="@{/proyectos}" th:text="${statProyectos}">0</a></dd>
+                                </div>
+                                <div>
+                                    <dt>INVITACIONES RECIBIDAS</dt>
+                                    <dd><a th:href="@{/solicitudes(tab='invitaciones')}"
+                                            th:text="${statInvitacionesTotal}">0</a></dd>
+                                </div>
                             </dl>
                         </section>
 
                         <section class="pn" aria-labelledby="hExp">
                             <h2 id="hExp">Experiencia <a th:href="@{/curriculum}">editar en Curriculum</a></h2>
-                            <ol class="tl" th:if="${usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
+                            <ol class="tl"
+                                th:if="${usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
                                 <li th:each="e : ${usuario.cvExperiencias}"><span class="mk"></span>
                                     <div><span th:text="${e.cargo}">Cargo</span>
-                                        <time th:text="${(e.empresa != null ? e.empresa : '') + (e.empresa != null and e.periodo != null ? ' · ' : '') + (e.periodo != null ? e.periodo : '')}">Empresa · 2023–2025</time></div></li>
+                                        <time
+                                            th:text="${(e.empresa != null ? e.empresa : '') + (e.empresa != null and e.periodo != null ? ' · ' : '') + (e.periodo != null ? e.periodo : '')}">Empresa
+                                            · 2023–2025</time>
+                                    </div>
+                                </li>
                             </ol>
-                            <p class="note" th:if="${usuario.cvExperiencias == null or #lists.isEmpty(usuario.cvExperiencias)}">Aún no agregas experiencia. Hazlo desde Curriculum.</p>
+                            <p class="note"
+                                th:if="${usuario.cvExperiencias == null or #lists.isEmpty(usuario.cvExperiencias)}">Aún
+                                no agregas experiencia. Hazlo desde Curriculum.</p>
                         </section>
 
                         <section class="pn" aria-labelledby="hLog">
-                            <h2 id="hLog">Logros <span class="lab" th:text="${logrosDesbloqueados} + ' / ' + ${#lists.size(logros)}">3 / 12</span></h2>
+                            <h2 id="hLog">Logros <span class="lab"
+                                    th:text="${logrosDesbloqueados} + ' / ' + ${#lists.size(logros)}">3 / 12</span></h2>
                             <ul class="logros">
                                 <li th:each="l : ${logros}" th:classappend="${l.desbloqueado} ? 'on' : 'off'">
-                                    <span class="lg-i" aria-hidden="true"><svg viewBox="0 0 24 24"><path th:if="${l.desbloqueado}" d="M5 12.5l4.5 4.5L19 7"/><rect th:unless="${l.desbloqueado}" x="6" y="11" width="12" height="9" rx="2"/><path th:unless="${l.desbloqueado}" d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>
-                                    <span class="lg-t"><b th:text="${l.nombre}">Miembro</b><small th:text="${l.desbloqueado ? l.descripcion : l.progreso}">Bienvenido</small></span>
-                                    <span class="sr" th:text="${l.desbloqueado ? ' (desbloqueado)' : ' (bloqueado)'}"></span>
+                                    <span class="lg-i" aria-hidden="true"><svg viewBox="0 0 24 24">
+                                            <path th:if="${l.desbloqueado}" d="M5 12.5l4.5 4.5L19 7" />
+                                            <rect th:unless="${l.desbloqueado}" x="6" y="11" width="12" height="9"
+                                                rx="2" />
+                                            <path th:unless="${l.desbloqueado}" d="M9 11V8a3 3 0 0 1 6 0v3" />
+                                        </svg></span>
+                                    <span class="lg-t"><b th:text="${l.nombre}">Miembro</b><small
+                                            th:text="${l.desbloqueado ? l.descripcion : l.progreso}">Bienvenido</small></span>
+                                    <span class="sr"
+                                        th:text="${l.desbloqueado ? ' (desbloqueado)' : ' (bloqueado)'}"></span>
                                 </li>
                             </ul>
                         </section>
@@ -237,7 +340,9 @@
                 </div>
 
                 <th:block th:if="${usuario == null}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No encontramos tu perfil. Cierra sesión y vuelve a entrar.', null, null)}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No encontramos tu perfil. Cierra sesión y vuelve a entrar.', null, null)}">
+                    </div>
                 </th:block>
             </main>
         </div>
@@ -247,8 +352,8 @@
     <script th:if="${usuario != null}" th:inline="javascript">
         window.PERFIL = {
             tipo: 'talento',
-            stack: /*[[${usuario.stack != null ? usuario.stack : #lists.toList({})}]]*/ [],
-            hab: /*[[${usuario.habilidadesBlandas != null ? usuario.habilidadesBlandas : #lists.toList({})}]]*/ [],
+            stack: /*[[${usuario.stack != null ? usuario.stack : #lists.toList({})}]]*/[],
+            hab: /*[[${usuario.habilidadesBlandas != null ? usuario.habilidadesBlandas : #lists.toList({})}]]*/[],
             nombre: /*[[${usuario.nombre}]]*/ '',
             publicId: /*[[${usuario.perfilPublico ? usuario.id : null}]]*/ null
         };

@@ -51,7 +51,8 @@ public class AuthController {
         String correoNorm = correo.trim().toLowerCase();
         String equipo = request.getRemoteAddr();
         if (limiteIntentos.bloqueado(equipo, correoNorm)) {
-            ra.addFlashAttribute("flashMessage", "Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.");
+            ra.addFlashAttribute("flashMessage",
+                    "Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.");
             ra.addFlashAttribute("flashType", "error");
             return "redirect:/login";
         }

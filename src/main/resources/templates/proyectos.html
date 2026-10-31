@@ -18,37 +18,50 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/proyectos', 'Buscar proyectos', 'Busca por título o herramienta', ${q})}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/proyectos', 'Buscar proyectos', 'Busca por título o herramienta', ${q})}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
                         <div class="eyebrow">// portafolio</div>
                         <h1>Proyectos</h1>
-                        <p class="sub" id="conteo" aria-live="polite" th:attr="data-total=${totalProyectos},data-publicos=${totalPublicos}"
-                            th:text="${totalProyectos == 1 ? '1 proyecto' : totalProyectos + ' proyectos'} + ' · ' + ${totalPublicos} + (${totalPublicos} == 1 ? ' público' : ' públicos')">6 proyectos · 5 públicos</p>
+                        <p class="sub" id="conteo" aria-live="polite"
+                            th:attr="data-total=${totalProyectos},data-publicos=${totalPublicos}"
+                            th:text="${totalProyectos == 1 ? '1 proyecto' : totalProyectos + ' proyectos'} + ' · ' + ${totalPublicos} + (${totalPublicos} == 1 ? ' público' : ' públicos')">
+                            6 proyectos · 5 públicos</p>
                     </div>
-                    <div class="acts"><a class="btn-o sm" id="addTop" th:href="@{/subirProyecto}">Añadir proyecto</a></div>
+                    <div class="acts"><a class="btn-o sm" id="addTop" th:href="@{/subirProyecto}">Añadir proyecto</a>
+                    </div>
                 </div>
-                <p class="note">Tus proyectos públicos aparecen en tu perfil. Las empresas los ven cuando abren tu tarjeta en el directorio. Los ocultos solo los ves tú.</p>
+                <p class="note">Tus proyectos públicos aparecen en tu perfil. Las empresas los ven cuando abren tu
+                    tarjeta en el directorio. Los ocultos solo los ves tú.</p>
 
                 <div class="filters">
                     <div class="fg" role="group" aria-labelledby="fArea"><span class="lab" id="fArea">ÁREA</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/proyectos(vis=${visP},q=${q})}" th:attr="aria-current=${area == ''} ? 'true'">Todos</a>
-                            <a class="ch" th:href="@{/proyectos(area='programacion',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'programacion'} ? 'true'">Programación</a>
-                            <a class="ch" th:href="@{/proyectos(area='diseno',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'diseno'} ? 'true'">Diseño</a>
-                            <a class="ch" th:href="@{/proyectos(area='otras',vis=${visP},q=${q})}" th:attr="aria-current=${area == 'otras'} ? 'true'">Otras</a>
+                            <a class="ch" th:href="@{/proyectos(vis=${visP},q=${q})}"
+                                th:attr="aria-current=${area == ''} ? 'true'">Todos</a>
+                            <a class="ch" th:href="@{/proyectos(area='programacion',vis=${visP},q=${q})}"
+                                th:attr="aria-current=${area == 'programacion'} ? 'true'">Programación</a>
+                            <a class="ch" th:href="@{/proyectos(area='diseno',vis=${visP},q=${q})}"
+                                th:attr="aria-current=${area == 'diseno'} ? 'true'">Diseño</a>
+                            <a class="ch" th:href="@{/proyectos(area='otras',vis=${visP},q=${q})}"
+                                th:attr="aria-current=${area == 'otras'} ? 'true'">Otras</a>
                         </div>
                     </div>
                     <div class="fg" role="group" aria-labelledby="fVis"><span class="lab" id="fVis">VISIBILIDAD</span>
                         <div class="chs">
-                            <a class="ch" th:href="@{/proyectos(area=${areaP},q=${q})}" th:attr="aria-current=${vis == ''} ? 'true'">Todos</a>
-                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='1',q=${q})}" th:attr="aria-current=${vis == '1'} ? 'true'">Públicos</a>
-                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='0',q=${q})}" th:attr="aria-current=${vis == '0'} ? 'true'">Ocultos</a>
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},q=${q})}"
+                                th:attr="aria-current=${vis == ''} ? 'true'">Todos</a>
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='1',q=${q})}"
+                                th:attr="aria-current=${vis == '1'} ? 'true'">Públicos</a>
+                            <a class="ch" th:href="@{/proyectos(area=${areaP},vis='0',q=${q})}"
+                                th:attr="aria-current=${vis == '0'} ? 'true'">Ocultos</a>
                         </div>
                     </div>
                     <a class="clear" th:if="${hayFiltros}" th:href="@{/proyectos}">limpiar filtros</a>
@@ -56,7 +69,10 @@
 
                 <section class="pjs" aria-label="Tus proyectos" th:if="${!#lists.isEmpty(proyectos) or !hayFiltros}">
                     <a class="add in" id="add" th:href="@{/subirProyecto}" style="--i:0">
-                        <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21"/><path d="M24 15v18M15 24h18"/></svg>
+                        <svg viewBox="0 0 48 48" aria-hidden="true">
+                            <circle cx="24" cy="24" r="21" />
+                            <path d="M24 15v18M15 24h18" />
+                        </svg>
                         Añadir proyecto<small>Código, diseño o lo que quieras mostrar</small>
                     </a>
                     <th:block th:each="v, st : ${proyectos}">
@@ -65,19 +81,27 @@
                 </section>
 
                 <th:block th:if="${#lists.isEmpty(proyectos) and hayFiltros}">
-                    <div th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay proyectos con esos filtros.', '/proyectos', 'Limpiar filtros')}"></div>
+                    <div
+                        th:replace="~{fragments/nautico :: empty('Mar en calma.', 'No hay proyectos con esos filtros.', '/proyectos', 'Limpiar filtros')}">
+                    </div>
                 </th:block>
 
                 <dialog class="dlg" id="dlg" aria-labelledby="dlgT">
-                    <form id="pform" method="post" th:action="@{/proyectos/guardar}" novalidate data-crear="/proyectos/guardar">
+                    <form id="pform" method="post" th:action="@{/proyectos/guardar}" novalidate
+                        data-crear="/proyectos/guardar">
                         <input type="hidden" name="volver" value="proyectos">
-                        <div><span class="k" id="dlgK">NUEVO EN TU PORTAFOLIO</span><h2 id="dlgT">Añadir proyecto</h2></div>
+                        <div><span class="k" id="dlgK">NUEVO EN TU PORTAFOLIO</span>
+                            <h2 id="dlgT">Añadir proyecto</h2>
+                        </div>
                         <div class="fl"><label class="k" for="pNombre">TÍTULO</label>
-                            <input id="pNombre" name="nombre" type="text" autocomplete="off" maxlength="120" aria-describedby="eNombre" aria-invalid="false">
-                            <p class="err" id="eNombre" hidden></p></div>
+                            <input id="pNombre" name="nombre" type="text" autocomplete="off" maxlength="120"
+                                aria-describedby="eNombre" aria-invalid="false">
+                            <p class="err" id="eNombre" hidden></p>
+                        </div>
                         <div class="two-c">
                             <div class="fl"><label class="k" for="pCategoria">CATEGORÍA</label>
-                                <select id="pCategoria" name="categoria" aria-describedby="eCategoria" aria-invalid="false">
+                                <select id="pCategoria" name="categoria" aria-describedby="eCategoria"
+                                    aria-invalid="false">
                                     <option value="">Seleccionar</option>
                                     <optgroup label="Programación">
                                         <option value="Frontend">Frontend</option>
@@ -95,7 +119,8 @@
                                     </optgroup>
                                     <option value="Otro">Otro</option>
                                 </select>
-                                <p class="err" id="eCategoria" hidden></p></div>
+                                <p class="err" id="eCategoria" hidden></p>
+                            </div>
                             <div class="fl"><label class="k" for="pTipo">TIPO</label>
                                 <select id="pTipo" name="tipo" aria-describedby="eTipo" aria-invalid="false">
                                     <option value="">Seleccionar</option>
@@ -104,24 +129,35 @@
                                     <option value="Open source">Open source</option>
                                     <option value="Concepto">Concepto</option>
                                 </select>
-                                <p class="err" id="eTipo" hidden></p></div>
+                                <p class="err" id="eTipo" hidden></p>
+                            </div>
                         </div>
                         <div class="fl"><label class="k" for="pDesc">DESCRIPCIÓN</label>
-                            <textarea id="pDesc" name="descripcion" rows="3" maxlength="200" placeholder="¿Qué hace o qué problema resuelve?" aria-describedby="eDesc" aria-invalid="false"></textarea>
-                            <p class="err" id="eDesc" hidden></p></div>
+                            <textarea id="pDesc" name="descripcion" rows="3" maxlength="200"
+                                placeholder="¿Qué hace o qué problema resuelve?" aria-describedby="eDesc"
+                                aria-invalid="false"></textarea>
+                            <p class="err" id="eDesc" hidden></p>
+                        </div>
                         <div class="fl"><label class="k" for="pStack">HERRAMIENTAS (SEPARADAS POR COMA)</label>
-                            <input id="pStack" name="stack" type="text" placeholder="Java, Spring Boot, MongoDB"></div>
+                            <input id="pStack" name="stack" type="text" placeholder="Java, Spring Boot, MongoDB">
+                        </div>
                         <div class="two-c">
                             <div class="fl"><label class="k" for="pLink">ENLACE</label>
-                                <input id="pLink" name="linkProyecto" type="url" inputmode="url" placeholder="https://" aria-describedby="eLink" aria-invalid="false">
-                                <p class="err" id="eLink" hidden></p></div>
+                                <input id="pLink" name="linkProyecto" type="url" inputmode="url" placeholder="https://"
+                                    aria-describedby="eLink" aria-invalid="false">
+                                <p class="err" id="eLink" hidden></p>
+                            </div>
                             <div class="fl"><label class="k" for="pAnio">AÑO</label>
                                 <select id="pAnio" name="anio">
-                                    <option th:each="y : ${#numbers.sequence(anioActual, anioActual - 5, -1)}" th:value="${y}" th:text="${y}">2026</option>
-                                </select></div>
+                                    <option th:each="y : ${#numbers.sequence(anioActual, anioActual - 5, -1)}"
+                                        th:value="${y}" th:text="${y}">2026</option>
+                                </select>
+                            </div>
                         </div>
-                        <a class="full" id="pFull" th:href="@{/subirProyecto}" hidden>Abrir el editor completo (banner, rol, duración…)</a>
-                        <div class="dacts"><button class="ghostb" id="pCancel" type="button">Cancelar</button><button class="btn-o" id="pSave" type="submit">Guardar proyecto</button></div>
+                        <a class="full" id="pFull" th:href="@{/subirProyecto}" hidden>Abrir el editor completo (banner,
+                            rol, duración…)</a>
+                        <div class="dacts"><button class="ghostb" id="pCancel" type="button">Cancelar</button><button
+                                class="btn-o" id="pSave" type="submit">Guardar proyecto</button></div>
                     </form>
                 </dialog>
             </main>

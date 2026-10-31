@@ -26,7 +26,10 @@ public class LimiteTasa {
         this.reloj = reloj;
     }
 
-    /** Anota este intento y dice si ya se pasó de {@code max} en los últimos {@code ventanaMs}. */
+    /**
+     * Anota este intento y dice si ya se pasó de {@code max} en los últimos
+     * {@code ventanaMs}.
+     */
     public boolean excedido(String clave, int max, long ventanaMs) {
         String k = clave == null ? "" : (clave.length() > 160 ? clave.substring(0, 160) : clave);
         long ahora = reloj.getAsLong();

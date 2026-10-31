@@ -19,79 +19,138 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <section class="hello" aria-label="Resumen de hoy">
                     <div class="hello-t">
                         <div class="eyebrow">// resumen</div>
-                        <h1 th:text="${nombrePila != ''} ? 'Buen viento, ' + ${nombrePila} + '.' : 'Buen viento.'">Buen viento, [Nombre].</h1>
-                        <p th:if="${nInvPendientes > 0 and nNuevasAltas > 0}">Tienes <b th:text="${nInvPendientes == 1 ? '1 invitación' : nInvPendientes + ' invitaciones'}">1 invitación</b> por responder y
-                            <b th:text="${nNuevasAltas == 1 ? '1 oferta nueva' : nNuevasAltas + ' ofertas nuevas'}">2 ofertas nuevas</b> con match alto.</p>
-                        <p th:if="${nInvPendientes > 0 and nNuevasAltas == 0}">Tienes <b th:text="${nInvPendientes == 1 ? '1 invitación' : nInvPendientes + ' invitaciones'}">1 invitación</b> por responder.</p>
-                        <p th:if="${nInvPendientes == 0 and nNuevasAltas > 0}">Hay <b th:text="${nNuevasAltas == 1 ? '1 oferta nueva' : nNuevasAltas + ' ofertas nuevas'}">2 ofertas nuevas</b> con match alto para ti.</p>
-                        <p th:if="${nInvPendientes == 0 and nNuevasAltas == 0 and talentoSinStack}">Agrega tu stack en <a class="lnk" th:href="@{/perfil}">tu perfil</a> para ver cuánto encajas con cada oferta.</p>
-                        <p th:if="${nInvPendientes == 0 and nNuevasAltas == 0 and !talentoSinStack}">Todo en calma por ahora. Explora empleos y sigue zarpando.</p>
-                        <div class="acts"><a class="btn-o sm" th:href="@{/solicitudes}">Ver solicitudes</a><a class="lnk" th:href="@{/empleos}">Explorar empleos</a></div>
+                        <h1 th:text="${nombrePila != ''} ? 'Buen viento, ' + ${nombrePila} + '.' : 'Buen viento.'">Buen
+                            viento, [Nombre].</h1>
+                        <p th:if="${nInvPendientes > 0 and nNuevasAltas > 0}">Tienes <b
+                                th:text="${nInvPendientes == 1 ? '1 invitación' : nInvPendientes + ' invitaciones'}">1
+                                invitación</b> por responder y
+                            <b th:text="${nNuevasAltas == 1 ? '1 oferta nueva' : nNuevasAltas + ' ofertas nuevas'}">2
+                                ofertas nuevas</b> con match alto.
+                        </p>
+                        <p th:if="${nInvPendientes > 0 and nNuevasAltas == 0}">Tienes <b
+                                th:text="${nInvPendientes == 1 ? '1 invitación' : nInvPendientes + ' invitaciones'}">1
+                                invitación</b> por responder.</p>
+                        <p th:if="${nInvPendientes == 0 and nNuevasAltas > 0}">Hay <b
+                                th:text="${nNuevasAltas == 1 ? '1 oferta nueva' : nNuevasAltas + ' ofertas nuevas'}">2
+                                ofertas nuevas</b> con match alto para ti.</p>
+                        <p th:if="${nInvPendientes == 0 and nNuevasAltas == 0 and talentoSinStack}">Agrega tu stack en
+                            <a class="lnk" th:href="@{/perfil}">tu perfil</a> para ver cuánto encajas con cada oferta.
+                        </p>
+                        <p th:if="${nInvPendientes == 0 and nNuevasAltas == 0 and !talentoSinStack}">Todo en calma por
+                            ahora. Explora empleos y sigue zarpando.</p>
+                        <div class="acts"><a class="btn-o sm" th:href="@{/solicitudes}">Ver solicitudes</a><a
+                                class="lnk" th:href="@{/empleos}">Explorar empleos</a></div>
                     </div>
                     <div class="hello-sea" aria-hidden="true">
                         <th:block th:replace="~{fragments/nautico :: boat('hullclip32')}"></th:block>
                         <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
                     </div>
                     <dl class="nums" aria-label="Tus números">
-                        <div class="nv o"><dt><span>SOLICITUDES EN RUTA</span></dt><dd><b th:attr="data-n=${nEnRuta}" th:text="${nEnRuta}">5</b></dd></div>
-                        <div class="nv t"><dt><span>INVITACIONES POR RESPONDER</span></dt><dd><b th:attr="data-n=${nInvPendientes}" th:text="${nInvPendientes}">1</b></dd></div>
-                        <div class="nv"><dt><span>OFERTAS NUEVAS CON MATCH ALTO (7 DÍAS)</span></dt><dd><b th:attr="data-n=${nNuevasAltas}" th:text="${nNuevasAltas}">2</b></dd></div>
-                        <div class="nv"><dt><span>MATCH PROMEDIO DE TUS SOLICITUDES</span></dt><dd>
-                            <b th:if="${matchPromedio != null}" data-s="%" th:attr="data-n=${matchPromedio}"><span th:text="${matchPromedio}">72</span><small>%</small></b>
-                            <b th:if="${matchPromedio == null}" aria-label="sin datos">—</b></dd></div>
+                        <div class="nv o">
+                            <dt><span>SOLICITUDES EN RUTA</span></dt>
+                            <dd><b th:attr="data-n=${nEnRuta}" th:text="${nEnRuta}">5</b></dd>
+                        </div>
+                        <div class="nv t">
+                            <dt><span>INVITACIONES POR RESPONDER</span></dt>
+                            <dd><b th:attr="data-n=${nInvPendientes}" th:text="${nInvPendientes}">1</b></dd>
+                        </div>
+                        <div class="nv">
+                            <dt><span>OFERTAS NUEVAS CON MATCH ALTO (7 DÍAS)</span></dt>
+                            <dd><b th:attr="data-n=${nNuevasAltas}" th:text="${nNuevasAltas}">2</b></dd>
+                        </div>
+                        <div class="nv">
+                            <dt><span>MATCH PROMEDIO DE TUS SOLICITUDES</span></dt>
+                            <dd>
+                                <b th:if="${matchPromedio != null}" data-s="%" th:attr="data-n=${matchPromedio}"><span
+                                        th:text="${matchPromedio}">72</span><small>%</small></b>
+                                <b th:if="${matchPromedio == null}" aria-label="sin datos">—</b>
+                            </dd>
+                        </div>
                     </dl>
                 </section>
 
-                <div class="sec2"><h2>Tu travesía</h2><span>tus solicitudes, de la salida al puerto</span>
+                <div class="sec2">
+                    <h2>Tu travesía</h2><span>tus solicitudes, de la salida al puerto</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#FF7B4F"></i>Programación</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#2DD4BF"></i>Diseño</span>
                     <span class="lg" aria-hidden="true"><i class="sw" style="background:#CDD1DB"></i>Otras</span>
-                    <a th:href="@{/solicitudes}">ver solicitudes</a></div>
+                    <a th:href="@{/solicitudes}">ver solicitudes</a>
+                </div>
                 <th:block th:replace="~{fragments/pase :: carta(${carta})}"></th:block>
 
                 <th:block th:if="${destacado != null or invitacion != null}">
-                    <div class="sec2"><h2>Para ti hoy</h2><span th:text="${destacado != null} ? 'lo que más encaja con tu perfil' : 'una empresa quiere conocerte'">lo que más encaja con tu perfil</span><a th:href="@{/empleos}">ver todas las ofertas</a></div>
+                    <div class="sec2">
+                        <h2>Para ti hoy</h2><span
+                            th:text="${destacado != null} ? 'lo que más encaja con tu perfil' : 'una empresa quiere conocerte'">lo
+                            que más encaja con tu perfil</span><a th:href="@{/empleos}">ver todas las ofertas</a>
+                    </div>
                     <div class="pair" th:classappend="${destacado == null or invitacion == null} ? 'solo'">
-                        <th:block th:if="${destacado != null}"><th:block th:replace="~{fragments/pase :: ticket(${destacado}, true, 0)}"></th:block></th:block>
-                        <th:block th:if="${invitacion != null}"><th:block th:replace="~{fragments/pase :: invitacion(${invitacion}, 1)}"></th:block></th:block>
+                        <th:block th:if="${destacado != null}">
+                            <th:block th:replace="~{fragments/pase :: ticket(${destacado}, true, 0)}"></th:block>
+                        </th:block>
+                        <th:block th:if="${invitacion != null}">
+                            <th:block th:replace="~{fragments/pase :: invitacion(${invitacion}, 1)}"></th:block>
+                        </th:block>
                     </div>
                 </th:block>
 
                 <th:block th:if="${!#lists.isEmpty(avistadas)}">
-                    <div class="sec2"><h2>Avistadas</h2><span>ofertas recientes con buen match</span><a th:href="@{/empleos}">ver más</a></div>
+                    <div class="sec2">
+                        <h2>Avistadas</h2><span>ofertas recientes con buen match</span><a th:href="@{/empleos}">ver
+                            más</a>
+                    </div>
                     <div class="minis">
-                        <th:block th:each="v : ${avistadas}"><th:block th:replace="~{fragments/pase :: mini(${v})}"></th:block></th:block>
+                        <th:block th:each="v : ${avistadas}">
+                            <th:block th:replace="~{fragments/pase :: mini(${v})}"></th:block>
+                        </th:block>
                     </div>
                 </th:block>
 
-                <div class="sec2"><h2>Tu semana</h2><span>cómo va tu perfil y qué ha pasado</span></div>
+                <div class="sec2">
+                    <h2>Tu semana</h2><span>cómo va tu perfil y qué ha pasado</span>
+                </div>
                 <section class="pn" aria-labelledby="hBit">
-                    <h2 id="hBit">Bitácora <span class="lab" th:text="'PERFIL ' + ${completitud} + '%'">PERFIL 80%</span></h2>
+                    <h2 id="hBit">Bitácora <span class="lab" th:text="'PERFIL ' + ${completitud} + '%'">PERFIL
+                            80%</span></h2>
                     <div class="bit">
                         <div class="bit-l">
-                            <div class="pbar big" role="progressbar" th:attr="aria-valuenow=${completitud}" aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo"><i th:style="'width:' + ${completitud} + '%'"></i></div>
+                            <div class="pbar big" role="progressbar" th:attr="aria-valuenow=${completitud}"
+                                aria-valuemin="0" aria-valuemax="100" aria-label="Perfil completo"><i
+                                    th:style="'width:' + ${completitud} + '%'"></i></div>
                             <ul class="todo" th:if="${!#lists.isEmpty(pendientes)}">
-                                <li th:each="p : ${pendientes}"><span class="bx" aria-hidden="true"></span><a th:href="@{${p.href}}" th:text="${p.texto}">Agregar tu GitHub</a></li>
-                                <li class="mas" th:if="${pendientesMas > 0}"><span class="bx" aria-hidden="true" style="visibility:hidden"></span><span th:text="'y ' + ${pendientesMas} + (${pendientesMas} == 1 ? ' pendiente más' : ' pendientes más')">y 2 pendientes más</span></li>
+                                <li th:each="p : ${pendientes}"><span class="bx" aria-hidden="true"></span><a
+                                        th:href="@{${p.href}}" th:text="${p.texto}">Agregar tu GitHub</a></li>
+                                <li class="mas" th:if="${pendientesMas > 0}"><span class="bx" aria-hidden="true"
+                                        style="visibility:hidden"></span><span
+                                        th:text="'y ' + ${pendientesMas} + (${pendientesMas} == 1 ? ' pendiente más' : ' pendientes más')">y
+                                        2 pendientes más</span></li>
                             </ul>
-                            <p class="bit-vacio" th:if="${#lists.isEmpty(pendientes)}">Tu perfil está completo. Buen viento.</p>
+                            <p class="bit-vacio" th:if="${#lists.isEmpty(pendientes)}">Tu perfil está completo. Buen
+                                viento.</p>
                         </div>
                         <div class="bit-r">
                             <div class="sub-h">ACTIVIDAD RECIENTE</div>
                             <ol class="tl" th:if="${!#lists.isEmpty(eventos)}">
-                                <li th:each="e : ${eventos}"><span class="mk" th:classappend="${e.tono == 'o'} ? 'o' : (${e.tono == 'g'} ? 'g')"></span>
-                                    <div><span th:text="${e.texto}">Enviaste tu solicitud.</span><time th:datetime="${#dates.format(e.fecha, 'yyyy-MM-dd')}" th:text="${e.cuando}">hace 8 días</time></div></li>
+                                <li th:each="e : ${eventos}"><span class="mk"
+                                        th:classappend="${e.tono == 'o'} ? 'o' : (${e.tono == 'g'} ? 'g')"></span>
+                                    <div><span th:text="${e.texto}">Enviaste tu solicitud.</span><time
+                                            th:datetime="${#dates.format(e.fecha, 'yyyy-MM-dd')}"
+                                            th:text="${e.cuando}">hace 8 días</time></div>
+                                </li>
                             </ol>
-                            <p class="bit-vacio" th:if="${#lists.isEmpty(eventos)}">Cuando envíes solicitudes o recibas invitaciones, aparecerán aquí.</p>
+                            <p class="bit-vacio" th:if="${#lists.isEmpty(eventos)}">Cuando envíes solicitudes o recibas
+                                invitaciones, aparecerán aquí.</p>
                         </div>
                     </div>
                 </section>
@@ -102,44 +161,73 @@
     <dialog class="ob" id="ob" th:if="${mostrarOnboarding}" aria-labelledby="obT"
         th:attr="data-stack=${usuario != null and usuario.stack != null ? #strings.listJoin(usuario.stack, '|') : ''}">
         <form id="obForm" novalidate>
-            <div><span class="k">BIENVENIDO A BORDO</span><h2 id="obT">Completa tu perfil</h2></div>
-            <p class="ob-d">En un minuto las empresas pueden encontrarte, y nosotros calculamos tu match con cada oferta.</p>
+            <div><span class="k">BIENVENIDO A BORDO</span>
+                <h2 id="obT">Completa tu perfil</h2>
+            </div>
+            <p class="ob-d">En un minuto las empresas pueden encontrarte, y nosotros calculamos tu match con cada
+                oferta.</p>
             <div class="fl"><label class="k" for="obRol">CARGO O TÍTULO PROFESIONAL</label>
-                <input id="obRol" type="text" placeholder="Frontend Developer" autocomplete="organization-title" th:value="${usuario != null} ? ${usuario.rolTitulo}"></div>
+                <input id="obRol" type="text" placeholder="Frontend Developer" autocomplete="organization-title"
+                    th:value="${usuario != null} ? ${usuario.rolTitulo}">
+            </div>
             <div class="fl"><label class="k" for="obUbi">UBICACIÓN</label>
-                <input id="obUbi" type="text" placeholder="Bogotá, Colombia" autocomplete="address-level2" th:value="${usuario != null} ? ${usuario.ubicacion}"></div>
+                <input id="obUbi" type="text" placeholder="Bogotá, Colombia" autocomplete="address-level2"
+                    th:value="${usuario != null} ? ${usuario.ubicacion}">
+            </div>
             <div class="fl"><label class="k" for="obBio">BIOGRAFÍA</label>
-                <textarea id="obBio" rows="3" placeholder="Quién eres, qué haces mejor y qué proyectos te interesan." th:text="${usuario != null} ? ${usuario.bio}"></textarea></div>
+                <textarea id="obBio" rows="3" placeholder="Quién eres, qué haces mejor y qué proyectos te interesan."
+                    th:text="${usuario != null} ? ${usuario.bio}"></textarea>
+            </div>
             <div class="dos">
                 <div class="fl"><label class="k" for="obMod">MODALIDAD</label>
                     <select id="obMod">
                         <option value="">Seleccionar</option>
-                        <option value="remoto" th:selected="${usuario != null and usuario.modalidad == 'remoto'}">Remoto</option>
-                        <option value="hibrido" th:selected="${usuario != null and usuario.modalidad == 'hibrido'}">Híbrido</option>
-                        <option value="presencial" th:selected="${usuario != null and usuario.modalidad == 'presencial'}">Presencial</option>
-                        <option value="freelance" th:selected="${usuario != null and usuario.modalidad == 'freelance'}">Freelance</option>
-                    </select></div>
+                        <option value="remoto" th:selected="${usuario != null and usuario.modalidad == 'remoto'}">Remoto
+                        </option>
+                        <option value="hibrido" th:selected="${usuario != null and usuario.modalidad == 'hibrido'}">
+                            Híbrido</option>
+                        <option value="presencial"
+                            th:selected="${usuario != null and usuario.modalidad == 'presencial'}">Presencial</option>
+                        <option value="freelance" th:selected="${usuario != null and usuario.modalidad == 'freelance'}">
+                            Freelance</option>
+                    </select>
+                </div>
                 <div class="fl"><label class="k" for="obDisp">DISPONIBILIDAD</label>
                     <select id="obDisp">
                         <option value="">Seleccionar</option>
-                        <option value="full-time" th:selected="${usuario != null and usuario.disponibilidad == 'full-time'}">Tiempo completo</option>
-                        <option value="part-time" th:selected="${usuario != null and usuario.disponibilidad == 'part-time'}">Medio tiempo</option>
-                        <option value="freelance" th:selected="${usuario != null and usuario.disponibilidad == 'freelance'}">Freelance</option>
-                        <option value="practicas" th:selected="${usuario != null and usuario.disponibilidad == 'practicas'}">Prácticas</option>
-                    </select></div>
+                        <option value="full-time"
+                            th:selected="${usuario != null and usuario.disponibilidad == 'full-time'}">Tiempo completo
+                        </option>
+                        <option value="part-time"
+                            th:selected="${usuario != null and usuario.disponibilidad == 'part-time'}">Medio tiempo
+                        </option>
+                        <option value="freelance"
+                            th:selected="${usuario != null and usuario.disponibilidad == 'freelance'}">Freelance
+                        </option>
+                        <option value="practicas"
+                            th:selected="${usuario != null and usuario.disponibilidad == 'practicas'}">Prácticas
+                        </option>
+                    </select>
+                </div>
             </div>
             <div class="fl"><label class="k" for="obSal">EXPECTATIVA SALARIAL</label>
-                <input id="obSal" type="text" placeholder="COP 5.000.000 – 7.000.000 / mes" th:value="${usuario != null} ? ${usuario.salarioEsperado}"></div>
+                <input id="obSal" type="text" placeholder="COP 5.000.000 – 7.000.000 / mes"
+                    th:value="${usuario != null} ? ${usuario.salarioEsperado}">
+            </div>
             <fieldset class="fl" style="border:0;padding:0;margin:0">
                 <legend class="k" style="padding:0;margin-bottom:6px">TU STACK (ELIGE LO QUE USAS)</legend>
                 <div class="techs" id="obTechs">
-                    <label th:each="t : ${#strings.arraySplit('Java,Spring Boot,Python,Node.js,React,Angular,Vue.js,TypeScript,JavaScript,MongoDB,PostgreSQL,MySQL,Docker,AWS,Git,Kotlin,Flutter,Thymeleaf,Figma,Illustrator,Photoshop', ',')}"><input type="checkbox" th:value="${t}"><span th:text="${t}">Java</span></label>
+                    <label
+                        th:each="t : ${#strings.arraySplit('Java,Spring Boot,Python,Node.js,React,Angular,Vue.js,TypeScript,JavaScript,MongoDB,PostgreSQL,MySQL,Docker,AWS,Git,Kotlin,Flutter,Thymeleaf,Figma,Illustrator,Photoshop', ',')}"><input
+                            type="checkbox" th:value="${t}"><span th:text="${t}">Java</span></label>
                 </div>
             </fieldset>
             <div class="fl"><label class="k" for="obCustom">¿USAS ALGO MÁS? SEPÁRALO POR COMAS</label>
-                <input id="obCustom" type="text" placeholder="GraphQL, Redis, Kubernetes"></div>
+                <input id="obCustom" type="text" placeholder="GraphQL, Redis, Kubernetes">
+            </div>
             <p class="err" id="obErr" role="alert" hidden></p>
-            <div class="acts2"><button class="ghostb" id="obSkip" type="button">Ahora no</button><button class="btn-o" id="obSave" type="submit">Guardar y continuar</button></div>
+            <div class="acts2"><button class="ghostb" id="obSkip" type="button">Ahora no</button><button class="btn-o"
+                    id="obSave" type="submit">Guardar y continuar</button></div>
         </form>
     </dialog>
 

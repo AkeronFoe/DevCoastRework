@@ -18,16 +18,25 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar(${esEmpresa ? '/talentos' : '/empleos'}, ${esEmpresa ? 'Buscar talentos' : 'Buscar ofertas'}, ${esEmpresa ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa'}, null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar(${esEmpresa ? '/talentos' : '/empleos'}, ${esEmpresa ? 'Buscar talentos' : 'Buscar ofertas'}, ${esEmpresa ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa'}, null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error' or flashType == 'warning'} ? 'error'"
                     th:text="${flashMessage}">Aviso</p>
 
                 <div class="alertbar" role="status" th:if="${esPreview == true}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
                     <div class="txt"><b>Así te ven las empresas.</b>
-                        <span th:text="${talento.perfilPublico} ? 'Esta es tu página pública del Directorio.' : 'Tu perfil está oculto: solo tú ves esta página.'">Esta es tu página pública.</span></div>
+                        <span
+                            th:text="${talento.perfilPublico} ? 'Esta es tu página pública del Directorio.' : 'Tu perfil está oculto: solo tú ves esta página.'">Esta
+                            es tu página pública.</span>
+                    </div>
                     <a class="btn-o sm" th:href="@{/perfil}">Volver a editar mi perfil</a>
                 </div>
 
@@ -36,7 +45,8 @@
                         <div class="eyebrow">// perfil</div>
                         <h1 th:text="${tv.nombre}">Nombre</h1>
                         <p class="sub" th:if="${tv.rol != null or tv.ubicacion != null}"
-                            th:text="${(tv.rol != null ? tv.rol : '') + (tv.rol != null and tv.ubicacion != null ? ' · ' : '') + (tv.ubicacion != null ? tv.ubicacion : '')}">Frontend Developer · Santiago</p>
+                            th:text="${(tv.rol != null ? tv.rol : '') + (tv.rol != null and tv.ubicacion != null ? ' · ' : '') + (tv.ubicacion != null ? tv.ubicacion : '')}">
+                            Frontend Developer · Santiago</p>
                     </div>
                     <div class="pf-acts" th:unless="${esPreview == true}">
                         <a class="lnk" th:href="@{/talentos}">← Volver al Directorio</a>
@@ -50,25 +60,43 @@
                                 <img th:if="${tv.fotoUrl != null}" th:src="${tv.fotoUrl}" alt="">
                                 <b th:if="${tv.fotoUrl == null}" th:text="${tv.inicial}">V</b>
                             </span>
-                            <div class="tc-chips" th:if="${tv.categoria != null or tv.modalidad != null or tv.disponibilidad != null}">
+                            <div class="tc-chips"
+                                th:if="${tv.categoria != null or tv.modalidad != null or tv.disponibilidad != null}">
                                 <span class="area" th:if="${tv.categoria != null}" th:classappend="${tv.areaClave}">
-                                    <svg th:if="${tv.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
-                                    <svg th:if="${tv.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z"/><path d="M14.5 6.8l2.7 2.7"/></svg>
-                                    <svg th:if="${tv.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                                    <svg th:if="${tv.areaClave == 'p'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+                                    </svg>
+                                    <svg th:if="${tv.areaClave == 'd'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 21l3.5-.8L19 7.7 16.3 5 3.8 17.5z" />
+                                        <path d="M14.5 6.8l2.7 2.7" />
+                                    </svg>
+                                    <svg th:if="${tv.areaClave == 'o'}" viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="3" y="7" width="18" height="13" rx="2" />
+                                        <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                    </svg>
                                     <span th:text="${tv.categoria}">Frontend</span>
                                 </span>
-                                <span class="tc-c" th:if="${tv.modalidad != null}" th:text="${tv.modalidad}">Remoto</span>
-                                <span class="tc-c" th:if="${tv.disponibilidad != null}" th:text="${tv.disponibilidad}">Tiempo completo</span>
+                                <span class="tc-c" th:if="${tv.modalidad != null}"
+                                    th:text="${tv.modalidad}">Remoto</span>
+                                <span class="tc-c" th:if="${tv.disponibilidad != null}"
+                                    th:text="${tv.disponibilidad}">Tiempo completo</span>
                             </div>
                         </div>
 
-                        <p class="tp-bio" th:if="${talento.bio != null and !#strings.isEmpty(talento.bio)}" th:text="${talento.bio}">Bio</p>
-                        <p class="tp-bio vacia" th:if="${talento.bio == null or #strings.isEmpty(talento.bio)}">Esta persona todavía no ha escrito su biografía.</p>
+                        <p class="tp-bio" th:if="${talento.bio != null and !#strings.isEmpty(talento.bio)}"
+                            th:text="${talento.bio}">Bio</p>
+                        <p class="tp-bio vacia" th:if="${talento.bio == null or #strings.isEmpty(talento.bio)}">Esta
+                            persona todavía no ha escrito su biografía.</p>
 
-                        <div class="tc-l tp-links" th:if="${tv.portfolioUrl != null or tv.linkedinUrl != null or tv.githubUrl != null}">
-                            <a th:if="${tv.portfolioUrl != null}" th:href="${tv.portfolioUrl}" target="_blank" rel="noopener noreferrer" aria-label="Portafolio (se abre en otra pestaña)">Portafolio</a>
-                            <a th:if="${tv.linkedinUrl != null}" th:href="${tv.linkedinUrl}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (se abre en otra pestaña)">LinkedIn</a>
-                            <a th:if="${tv.githubUrl != null}" th:href="${tv.githubUrl}" target="_blank" rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
+                        <div class="tc-l tp-links"
+                            th:if="${tv.portfolioUrl != null or tv.linkedinUrl != null or tv.githubUrl != null}">
+                            <a th:if="${tv.portfolioUrl != null}" th:href="${tv.portfolioUrl}" target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Portafolio (se abre en otra pestaña)">Portafolio</a>
+                            <a th:if="${tv.linkedinUrl != null}" th:href="${tv.linkedinUrl}" target="_blank"
+                                rel="noopener noreferrer" aria-label="LinkedIn (se abre en otra pestaña)">LinkedIn</a>
+                            <a th:if="${tv.githubUrl != null}" th:href="${tv.githubUrl}" target="_blank"
+                                rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
                         </div>
 
                         <div class="tp-inv" th:if="${esEmpresa}">
@@ -79,14 +107,18 @@
                                         <label for="invEmpleo">OFERTA</label>
                                         <div class="inp"><select id="invEmpleo" name="empleoId">
                                                 <option value="">Sin oferta concreta (mensaje libre)</option>
-                                                <option th:each="e : ${misEmpleos}" th:value="${e.id}" th:text="${e.titulo} + (${e.modalidad} != null ? ' · ' + ${e.modalidad} : '')">Backend Java · Remoto</option>
+                                                <option th:each="e : ${misEmpleos}" th:value="${e.id}"
+                                                    th:text="${e.titulo} + (${e.modalidad} != null ? ' · ' + ${e.modalidad} : '')">
+                                                    Backend Java · Remoto</option>
                                             </select></div>
-                                        <span class="hint" th:if="${#lists.isEmpty(misEmpleos)}">No tienes ofertas activas. <a class="lnk" th:href="@{/crearEmpleo}">Publica una</a>.</span>
+                                        <span class="hint" th:if="${#lists.isEmpty(misEmpleos)}">No tienes ofertas
+                                            activas. <a class="lnk" th:href="@{/crearEmpleo}">Publica una</a>.</span>
                                     </div>
                                     <div class="field">
                                         <label for="invMsg">MENSAJE <span class="opt">(opcional)</span></label>
                                         <div class="inp"><textarea id="invMsg" name="mensaje" rows="4" maxlength="1000"
-                                                placeholder="Cuéntale por qué quieres contactarle y qué ofreces."></textarea></div>
+                                                placeholder="Cuéntale por qué quieres contactarle y qué ofreces."></textarea>
+                                        </div>
                                     </div>
                                     <div class="inv-acts">
                                         <button class="tc-inv" type="submit">Enviar invitación</button>
@@ -95,41 +127,71 @@
                                 </form>
                             </details>
                             <span class="tc-ya" th:if="${yaInvitado}">✓ Ya enviaste una invitación a este talento</span>
-                            <span class="tc-ya" th:if="${!yaInvitado and !permiteContacto}">Este talento desactivó las invitaciones directas.</span>
+                            <span class="tc-ya" th:if="${!yaInvitado and !permiteContacto}">Este talento desactivó las
+                                invitaciones directas.</span>
                         </div>
                     </article>
 
                     <div class="pf-side">
-                        <section class="pn" aria-labelledby="hStack" th:if="${talento.stack != null and !#lists.isEmpty(talento.stack)}">
-                            <h2 id="hStack">Stack <span class="lab" th:text="${#lists.size(talento.stack)} + ' tecnologías'">5 tecnologías</span></h2>
-                            <div class="chips-ro"><span class="pill" th:each="s : ${talento.stack}" th:text="${s}">Java</span></div>
+                        <section class="pn" aria-labelledby="hStack"
+                            th:if="${talento.stack != null and !#lists.isEmpty(talento.stack)}">
+                            <h2 id="hStack">Stack <span class="lab"
+                                    th:text="${#lists.size(talento.stack)} + ' tecnologías'">5 tecnologías</span></h2>
+                            <div class="chips-ro"><span class="pill" th:each="s : ${talento.stack}"
+                                    th:text="${s}">Java</span></div>
                         </section>
 
-                        <section class="pn" aria-labelledby="hExp" th:if="${talento.cvExperiencias != null and !#lists.isEmpty(talento.cvExperiencias)}">
+                        <section class="pn" aria-labelledby="hExp"
+                            th:if="${talento.cvExperiencias != null and !#lists.isEmpty(talento.cvExperiencias)}">
                             <h2 id="hExp">Experiencia</h2>
                             <ol class="tl">
                                 <li th:each="e, it : ${talento.cvExperiencias}"><span class="mk"></span>
-                                    <div><span><b th:text="${e.cargo}">Cargo</b><span th:if="${e.empresa != null and !#strings.isEmpty(e.empresa)}" th:text="' · ' + ${e.empresa}"> · Empresa</span></span>
+                                    <div><span><b th:text="${e.cargo}">Cargo</b><span
+                                                th:if="${e.empresa != null and !#strings.isEmpty(e.empresa)}"
+                                                th:text="' · ' + ${e.empresa}"> · Empresa</span></span>
                                         <time th:if="${e.periodo != null or e.modalidad != null}"
-                                            th:text="${(e.periodo != null ? e.periodo : '') + (e.periodo != null and e.modalidad != null ? ' · ' : '') + (e.modalidad != null ? e.modalidad : '')}">2023–2025 · Remoto</time>
-                                        <p class="tl-d" th:if="${e.descripcion != null and !#strings.isEmpty(e.descripcion)}" th:text="${e.descripcion}">Descripción</p></div></li>
+                                            th:text="${(e.periodo != null ? e.periodo : '') + (e.periodo != null and e.modalidad != null ? ' · ' : '') + (e.modalidad != null ? e.modalidad : '')}">2023–2025
+                                            · Remoto</time>
+                                        <p class="tl-d"
+                                            th:if="${e.descripcion != null and !#strings.isEmpty(e.descripcion)}"
+                                            th:text="${e.descripcion}">Descripción</p>
+                                    </div>
+                                </li>
                             </ol>
                         </section>
 
-                        <section class="pn" aria-labelledby="hSoft" th:if="${talento.habilidadesBlandas != null and !#lists.isEmpty(talento.habilidadesBlandas)}">
+                        <section class="pn" aria-labelledby="hSoft"
+                            th:if="${talento.habilidadesBlandas != null and !#lists.isEmpty(talento.habilidadesBlandas)}">
                             <h2 id="hSoft">Habilidades blandas</h2>
-                            <div class="chips-ro"><span class="pill soft" th:each="h : ${talento.habilidadesBlandas}" th:text="${h}">Comunicación</span></div>
+                            <div class="chips-ro"><span class="pill soft" th:each="h : ${talento.habilidadesBlandas}"
+                                    th:text="${h}">Comunicación</span></div>
                         </section>
 
                         <section class="pn" aria-labelledby="hCon">
                             <h2 id="hCon">Contacto</h2>
                             <dl class="datos">
-                                <div th:if="${talento.emailContacto != null and !#strings.isEmpty(talento.emailContacto) and talento.mostrarCorreo}"><dt>CORREO</dt><dd th:text="${talento.emailContacto}">correo</dd></div>
-                                <div th:if="${talento.telefono != null and !#strings.isEmpty(talento.telefono)}"><dt>TELÉFONO</dt><dd th:text="${talento.telefono}">teléfono</dd></div>
-                                <div th:if="${tv.ubicacion != null}"><dt>UBICACIÓN</dt><dd th:text="${tv.ubicacion}">Ciudad</dd></div>
-                                <div th:if="${talento.salarioEsperado != null and !#strings.isEmpty(talento.salarioEsperado)}"><dt>EXPECTATIVA SALARIAL</dt><dd th:text="${talento.salarioEsperado}">COP 5 M</dd></div>
+                                <div
+                                    th:if="${talento.emailContacto != null and !#strings.isEmpty(talento.emailContacto) and talento.mostrarCorreo}">
+                                    <dt>CORREO</dt>
+                                    <dd th:text="${talento.emailContacto}">correo</dd>
+                                </div>
+                                <div th:if="${talento.telefono != null and !#strings.isEmpty(talento.telefono)}">
+                                    <dt>TELÉFONO</dt>
+                                    <dd th:text="${talento.telefono}">teléfono</dd>
+                                </div>
+                                <div th:if="${tv.ubicacion != null}">
+                                    <dt>UBICACIÓN</dt>
+                                    <dd th:text="${tv.ubicacion}">Ciudad</dd>
+                                </div>
+                                <div
+                                    th:if="${talento.salarioEsperado != null and !#strings.isEmpty(talento.salarioEsperado)}">
+                                    <dt>EXPECTATIVA SALARIAL</dt>
+                                    <dd th:text="${talento.salarioEsperado}">COP 5 M</dd>
+                                </div>
                             </dl>
-                            <p class="note" th:if="${(talento.emailContacto == null or #strings.isEmpty(talento.emailContacto) or !talento.mostrarCorreo) and (talento.telefono == null or #strings.isEmpty(talento.telefono)) and tv.ubicacion == null and (talento.salarioEsperado == null or #strings.isEmpty(talento.salarioEsperado))}">Esta persona no comparte datos de contacto. Puedes invitarle desde el Directorio.</p>
+                            <p class="note"
+                                th:if="${(talento.emailContacto == null or #strings.isEmpty(talento.emailContacto) or !talento.mostrarCorreo) and (talento.telefono == null or #strings.isEmpty(talento.telefono)) and tv.ubicacion == null and (talento.salarioEsperado == null or #strings.isEmpty(talento.salarioEsperado))}">
+                                Esta persona no comparte datos de contacto. Puedes invitarle desde el Directorio.</p>
                         </section>
                     </div>
                 </div>

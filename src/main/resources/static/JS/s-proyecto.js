@@ -255,54 +255,54 @@ setupTags('stack-input', 'stack-field', stackTags);
 setupTags('tags-input', 'tags-field', extraTags);
 
 function pintarCard(prefix) {
-  try {
-    const PR = window.ProyectosRender;
-    const card = document.getElementById(prefix + '-card');
-    if (!PR || !card) return;
+    try {
+        const PR = window.ProyectosRender;
+        const card = document.getElementById(prefix + '-card');
+        if (!PR || !card) return;
 
-    const nombre = v('f-nombre') || 'Nombre del proyecto';
-    const cat = v('f-categoria');
-    const tipo = v('f-tipo');
-    const accent = iconColor || '#1f8f8f';
-    const ink = PR.inkFor(accent);
-    const seed = PR.hashStr(nombre || 'preview');
+        const nombre = v('f-nombre') || 'Nombre del proyecto';
+        const cat = v('f-categoria');
+        const tipo = v('f-tipo');
+        const accent = iconColor || '#1f8f8f';
+        const ink = PR.inkFor(accent);
+        const seed = PR.hashStr(nombre || 'preview');
 
-    card.style.setProperty('--card-accent', accent);
-    card.style.setProperty('--card-ink', ink);
+        card.style.setProperty('--card-accent', accent);
+        card.style.setProperty('--card-ink', ink);
 
-    const built = PR.buildCanvas({ nombre, categoria: cat, tipo, stack: stackTags, accent, seed, estilo: coverActual });
-    const canvas = document.getElementById(prefix + '-canvas');
-    if (canvas) {
-        canvas.className = 'proj-canvas ' + built.modeClass;
-        canvas.innerHTML = built.bar + built.stage;
-    }
-
-    const avatar = document.getElementById(prefix + '-avatar');
-    if (avatar) {
-        avatar.className = 'proj-avatar' + (built.shapeClass ? ' ' + built.shapeClass : '');
-        if (logoSubido) {
-            const img = document.querySelector('#icon-preview img');
-            avatar.innerHTML = img ? `<img src="${img.src}" alt="">` : '<span>D</span>';
-        } else {
-            const inicial = nombre.trim().charAt(0).toUpperCase() || 'D';
-            avatar.innerHTML = `<span>${inicial}</span>`;
+        const built = PR.buildCanvas({ nombre, categoria: cat, tipo, stack: stackTags, accent, seed, estilo: coverActual });
+        const canvas = document.getElementById(prefix + '-canvas');
+        if (canvas) {
+            canvas.className = 'proj-canvas ' + built.modeClass;
+            canvas.innerHTML = built.bar + built.stage;
         }
+
+        const avatar = document.getElementById(prefix + '-avatar');
+        if (avatar) {
+            avatar.className = 'proj-avatar' + (built.shapeClass ? ' ' + built.shapeClass : '');
+            if (logoSubido) {
+                const img = document.querySelector('#icon-preview img');
+                avatar.innerHTML = img ? `<img src="${img.src}" alt="">` : '<span>D</span>';
+            } else {
+                const inicial = nombre.trim().charAt(0).toUpperCase() || 'D';
+                avatar.innerHTML = `<span>${inicial}</span>`;
+            }
+        }
+
+        const swatches = document.getElementById(prefix + '-swatches');
+        if (swatches) swatches.innerHTML = PR.buildSwatchesHTML(accent);
+
+        const tags = document.getElementById(prefix + '-tags') || document.getElementById(prefix + '-stack');
+        if (tags) tags.innerHTML = PR.buildTagsHTML(stackTags, extraTags);
+
+        const modeBadge = document.getElementById(prefix + '-mode-badge');
+        if (modeBadge) {
+            modeBadge.className = 'proj-title-disc ' + built.modeClass.replace('mode-', 'is-');
+            modeBadge.textContent = built.discLabel;
+        }
+    } catch (err) {
+        console.error('pintarCard(' + prefix + ') falló:', err);
     }
-
-    const swatches = document.getElementById(prefix + '-swatches');
-    if (swatches) swatches.innerHTML = PR.buildSwatchesHTML(accent);
-
-    const tags = document.getElementById(prefix + '-tags') || document.getElementById(prefix + '-stack');
-    if (tags) tags.innerHTML = PR.buildTagsHTML(stackTags, extraTags);
-
-    const modeBadge = document.getElementById(prefix + '-mode-badge');
-    if (modeBadge) {
-        modeBadge.className = 'proj-title-disc ' + built.modeClass.replace('mode-', 'is-');
-        modeBadge.textContent = built.discLabel;
-    }
-  } catch (err) {
-    console.error('pintarCard(' + prefix + ') falló:', err);
-  }
 }
 
 function pintarEstiloTiles() {

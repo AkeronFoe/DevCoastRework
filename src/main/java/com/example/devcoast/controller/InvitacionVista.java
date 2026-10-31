@@ -35,11 +35,14 @@ public class InvitacionVista {
         v.empleoId = i.getEmpleoId();
         v.cargo = i.getEmpleoTitulo() != null && !i.getEmpleoTitulo().isBlank() ? i.getEmpleoTitulo() : null;
         v.empresa = i.getEmpresaNombre();
-        v.empresaInicial = v.empresa != null && !v.empresa.isBlank() ? v.empresa.trim().substring(0, 1).toUpperCase(Locale.ROOT) : null;
+        v.empresaInicial = v.empresa != null && !v.empresa.isBlank()
+                ? v.empresa.trim().substring(0, 1).toUpperCase(Locale.ROOT)
+                : null;
         AreaEmpleo.Area area = AreaEmpleo.de(i.getEmpleoCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
         v.categoria = AreaEmpleo.categoriaVisible(i.getEmpleoCategoria());
-        v.modalidad = i.getEmpleoModalidad() != null && !i.getEmpleoModalidad().isBlank() ? i.getEmpleoModalidad() : null;
+        v.modalidad = i.getEmpleoModalidad() != null && !i.getEmpleoModalidad().isBlank() ? i.getEmpleoModalidad()
+                : null;
         v.mensaje = i.getMensaje() != null && !i.getMensaje().isBlank() ? i.getMensaje().trim() : null;
         v.fecha = i.getFechaEnvio();
         v.hace = SolicitudVista.hace(i.getFechaEnvio(), ahora);
@@ -63,8 +66,12 @@ public class InvitacionVista {
         }
         if (i.isEmpleoMostrarSalario() && (i.getEmpleoSalarioMin() != null || i.getEmpleoSalarioMax() != null)) {
             String mon = i.getEmpleoMoneda() == null ? "" : i.getEmpleoMoneda() + " ";
-            String a = i.getEmpleoSalarioMin() != null ? String.format(Locale.forLanguageTag("es"), "%,d", i.getEmpleoSalarioMin()) : null;
-            String b = i.getEmpleoSalarioMax() != null ? String.format(Locale.forLanguageTag("es"), "%,d", i.getEmpleoSalarioMax()) : null;
+            String a = i.getEmpleoSalarioMin() != null
+                    ? String.format(Locale.forLanguageTag("es"), "%,d", i.getEmpleoSalarioMin())
+                    : null;
+            String b = i.getEmpleoSalarioMax() != null
+                    ? String.format(Locale.forLanguageTag("es"), "%,d", i.getEmpleoSalarioMax())
+                    : null;
             v.salarioTexto = mon + (a != null && b != null ? a + " – " + b : a != null ? "Desde " + a : "Hasta " + b);
         }
         return v;

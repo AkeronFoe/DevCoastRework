@@ -89,7 +89,8 @@ public class MensajeController {
         return "mensajes";
     }
 
-    // oigan, esto de acá arma la lista de conversaciones sin traerse todos los mensajes: la base nos da solo el último de cada charla
+    // oigan, esto de acá arma la lista de conversaciones sin traerse todos los
+    // mensajes: la base nos da solo el último de cada charla
     private void cargarBandeja(Model model, HttpSession session, String q) {
         String userId = RoleGuard.getId(session);
         boolean esTalento = "talento".equals(RoleGuard.getTipo(session));
@@ -97,7 +98,8 @@ public class MensajeController {
         String buscado = normalizar(q);
         if (!buscado.isEmpty())
             conversaciones = conversaciones.stream()
-                    .filter(c -> normalizar(c.getOtroNombre() + " " + c.getSolicitud().getEmpleoTitulo()).contains(buscado))
+                    .filter(c -> normalizar(c.getOtroNombre() + " " + c.getSolicitud().getEmpleoTitulo())
+                            .contains(buscado))
                     .toList();
         model.addAttribute("conversaciones", conversaciones);
         model.addAttribute("totalNoLeidos", conversaciones.stream().mapToLong(ConversacionItem::getNoLeidos).sum());

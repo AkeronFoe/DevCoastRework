@@ -17,11 +17,13 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/empleos', 'Buscar ofertas', 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <a class="lnk back" th:href="@{/solicitudes}">← Volver a solicitudes</a>
 
@@ -31,36 +33,52 @@
                     <div class="sd-main">
                         <section class="pn" aria-labelledby="h-hist">
                             <h2 id="h-hist">Historial de la postulación</h2>
-                            <div class="sd-now" th:classappend="${solicitud.estado == 'aprobada'} ? 'ok' : (${solicitud.estado == 'rechazada'} ? 'no' : (${solicitud.estado == 'descartado'} ? 'warn' : 'rev'))">
-                                <b th:text="${solicitud.estado == 'aprobada'} ? '¡Postulación aceptada!' : (${solicitud.estado == 'rechazada'} ? 'Postulación rechazada' : (${solicitud.estado == 'descartado'} ? 'Filtrada por screening automático' : 'En revisión'))">Estado</b>
-                                <p th:text="${solicitud.estado == 'aprobada'} ? 'La empresa aceptó tu perfil. Espera instrucciones sobre el siguiente paso.'
+                            <div class="sd-now"
+                                th:classappend="${solicitud.estado == 'aprobada'} ? 'ok' : (${solicitud.estado == 'rechazada'} ? 'no' : (${solicitud.estado == 'descartado'} ? 'warn' : 'rev'))">
+                                <b
+                                    th:text="${solicitud.estado == 'aprobada'} ? '¡Postulación aceptada!' : (${solicitud.estado == 'rechazada'} ? 'Postulación rechazada' : (${solicitud.estado == 'descartado'} ? 'Filtrada por screening automático' : 'En revisión'))">Estado</b>
+                                <p
+                                    th:text="${solicitud.estado == 'aprobada'} ? 'La empresa aceptó tu perfil. Espera instrucciones sobre el siguiente paso.'
                                           : (${solicitud.estado == 'rechazada'} ? 'No fuiste seleccionado en este proceso. Puedes seguir aplicando a otras vacantes.'
                                           : (${solicitud.estado == 'descartado'} ? 'Tu stack no cumplió los requisitos mínimos definidos por la empresa para este empleo.'
-                                          : 'La empresa todavía no tomó una decisión. Te notificaremos cuando haya novedades.'))">Mensaje</p>
+                                          : 'La empresa todavía no tomó una decisión. Te notificaremos cuando haya novedades.'))">
+                                    Mensaje</p>
                             </div>
-                            <ol class="sd-tl" th:if="${solicitud.historial != null and !#lists.isEmpty(solicitud.historial)}" aria-label="Línea de tiempo">
-                                <li th:each="ev : ${solicitud.historial}" th:classappend="${ev.estado == 'aprobada'} ? 'ok' : (${ev.estado == 'rechazada'} ? 'no' : (${ev.estado == 'descartado'} ? 'warn' : 'rev'))">
+                            <ol class="sd-tl"
+                                th:if="${solicitud.historial != null and !#lists.isEmpty(solicitud.historial)}"
+                                aria-label="Línea de tiempo">
+                                <li th:each="ev : ${solicitud.historial}"
+                                    th:classappend="${ev.estado == 'aprobada'} ? 'ok' : (${ev.estado == 'rechazada'} ? 'no' : (${ev.estado == 'descartado'} ? 'warn' : 'rev'))">
                                     <span class="sd-tl-h">
-                                        <b th:text="${ev.estado == 'aprobada'} ? 'Aceptada' : (${ev.estado == 'rechazada'} ? 'Rechazada' : (${ev.estado == 'descartado'} ? 'Filtrada' : 'En revisión'))">Estado</b>
-                                        <time th:text="${#dates.format(ev.fecha, 'dd/MM/yyyy · HH:mm')}">01/01/2026</time>
+                                        <b
+                                            th:text="${ev.estado == 'aprobada'} ? 'Aceptada' : (${ev.estado == 'rechazada'} ? 'Rechazada' : (${ev.estado == 'descartado'} ? 'Filtrada' : 'En revisión'))">Estado</b>
+                                        <time
+                                            th:text="${#dates.format(ev.fecha, 'dd/MM/yyyy · HH:mm')}">01/01/2026</time>
                                     </span>
-                                    <p th:if="${ev.nota != null and !#strings.isEmpty(ev.nota)}" th:text="${ev.nota}">Nota</p>
+                                    <p th:if="${ev.nota != null and !#strings.isEmpty(ev.nota)}" th:text="${ev.nota}">
+                                        Nota</p>
                                 </li>
                             </ol>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-msg" th:if="${solicitud.mensajeMotivacion != null and solicitud.mensajeMotivacion != ''}">
+                        <section class="pn" aria-labelledby="h-msg"
+                            th:if="${solicitud.mensajeMotivacion != null and solicitud.mensajeMotivacion != ''}">
                             <h2 id="h-msg">Tu mensaje de motivación</h2>
                             <blockquote class="sd-quote" th:text="${solicitud.mensajeMotivacion}">Mensaje</blockquote>
                         </section>
 
-                        <section class="pn" aria-labelledby="h-adj" th:if="${proyectosAdjuntos != null and !#lists.isEmpty(proyectosAdjuntos)}">
-                            <h2 id="h-adj">Proyectos que adjuntaste <span th:text="${#lists.size(proyectosAdjuntos)} + (${#lists.size(proyectosAdjuntos)} == 1 ? ' proyecto' : ' proyectos')">2 proyectos</span></h2>
+                        <section class="pn" aria-labelledby="h-adj"
+                            th:if="${proyectosAdjuntos != null and !#lists.isEmpty(proyectosAdjuntos)}">
+                            <h2 id="h-adj">Proyectos que adjuntaste <span
+                                    th:text="${#lists.size(proyectosAdjuntos)} + (${#lists.size(proyectosAdjuntos)} == 1 ? ' proyecto' : ' proyectos')">2
+                                    proyectos</span></h2>
                             <p class="sd-hint">Estos proyectos de tu portafolio viajaron con tu postulación.</p>
                             <ul class="sd-pj">
                                 <li th:each="proy : ${proyectosAdjuntos}">
-                                    <span class="sd-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')" aria-hidden="true"></span>
-                                    <a th:href="@{/misProyectos/{id}(id=${proy.id})}" th:text="${proy.nombre}">Proyecto</a>
+                                    <span class="sd-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')"
+                                        aria-hidden="true"></span>
+                                    <a th:href="@{/misProyectos/{id}(id=${proy.id})}"
+                                        th:text="${proy.nombre}">Proyecto</a>
                                 </li>
                             </ul>
                         </section>
@@ -70,25 +88,72 @@
                         <section class="pn" aria-labelledby="h-vac">
                             <h2 id="h-vac">Vacante solicitada</h2>
                             <dl class="rg one">
-                                <div th:if="${solicitud.empleoEmpresaNombre}"><dt>EMPRESA</dt><dd th:text="${solicitud.empleoEmpresaNombre}">-</dd></div>
-                                <div th:if="${solicitud.empleoEmpresaSector}"><dt>SECTOR</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoEmpresaSector)}">-</dd></div>
-                                <div th:if="${solicitud.empleoCategoria}"><dt>CATEGORÍA</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoCategoria)}">-</dd></div>
-                                <div th:if="${solicitud.empleoModalidad}"><dt>MODALIDAD</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoModalidad)}">-</dd></div>
-                                <div th:if="${solicitud.empleoSeniority}"><dt>SENIORITY</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoSeniority)}">-</dd></div>
-                                <div th:if="${solicitud.empleoContrato}"><dt>CONTRATO</dt><dd th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoContrato)}">-</dd></div>
-                                <div th:if="${solicitud.empleoVacantes != null}"><dt>VACANTES</dt><dd th:text="${solicitud.empleoVacantes}">-</dd></div>
-                                <div th:if="${solicitud.empleoMostrarSalario}"><dt>SALARIO</dt><dd th:text="(${solicitud.empleoSalarioMin != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMin, 1, 'POINT')} : '—') + ' – ' + (${solicitud.empleoSalarioMax != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMax, 1, 'POINT')} : '—') + ' ' + ${solicitud.empleoMoneda}">-</dd></div>
+                                <div th:if="${solicitud.empleoEmpresaNombre}">
+                                    <dt>EMPRESA</dt>
+                                    <dd th:text="${solicitud.empleoEmpresaNombre}">-</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoEmpresaSector}">
+                                    <dt>SECTOR</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoEmpresaSector)}">
+                                        -</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoCategoria}">
+                                    <dt>CATEGORÍA</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoCategoria)}">
+                                        -</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoModalidad}">
+                                    <dt>MODALIDAD</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoModalidad)}">
+                                        -</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoSeniority}">
+                                    <dt>SENIORITY</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoSeniority)}">
+                                        -</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoContrato}">
+                                    <dt>CONTRATO</dt>
+                                    <dd
+                                        th:text="${T(com.example.devcoast.service.AreaEmpleo).textoVisible(solicitud.empleoContrato)}">
+                                        -</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoVacantes != null}">
+                                    <dt>VACANTES</dt>
+                                    <dd th:text="${solicitud.empleoVacantes}">-</dd>
+                                </div>
+                                <div th:if="${solicitud.empleoMostrarSalario}">
+                                    <dt>SALARIO</dt>
+                                    <dd
+                                        th:text="(${solicitud.empleoSalarioMin != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMin, 1, 'POINT')} : '—') + ' – ' + (${solicitud.empleoSalarioMax != null} ? ${#numbers.formatInteger(solicitud.empleoSalarioMax, 1, 'POINT')} : '—') + ' ' + ${solicitud.empleoMoneda}">
+                                        -</dd>
+                                </div>
                             </dl>
-                            <a class="btn-o" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Ver empleo original</a>
-                            <a class="btn-o sd-chat" th:href="@{/chat/{id}(id=${solicitud.id})}">Escribir a la empresa</a>
+                            <a class="btn-o" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Ver empleo
+                                original</a>
+                            <a class="btn-o sd-chat" th:href="@{/chat/{id}(id=${solicitud.id})}">Escribir a la
+                                empresa</a>
                         </section>
 
                         <section class="pn" aria-labelledby="h-post">
                             <h2 id="h-post">Tu postulación</h2>
                             <dl class="rg one">
-                                <div><dt>CORREO</dt><dd th:text="${solicitud.usuarioCorreo}">-</dd></div>
-                                <div><dt>FECHA</dt><dd th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">-</dd></div>
-                                <div><dt>REFERENCIA</dt><dd class="mono" th:text="${solicitud.id}">-</dd></div>
+                                <div>
+                                    <dt>CORREO</dt>
+                                    <dd th:text="${solicitud.usuarioCorreo}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>FECHA</dt>
+                                    <dd th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">-</dd>
+                                </div>
+                                <div>
+                                    <dt>REFERENCIA</dt>
+                                    <dd class="mono" th:text="${solicitud.id}">-</dd>
+                                </div>
                             </dl>
                         </section>
                     </aside>

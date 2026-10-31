@@ -22,7 +22,8 @@ public class SolicitudVista {
     }
 
     public static final String[] ETAPAS = { "Enviada", "En revisión", "Decisión" };
-    private static final String[] MESES = { "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic" };
+    private static final String[] MESES = { "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov",
+            "dic" };
 
     private String id;
     private String empleoId;
@@ -59,8 +60,12 @@ public class SolicitudVista {
         v.empresa = s.getEmpleoEmpresaNombre();
         v.candidato = s.getUsuarioNombre();
         v.candidatoRol = s.getUsuarioRolTitulo();
-        v.empresaInicial = v.empresa != null && !v.empresa.isBlank() ? v.empresa.trim().substring(0, 1).toUpperCase(Locale.ROOT) : null;
-        v.empresaColor = s.getEmpleoColorIcono() != null && s.getEmpleoColorIcono().matches("#[0-9a-fA-F]{3,8}") ? s.getEmpleoColorIcono() : null;
+        v.empresaInicial = v.empresa != null && !v.empresa.isBlank()
+                ? v.empresa.trim().substring(0, 1).toUpperCase(Locale.ROOT)
+                : null;
+        v.empresaColor = s.getEmpleoColorIcono() != null && s.getEmpleoColorIcono().matches("#[0-9a-fA-F]{3,8}")
+                ? s.getEmpleoColorIcono()
+                : null;
         AreaEmpleo.Area area = AreaEmpleo.de(s.getEmpleoCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
         v.categoria = AreaEmpleo.categoriaVisible(s.getEmpleoCategoria());
@@ -127,8 +132,9 @@ public class SolicitudVista {
 
         for (int i = 0; i < ETAPAS.length; i++) {
             String est = i < actual ? "hecha" : i == actual ? (termino ? "fin" : "actual") : "pendiente";
-            String texto = "hecha".equals(est) ? " (completado)" : "actual".equals(est) ? " (etapa actual)"
-                    : "fin".equals(est) ? " (aquí terminó)" : " (pendiente)";
+            String texto = "hecha".equals(est) ? " (completado)"
+                    : "actual".equals(est) ? " (etapa actual)"
+                            : "fin".equals(est) ? " (aquí terminó)" : " (pendiente)";
             v.etapas.add(new Etapa(ETAPAS[i], est, texto));
         }
         return v;
@@ -167,7 +173,10 @@ public class SolicitudVista {
         if (fecha == null || ahora == null)
             return null;
         long dias = Math.max(0, (ahora.getTime() - fecha.getTime()) / 86_400_000L);
-        return dias == 0 ? "hoy" : dias == 1 ? "hace 1 día" : dias < 30 ? "hace " + dias + " días"
-                : dias < 365 ? "hace " + (dias / 30) + (dias / 30 == 1 ? " mes" : " meses") : "hace más de un año";
+        return dias == 0 ? "hoy"
+                : dias == 1 ? "hace 1 día"
+                        : dias < 30 ? "hace " + dias + " días"
+                                : dias < 365 ? "hace " + (dias / 30) + (dias / 30 == 1 ? " mes" : " meses")
+                                        : "hace más de un año";
     }
 }

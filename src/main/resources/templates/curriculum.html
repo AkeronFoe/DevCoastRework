@@ -3,7 +3,9 @@
 
 <head>
     <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
-    <title th:text="${modoLectura != null and modoLectura and usuario != null} ? (${usuario.nombre} + ' – CV · DevCoast') : 'Currículum | DevCoast'">Currículum | DevCoast</title>
+    <title
+        th:text="${modoLectura != null and modoLectura and usuario != null} ? (${usuario.nombre} + ' – CV · DevCoast') : 'Currículum | DevCoast'">
+        Currículum | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: assets}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/nautico-pase.css}">
     <link rel="stylesheet" th:href="@{/CSS/nautico-curriculum.css}">
@@ -20,82 +22,121 @@
 
         <div class="main">
             <header
-                th:replace="~{fragments/nautico :: topbar(${lectura} ? '/talentos' : '/empleos', ${lectura} ? 'Buscar talentos' : 'Buscar ofertas', ${lectura} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}"></header>
+                th:replace="~{fragments/nautico :: topbar(${lectura} ? '/talentos' : '/empleos', ${lectura} ? 'Buscar talentos' : 'Buscar ofertas', ${lectura} ? 'Busca por nombre, cargo o tecnología' : 'Busca por cargo o empresa', null)}">
+            </header>
 
             <main class="content" id="contenido">
-                <p class="flash" role="status" th:if="${flashMessage != null}" th:classappend="${flashType == 'error'} ? 'error'"
-                    th:text="${flashMessage}">Aviso</p>
+                <p class="flash" role="status" th:if="${flashMessage != null}"
+                    th:classappend="${flashType == 'error'} ? 'error'" th:text="${flashMessage}">Aviso</p>
 
                 <div class="head">
                     <div>
-                        <div class="eyebrow" th:text="${lectura} ? '// revisión de candidatura' : '// tu currículum'">// tu currículum</div>
+                        <div class="eyebrow" th:text="${lectura} ? '// revisión de candidatura' : '// tu currículum'">//
+                            tu currículum</div>
                         <h1 th:text="${lectura} ? ${usuario.nombre} : 'Tu currículum'">Tu currículum</h1>
-                        <p class="sub" th:unless="${lectura}">Así te ven las empresas cuando revisan tu postulación. Se imprime como PDF.</p>
+                        <p class="sub" th:unless="${lectura}">Así te ven las empresas cuando revisan tu postulación. Se
+                            imprime como PDF.</p>
                         <p class="sub" th:if="${lectura}">Revisa el CV y decide si avanzas el proceso.</p>
                     </div>
                     <div class="cv-acts">
                         <button class="cv-btn" type="button" id="btnPdf">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Descargar PDF
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <path d="M7 10l5 5 5-5" />
+                                <path d="M12 15V3" />
+                            </svg>Descargar PDF
                         </button>
-                        <button class="btn-o sm" type="button" id="btnEditar" th:unless="${lectura}" aria-haspopup="dialog">Editar secciones</button>
-                        <a class="cv-btn" th:if="${lectura}" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Volver al empleo</a>
+                        <button class="btn-o sm" type="button" id="btnEditar" th:unless="${lectura}"
+                            aria-haspopup="dialog">Editar secciones</button>
+                        <a class="cv-btn" th:if="${lectura}" th:href="@{/empleos/{id}(id=${solicitud.empleoId})}">Volver
+                            al empleo</a>
                     </div>
                 </div>
 
                 <section class="pn cv-rev" th:if="${lectura}" aria-labelledby="h-post">
                     <div class="cv-rev-h">
                         <h2 id="h-post">Postulación</h2>
-                        <span class="cv-st rev" th:if="${solicitud.estado == 'revision' or solicitud.estado == null}">EN REVISIÓN</span>
+                        <span class="cv-st rev" th:if="${solicitud.estado == 'revision' or solicitud.estado == null}">EN
+                            REVISIÓN</span>
                         <span class="cv-st ok" th:if="${solicitud.estado == 'aprobada'}">ACEPTADA</span>
                         <span class="cv-st no" th:if="${solicitud.estado == 'rechazada'}">NO AVANZÓ</span>
                     </div>
                     <dl class="cv-rev-g">
-                        <div><dt>CANDIDATO</dt><dd th:text="${usuario.nombre}">-</dd></div>
-                        <div><dt>CORREO</dt><dd th:text="${solicitud.usuarioCorreo}">-</dd></div>
-                        <div><dt>FECHA DE POSTULACIÓN</dt><dd th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">-</dd></div>
-                        <div><dt>REFERENCIA</dt><dd class="mono" th:text="${solicitud.id}">-</dd></div>
+                        <div>
+                            <dt>CANDIDATO</dt>
+                            <dd th:text="${usuario.nombre}">-</dd>
+                        </div>
+                        <div>
+                            <dt>CORREO</dt>
+                            <dd th:text="${solicitud.usuarioCorreo}">-</dd>
+                        </div>
+                        <div>
+                            <dt>FECHA DE POSTULACIÓN</dt>
+                            <dd th:text="${#dates.format(solicitud.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">-</dd>
+                        </div>
+                        <div>
+                            <dt>REFERENCIA</dt>
+                            <dd class="mono" th:text="${solicitud.id}">-</dd>
+                        </div>
                     </dl>
                     <div class="cv-rev-a">
-                        <form method="post" th:action="@{/empleos/{e}/postulaciones/{s}/aprobar(e=${solicitud.empleoId},s=${solicitud.id})}">
+                        <form method="post"
+                            th:action="@{/empleos/{e}/postulaciones/{s}/aprobar(e=${solicitud.empleoId},s=${solicitud.id})}">
                             <details class="cv-ret">
                                 <summary class="ok">Aceptar</summary>
-                                <div class="cv-ret-box"><p>¿Aceptar a este candidato?</p>
+                                <div class="cv-ret-box">
+                                    <p>¿Aceptar a este candidato?</p>
                                     <button class="btn-o" type="submit">Sí, aceptar</button>
-                                    <button class="cv-no" type="button" data-cancelar>Cancelar</button></div>
+                                    <button class="cv-no" type="button" data-cancelar>Cancelar</button>
+                                </div>
                             </details>
                         </form>
-                        <form method="post" th:action="@{/empleos/{e}/postulaciones/{s}/rechazar(e=${solicitud.empleoId},s=${solicitud.id})}">
+                        <form method="post"
+                            th:action="@{/empleos/{e}/postulaciones/{s}/rechazar(e=${solicitud.empleoId},s=${solicitud.id})}">
                             <details class="cv-ret">
                                 <summary class="no">Rechazar</summary>
-                                <div class="cv-ret-box"><p>¿Rechazar a este candidato?</p>
+                                <div class="cv-ret-box">
+                                    <p>¿Rechazar a este candidato?</p>
                                     <button class="btn-d" type="submit">Sí, rechazar</button>
-                                    <button class="cv-no" type="button" data-cancelar>Cancelar</button></div>
+                                    <button class="cv-no" type="button" data-cancelar>Cancelar</button>
+                                </div>
                             </details>
                         </form>
                     </div>
                 </section>
 
-                <section class="pn" th:if="${lectura and solicitud != null and solicitud.mensajeMotivacion != null and solicitud.mensajeMotivacion != ''}" aria-labelledby="h-msg">
+                <section class="pn"
+                    th:if="${lectura and solicitud != null and solicitud.mensajeMotivacion != null and solicitud.mensajeMotivacion != ''}"
+                    aria-labelledby="h-msg">
                     <h2 id="h-msg">Mensaje de motivación</h2>
                     <blockquote class="cv-quote" th:text="${solicitud.mensajeMotivacion}">Mensaje</blockquote>
                 </section>
 
-                <section class="pn" th:if="${lectura and proyectosAdjuntos != null and !#lists.isEmpty(proyectosAdjuntos)}" aria-labelledby="h-adj">
-                    <h2 id="h-adj">Proyectos adjuntos <span th:text="${#lists.size(proyectosAdjuntos)} + (${#lists.size(proyectosAdjuntos)} == 1 ? ' proyecto' : ' proyectos')">2 proyectos</span></h2>
+                <section class="pn"
+                    th:if="${lectura and proyectosAdjuntos != null and !#lists.isEmpty(proyectosAdjuntos)}"
+                    aria-labelledby="h-adj">
+                    <h2 id="h-adj">Proyectos adjuntos <span
+                            th:text="${#lists.size(proyectosAdjuntos)} + (${#lists.size(proyectosAdjuntos)} == 1 ? ' proyecto' : ' proyectos')">2
+                            proyectos</span></h2>
                     <p class="cv-hint">El candidato incluyó estos proyectos de su portafolio en esta postulación.</p>
                     <div class="cv-pj">
                         <article class="cv-pj-i" th:each="proy : ${proyectosAdjuntos}">
-                            <span class="cv-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')" aria-hidden="true"></span>
+                            <span class="cv-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')"
+                                aria-hidden="true"></span>
                             <div class="cv-pj-b">
                                 <b th:text="${proy.nombre}">Nombre</b>
                                 <p th:if="${proy.descripcionCorta}" th:text="${proy.descripcionCorta}">Descripción</p>
                                 <div class="cv-chips" th:if="${proy.stack != null and !#lists.isEmpty(proy.stack)}">
-                                    <span th:each="tech, s : ${proy.stack}" th:if="${s.index < 4}" th:text="${tech}">Tech</span>
-                                    <span th:if="${#lists.size(proy.stack) > 4}" th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
+                                    <span th:each="tech, s : ${proy.stack}" th:if="${s.index < 4}"
+                                        th:text="${tech}">Tech</span>
+                                    <span th:if="${#lists.size(proy.stack) > 4}"
+                                        th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
                                 </div>
                                 <div class="cv-pj-l">
-                                    <a th:if="${proy.linkProyecto}" th:href="${proy.linkProyecto}" target="_blank" rel="noopener">Ver proyecto ↗</a>
-                                    <a th:href="@{/misProyectos/{id}(id=${proy.id})}" target="_blank" rel="noopener">Ver en DevCoast ↗</a>
+                                    <a th:if="${proy.linkProyecto}" th:href="${proy.linkProyecto}" target="_blank"
+                                        rel="noopener">Ver proyecto ↗</a>
+                                    <a th:href="@{/misProyectos/{id}(id=${proy.id})}" target="_blank" rel="noopener">Ver
+                                        en DevCoast ↗</a>
                                 </div>
                             </div>
                         </article>
@@ -103,98 +144,181 @@
                 </section>
 
                 <section class="pn cv-comp" th:unless="${lectura}" aria-labelledby="h-comp">
-                    <h2 id="h-comp">Completitud <span th:text="${usuario != null ? usuario.completitudPerfil : 0} + '%'">80%</span></h2>
-                    <div class="pbar big" role="progressbar" aria-label="Completitud del currículum" aria-valuemin="0" aria-valuemax="100"
-                        th:attr="aria-valuenow=${usuario != null ? usuario.completitudPerfil : 0}"><i th:style="'width:' + ${usuario != null ? usuario.completitudPerfil : 0} + '%'"></i></div>
+                    <h2 id="h-comp">Completitud <span
+                            th:text="${usuario != null ? usuario.completitudPerfil : 0} + '%'">80%</span></h2>
+                    <div class="pbar big" role="progressbar" aria-label="Completitud del currículum" aria-valuemin="0"
+                        aria-valuemax="100" th:attr="aria-valuenow=${usuario != null ? usuario.completitudPerfil : 0}">
+                        <i th:style="'width:' + ${usuario != null ? usuario.completitudPerfil : 0} + '%'"></i></div>
                     <ul class="cv-falta" th:if="${usuario != null and usuario.completitudPerfil < 100}">
-                        <li th:if="${usuario.bio == null or #strings.isEmpty(usuario.bio)}"><button type="button" data-abrir="perfil">Escribe tu resumen profesional</button></li>
-                        <li th:if="${usuario.rolTitulo == null or #strings.isEmpty(usuario.rolTitulo)}"><button type="button" data-abrir="perfil">Agrega tu cargo o título</button></li>
-                        <li th:if="${usuario.cvExperiencias == null or #lists.isEmpty(usuario.cvExperiencias)}"><button type="button" data-abrir="experiencia">Suma tu experiencia</button></li>
-                        <li th:if="${usuario.cvEducaciones == null or #lists.isEmpty(usuario.cvEducaciones)}"><button type="button" data-abrir="educacion">Suma tu educación</button></li>
-                        <li th:if="${usuario.linkedinUrl == null or #strings.isEmpty(usuario.linkedinUrl)}"><button type="button" data-abrir="contacto">Enlaza tu LinkedIn</button></li>
-                        <li th:if="${usuario.stack == null or #lists.isEmpty(usuario.stack)}"><a th:href="@{/perfil}">Elige tu stack en Mi perfil</a></li>
+                        <li th:if="${usuario.bio == null or #strings.isEmpty(usuario.bio)}"><button type="button"
+                                data-abrir="perfil">Escribe tu resumen profesional</button></li>
+                        <li th:if="${usuario.rolTitulo == null or #strings.isEmpty(usuario.rolTitulo)}"><button
+                                type="button" data-abrir="perfil">Agrega tu cargo o título</button></li>
+                        <li th:if="${usuario.cvExperiencias == null or #lists.isEmpty(usuario.cvExperiencias)}"><button
+                                type="button" data-abrir="experiencia">Suma tu experiencia</button></li>
+                        <li th:if="${usuario.cvEducaciones == null or #lists.isEmpty(usuario.cvEducaciones)}"><button
+                                type="button" data-abrir="educacion">Suma tu educación</button></li>
+                        <li th:if="${usuario.linkedinUrl == null or #strings.isEmpty(usuario.linkedinUrl)}"><button
+                                type="button" data-abrir="contacto">Enlaza tu LinkedIn</button></li>
+                        <li th:if="${usuario.stack == null or #lists.isEmpty(usuario.stack)}"><a
+                                th:href="@{/perfil}">Elige tu stack en Mi perfil</a></li>
                     </ul>
                     <dl class="cv-nums">
-                        <div><dt>PROYECTOS</dt><dd th:text="${misProyectos != null ? #lists.size(misProyectos) : 0}">0</dd></div>
-                        <div><dt>EXPERIENCIAS</dt><dd th:text="${usuario != null and usuario.cvExperiencias != null ? #lists.size(usuario.cvExperiencias) : 0}">0</dd></div>
-                        <div><dt>HABILIDADES</dt><dd th:text="${usuario != null and usuario.stack != null ? #lists.size(usuario.stack) : 0}">0</dd></div>
-                        <div><dt>COMPLETITUD</dt><dd th:text="${usuario != null ? usuario.completitudPerfil : 0} + '%'">0%</dd></div>
+                        <div>
+                            <dt>PROYECTOS</dt>
+                            <dd th:text="${misProyectos != null ? #lists.size(misProyectos) : 0}">0</dd>
+                        </div>
+                        <div>
+                            <dt>EXPERIENCIAS</dt>
+                            <dd
+                                th:text="${usuario != null and usuario.cvExperiencias != null ? #lists.size(usuario.cvExperiencias) : 0}">
+                                0</dd>
+                        </div>
+                        <div>
+                            <dt>HABILIDADES</dt>
+                            <dd th:text="${usuario != null and usuario.stack != null ? #lists.size(usuario.stack) : 0}">
+                                0</dd>
+                        </div>
+                        <div>
+                            <dt>COMPLETITUD</dt>
+                            <dd th:text="${usuario != null ? usuario.completitudPerfil : 0} + '%'">0%</dd>
+                        </div>
                     </dl>
                 </section>
 
                 <article class="cv" id="cvHoja" aria-label="Currículum">
                     <header class="cv-top">
-                        <div class="cv-av" th:style="${usuario != null and usuario.fotoUrl != null} ? 'background-image:url(' + ${usuario.fotoUrl} + ');color:transparent'" aria-hidden="true"
-                            th:text="${usuario != null and usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${#strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1))} : 'D'">D</div>
+                        <div class="cv-av"
+                            th:style="${usuario != null and usuario.fotoUrl != null} ? 'background-image:url(' + ${usuario.fotoUrl} + ');color:transparent'"
+                            aria-hidden="true"
+                            th:text="${usuario != null and usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${#strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1))} : 'D'">
+                            D</div>
                         <div class="cv-id">
                             <h2 class="cv-name" th:text="${usuario != null ? usuario.nombre : 'Dev'}">Dev</h2>
-                            <p class="cv-role" th:text="${usuario != null and usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo) ? usuario.rolTitulo : 'Tu rol profesional'}">Tu rol profesional</p>
+                            <p class="cv-role"
+                                th:text="${usuario != null and usuario.rolTitulo != null and !#strings.isEmpty(usuario.rolTitulo) ? usuario.rolTitulo : 'Tu rol profesional'}">
+                                Tu rol profesional</p>
                             <div class="cv-tags">
                                 <span class="cv-tag ok">Disponible</span>
-                                <span class="cv-tag" th:if="${usuario != null and usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).modalidad(usuario.modalidad)}">Remoto</span>
-                                <span class="cv-tag" th:if="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).disponibilidad(usuario.disponibilidad)}">Full-time</span>
-                                <span class="cv-tag" th:if="${usuario != null and usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}" th:text="${usuario.ubicacion}">Bogotá</span>
+                                <span class="cv-tag"
+                                    th:if="${usuario != null and usuario.modalidad != null and !#strings.isEmpty(usuario.modalidad)}"
+                                    th:text="${T(com.example.devcoast.service.EtiquetasPerfil).modalidad(usuario.modalidad)}">Remoto</span>
+                                <span class="cv-tag"
+                                    th:if="${usuario != null and usuario.disponibilidad != null and !#strings.isEmpty(usuario.disponibilidad)}"
+                                    th:text="${T(com.example.devcoast.service.EtiquetasPerfil).disponibilidad(usuario.disponibilidad)}">Full-time</span>
+                                <span class="cv-tag"
+                                    th:if="${usuario != null and usuario.ubicacion != null and !#strings.isEmpty(usuario.ubicacion)}"
+                                    th:text="${usuario.ubicacion}">Bogotá</span>
                             </div>
                         </div>
                     </header>
 
-                    <p class="cv-bio" th:if="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}" th:text="${usuario.bio}">Resumen</p>
-                    <p class="cv-bio vacio" th:unless="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}">
-                        <span th:unless="${lectura}">Agrega un resumen profesional en <button type="button" class="cv-in" data-abrir="perfil">Editar secciones</button>.</span>
+                    <p class="cv-bio"
+                        th:if="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}"
+                        th:text="${usuario.bio}">Resumen</p>
+                    <p class="cv-bio vacio"
+                        th:unless="${usuario != null and usuario.bio != null and !#strings.isEmpty(usuario.bio)}">
+                        <span th:unless="${lectura}">Agrega un resumen profesional en <button type="button"
+                                class="cv-in" data-abrir="perfil">Editar secciones</button>.</span>
                         <span th:if="${lectura}">El candidato todavía no escribió un resumen.</span>
                     </p>
 
-                    <ul class="cv-bullets" th:if="${usuario != null and usuario.cvBullets != null and !#lists.isEmpty(usuario.cvBullets)}">
+                    <ul class="cv-bullets"
+                        th:if="${usuario != null and usuario.cvBullets != null and !#lists.isEmpty(usuario.cvBullets)}">
                         <li th:each="b : ${usuario.cvBullets}" th:text="${b}">Logro</li>
                     </ul>
 
                     <dl class="cv-contact">
-                        <div><dt>EMAIL</dt><dd th:text="${usuario != null and usuario.emailContacto != null and !#strings.isEmpty(usuario.emailContacto) ? usuario.emailContacto : (usuario != null ? usuario.correo : '—')}">tu@correo.com</dd></div>
-                        <div th:if="${usuario != null and usuario.telefono != null and !#strings.isEmpty(usuario.telefono)}"><dt>TELÉFONO</dt><dd th:text="${usuario.telefono}">+57</dd></div>
-                        <div th:if="${usuario != null and usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}"><dt>PORTAFOLIO</dt><dd><a th:href="${usuario.portfolioUrl}" target="_blank" rel="noopener" th:text="${usuario.portfolioUrl}">sitio</a></dd></div>
-                        <div th:if="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}"><dt>LINKEDIN</dt><dd><a th:href="${usuario.linkedinUrl}" target="_blank" rel="noopener" th:text="${usuario.linkedinUrl}">linkedin</a></dd></div>
-                        <div th:if="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}"><dt>GITHUB</dt><dd><a th:href="${usuario.githubUrl}" target="_blank" rel="noopener" th:text="${usuario.githubUrl}">github</a></dd></div>
+                        <div>
+                            <dt>EMAIL</dt>
+                            <dd
+                                th:text="${usuario != null and usuario.emailContacto != null and !#strings.isEmpty(usuario.emailContacto) ? usuario.emailContacto : (usuario != null ? usuario.correo : '—')}">
+                                tu@correo.com</dd>
+                        </div>
+                        <div
+                            th:if="${usuario != null and usuario.telefono != null and !#strings.isEmpty(usuario.telefono)}">
+                            <dt>TELÉFONO</dt>
+                            <dd th:text="${usuario.telefono}">+57</dd>
+                        </div>
+                        <div
+                            th:if="${usuario != null and usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}">
+                            <dt>PORTAFOLIO</dt>
+                            <dd><a th:href="${usuario.portfolioUrl}" target="_blank" rel="noopener"
+                                    th:text="${usuario.portfolioUrl}">sitio</a></dd>
+                        </div>
+                        <div
+                            th:if="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">
+                            <dt>LINKEDIN</dt>
+                            <dd><a th:href="${usuario.linkedinUrl}" target="_blank" rel="noopener"
+                                    th:text="${usuario.linkedinUrl}">linkedin</a></dd>
+                        </div>
+                        <div
+                            th:if="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">
+                            <dt>GITHUB</dt>
+                            <dd><a th:href="${usuario.githubUrl}" target="_blank" rel="noopener"
+                                    th:text="${usuario.githubUrl}">github</a></dd>
+                        </div>
                     </dl>
 
                     <div class="cv-cols">
                         <section aria-labelledby="h-exp">
                             <h3 id="h-exp" class="cv-h">Experiencia</h3>
-                            <ol class="cv-tl" th:if="${usuario != null and usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
+                            <ol class="cv-tl"
+                                th:if="${usuario != null and usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
                                 <li th:each="exp, iter : ${usuario.cvExperiencias}">
                                     <b th:text="${exp.cargo}">Cargo</b>
-                                    <span class="cv-em" th:if="${exp.empresa != null and !#strings.isEmpty(exp.empresa)}" th:text="${exp.empresa}">Empresa</span>
+                                    <span class="cv-em"
+                                        th:if="${exp.empresa != null and !#strings.isEmpty(exp.empresa)}"
+                                        th:text="${exp.empresa}">Empresa</span>
                                     <span class="cv-meta">
                                         <span class="cv-tag ok" th:if="${iter.index == 0}">Actual</span>
-                                        <span th:if="${exp.periodo != null and !#strings.isEmpty(exp.periodo)}" th:text="${exp.periodo}">2023 – hoy</span>
-                                        <span th:if="${exp.modalidad != null and !#strings.isEmpty(exp.modalidad)}" th:text="${exp.modalidad}">Remoto</span>
+                                        <span th:if="${exp.periodo != null and !#strings.isEmpty(exp.periodo)}"
+                                            th:text="${exp.periodo}">2023 – hoy</span>
+                                        <span th:if="${exp.modalidad != null and !#strings.isEmpty(exp.modalidad)}"
+                                            th:text="${exp.modalidad}">Remoto</span>
                                     </span>
-                                    <p th:if="${exp.descripcion != null and !#strings.isEmpty(exp.descripcion)}" th:text="${exp.descripcion}">Descripción</p>
+                                    <p th:if="${exp.descripcion != null and !#strings.isEmpty(exp.descripcion)}"
+                                        th:text="${exp.descripcion}">Descripción</p>
                                 </li>
                             </ol>
-                            <p class="vacio" th:unless="${usuario != null and usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
-                                <span th:unless="${lectura}">Agrega tu experiencia en <button type="button" class="cv-in" data-abrir="experiencia">Editar secciones</button>.</span>
+                            <p class="vacio"
+                                th:unless="${usuario != null and usuario.cvExperiencias != null and !#lists.isEmpty(usuario.cvExperiencias)}">
+                                <span th:unless="${lectura}">Agrega tu experiencia en <button type="button"
+                                        class="cv-in" data-abrir="experiencia">Editar secciones</button>.</span>
                                 <span th:if="${lectura}">Sin experiencia registrada.</span>
                             </p>
                         </section>
 
                         <section aria-labelledby="h-edu">
                             <h3 id="h-edu" class="cv-h">Educación</h3>
-                            <ol class="cv-tl" th:if="${usuario != null and usuario.cvEducaciones != null and !#lists.isEmpty(usuario.cvEducaciones)}">
+                            <ol class="cv-tl"
+                                th:if="${usuario != null and usuario.cvEducaciones != null and !#lists.isEmpty(usuario.cvEducaciones)}">
                                 <li th:each="edu : ${usuario.cvEducaciones}">
                                     <b th:text="${edu.institucion}">Institución</b>
-                                    <span class="cv-em" th:if="${edu.titulo != null and !#strings.isEmpty(edu.titulo)}" th:text="${edu.titulo}">Título</span>
-                                    <span class="cv-meta"><span th:if="${edu.periodo != null and !#strings.isEmpty(edu.periodo)}" th:text="${edu.periodo}">2018 – 2023</span></span>
-                                    <p th:if="${edu.descripcion != null and !#strings.isEmpty(edu.descripcion)}" th:text="${edu.descripcion}">Descripción</p>
+                                    <span class="cv-em" th:if="${edu.titulo != null and !#strings.isEmpty(edu.titulo)}"
+                                        th:text="${edu.titulo}">Título</span>
+                                    <span class="cv-meta"><span
+                                            th:if="${edu.periodo != null and !#strings.isEmpty(edu.periodo)}"
+                                            th:text="${edu.periodo}">2018 – 2023</span></span>
+                                    <p th:if="${edu.descripcion != null and !#strings.isEmpty(edu.descripcion)}"
+                                        th:text="${edu.descripcion}">Descripción</p>
                                 </li>
                             </ol>
-                            <p class="vacio" th:unless="${usuario != null and usuario.cvEducaciones != null and !#lists.isEmpty(usuario.cvEducaciones)}">
-                                <span th:unless="${lectura}">Agrega tu educación en <button type="button" class="cv-in" data-abrir="educacion">Editar secciones</button>.</span>
+                            <p class="vacio"
+                                th:unless="${usuario != null and usuario.cvEducaciones != null and !#lists.isEmpty(usuario.cvEducaciones)}">
+                                <span th:unless="${lectura}">Agrega tu educación en <button type="button" class="cv-in"
+                                        data-abrir="educacion">Editar secciones</button>.</span>
                                 <span th:if="${lectura}">Sin educación registrada.</span>
                             </p>
 
-                            <div class="cv-pref" th:if="${usuario != null and ((usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)) or (usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)))}">
-                                <span class="cv-tag" th:if="${usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)}" th:text="${T(com.example.devcoast.service.EtiquetasPerfil).especialidad(usuario.especialidad)}">Backend</span>
-                                <span class="cv-tag" th:if="${usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)}" th:text="'Salario: ' + ${usuario.salarioEsperado}">Salario</span>
+                            <div class="cv-pref"
+                                th:if="${usuario != null and ((usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)) or (usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)))}">
+                                <span class="cv-tag"
+                                    th:if="${usuario.especialidad != null and !#strings.isEmpty(usuario.especialidad)}"
+                                    th:text="${T(com.example.devcoast.service.EtiquetasPerfil).especialidad(usuario.especialidad)}">Backend</span>
+                                <span class="cv-tag"
+                                    th:if="${usuario.salarioEsperado != null and !#strings.isEmpty(usuario.salarioEsperado)}"
+                                    th:text="'Salario: ' + ${usuario.salarioEsperado}">Salario</span>
                             </div>
                         </section>
                     </div>
@@ -203,49 +327,63 @@
                         <section aria-labelledby="h-idi">
                             <h3 id="h-idi" class="cv-h">Idiomas</h3>
                             <div class="cv-lang">
-                                <div class="cv-lang-r" th:with="n=${usuario != null and usuario.nivelEspanol != null ? usuario.nivelEspanol : 5}">
+                                <div class="cv-lang-r"
+                                    th:with="n=${usuario != null and usuario.nivelEspanol != null ? usuario.nivelEspanol : 5}">
                                     <b>Español</b>
                                     <span class="cv-bars" role="img" th:attr="aria-label='Nivel ' + ${n} + ' de 5'">
                                         <i th:each="k : ${#numbers.sequence(1, 5)}" th:class="${k <= n} ? 'on'"></i>
                                     </span>
-                                    <small th:text="${n == 1 ? 'A1 Básico' : (n == 2 ? 'A2 Elemental' : (n == 3 ? 'B1 Intermedio' : (n == 4 ? 'B2 Conversacional' : 'Nativo')))}">Nativo</small>
+                                    <small
+                                        th:text="${n == 1 ? 'A1 Básico' : (n == 2 ? 'A2 Elemental' : (n == 3 ? 'B1 Intermedio' : (n == 4 ? 'B2 Conversacional' : 'Nativo')))}">Nativo</small>
                                 </div>
-                                <div class="cv-lang-r" th:with="n=${usuario != null and usuario.nivelIngles != null ? usuario.nivelIngles : 4}">
+                                <div class="cv-lang-r"
+                                    th:with="n=${usuario != null and usuario.nivelIngles != null ? usuario.nivelIngles : 4}">
                                     <b>Inglés</b>
                                     <span class="cv-bars" role="img" th:attr="aria-label='Nivel ' + ${n} + ' de 5'">
                                         <i th:each="k : ${#numbers.sequence(1, 5)}" th:class="${k <= n} ? 'on'"></i>
                                     </span>
-                                    <small th:text="${n == 1 ? 'A1 Básico' : (n == 2 ? 'A2 Elemental' : (n == 3 ? 'B1 Intermedio' : (n == 4 ? 'B2 Conversacional' : 'C1/C2')))}">B2</small>
+                                    <small
+                                        th:text="${n == 1 ? 'A1 Básico' : (n == 2 ? 'A2 Elemental' : (n == 3 ? 'B1 Intermedio' : (n == 4 ? 'B2 Conversacional' : 'C1/C2')))}">B2</small>
                                 </div>
                             </div>
                         </section>
 
                         <section aria-labelledby="h-hab">
                             <h3 id="h-hab" class="cv-h">Habilidades</h3>
-                            <div class="cv-chips tech" th:if="${usuario != null and usuario.stack != null and !#lists.isEmpty(usuario.stack)}">
+                            <div class="cv-chips tech"
+                                th:if="${usuario != null and usuario.stack != null and !#lists.isEmpty(usuario.stack)}">
                                 <span th:each="t : ${usuario.stack}" th:text="${t}">Java</span>
                             </div>
-                            <div class="cv-chips soft" th:if="${usuario != null and usuario.habilidadesBlandas != null and !#lists.isEmpty(usuario.habilidadesBlandas)}">
+                            <div class="cv-chips soft"
+                                th:if="${usuario != null and usuario.habilidadesBlandas != null and !#lists.isEmpty(usuario.habilidadesBlandas)}">
                                 <span th:each="s : ${usuario.habilidadesBlandas}" th:text="${s}">Liderazgo</span>
                             </div>
-                            <p class="vacio" th:unless="${usuario != null and ((usuario.stack != null and !#lists.isEmpty(usuario.stack)) or (usuario.habilidadesBlandas != null and !#lists.isEmpty(usuario.habilidadesBlandas)))}">
-                                <span th:unless="${lectura}">Agrega tus habilidades en <button type="button" class="cv-in" data-abrir="habilidades">Editar secciones</button>.</span>
+                            <p class="vacio"
+                                th:unless="${usuario != null and ((usuario.stack != null and !#lists.isEmpty(usuario.stack)) or (usuario.habilidadesBlandas != null and !#lists.isEmpty(usuario.habilidadesBlandas)))}">
+                                <span th:unless="${lectura}">Agrega tus habilidades en <button type="button"
+                                        class="cv-in" data-abrir="habilidades">Editar secciones</button>.</span>
                                 <span th:if="${lectura}">Sin habilidades registradas.</span>
                             </p>
                         </section>
                     </div>
 
-                    <section aria-labelledby="h-proy" th:if="${!lectura and misProyectos != null and !#lists.isEmpty(misProyectos)}">
-                        <h3 id="h-proy" class="cv-h">Proyectos <a class="cv-vl" th:href="@{/proyectos}">ver portafolio →</a></h3>
+                    <section aria-labelledby="h-proy"
+                        th:if="${!lectura and misProyectos != null and !#lists.isEmpty(misProyectos)}">
+                        <h3 id="h-proy" class="cv-h">Proyectos <a class="cv-vl" th:href="@{/proyectos}">ver portafolio
+                                →</a></h3>
                         <div class="cv-pj">
                             <article class="cv-pj-i" th:each="proy : ${misProyectos}">
-                                <span class="cv-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')" aria-hidden="true"></span>
+                                <span class="cv-pj-c" th:style="'background:' + (${proy.colorIcono} ?: '#1F8F82')"
+                                    aria-hidden="true"></span>
                                 <div class="cv-pj-b">
                                     <b th:text="${proy.nombre}">Nombre</b>
-                                    <p th:if="${proy.descripcionCorta}" th:text="${proy.descripcionCorta}">Descripción</p>
+                                    <p th:if="${proy.descripcionCorta}" th:text="${proy.descripcionCorta}">Descripción
+                                    </p>
                                     <div class="cv-chips" th:if="${proy.stack != null and !#lists.isEmpty(proy.stack)}">
-                                        <span th:each="tech, s : ${proy.stack}" th:if="${s.index < 4}" th:text="${tech}">Tech</span>
-                                        <span th:if="${#lists.size(proy.stack) > 4}" th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
+                                        <span th:each="tech, s : ${proy.stack}" th:if="${s.index < 4}"
+                                            th:text="${tech}">Tech</span>
+                                        <span th:if="${#lists.size(proy.stack) > 4}"
+                                            th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
                                     </div>
                                 </div>
                             </article>
@@ -266,34 +404,65 @@
 
             <div class="cv-tabs" role="tablist" aria-label="Secciones del currículum">
                 <button type="button" role="tab" class="cv-tab" data-tab="perfil" aria-selected="true">Perfil</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="contacto" aria-selected="false">Contacto</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="preferencias" aria-selected="false">Preferencias</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="experiencia" aria-selected="false">Experiencia</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="educacion" aria-selected="false">Educación</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="idiomas" aria-selected="false">Idiomas</button>
-                <button type="button" role="tab" class="cv-tab" data-tab="habilidades" aria-selected="false">Habilidades</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="contacto"
+                    aria-selected="false">Contacto</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="preferencias"
+                    aria-selected="false">Preferencias</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="experiencia"
+                    aria-selected="false">Experiencia</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="educacion"
+                    aria-selected="false">Educación</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="idiomas"
+                    aria-selected="false">Idiomas</button>
+                <button type="button" role="tab" class="cv-tab" data-tab="habilidades"
+                    aria-selected="false">Habilidades</button>
             </div>
 
             <div class="cv-panels">
                 <div class="cv-panel" id="panel-perfil" role="tabpanel">
-                    <div class="cv-fl"><label for="inNombre">NOMBRE COMPLETO</label><input id="inNombre" type="text" autocomplete="name" th:value="${usuario != null ? usuario.nombre : ''}" placeholder="Tu nombre"></div>
-                    <div class="cv-fl"><label for="inRol">TÍTULO PROFESIONAL</label><input id="inRol" type="text" th:value="${usuario != null and usuario.rolTitulo != null ? usuario.rolTitulo : ''}" placeholder="Full Stack Developer"></div>
-                    <div class="cv-fl"><label for="inBio">RESUMEN PROFESIONAL</label><textarea id="inBio" rows="4" maxlength="400" th:text="${usuario != null and usuario.bio != null ? usuario.bio : ''}" placeholder="Describe tu perfil en 2-3 oraciones…"></textarea>
-                        <small id="bioCount" aria-live="polite">400 caracteres restantes</small></div>
-                    <div class="cv-fl"><label for="inBullets">LOGROS PRINCIPALES <span>(uno por línea)</span></label><textarea id="inBullets" rows="4" th:attr="data-lineas=${usuario != null and usuario.cvBullets != null ? #strings.listJoin(usuario.cvBullets, '||') : ''}" placeholder="Reduje el tiempo de deploy un 40%"></textarea></div>
+                    <div class="cv-fl"><label for="inNombre">NOMBRE COMPLETO</label><input id="inNombre" type="text"
+                            autocomplete="name" th:value="${usuario != null ? usuario.nombre : ''}"
+                            placeholder="Tu nombre"></div>
+                    <div class="cv-fl"><label for="inRol">TÍTULO PROFESIONAL</label><input id="inRol" type="text"
+                            th:value="${usuario != null and usuario.rolTitulo != null ? usuario.rolTitulo : ''}"
+                            placeholder="Full Stack Developer"></div>
+                    <div class="cv-fl"><label for="inBio">RESUMEN PROFESIONAL</label><textarea id="inBio" rows="4"
+                            maxlength="400" th:text="${usuario != null and usuario.bio != null ? usuario.bio : ''}"
+                            placeholder="Describe tu perfil en 2-3 oraciones…"></textarea>
+                        <small id="bioCount" aria-live="polite">400 caracteres restantes</small>
+                    </div>
+                    <div class="cv-fl"><label for="inBullets">LOGROS PRINCIPALES <span>(uno por
+                                línea)</span></label><textarea id="inBullets" rows="4"
+                            th:attr="data-lineas=${usuario != null and usuario.cvBullets != null ? #strings.listJoin(usuario.cvBullets, '||') : ''}"
+                            placeholder="Reduje el tiempo de deploy un 40%"></textarea></div>
                 </div>
 
                 <div class="cv-panel" id="panel-contacto" role="tabpanel" hidden>
                     <div class="cv-two">
-                        <div class="cv-fl"><label for="inEmail">EMAIL DE CONTACTO</label><input id="inEmail" type="email" autocomplete="email" th:value="${usuario != null and usuario.emailContacto != null ? usuario.emailContacto : ''}" placeholder="tu@correo.com"></div>
-                        <div class="cv-fl"><label for="inTel">TELÉFONO</label><input id="inTel" type="tel" autocomplete="tel" th:value="${usuario != null and usuario.telefono != null ? usuario.telefono : ''}" placeholder="+57 300 000 0000"></div>
+                        <div class="cv-fl"><label for="inEmail">EMAIL DE CONTACTO</label><input id="inEmail"
+                                type="email" autocomplete="email"
+                                th:value="${usuario != null and usuario.emailContacto != null ? usuario.emailContacto : ''}"
+                                placeholder="tu@correo.com"></div>
+                        <div class="cv-fl"><label for="inTel">TELÉFONO</label><input id="inTel" type="tel"
+                                autocomplete="tel"
+                                th:value="${usuario != null and usuario.telefono != null ? usuario.telefono : ''}"
+                                placeholder="+57 300 000 0000"></div>
                     </div>
-                    <div class="cv-fl"><label for="inWeb">PORTAFOLIO</label><input id="inWeb" type="url" th:value="${usuario != null and usuario.portfolioUrl != null ? usuario.portfolioUrl : ''}" placeholder="https://tuportafolio.dev"></div>
+                    <div class="cv-fl"><label for="inWeb">PORTAFOLIO</label><input id="inWeb" type="url"
+                            th:value="${usuario != null and usuario.portfolioUrl != null ? usuario.portfolioUrl : ''}"
+                            placeholder="https://tuportafolio.dev"></div>
                     <div class="cv-two">
-                        <div class="cv-fl"><label for="inLi">LINKEDIN</label><input id="inLi" type="url" th:value="${usuario != null and usuario.linkedinUrl != null ? usuario.linkedinUrl : ''}" placeholder="https://linkedin.com/in/tu-usuario"></div>
-                        <div class="cv-fl"><label for="inGh">GITHUB</label><input id="inGh" type="url" th:value="${usuario != null and usuario.githubUrl != null ? usuario.githubUrl : ''}" placeholder="https://github.com/tu-usuario"></div>
+                        <div class="cv-fl"><label for="inLi">LINKEDIN</label><input id="inLi" type="url"
+                                th:value="${usuario != null and usuario.linkedinUrl != null ? usuario.linkedinUrl : ''}"
+                                placeholder="https://linkedin.com/in/tu-usuario"></div>
+                        <div class="cv-fl"><label for="inGh">GITHUB</label><input id="inGh" type="url"
+                                th:value="${usuario != null and usuario.githubUrl != null ? usuario.githubUrl : ''}"
+                                placeholder="https://github.com/tu-usuario"></div>
                     </div>
-                    <div class="cv-fl"><label for="inUbi">UBICACIÓN</label><input id="inUbi" type="text" autocomplete="address-level2" th:value="${usuario != null and usuario.ubicacion != null ? usuario.ubicacion : ''}" placeholder="Bogotá, Colombia"></div>
+                    <div class="cv-fl"><label for="inUbi">UBICACIÓN</label><input id="inUbi" type="text"
+                            autocomplete="address-level2"
+                            th:value="${usuario != null and usuario.ubicacion != null ? usuario.ubicacion : ''}"
+                            placeholder="Bogotá, Colombia"></div>
                 </div>
 
                 <div class="cv-panel" id="panel-preferencias" role="tabpanel" hidden>
@@ -302,36 +471,49 @@
                             <button type="button" data-val="Remoto" aria-pressed="false">Remoto</button>
                             <button type="button" data-val="Presencial" aria-pressed="false">Presencial</button>
                             <button type="button" data-val="Híbrido" aria-pressed="false">Híbrido</button>
-                        </div></div>
+                        </div>
+                    </div>
                     <div class="cv-fl"><span class="cv-lab" id="lCon">TIPO DE CONTRATO</span>
                         <div class="cv-opts" id="prefCon" role="group" aria-labelledby="lCon">
                             <button type="button" data-val="Full-time" aria-pressed="false">Full-time</button>
                             <button type="button" data-val="Part-time" aria-pressed="false">Part-time</button>
                             <button type="button" data-val="Freelance" aria-pressed="false">Freelance</button>
                             <button type="button" data-val="Por proyecto" aria-pressed="false">Por proyecto</button>
-                        </div></div>
+                        </div>
+                    </div>
                     <div class="cv-two">
-                        <div class="cv-fl"><label for="inSal">RANGO SALARIAL</label><input id="inSal" type="text" th:value="${usuario != null and usuario.salarioEsperado != null ? usuario.salarioEsperado : ''}" placeholder="USD 1800 – 2500"></div>
-                        <div class="cv-fl"><label for="inEsp">ESPECIALIDAD</label><input id="inEsp" type="text" th:value="${usuario != null and usuario.especialidad != null ? usuario.especialidad : ''}" placeholder="Product design, UI"></div>
+                        <div class="cv-fl"><label for="inSal">RANGO SALARIAL</label><input id="inSal" type="text"
+                                th:value="${usuario != null and usuario.salarioEsperado != null ? usuario.salarioEsperado : ''}"
+                                placeholder="USD 1800 – 2500"></div>
+                        <div class="cv-fl"><label for="inEsp">ESPECIALIDAD</label><input id="inEsp" type="text"
+                                th:value="${usuario != null and usuario.especialidad != null ? usuario.especialidad : ''}"
+                                placeholder="Product design, UI"></div>
                     </div>
                 </div>
 
                 <div class="cv-panel" id="panel-experiencia" role="tabpanel" hidden>
                     <div id="expLista" class="cv-items">
                         <th:block th:if="${usuario != null and usuario.cvExperiencias != null}">
-                        <fieldset class="cv-item" th:each="exp : ${usuario.cvExperiencias}">
-                            <legend class="cv-item-l">Experiencia</legend>
-                            <button class="cv-del" type="button" data-quitar aria-label="Quitar esta experiencia">Quitar</button>
-                            <div class="cv-two">
-                                <div class="cv-fl"><label>CARGO</label><input type="text" class="exp-cargo" th:value="${exp.cargo}" placeholder="Tu cargo"></div>
-                                <div class="cv-fl"><label>EMPRESA</label><input type="text" class="exp-empresa" th:value="${exp.empresa}" placeholder="Nombre de la empresa"></div>
-                            </div>
-                            <div class="cv-two">
-                                <div class="cv-fl"><label>PERÍODO</label><input type="text" class="exp-periodo" th:value="${exp.periodo}" placeholder="2025 – hoy"></div>
-                                <div class="cv-fl"><label>MODALIDAD</label><input type="text" class="exp-modalidad" th:value="${exp.modalidad}" placeholder="Remoto / Híbrido"></div>
-                            </div>
-                            <div class="cv-fl"><label>DESCRIPCIÓN</label><textarea class="exp-desc" rows="2" th:text="${exp.descripcion}" placeholder="Describe tus responsabilidades…"></textarea></div>
-                        </fieldset>
+                            <fieldset class="cv-item" th:each="exp : ${usuario.cvExperiencias}">
+                                <legend class="cv-item-l">Experiencia</legend>
+                                <button class="cv-del" type="button" data-quitar
+                                    aria-label="Quitar esta experiencia">Quitar</button>
+                                <div class="cv-two">
+                                    <div class="cv-fl"><label>CARGO</label><input type="text" class="exp-cargo"
+                                            th:value="${exp.cargo}" placeholder="Tu cargo"></div>
+                                    <div class="cv-fl"><label>EMPRESA</label><input type="text" class="exp-empresa"
+                                            th:value="${exp.empresa}" placeholder="Nombre de la empresa"></div>
+                                </div>
+                                <div class="cv-two">
+                                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="exp-periodo"
+                                            th:value="${exp.periodo}" placeholder="2025 – hoy"></div>
+                                    <div class="cv-fl"><label>MODALIDAD</label><input type="text" class="exp-modalidad"
+                                            th:value="${exp.modalidad}" placeholder="Remoto / Híbrido"></div>
+                                </div>
+                                <div class="cv-fl"><label>DESCRIPCIÓN</label><textarea class="exp-desc" rows="2"
+                                        th:text="${exp.descripcion}"
+                                        placeholder="Describe tus responsabilidades…"></textarea></div>
+                            </fieldset>
                         </th:block>
                     </div>
                     <button class="cv-add" type="button" id="expAgregar">+ Agregar experiencia</button>
@@ -340,18 +522,26 @@
                 <div class="cv-panel" id="panel-educacion" role="tabpanel" hidden>
                     <div id="eduLista" class="cv-items">
                         <th:block th:if="${usuario != null and usuario.cvEducaciones != null}">
-                        <fieldset class="cv-item" th:each="edu : ${usuario.cvEducaciones}">
-                            <legend class="cv-item-l">Educación</legend>
-                            <button class="cv-del" type="button" data-quitar aria-label="Quitar esta educación">Quitar</button>
-                            <div class="cv-two">
-                                <div class="cv-fl"><label>INSTITUCIÓN</label><input type="text" class="edu-institucion" th:value="${edu.institucion}" placeholder="Universidad / Bootcamp"></div>
-                                <div class="cv-fl"><label>TÍTULO / CARRERA</label><input type="text" class="edu-titulo" th:value="${edu.titulo}" placeholder="Ingeniería de Sistemas"></div>
-                            </div>
-                            <div class="cv-two">
-                                <div class="cv-fl"><label>PERÍODO</label><input type="text" class="edu-periodo" th:value="${edu.periodo}" placeholder="2020 – 2024"></div>
-                                <div class="cv-fl"><label>DESCRIPCIÓN <span>(opcional)</span></label><input type="text" class="edu-descripcion" th:value="${edu.descripcion}" placeholder="Especialización en…"></div>
-                            </div>
-                        </fieldset>
+                            <fieldset class="cv-item" th:each="edu : ${usuario.cvEducaciones}">
+                                <legend class="cv-item-l">Educación</legend>
+                                <button class="cv-del" type="button" data-quitar
+                                    aria-label="Quitar esta educación">Quitar</button>
+                                <div class="cv-two">
+                                    <div class="cv-fl"><label>INSTITUCIÓN</label><input type="text"
+                                            class="edu-institucion" th:value="${edu.institucion}"
+                                            placeholder="Universidad / Bootcamp"></div>
+                                    <div class="cv-fl"><label>TÍTULO / CARRERA</label><input type="text"
+                                            class="edu-titulo" th:value="${edu.titulo}"
+                                            placeholder="Ingeniería de Sistemas"></div>
+                                </div>
+                                <div class="cv-two">
+                                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="edu-periodo"
+                                            th:value="${edu.periodo}" placeholder="2020 – 2024"></div>
+                                    <div class="cv-fl"><label>DESCRIPCIÓN <span>(opcional)</span></label><input
+                                            type="text" class="edu-descripcion" th:value="${edu.descripcion}"
+                                            placeholder="Especialización en…"></div>
+                                </div>
+                            </fieldset>
                         </th:block>
                     </div>
                     <button class="cv-add" type="button" id="eduAgregar">+ Agregar educación</button>
@@ -360,24 +550,35 @@
                 <div class="cv-panel" id="panel-idiomas" role="tabpanel" hidden>
                     <div class="cv-fl"><span class="cv-lab" id="lEs">ESPAÑOL</span>
                         <div class="cv-opts" id="langEs" role="group" aria-labelledby="lEs">
-                            <button type="button" data-level="1" aria-pressed="false">A1</button><button type="button" data-level="2" aria-pressed="false">A2</button>
-                            <button type="button" data-level="3" aria-pressed="false">B1</button><button type="button" data-level="4" aria-pressed="false">B2</button>
+                            <button type="button" data-level="1" aria-pressed="false">A1</button><button type="button"
+                                data-level="2" aria-pressed="false">A2</button>
+                            <button type="button" data-level="3" aria-pressed="false">B1</button><button type="button"
+                                data-level="4" aria-pressed="false">B2</button>
                             <button type="button" data-level="5" aria-pressed="false">Nativo</button>
-                        </div></div>
+                        </div>
+                    </div>
                     <div class="cv-fl"><span class="cv-lab" id="lEn">INGLÉS</span>
                         <div class="cv-opts" id="langEn" role="group" aria-labelledby="lEn">
-                            <button type="button" data-level="1" aria-pressed="false">A1</button><button type="button" data-level="2" aria-pressed="false">A2</button>
-                            <button type="button" data-level="3" aria-pressed="false">B1</button><button type="button" data-level="4" aria-pressed="false">B2</button>
+                            <button type="button" data-level="1" aria-pressed="false">A1</button><button type="button"
+                                data-level="2" aria-pressed="false">A2</button>
+                            <button type="button" data-level="3" aria-pressed="false">B1</button><button type="button"
+                                data-level="4" aria-pressed="false">B2</button>
                             <button type="button" data-level="5" aria-pressed="false">C1/C2</button>
-                        </div></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="cv-panel" id="panel-habilidades" role="tabpanel" hidden>
-                    <div class="cv-fl"><label for="softIn">HABILIDADES BLANDAS <span>(Enter o coma para agregar)</span></label>
+                    <div class="cv-fl"><label for="softIn">HABILIDADES BLANDAS <span>(Enter o coma para
+                                agregar)</span></label>
                         <div class="cv-chipin" id="softWrap">
-                            <th:block th:if="${usuario != null and usuario.habilidadesBlandas != null}"><span class="cv-chip" th:each="s : ${usuario.habilidadesBlandas}" th:attr="data-v=${s}"><span th:text="${s}">Liderazgo</span><button type="button" th:attr="aria-label='Quitar ' + ${s}">×</button></span></th:block>
+                            <th:block th:if="${usuario != null and usuario.habilidadesBlandas != null}"><span
+                                    class="cv-chip" th:each="s : ${usuario.habilidadesBlandas}"
+                                    th:attr="data-v=${s}"><span th:text="${s}">Liderazgo</span><button type="button"
+                                        th:attr="aria-label='Quitar ' + ${s}">×</button></span></th:block>
                             <input id="softIn" type="text" placeholder="Liderazgo, comunicación…" autocomplete="off">
-                        </div></div>
+                        </div>
+                    </div>
                     <p class="cv-hint">Tu stack técnico se edita en <a th:href="@{/perfil}">Mi perfil</a>.</p>
                 </div>
             </div>
@@ -394,14 +595,19 @@
                 <legend class="cv-item-l">Experiencia</legend>
                 <button class="cv-del" type="button" data-quitar aria-label="Quitar esta experiencia">Quitar</button>
                 <div class="cv-two">
-                    <div class="cv-fl"><label>CARGO</label><input type="text" class="exp-cargo" placeholder="Tu cargo"></div>
-                    <div class="cv-fl"><label>EMPRESA</label><input type="text" class="exp-empresa" placeholder="Nombre de la empresa"></div>
+                    <div class="cv-fl"><label>CARGO</label><input type="text" class="exp-cargo" placeholder="Tu cargo">
+                    </div>
+                    <div class="cv-fl"><label>EMPRESA</label><input type="text" class="exp-empresa"
+                            placeholder="Nombre de la empresa"></div>
                 </div>
                 <div class="cv-two">
-                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="exp-periodo" placeholder="2025 – hoy"></div>
-                    <div class="cv-fl"><label>MODALIDAD</label><input type="text" class="exp-modalidad" placeholder="Remoto / Híbrido"></div>
+                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="exp-periodo"
+                            placeholder="2025 – hoy"></div>
+                    <div class="cv-fl"><label>MODALIDAD</label><input type="text" class="exp-modalidad"
+                            placeholder="Remoto / Híbrido"></div>
                 </div>
-                <div class="cv-fl"><label>DESCRIPCIÓN</label><textarea class="exp-desc" rows="2" placeholder="Describe tus responsabilidades…"></textarea></div>
+                <div class="cv-fl"><label>DESCRIPCIÓN</label><textarea class="exp-desc" rows="2"
+                        placeholder="Describe tus responsabilidades…"></textarea></div>
             </fieldset>
         </template>
         <template id="tplEdu">
@@ -409,12 +615,16 @@
                 <legend class="cv-item-l">Educación</legend>
                 <button class="cv-del" type="button" data-quitar aria-label="Quitar esta educación">Quitar</button>
                 <div class="cv-two">
-                    <div class="cv-fl"><label>INSTITUCIÓN</label><input type="text" class="edu-institucion" placeholder="Universidad / Bootcamp"></div>
-                    <div class="cv-fl"><label>TÍTULO / CARRERA</label><input type="text" class="edu-titulo" placeholder="Ingeniería de Sistemas"></div>
+                    <div class="cv-fl"><label>INSTITUCIÓN</label><input type="text" class="edu-institucion"
+                            placeholder="Universidad / Bootcamp"></div>
+                    <div class="cv-fl"><label>TÍTULO / CARRERA</label><input type="text" class="edu-titulo"
+                            placeholder="Ingeniería de Sistemas"></div>
                 </div>
                 <div class="cv-two">
-                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="edu-periodo" placeholder="2020 – 2024"></div>
-                    <div class="cv-fl"><label>DESCRIPCIÓN <span>(opcional)</span></label><input type="text" class="edu-descripcion" placeholder="Especialización en…"></div>
+                    <div class="cv-fl"><label>PERÍODO</label><input type="text" class="edu-periodo"
+                            placeholder="2020 – 2024"></div>
+                    <div class="cv-fl"><label>DESCRIPCIÓN <span>(opcional)</span></label><input type="text"
+                            class="edu-descripcion" placeholder="Especialización en…"></div>
                 </div>
             </fieldset>
         </template>

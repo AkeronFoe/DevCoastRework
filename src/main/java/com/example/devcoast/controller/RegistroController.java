@@ -34,7 +34,8 @@ public class RegistroController {
 
     private final LimiteTasa limiteTasa;
 
-    // la gente de una feria puede registrarse desde una misma red: por eso el tope es holgado
+    // la gente de una feria puede registrarse desde una misma red: por eso el tope
+    // es holgado
     private static final int MAX_REGISTROS = 40;
     private static final long VENTANA_REGISTROS_MS = 15 * 60 * 1000L;
 
@@ -229,7 +230,8 @@ public class RegistroController {
         empresa.setCorreo(correoNorm);
         empresa.setTelefono(telefono);
         empresa.setDescripcion(descripcion != null && descripcion.length() > 300
-                ? descripcion.substring(0, 300) : descripcion);
+                ? descripcion.substring(0, 300)
+                : descripcion);
         empresa.setPassword(passwordEncoder.encode(password));
         empresa.setActivo(true);
         empresa.setCreadoEn(new Date());

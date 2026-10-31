@@ -2,136 +2,295 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
-    <title>DevCoast</title>
-    <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
-    <link rel="stylesheet" th:href="@{/CSS/landing.css}">
-    <script th:src="@{/JS/i18n.js}" defer></script>
-    <script th:src="@{/JS/landing.js}" defer></script>
+  <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+  <title>DevCoast</title>
+  <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
+  <link rel="stylesheet" th:href="@{/CSS/landing.css}">
+  <script th:src="@{/JS/i18n.js}" defer></script>
+  <script th:src="@{/JS/landing.js}" defer></script>
 </head>
 
 <body>
-<a class="skip" href="#hero">Saltar al contenido</a>
-<div class="hud" id="hud" aria-hidden="true">
-  <div class="hud-n">−<span id="hudN">0</span> m</div>
-  <div class="hud-bar" id="hudBar"><i></i><span class="hud-t" style="top:0%">0</span><span class="hud-t" style="top:25%">10</span><span class="hud-t" style="top:50%">20</span><span class="hud-t" style="top:75%">30</span><span class="hud-t" style="top:100%">40</span></div>
-</div>
-<div class="bubbles" id="bubbles" aria-hidden="true">
-  <i class="bub" style="left:6%;width:14px;height:14px;--d:0s;--t:13s"></i><i class="bub" style="left:14%;width:9px;height:9px;--d:5s;--t:11s"></i><i class="bub" style="left:30%;width:18px;height:18px;--d:8s;--t:15s"></i><i class="bub" style="left:48%;width:10px;height:10px;--d:2s;--t:12s"></i><i class="bub" style="left:66%;width:16px;height:16px;--d:6s;--t:14s"></i><i class="bub" style="left:82%;width:11px;height:11px;--d:3s;--t:12s"></i><i class="bub" style="left:94%;width:15px;height:15px;--d:9s;--t:16s"></i>
-</div>
+  <a class="skip" href="#hero">Saltar al contenido</a>
+  <div class="hud" id="hud" aria-hidden="true">
+    <div class="hud-n">−<span id="hudN">0</span> m</div>
+    <div class="hud-bar" id="hudBar"><i></i><span class="hud-t" style="top:0%">0</span><span class="hud-t"
+        style="top:25%">10</span><span class="hud-t" style="top:50%">20</span><span class="hud-t"
+        style="top:75%">30</span><span class="hud-t" style="top:100%">40</span></div>
+  </div>
+  <div class="bubbles" id="bubbles" aria-hidden="true">
+    <i class="bub" style="left:6%;width:14px;height:14px;--d:0s;--t:13s"></i><i class="bub"
+      style="left:14%;width:9px;height:9px;--d:5s;--t:11s"></i><i class="bub"
+      style="left:30%;width:18px;height:18px;--d:8s;--t:15s"></i><i class="bub"
+      style="left:48%;width:10px;height:10px;--d:2s;--t:12s"></i><i class="bub"
+      style="left:66%;width:16px;height:16px;--d:6s;--t:14s"></i><i class="bub"
+      style="left:82%;width:11px;height:11px;--d:3s;--t:12s"></i><i class="bub"
+      style="left:94%;width:15px;height:15px;--d:9s;--t:16s"></i>
+  </div>
 
-<section class="scene" id="hero" style="height:195vh">
-<div class="stick">
-  <svg width="100%" height="100%" aria-hidden="true" style="position:absolute;left:0;top:0"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+  <section class="scene" id="hero" style="height:195vh">
+    <div class="stick">
+      <svg width="100%" height="100%" aria-hidden="true" style="position:absolute;left:0;top:0">
+        <defs>
+          <pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#graticula)" />
+      </svg>
 
-  <div class="bar"><span>// carta náutica del talento tech</span><span>rumbo 045° · viento a favor</span></div>
-  <header class="nav fu">
-    <a class="nav-l" href="#hero" aria-label="DevCoast, inicio">
-      <th:block th:replace="~{fragments/nautico :: logo}"></th:block>DevCoast
-    </a>
-    <nav class="nav-r"><a class="nl" href="#ruta">ruta</a><a class="nl" href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a class="nl" href="#muelles">talento / empresas</a><a class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
-  </header>
+      <div class="bar"><span>// carta náutica del talento tech</span><span>rumbo 045° · viento a favor</span></div>
+      <header class="nav fu">
+        <a class="nav-l" href="#hero" aria-label="DevCoast, inicio">
+          <th:block th:replace="~{fragments/nautico :: logo}"></th:block>DevCoast
+        </a>
+        <nav class="nav-r"><a class="nl" href="#ruta">ruta</a><a class="nl" href="#pases"
+            th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a class="nl" href="#muelles">talento / empresas</a><a
+            class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
+      </header>
 
-  <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
+      <th:block th:replace="~{fragments/nautico :: bunting}"></th:block>
 
-  <div class="hero-main">
-    <div class="hero-text" id="heroText">
-      <div class="kicker"><span class="type">&gt; zarpando desde la orilla</span><span class="caret" style="color:var(--orange)">▌</span></div>
-      <h1><span class="mask"><span class="w" style="--d:.4s">Tu</span></span> <span class="mask"><span class="w" style="--d:.5s">próximo</span></span> <span class="mask"><span class="w" style="--d:.6s">trabajo</span></span> <span class="mask"><span class="w" style="--d:.7s">está</span></span> <span class="mask"><span class="w" style="--d:.8s">en</span></span> <span class="mask"><span class="w" style="--d:.9s">la</span></span> <span class="costa"><span class="mask"><span class="w" style="--d:1s">costa</span></span><svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;bottom:-4px"><path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none" stroke="#FF7B4F" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
-      <p class="fu" style="--d:1.2s">Programadores y diseñadores por un lado, empresas que buscan talento por el otro. DevCoast es el puerto donde se encuentran.</p>
-      <div class="cta-row fu" style="--d:1.35s">
-        <a class="btn btn-o pulse" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg>Zarpar ahora</a>
-        <a class="btn btn-g" href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">Ver empleos</a>
+      <div class="hero-main">
+        <div class="hero-text" id="heroText">
+          <div class="kicker"><span class="type">&gt; zarpando desde la orilla</span><span class="caret"
+              style="color:var(--orange)">▌</span></div>
+          <h1><span class="mask"><span class="w" style="--d:.4s">Tu</span></span> <span class="mask"><span class="w"
+                style="--d:.5s">próximo</span></span> <span class="mask"><span class="w"
+                style="--d:.6s">trabajo</span></span> <span class="mask"><span class="w"
+                style="--d:.7s">está</span></span> <span class="mask"><span class="w" style="--d:.8s">en</span></span>
+            <span class="mask"><span class="w" style="--d:.9s">la</span></span> <span class="costa"><span
+                class="mask"><span class="w" style="--d:1s">costa</span></span><svg viewBox="0 0 200 16" width="100%"
+                height="16" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;bottom:-4px">
+                <path class="ud" pathLength="1" d="M2 8 Q 27 -2 52 8 T 102 8 T 152 8 T 198 8" fill="none"
+                  stroke="#FF7B4F" stroke-width="5" stroke-linecap="round" />
+              </svg></span>.</h1>
+          <p class="fu" style="--d:1.2s">Programadores y diseñadores por un lado, empresas que buscan talento por el
+            otro. DevCoast es el puerto donde se encuentran.</p>
+          <div class="cta-row fu" style="--d:1.35s">
+            <a class="btn btn-o pulse" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18" height="22"
+                aria-hidden="true">
+                <path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114" />
+              </svg>Zarpar ahora</a>
+            <a class="btn btn-g" href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">Ver empleos</a>
+          </div>
+        </div>
+
+        <div class="boat-wrap" id="boatWrap" role="img"
+          aria-label="Velero DevCoast: la vela es un cursor y una gaviota va posada en cubierta">
+          <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
+        </div>
+      </div>
+
+      <div id="sea" aria-hidden="true">
+        <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+        <div class="seabody"></div>
       </div>
     </div>
+  </section>
 
-    <div class="boat-wrap" id="boatWrap" role="img" aria-label="Velero DevCoast: la vela es un cursor y una gaviota va posada en cubierta">
-      <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
-    </div>
-  </div>
+  <main style="position:relative;z-index:1">
 
-  <div id="sea" aria-hidden="true">
-    <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
-    <div class="seabody"></div>
-  </div>
-</div>
-</section>
+    <section class="scene" id="ruta" style="height:340vh">
+      <div class="stick">
+        <div class="rbox">
+          <div class="sec-h">
+            <div class="eyebrow">// la ruta</div>
+            <h2>Tres puertos hasta tu empleo.</h2>
+          </div>
+          <div class="route" id="route">
+            <svg viewBox="0 90 1200 250" aria-hidden="true">
+              <path id="routeBase" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205"
+                fill="none" stroke="#1F8F82" stroke-width="3" stroke-dasharray="4 12" stroke-linecap="round" />
+              <path id="routeFill" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205"
+                fill="none" stroke="#FF7B4F" stroke-width="4" stroke-linecap="round" />
+            </svg>
+            <div class="node" id="n0">1</div>
+            <div class="node" id="n1">2</div>
+            <div class="node" id="n2">3</div>
+            <div class="compass" aria-hidden="true"><svg viewBox="0 0 160 160">
+                <g id="compassRing">
+                  <circle cx="80" cy="80" r="70" fill="none" stroke="#2DD4BF" stroke-width="2" />
+                  <circle cx="80" cy="80" r="58" fill="none" stroke="#2DD4BF" stroke-width="1" stroke-dasharray="3 5" />
+                </g>
+                <polygon class="needle" points="80,10 92,68 150,80 92,92 80,150 68,92 10,80 68,68" fill="none"
+                  stroke="#FF7B4F" stroke-width="2.5" stroke-linejoin="round" /><text x="80" y="8" text-anchor="middle"
+                  font-family="JetBrains Mono, monospace" font-size="12" fill="#F3F4F8">N</text>
+              </svg></div>
+            <div class="miniWrap" id="miniWrap" aria-hidden="true"></div>
+          </div>
+          <div class="pcs">
+            <article class="pc" id="pc0">
+              <div class="tag">PUERTO 1 · PERFIL</div>
+              <h3>Arma tu bitácora</h3>
+              <p>Quién eres, qué sabes hacer y qué has construido. Tu perfil se completa paso a paso.</p>
+              <div class="mini-ui"><span>perfil completo</span>
+                <div style="flex-basis:100%;height:8px;background:var(--line);border-radius:4px">
+                  <div style="width:60%;height:8px;background:var(--teal);border-radius:4px"></div>
+                </div>
+              </div>
+            </article>
+            <article class="pc" id="pc1">
+              <div class="tag">PUERTO 2 · EXPLORAR</div>
+              <h3>Busca tu rumbo</h3>
+              <p>Filtra ofertas, descubre el directorio y deja que las empresas te encuentren a ti.</p>
+              <div class="mini-ui"><span class="chip t">Frontend</span><span class="chip">Backend</span><span
+                  class="chip">Diseño</span><span class="chip o">Remoto</span></div>
+            </article>
+            <article class="pc" id="pc2">
+              <div class="tag">PUERTO 3 · LLEGADA</div>
+              <h3>Atraca con tu empresa</h3>
+              <p>Envía solicitudes o responde a las invitaciones. Un mensaje en botella que sí llega.</p>
+              <div class="mini-ui"><span style="color:var(--ink)">Una empresa</span><span class="chip o"
+                  style="margin-left:auto">INVITACIÓN</span><span style="flex-basis:100%">Te invitan a postularte a una
+                  oferta.</span></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<main style="position:relative;z-index:1">
+    <section class="scene" id="pases" style="height:320vh" th:if="${!#lists.isEmpty(empleosLanding)}">
+      <div class="stick">
+        <div class="sec-h pases-h">
+          <div class="eyebrow">// empleos</div>
+          <h2>Cada oferta es un pase de abordaje.</h2>
+        </div>
+        <div class="tks">
+          <div class="tk" th:each="e, st : ${empleosLanding}"
+            th:data-rot="${st.index % 3 == 0 ? -3 : (st.index % 3 == 1 ? 2 : -1.5)}"
+            th:data-y="${st.index % 3 == 1 ? 28 : 0}">
+            <div class="tk-in">
+              <div class="tk-main">
+                <div class="tk-top"><span>PASE DE ABORDAJE</span><span>DEVCOAST</span></div>
+                <div>
+                  <div class="tk-k">DESTINO</div>
+                  <div class="tk-d" th:text="${e.titulo}">Cargo</div>
+                </div>
+                <div class="tk-r">
+                  <div th:if="${e.empresaNombre != null and !#strings.isEmpty(e.empresaNombre)}">
+                    <div class="tk-k">EMPRESA</div>
+                    <div class="tk-v" th:text="${e.empresaNombre}">Empresa</div>
+                  </div>
+                  <div th:if="${e.modalidad != null and !#strings.isEmpty(e.modalidad)}">
+                    <div class="tk-k">MODALIDAD</div>
+                    <div class="tk-v" th:text="${e.modalidad}">Remoto</div>
+                  </div>
+                </div>
+                <div class="tk-k" th:if="${e.categoria != null and !#strings.isEmpty(e.categoria)}"
+                  th:text="|ÁREA · ${#strings.toUpperCase(e.categoriaMostrar)}|">ÁREA</div>
+              </div>
+              <div class="stub" th:style="${st.index % 2 == 0} ? 'background:var(--orange)' : 'background:var(--teal)'">
+                <div>SALIDA</div>
+                <th:block th:if="${st.index % 3 == 0}"><svg viewBox="0 0 60 60" width="52" height="52"
+                    aria-hidden="true">
+                    <rect x="0" width="3" height="60" fill="#101114" />
+                    <rect x="7" width="1.5" height="60" fill="#101114" />
+                    <rect x="12" width="5" height="60" fill="#101114" />
+                    <rect x="21" width="2" height="60" fill="#101114" />
+                    <rect x="27" width="4" height="60" fill="#101114" />
+                    <rect x="35" width="1.5" height="60" fill="#101114" />
+                    <rect x="40" width="5" height="60" fill="#101114" />
+                    <rect x="49" width="2" height="60" fill="#101114" />
+                    <rect x="55" width="4" height="60" fill="#101114" />
+                  </svg></th:block>
+                <th:block th:if="${st.index % 3 == 1}"><svg viewBox="0 0 60 60" width="52" height="52"
+                    aria-hidden="true">
+                    <rect x="0" width="2" height="60" fill="#101114" />
+                    <rect x="6" width="5" height="60" fill="#101114" />
+                    <rect x="15" width="1.5" height="60" fill="#101114" />
+                    <rect x="20" width="4" height="60" fill="#101114" />
+                    <rect x="28" width="2" height="60" fill="#101114" />
+                    <rect x="34" width="5" height="60" fill="#101114" />
+                    <rect x="43" width="1.5" height="60" fill="#101114" />
+                    <rect x="48" width="3" height="60" fill="#101114" />
+                    <rect x="55" width="4" height="60" fill="#101114" />
+                  </svg></th:block>
+                <th:block th:if="${st.index % 3 == 2}"><svg viewBox="0 0 60 60" width="52" height="52"
+                    aria-hidden="true">
+                    <rect x="0" width="4" height="60" fill="#101114" />
+                    <rect x="8" width="1.5" height="60" fill="#101114" />
+                    <rect x="13" width="3" height="60" fill="#101114" />
+                    <rect x="20" width="5" height="60" fill="#101114" />
+                    <rect x="29" width="1.5" height="60" fill="#101114" />
+                    <rect x="34" width="4" height="60" fill="#101114" />
+                    <rect x="42" width="2" height="60" fill="#101114" />
+                    <rect x="48" width="5" height="60" fill="#101114" />
+                    <rect x="57" width="2" height="60" fill="#101114" />
+                  </svg></th:block>
+              </div>
+              <i class="notch" style="top:-10px"></i><i class="notch" style="bottom:-10px"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section class="scene" id="ruta" style="height:340vh">
-<div class="stick">
-  <div class="rbox">
-    <div class="sec-h"><div class="eyebrow">// la ruta</div><h2>Tres puertos hasta tu empleo.</h2></div>
-    <div class="route" id="route">
-      <svg viewBox="0 90 1200 250" aria-hidden="true">
-        <path id="routeBase" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205" fill="none" stroke="#1F8F82" stroke-width="3" stroke-dasharray="4 12" stroke-linecap="round"/>
-        <path id="routeFill" d="M40 215 C 220 135, 320 295, 470 215 S 720 135, 840 215 S 1040 295, 1170 205" fill="none" stroke="#FF7B4F" stroke-width="4" stroke-linecap="round"/>
-      </svg>
-      <div class="node" id="n0">1</div><div class="node" id="n1">2</div><div class="node" id="n2">3</div>
-      <div class="compass" aria-hidden="true"><svg viewBox="0 0 160 160"><g id="compassRing"><circle cx="80" cy="80" r="70" fill="none" stroke="#2DD4BF" stroke-width="2"/><circle cx="80" cy="80" r="58" fill="none" stroke="#2DD4BF" stroke-width="1" stroke-dasharray="3 5"/></g><polygon class="needle" points="80,10 92,68 150,80 92,92 80,150 68,92 10,80 68,68" fill="none" stroke="#FF7B4F" stroke-width="2.5" stroke-linejoin="round"/><text x="80" y="8" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#F3F4F8">N</text></svg></div>
-      <div class="miniWrap" id="miniWrap" aria-hidden="true"></div>
-    </div>
-    <div class="pcs">
-      <article class="pc" id="pc0">
-        <div class="tag">PUERTO 1 · PERFIL</div><h3>Arma tu bitácora</h3><p>Quién eres, qué sabes hacer y qué has construido. Tu perfil se completa paso a paso.</p>
-        <div class="mini-ui"><span>perfil completo</span><div style="flex-basis:100%;height:8px;background:var(--line);border-radius:4px"><div style="width:60%;height:8px;background:var(--teal);border-radius:4px"></div></div></div>
-      </article>
-      <article class="pc" id="pc1">
-        <div class="tag">PUERTO 2 · EXPLORAR</div><h3>Busca tu rumbo</h3><p>Filtra ofertas, descubre el directorio y deja que las empresas te encuentren a ti.</p>
-        <div class="mini-ui"><span class="chip t">Frontend</span><span class="chip">Backend</span><span class="chip">Diseño</span><span class="chip o">Remoto</span></div>
-      </article>
-      <article class="pc" id="pc2">
-        <div class="tag">PUERTO 3 · LLEGADA</div><h3>Atraca con tu empresa</h3><p>Envía solicitudes o responde a las invitaciones. Un mensaje en botella que sí llega.</p>
-        <div class="mini-ui"><span style="color:var(--ink)">Una empresa</span><span class="chip o" style="margin-left:auto">INVITACIÓN</span><span style="flex-basis:100%">Te invitan a postularte a una oferta.</span></div>
-      </article>
-    </div>
-  </div>
-</div>
-</section>
+    <section class="scene" id="gaviota" style="height:190vh">
+      <div class="stick">
+        <div class="gq">
+          <div class="tile"><svg id="tileSvg" viewBox="96 270 186 156"
+              aria-label="La gaviota de DevCoast posada en cubierta" role="img">
+              <rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8" />
+              <rect x="96" y="397" width="186" height="40" fill="#F3F4F8" />
+              <rect x="96" y="410" width="186" height="9" fill="#2DD4BF" />
+            </svg></div>
+          <div class="bubble">
+            <p id="quote">Completa tu perfil. Los que no, se quedan en la orilla viendo zarpar a los demás.</p>
+            <div class="who">— la gaviota, 6 de la mañana</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section class="scene" id="pases" style="height:320vh" th:if="${!#lists.isEmpty(empleosLanding)}">
-<div class="stick">
-  <div class="sec-h pases-h"><div class="eyebrow">// empleos</div><h2>Cada oferta es un pase de abordaje.</h2></div>
-  <div class="tks">
-    <div class="tk" th:each="e, st : ${empleosLanding}" th:data-rot="${st.index % 3 == 0 ? -3 : (st.index % 3 == 1 ? 2 : -1.5)}" th:data-y="${st.index % 3 == 1 ? 28 : 0}"><div class="tk-in">
-      <div class="tk-main"><div class="tk-top"><span>PASE DE ABORDAJE</span><span>DEVCOAST</span></div><div><div class="tk-k">DESTINO</div><div class="tk-d" th:text="${e.titulo}">Cargo</div></div><div class="tk-r"><div th:if="${e.empresaNombre != null and !#strings.isEmpty(e.empresaNombre)}"><div class="tk-k">EMPRESA</div><div class="tk-v" th:text="${e.empresaNombre}">Empresa</div></div><div th:if="${e.modalidad != null and !#strings.isEmpty(e.modalidad)}"><div class="tk-k">MODALIDAD</div><div class="tk-v" th:text="${e.modalidad}">Remoto</div></div></div><div class="tk-k" th:if="${e.categoria != null and !#strings.isEmpty(e.categoria)}" th:text="|ÁREA · ${#strings.toUpperCase(e.categoriaMostrar)}|">ÁREA</div></div>
-      <div class="stub" th:style="${st.index % 2 == 0} ? 'background:var(--orange)' : 'background:var(--teal)'"><div>SALIDA</div><th:block th:if="${st.index % 3 == 0}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="3" height="60" fill="#101114"/><rect x="7" width="1.5" height="60" fill="#101114"/><rect x="12" width="5" height="60" fill="#101114"/><rect x="21" width="2" height="60" fill="#101114"/><rect x="27" width="4" height="60" fill="#101114"/><rect x="35" width="1.5" height="60" fill="#101114"/><rect x="40" width="5" height="60" fill="#101114"/><rect x="49" width="2" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg></th:block><th:block th:if="${st.index % 3 == 1}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="2" height="60" fill="#101114"/><rect x="6" width="5" height="60" fill="#101114"/><rect x="15" width="1.5" height="60" fill="#101114"/><rect x="20" width="4" height="60" fill="#101114"/><rect x="28" width="2" height="60" fill="#101114"/><rect x="34" width="5" height="60" fill="#101114"/><rect x="43" width="1.5" height="60" fill="#101114"/><rect x="48" width="3" height="60" fill="#101114"/><rect x="55" width="4" height="60" fill="#101114"/></svg></th:block><th:block th:if="${st.index % 3 == 2}"><svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><rect x="0" width="4" height="60" fill="#101114"/><rect x="8" width="1.5" height="60" fill="#101114"/><rect x="13" width="3" height="60" fill="#101114"/><rect x="20" width="5" height="60" fill="#101114"/><rect x="29" width="1.5" height="60" fill="#101114"/><rect x="34" width="4" height="60" fill="#101114"/><rect x="42" width="2" height="60" fill="#101114"/><rect x="48" width="5" height="60" fill="#101114"/><rect x="57" width="2" height="60" fill="#101114"/></svg></th:block></div>
-      <i class="notch" style="top:-10px"></i><i class="notch" style="bottom:-10px"></i>
-    </div></div>
-  </div>
-</div>
-</section>
+    <section class="scene" id="muelles" style="height:210vh">
+      <div class="stick">
+        <div class="sec-h pases-h" id="muellesH">
+          <div class="eyebrow">// dos muelles</div>
+          <h2>Un mismo mar, dos formas de llegar.</h2>
+        </div>
+        <div class="docks">
+          <div class="dock dock1" id="dockL">
+            <div class="tagl">// zarpa</div>
+            <h3>Para talento</h3>
+            <p>Perfil público, logros y empleos en un solo lugar. Tu código y tu diseño merecen ser vistos.</p><a
+              class="btn" th:href="@{/register/talento}"
+              style="align-self:flex-start;background:var(--sky);color:var(--ink);padding:13px 22px;font-size:16px">Crear
+              perfil de talento</a>
+          </div>
+          <div class="dock dock2" id="dockR">
+            <div class="tagl" style="color:var(--teal)">// atraca</div>
+            <h3>Para empresas</h3>
+            <p style="color:var(--mute)">Publica ofertas, explora el directorio e invita a quien quieras en tu
+              tripulación.</p><a class="btn" th:href="@{/register/empresa}"
+              style="align-self:flex-start;background:var(--teal);color:var(--sky);padding:13px 22px;font-size:16px">Registrar
+              mi empresa</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section class="scene" id="gaviota" style="height:190vh">
-<div class="stick">
-  <div class="gq">
-    <div class="tile"><svg id="tileSvg" viewBox="96 270 186 156" aria-label="La gaviota de DevCoast posada en cubierta" role="img"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/></svg></div>
-    <div class="bubble"><p id="quote">Completa tu perfil. Los que no, se quedan en la orilla viendo zarpar a los demás.</p><div class="who">— la gaviota, 6 de la mañana</div></div>
-  </div>
-</div>
-</section>
+    <section id="crear">
+      <div class="x-wrap">
+        <div class="xbox" aria-hidden="true">
+          <div class="ring" id="xRing"></div>
+          <div class="xb" id="xA" style="transform:rotate(45deg)"></div>
+          <div class="xb" id="xB" style="transform:rotate(-45deg)"></div>
+        </div>
+        <h2 id="xTitle">La X marca el punto.<br><span style="color:var(--orange)">Aquí empieza tu carrera.</span></h2>
+        <a class="btn btn-o pulse" id="xCta" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18"
+            height="22" aria-hidden="true">
+            <path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114" />
+          </svg>Crear mi perfil</a>
+      </div>
+      <footer class="foot"><span>DevCoast · <span th:text="${#dates.year(#dates.createNow())}">2026</span> · hecho en la
+          costa</span>
+        <nav><a href="#ruta">ruta</a><a href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a
+            href="#muelles">talento / empresas</a><a th:href="@{/login}">ingresar</a></nav>
+      </footer>
+    </section>
 
-<section class="scene" id="muelles" style="height:210vh">
-<div class="stick">
-  <div class="sec-h pases-h" id="muellesH"><div class="eyebrow">// dos muelles</div><h2>Un mismo mar, dos formas de llegar.</h2></div>
-  <div class="docks">
-    <div class="dock dock1" id="dockL"><div class="tagl">// zarpa</div><h3>Para talento</h3><p>Perfil público, logros y empleos en un solo lugar. Tu código y tu diseño merecen ser vistos.</p><a class="btn" th:href="@{/register/talento}" style="align-self:flex-start;background:var(--sky);color:var(--ink);padding:13px 22px;font-size:16px">Crear perfil de talento</a></div>
-    <div class="dock dock2" id="dockR"><div class="tagl" style="color:var(--teal)">// atraca</div><h3>Para empresas</h3><p style="color:var(--mute)">Publica ofertas, explora el directorio e invita a quien quieras en tu tripulación.</p><a class="btn" th:href="@{/register/empresa}" style="align-self:flex-start;background:var(--teal);color:var(--sky);padding:13px 22px;font-size:16px">Registrar mi empresa</a></div>
-  </div>
-</div>
-</section>
-
-<section id="crear">
-  <div class="x-wrap">
-    <div class="xbox" aria-hidden="true"><div class="ring" id="xRing"></div><div class="xb" id="xA" style="transform:rotate(45deg)"></div><div class="xb" id="xB" style="transform:rotate(-45deg)"></div></div>
-    <h2 id="xTitle">La X marca el punto.<br><span style="color:var(--orange)">Aquí empieza tu carrera.</span></h2>
-    <a class="btn btn-o pulse" id="xCta" th:href="@{/register-options}"><svg viewBox="0 0 20 24" width="18" height="22" aria-hidden="true"><path d="M2 2 L2 19 L7 14 L11 23 L14 21 L10 13 L17 13 Z" fill="#101114"/></svg>Crear mi perfil</a>
-  </div>
-  <footer class="foot"><span>DevCoast · <span th:text="${#dates.year(#dates.createNow())}">2026</span> · hecho en la costa</span><nav><a href="#ruta">ruta</a><a href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a href="#muelles">talento / empresas</a><a th:href="@{/login}">ingresar</a></nav></footer>
-</section>
-
-</main>
+  </main>
 
 </body>
 

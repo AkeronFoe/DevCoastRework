@@ -41,15 +41,18 @@ public class EmpleoVista {
     private boolean solicitada;
     private boolean cerrada;
 
-    public static EmpleoVista de(Empleo e, MatchEmpleo.Resultado m, boolean solicitada, boolean destacado, Long postulantes,
+    public static EmpleoVista de(Empleo e, MatchEmpleo.Resultado m, boolean solicitada, boolean destacado,
+            Long postulantes,
             Date ahora) {
         EmpleoVista v = new EmpleoVista();
         v.id = e.getId();
         v.titulo = e.getTitulo();
         v.empresaNombre = e.getEmpresaNombre();
         v.empresaInicial = e.getEmpresaNombre() != null && !e.getEmpresaNombre().isBlank()
-                ? e.getEmpresaNombre().trim().substring(0, 1).toUpperCase(Locale.ROOT) : null;
-        v.empresaColor = e.getColorIcono() != null && e.getColorIcono().matches("#[0-9a-fA-F]{3,8}") ? e.getColorIcono() : null;
+                ? e.getEmpresaNombre().trim().substring(0, 1).toUpperCase(Locale.ROOT)
+                : null;
+        v.empresaColor = e.getColorIcono() != null && e.getColorIcono().matches("#[0-9a-fA-F]{3,8}") ? e.getColorIcono()
+                : null;
         v.logoUrl = e.getLogoUrl() != null && !e.getLogoUrl().isBlank() ? e.getLogoUrl() : null;
         AreaEmpleo.Area area = AreaEmpleo.de(e.getCategoria());
         v.areaClave = area == AreaEmpleo.Area.PROGRAMACION ? "p" : area == AreaEmpleo.Area.DISENO ? "d" : "o";
@@ -65,8 +68,11 @@ public class EmpleoVista {
         if (fecha != null && ahora != null) {
             long dias = Math.max(0, (ahora.getTime() - fecha.getTime()) / 86_400_000L);
             v.nueva = dias <= 2;
-            v.hace = dias == 0 ? "hoy" : dias == 1 ? "hace 1 día" : dias < 30 ? "hace " + dias + " días"
-                    : dias < 365 ? "hace " + (dias / 30) + (dias / 30 == 1 ? " mes" : " meses") : "hace más de un año";
+            v.hace = dias == 0 ? "hoy"
+                    : dias == 1 ? "hace 1 día"
+                            : dias < 30 ? "hace " + dias + " días"
+                                    : dias < 365 ? "hace " + (dias / 30) + (dias / 30 == 1 ? " mes" : " meses")
+                                            : "hace más de un año";
         }
         armarSalario(v, e);
 
@@ -94,13 +100,20 @@ public class EmpleoVista {
         String sufijo = divisor == 1_000_000 ? " M" : divisor == 1_000 ? " K" : "";
         String a = e.getSalarioMin() != null ? num(e.getSalarioMin() / divisor) : null;
         String b = e.getSalarioMax() != null ? num(e.getSalarioMax() / divisor) : null;
-        v.salarioTexto = "$" + (a != null && b != null ? (a.equals(b) ? a : a + "–" + b) : a != null ? "Desde " + a : "Hasta " + b) + sufijo;
-        String per = e.getSalarioPeriodo() == null ? "" : e.getSalarioPeriodo().trim().replaceFirst("^/\\s*", "").toLowerCase(Locale.ROOT);
-        String perAbrev = per.startsWith("mes") || per.startsWith("mens") ? "MES" : per.startsWith("anu") || per.startsWith("año") ? "AÑO"
-                : per.startsWith("hora") ? "HORA" : per.startsWith("seman") ? "SEMANA" : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
+        v.salarioTexto = "$"
+                + (a != null && b != null ? (a.equals(b) ? a : a + "–" + b) : a != null ? "Desde " + a : "Hasta " + b)
+                + sufijo;
+        String per = e.getSalarioPeriodo() == null ? ""
+                : e.getSalarioPeriodo().trim().replaceFirst("^/\\s*", "").toLowerCase(Locale.ROOT);
+        String perAbrev = per.startsWith("mes") || per.startsWith("mens") ? "MES"
+                : per.startsWith("anu") || per.startsWith("año") ? "AÑO"
+                        : per.startsWith("hora") ? "HORA"
+                                : per.startsWith("seman") ? "SEMANA"
+                                        : per.isEmpty() ? null : per.toUpperCase(Locale.ROOT);
         String mon = vacioANull(e.getMoneda());
         v.salarioEtiqueta = "SALARIO" + (mon != null || perAbrev != null
-                ? " · " + (mon != null ? mon.toUpperCase(Locale.ROOT) : "") + (mon != null && perAbrev != null ? "/" : "") + (perAbrev != null ? perAbrev : "")
+                ? " · " + (mon != null ? mon.toUpperCase(Locale.ROOT) : "")
+                        + (mon != null && perAbrev != null ? "/" : "") + (perAbrev != null ? perAbrev : "")
                 : "");
     }
 

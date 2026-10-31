@@ -17,32 +17,45 @@
         <div th:replace="~{fragments/nautico :: scrim}"></div>
 
         <div class="main">
-            <header th:replace="~{fragments/nautico :: topbar('/mensajes', 'Buscar conversaciones', 'Busca por nombre o cargo', null)}"></header>
+            <header
+                th:replace="~{fragments/nautico :: topbar('/mensajes', 'Buscar conversaciones', 'Busca por nombre o cargo', null)}">
+            </header>
 
             <main class="mx en-chat" id="contenido">
-                <th:block th:replace="~{fragments/mensajes :: lista(${conversaciones}, ${activaId}, ${totalNoLeidos}, null)}"></th:block>
+                <th:block
+                    th:replace="~{fragments/mensajes :: lista(${conversaciones}, ${activaId}, ${totalNoLeidos}, null)}">
+                </th:block>
 
                 <section class="mx-thread" id="mxThread" aria-label="Conversación"
                     th:attr="data-sol=${solicitud.id},data-yo=${currentUserId},data-ultima=${ultimaMarca},data-primera=${primeraMarca},data-otro=${otroNombre},data-cargo=${solicitud.empleoTitulo ?: 'Oferta'},data-inicial=${otroInitial},data-tono=${otroTono}"
                     th:with="est=${solicitud.estado}">
                     <header class="mx-th">
                         <a class="mx-back" th:href="@{/mensajes}" aria-label="Volver a la bandeja">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M15 18l-6-6 6-6" />
+                            </svg>
                         </a>
-                        <span class="mx-av big" th:classappend="${otroAvatarUrl != null} ? 'foto' : ('t' + ${otroTono})" aria-hidden="true"
+                        <span class="mx-av big" th:classappend="${otroAvatarUrl != null} ? 'foto' : ('t' + ${otroTono})"
+                            aria-hidden="true"
                             th:style="${otroAvatarUrl != null} ? ('background-image:url(' + ${otroAvatarUrl} + ')')"
                             th:text="${otroAvatarUrl == null} ? ${otroInitial}">N</span>
                         <div class="mx-th-i">
                             <h2>
-                                <a th:if="${otroPerfilUrl != null}" th:href="@{${otroPerfilUrl}}" th:text="${otroNombre}">Nombre</a>
+                                <a th:if="${otroPerfilUrl != null}" th:href="@{${otroPerfilUrl}}"
+                                    th:text="${otroNombre}">Nombre</a>
                                 <span th:if="${otroPerfilUrl == null}" th:text="${otroNombre}">Nombre</span>
                             </h2>
-                            <p th:text="(${solicitud.empleoTitulo} ?: 'Oferta') + (${esTalento and solicitud.empleoModalidad != null} ? ' · ' + ${solicitud.empleoModalidad} : '')">Frontend Developer · Remoto</p>
+                            <p
+                                th:text="(${solicitud.empleoTitulo} ?: 'Oferta') + (${esTalento and solicitud.empleoModalidad != null} ? ' · ' + ${solicitud.empleoModalidad} : '')">
+                                Frontend Developer · Remoto</p>
                         </div>
-                        <span class="mx-pill" th:classappend="${est == 'aprobada'} ? 'ok' : (${est == 'rechazada' or est == 'descartado'} ? 'no' : 'rev')"
-                            th:text="${est == 'aprobada'} ? 'Aceptada' : (${est == 'rechazada'} ? 'No avanzó' : (${est == 'descartado'} ? 'Filtrada' : 'En revisión'))">En revisión</span>
+                        <span class="mx-pill"
+                            th:classappend="${est == 'aprobada'} ? 'ok' : (${est == 'rechazada' or est == 'descartado'} ? 'no' : 'rev')"
+                            th:text="${est == 'aprobada'} ? 'Aceptada' : (${est == 'rechazada'} ? 'No avanzó' : (${est == 'descartado'} ? 'Filtrada' : 'En revisión'))">En
+                            revisión</span>
                         <a class="mx-th-l lnk" th:href="@{${solicitudUrl}}">Ver postulación</a>
-                        <span class="mx-live" id="mxLive" role="status" title="Los mensajes nuevos llegan solos"><i aria-hidden="true"></i><span>En vivo</span></span>
+                        <span class="mx-live" id="mxLive" role="status" title="Los mensajes nuevos llegan solos"><i
+                                aria-hidden="true"></i><span>En vivo</span></span>
                     </header>
 
                     <div class="mx-flow" id="mxFlow" role="log" aria-live="polite" aria-label="Mensajes" tabindex="0">
@@ -52,23 +65,35 @@
 
                         <div class="mx-empty" id="mxEmpty" th:if="${#lists.isEmpty(mensajes)}"
                             th:with="sugerencias=${esTalento ? {'Hola, gracias por considerar mi postulación. Quedo pendiente de los siguientes pasos.', 'Hola, ¿podrían contarme un poco más sobre el proceso de selección?', 'Hola, ¿cuándo podríamos agendar una conversación?'} : {'Hola, gracias por postularte. ¿Tienes disponibilidad esta semana para una llamada corta?', 'Hola, vimos tu portafolio y nos gustó mucho. ¿Podemos agendar una entrevista?', 'Hola, ¿podrías contarnos más sobre tu experiencia con el stack de la oferta?'}}">
-                            <svg viewBox="96 270 186 156" aria-hidden="true"><rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8"/><rect x="96" y="397" width="186" height="40" fill="#F3F4F8"/><rect x="96" y="410" width="186" height="9" fill="#2DD4BF"/>
-                                <th:block th:replace="~{fragments/nautico :: gull}"></th:block></svg>
+                            <svg viewBox="96 270 186 156" aria-hidden="true">
+                                <rect x="264" y="282" width="12" height="150" rx="6" fill="#F3F4F8" />
+                                <rect x="96" y="397" width="186" height="40" fill="#F3F4F8" />
+                                <rect x="96" y="410" width="186" height="9" fill="#2DD4BF" />
+                                <th:block th:replace="~{fragments/nautico :: gull}"></th:block>
+                            </svg>
                             <h3>Rompe el hielo.</h3>
                             <p>Todavía no hay mensajes. Escribe el primero, o toca una idea y ajústala a tu gusto.</p>
                             <div class="mx-sug">
-                                <button type="button" class="ch" th:each="s : ${sugerencias}" th:text="${s}" th:attr="data-sug=${s}">Hola</button>
+                                <button type="button" class="ch" th:each="s : ${sugerencias}" th:text="${s}"
+                                    th:attr="data-sug=${s}">Hola</button>
                             </div>
                         </div>
 
-                        <div th:each="m : ${mensajes}" class="mx-m" th:classappend="${m.remitenteId == currentUserId} ? 'own' : 'other'"
+                        <div th:each="m : ${mensajes}" class="mx-m"
+                            th:classappend="${m.remitenteId == currentUserId} ? 'own' : 'other'"
                             th:attr="data-id=${m.id},data-t=${m.fechaEnvio != null ? m.fechaEnvio.time : ''}">
                             <p class="mx-b" th:text="${m.texto}">Texto</p>
                             <span class="mx-mm">
-                                <time th:if="${m.fechaEnvio != null}" th:text="${#dates.format(m.fechaEnvio, 'HH:mm')}">10:30</time>
-                                <span class="mx-tick" th:if="${m.remitenteId == currentUserId}" th:classappend="${m.leido} ? 'read'"
-                                    th:attr="title=${m.leido} ? 'Leído' : 'Enviado'" role="img" th:aria-label="${m.leido} ? 'Leído' : 'Enviado'">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12.5l4.5 4.5L16 8"/><path class="d" d="M11 14.5l2.5 2.5L22 8"/></svg>
+                                <time th:if="${m.fechaEnvio != null}"
+                                    th:text="${#dates.format(m.fechaEnvio, 'HH:mm')}">10:30</time>
+                                <span class="mx-tick" th:if="${m.remitenteId == currentUserId}"
+                                    th:classappend="${m.leido} ? 'read'"
+                                    th:attr="title=${m.leido} ? 'Leído' : 'Enviado'" role="img"
+                                    th:aria-label="${m.leido} ? 'Leído' : 'Enviado'">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 12.5l4.5 4.5L16 8" />
+                                        <path class="d" d="M11 14.5l2.5 2.5L22 8" />
+                                    </svg>
                                 </span>
                             </span>
                         </div>
@@ -79,11 +104,16 @@
                     <form class="mx-compose" id="mxForm" method="post" th:action="@{/chat/{s}(s=${solicitud.id})}">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <label class="sr" for="mxTexto">Escribe un mensaje</label>
-                        <textarea id="mxTexto" name="texto" rows="1" maxlength="1000" required placeholder="Escribe un mensaje…" autocomplete="off"></textarea>
+                        <textarea id="mxTexto" name="texto" rows="1" maxlength="1000" required
+                            placeholder="Escribe un mensaje…" autocomplete="off"></textarea>
                         <button class="mx-send" id="mxSend" type="submit" aria-label="Enviar mensaje" disabled>
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M22 2L11 13" />
+                                <path d="M22 2l-7 20-4-9-9-4z" />
+                            </svg>
                         </button>
-                        <p class="mx-hint"><span>Enter envía · Shift + Enter salta de línea</span><span id="mxCuenta" hidden></span></p>
+                        <p class="mx-hint"><span>Enter envía · Shift + Enter salta de línea</span><span id="mxCuenta"
+                                hidden></span></p>
                     </form>
                 </section>
             </main>
