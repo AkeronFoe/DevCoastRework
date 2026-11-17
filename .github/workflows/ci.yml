@@ -44,3 +44,85 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw --batch-mode verify
+
+  # recorre la app como una persona (navegador real) en modo feria. Corre después de que compile y pasen los tests
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/devcoast_e2e
+      CLOUDINARY_CLOUD_NAME: ci-test
+      CLOUDINARY_API_KEY: ci-test
+      CLOUDINARY_API_SECRET: ci-test
+      DEVCOAST_PERFIL: feria
+      DEVCOAST_FERIA_TOKEN: ci-token-e2e
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Empaquetar
+        run: |
+          chmod +x mvnw
+          ./mvnw --batch-mode -DskipTests package
+
+      - name: Arrancar la app en modo feria
+        run: |
+          nohup java -jar target/devcoast-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:8080/salud >/dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          cat app.log
+          exit 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Instalar Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Pruebas de recorrido
+        working-directory: e2e
+        env:
+          BASE_URL: http://localhost:8080
+          FERIA_TOKEN: ci-token-e2e
+          CI: "true"
+        run: npm run todo
+
+      - name: Guardar informe si algo falló
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-informe
+          path: |
+            e2e/informe
+            e2e/resultados
+            app.log
+          retention-days: 7

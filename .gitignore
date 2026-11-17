@@ -23,3 +23,10 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+# Pruebas de recorrido (e2e) y material generado para la feria
+e2e/node_modules/
+e2e/resultados/
+e2e/informe/
+feria/material/
+feria/respaldos/

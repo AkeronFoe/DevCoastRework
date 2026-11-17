@@ -39,8 +39,24 @@ de verdad no se tocan. Quita `SEED_LIMPIAR_ANTIGUOS` después de esa primera vez
 Cuentas de demo (contraseña `demo1234`): `demo@devcoast.co` y `diseno@devcoast.co` (talentos),
 `empresa@devcoast.co` (plan PRO) y `startup@devcoast.co` (plan gratis). El resto de cuentas usa `devcoast123`.
 
+## Modo feria (demo para eventos)
+
+Con `DEVCOAST_PERFIL=feria` la app carga **datos curados** de `feria/datos/` (en vez de los miles de datos inventados), ofrece **«Probar como talento / empresa»**
+sin registro, cuentas demo con una historia lista para contar, recorrido guiado, reinicio de la demo en un comando y un simulador de actividad.
+Todo está explicado en [`feria/README.md`](feria/README.md); el formato de los datos en [`feria/datos/LEEME.md`](feria/datos/LEEME.md) y el guion del stand en
+[`feria/GUION-STAND.md`](feria/GUION-STAND.md). Las pruebas de recorrido con un navegador real están en [`e2e/`](e2e/README.md).
+
+```bash
+DEVCOAST_PERFIL=feria DEVCOAST_FERIA_TOKEN=un-secreto ./mvnw spring-boot:run     # carga feria/datos y arma la demo
+./feria/chequeo.sh                                                               # «TODO LISTO» o lo que falla
+./feria/reiniciar-demo.sh                                                        # demo como el primer día
+```
+
+Otras variables útiles en cualquier modo: `DEVCOAST_URL_PUBLICA` (vista previa al compartir el enlace) y `DEVCOAST_CONTACTO` (correo del pie de página).
+
 ## Estructura
 
+- `feria/` (raíz) datos curados, scripts y guion del evento; `feria/` (código, en `java/.../feria`) importador, historias demo, simulador y rutas `/demo`.
 - `config/` seguridad (sesión + `RoleGuard`), índices de Mongo, interceptor de notificaciones y `DataSeeder`.
 - `controller/` páginas y endpoints; las clases `*Vista` preparan lo que muestran las plantillas.
 - `service/` reglas de negocio (match entre perfil y oferta, planes, limpieza en cascada).

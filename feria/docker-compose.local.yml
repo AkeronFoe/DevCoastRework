@@ -1,0 +1,39 @@
+# Plan B local de la feria: una base MongoDB y la app en modo feria, sin depender de internet.
+# Las imágenes de Docker (mongo y temurin) deben estar descargadas ANTES del evento: corre `docker compose -f feria/docker-compose.local.yml pull`.
+# La subida de imágenes (Cloudinary) no funciona sin internet; los datos curados traen sus imágenes en feria/datos/imagenes.
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-feria:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    image: eclipse-temurin:17-jre
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    working_dir: /app
+    command: ["sh", "-c", "java -jar /app/app.jar"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../target/devcoast-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+      - ./datos:/app/feria/datos:ro
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/devcoast_feria
+      CLOUDINARY_CLOUD_NAME: sin-internet
+      CLOUDINARY_API_KEY: sin-internet
+      CLOUDINARY_API_SECRET: sin-internet
+      DEVCOAST_PERFIL: feria
+      DEVCOAST_FERIA_TOKEN: ${DEVCOAST_FERIA_TOKEN:-plan-b-local}
+      FERIA_SIMULADOR: ${FERIA_SIMULADOR:-false}
+
+volumes:
+  mongo-feria:

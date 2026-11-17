@@ -1,0 +1,16 @@
+{
+  "name": "devcoast-e2e",
+  "private": true,
+  "description": "Pruebas de recorrido de DevCoast con un navegador real (Playwright)",
+  "scripts": {
+    "humo": "playwright test --project=humo",
+    "flujos": "playwright test --project=flujos",
+    "todo": "playwright test",
+    "capturas": "node herramientas/capturas.mjs",
+    "qr": "node herramientas/qr.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "qrcode": "1.5.4"
+  }
+}
