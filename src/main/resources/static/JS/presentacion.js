@@ -31,7 +31,14 @@
         document.body.appendChild(f);
         f.submit();
     }
-    function cambiarRol(rol) { enviarForm('/demo/' + rol, { presentacion: '1' }); }
+    // un cambio de cuenta cierra la sesión actual: mientras llega la respuesta no se hace nada más (ni un segundo cambio, ni más clics)
+    var cambiandoRol = false;
+    function cambiarRol(rol) {
+        if (cambiandoRol) return;
+        cambiandoRol = true;
+        if (panel) $$('button', panel).forEach(function (b) { b.disabled = true; });
+        enviarForm('/demo/' + rol, { presentacion: '1' });
+    }
     function esEmpresa() { return document.body.classList.contains('empresa'); }
 
     // ------------------------------------------------------------------ pasos
@@ -210,6 +217,7 @@
     }
 
     function ejecutar() {
+        if (cambiandoRol) return;
         var s = leer();
         if (!s || !s.activo) return;
         if (!$('.demo-card')) { limpiar(); return; } // no es una sesión de demo: nada que presentar
@@ -273,7 +281,7 @@
 
     // hace la acción del paso actual (clics reales) y pasa al siguiente
     function hacer() {
-        if (ocupado) return;
+        if (ocupado || cambiandoRol) return;
         var s = leer();
         if (!s || !s.activo) return;
         var p = PASOS[s.paso];
@@ -360,6 +368,11 @@
         if (!m) return;
         e.preventDefault();
         empezar(m.getAttribute('data-presentar') === 'auto' ? 'auto' : 'manual', m.getAttribute('data-presentar') === 'auto');
+    });
+
+    // volver con «atrás» puede mostrar una copia vieja de la página (con una sesión que ya no existe): se recarga para continuar con datos frescos
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted && leer() && leer().activo) location.reload();
     });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ejecutar);

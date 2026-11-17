@@ -39,8 +39,10 @@ public class SecurityConfig {
                         .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
                         .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
                                 "camera=(), microphone=(), geolocation=(), payment=(), usb=()")))
-                // /interno/** lo llaman scripts del equipo (reinicio de la demo) y se protege con un token propio, no con la sesión
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/interno/**"))
+                // /interno/** lo llaman scripts del equipo (reinicio de la demo) y se protege con un token propio, no con la sesión.
+                // /demo/** solo existe en modo feria y solo entra a cuentas de ejemplo públicas: sin esto, una página de demo que quedó abierta
+                // (la app se reinició, la sesión venció, el botón «atrás») respondería 403 en vez de entrar
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/interno/**", "/demo/**"))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable());

@@ -137,3 +137,74 @@ test('una sesión normal (no demo) no ve ni el botón Presentar ni «Rellenar co
   await expect(page.locator('.pres-panel')).toHaveCount(0);
   expect(await page.evaluate(() => sessionStorage.getItem('dc_presentacion'))).toBeNull();
 });
+
+test.describe('robustez ante páginas vencidas y clics rápidos', () => {
+  test('entrar a la demo desde una página que quedó abierta con la sesión vencida no da 403', async ({ page, context }) => {
+    await page.goto('/demo');
+    await context.clearCookies(); // como si la app se hubiera reiniciado o la sesión hubiera vencido
+    await page.getByRole('button', { name: /Probar como talento/i }).first().click();
+    await page.waitForURL('**/dashboard');
+    await expect(page.locator('.demo-card')).toBeVisible();
+  });
+
+  test('POST /demo/{rol} no exige token (solo entra a cuentas de ejemplo públicas)', async ({ request }) => {
+    const r = await request.post('/demo/empresa', { maxRedirects: 0 });
+    expect(r.status()).toBe(302);
+    expect(r.headers()['location']).toContain('/dashboard');
+  });
+
+  test('un 403 de verdad (otra ruta sin token) muestra una página amable, no la de error por defecto', async ({ request }) => {
+    const r = await request.post('/login', { form: { correo: 'x@x.co', password: 'x' }, headers: { Accept: 'text/html' }, maxRedirects: 0 });
+    expect(r.status()).toBe(403);
+    const html = await r.text();
+    expect(html).toContain('Esta pantalla ya venció');
+    expect(html).not.toContain('Whitelabel');
+  });
+
+  test('clics rápidos y mezclados (Siguiente, Manual, Automático, Pausa) nunca rompen la presentación', async ({ page }) => {
+    test.setTimeout(120_000);
+    const malas = [];
+    page.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) malas.push(`${r.status()} ${r.request().method()} ${r.url()}`); });
+    await page.addInitScript(() => sessionStorage.setItem('dc_presentacion_ritmo', '0.3'));
+    await page.goto('/demo');
+    await page.getByRole('button', { name: /Ver la demo automática/ }).click();
+    const panel = page.locator('.pres-panel');
+    const nombres = ['Siguiente', 'Siguiente', 'Siguiente', 'Manual', 'Automático', 'Pausa', 'Seguir'];
+    const fin = Date.now() + 45_000;
+    while (Date.now() < fin) {
+      const n = nombres[Math.floor(Math.random() * nombres.length)];
+      await panel.getByRole('button', { name: n, exact: true }).click({ timeout: 250 }).catch(() => { });
+      await page.waitForTimeout(80 + Math.random() * 500);
+      expect(page.url()).not.toMatch(/\/demo\/\w+$/);
+    }
+    expect(malas, malas.join('\n')).toEqual([]);
+    await page.keyboard.press('Escape');
+  });
+
+  test('volver con «atrás» a mitad de la presentación y seguir no rompe nada', async ({ page }) => {
+    test.setTimeout(120_000);
+    const malas = [];
+    page.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) malas.push(`${r.status()} ${r.request().method()} ${r.url()}`); });
+    await page.addInitScript(() => sessionStorage.setItem('dc_presentacion_ritmo', '0.2'));
+    await entrarDemo(page, 'talento');
+    await page.goto('/dashboard');
+    await page.getByRole('button', { name: '▶ Presentar' }).click();
+    const panel = page.locator('.pres-panel');
+    for (let i = 0; i < 40 && !/\/candidatos/.test(page.url()); i++) {
+      await panel.getByRole('button', { name: 'Siguiente' }).click({ timeout: 3000 }).catch(() => { });
+      await page.waitForTimeout(400);
+    }
+    expect(page.url()).toContain('/candidatos');
+    await page.goBack();
+    await page.waitForTimeout(1200);
+    await page.goBack().catch(() => { });
+    await page.waitForTimeout(1200);
+    for (let i = 0; i < 60; i++) {
+      if (await panel.getByRole('button', { name: 'Repetir' }).isVisible().catch(() => false)) break;
+      await panel.getByRole('button', { name: 'Siguiente' }).click({ timeout: 3000 }).catch(() => { });
+      await page.waitForTimeout(400);
+    }
+    expect(malas, malas.join('\n')).toEqual([]);
+    expect(page.url()).not.toMatch(/\/demo\/\w+$/);
+  });
+});
