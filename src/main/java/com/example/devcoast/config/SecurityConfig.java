@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
                         .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
                                 "camera=(), microphone=(), geolocation=(), payment=(), usb=()")))
+                // /interno/** lo llaman scripts del equipo (reinicio de la demo) y se protege con un token propio, no con la sesión
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/interno/**"))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable());

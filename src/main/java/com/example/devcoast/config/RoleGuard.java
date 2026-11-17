@@ -11,6 +11,19 @@ public class RoleGuard {
     public static final String TIPO_EMPRESA = "empresa";
     public static final String TIPO_TALENTO = "talento";
 
+    // lo que guarda la sesión al entrar (login normal o entrada a la demo)
+    public static void iniciarSesion(HttpSession session, String id, String correo, String nombre, String tipo, String fotoUrl) {
+        session.setAttribute("usuarioActualId", id);
+        session.setAttribute("usuarioActualCorreo", correo);
+        session.setAttribute("usuarioActualNombre", nombre);
+        session.setAttribute("usuarioActualTipo", tipo);
+        if (fotoUrl != null && !fotoUrl.isBlank()) {
+            session.setAttribute("usuarioActualFotoUrl", fotoUrl);
+        } else {
+            session.removeAttribute("usuarioActualFotoUrl");
+        }
+    }
+
     public static boolean sinSesion(HttpSession session) {
         return session.getAttribute("usuarioActualId") == null;
     }

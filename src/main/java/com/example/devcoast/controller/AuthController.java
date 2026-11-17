@@ -105,14 +105,6 @@ public class AuthController {
 
     private void poblarSesion(HttpSession session, String id, String correo,
             String nombre, String tipo, String fotoUrl) {
-        session.setAttribute("usuarioActualId", id);
-        session.setAttribute("usuarioActualCorreo", correo);
-        session.setAttribute("usuarioActualNombre", nombre);
-        session.setAttribute("usuarioActualTipo", tipo);
-        if (fotoUrl != null && !fotoUrl.isBlank()) {
-            session.setAttribute("usuarioActualFotoUrl", fotoUrl);
-        } else {
-            session.removeAttribute("usuarioActualFotoUrl");
-        }
+        RoleGuard.iniciarSesion(session, id, correo, nombre, tipo, fotoUrl);
     }
 }
