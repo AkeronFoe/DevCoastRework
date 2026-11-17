@@ -47,7 +47,8 @@ jobs:
 
   # recorre la app como una persona (navegador real) en modo feria. Corre después de que compile y pasen los tests
   e2e:
-    runs-on: ubuntu-latest
+    # fijo en 24.04: ubuntu-latest ya es 26.04 y Playwright 1.56 no soporta Chromium ahí. Al subir de versión Playwright se puede volver a latest
+    runs-on: ubuntu-24.04
     needs: build
 
     services:
