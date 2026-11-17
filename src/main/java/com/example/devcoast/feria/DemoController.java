@@ -51,7 +51,8 @@ public class DemoController {
     }
 
     @PostMapping("/demo/{rol}")
-    public String entrar(@PathVariable String rol, HttpServletRequest request, HttpSession session, RedirectAttributes ra) {
+    public String entrar(@PathVariable String rol, @RequestParam(defaultValue = "0") String presentacion, HttpServletRequest request,
+            HttpSession session, RedirectAttributes ra) {
         String correo = switch (rol) {
             case "talento" -> FeriaService.DEMO_TALENTO;
             case "diseno" -> FeriaService.DEMO_DISENO;
@@ -84,7 +85,9 @@ public class DemoController {
         HttpSession nueva = request.getSession(true);
         RoleGuard.iniciarSesion(nueva, id, correo, nombre, esEmpresa ? RoleGuard.TIPO_EMPRESA : RoleGuard.TIPO_TALENTO, foto);
         nueva.setAttribute("modoDemo", true);
-        nueva.setAttribute("verRecorrido", true);
+        // el modo presentación cambia de cuenta varias veces y lleva su propia narración: no se le encima el recorrido guiado
+        if (!"1".equals(presentacion))
+            nueva.setAttribute("verRecorrido", true);
         return "redirect:/dashboard";
     }
 

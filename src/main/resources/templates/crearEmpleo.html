@@ -36,6 +36,9 @@
                             </h1>
                             <p class="sub">Los campos marcados con <span class="req">*</span> son obligatorios.</p>
                         </div>
+                        <div th:if="${feria and empleo.id == null}">
+                            <button class="btn btn-ghost" type="button" id="btn-ejemplo" title="Llena todos los pasos con una oferta de ejemplo y te deja en el resumen para publicar">✨ Rellenar con un ejemplo</button>
+                        </div>
                     </div>
 
                     <div class="stepper">
@@ -935,6 +938,7 @@
     <div th:replace="~{fragments/nautico :: toast}"></div>
 </body>
 <script th:src="@{/JS/steps.js}"></script>
+<script th:if="${feria and empleo.id == null}" th:src="@{/JS/ejemplo-oferta.js}"></script>
 <script th:if="${empleo.id != null}" th:inline="javascript">
     (function () {
         moneda = /*[[${empleo.moneda ?: 'USD'}]]*/ 'USD';

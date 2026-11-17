@@ -59,6 +59,7 @@
         <script th:src="@{/JS/i18n.js}" defer></script>
         <script th:src="@{/JS/nautico.js}" defer></script>
         <script th:src="@{/JS/recorrido.js}" defer></script>
+        <script th:src="@{/JS/presentacion.js}" defer></script>
     </th:block>
 
     <th:block th:fragment="boat(clip)">
@@ -324,6 +325,7 @@
                     <button type="button" data-tour-start>Recorrido</button>
                     <form th:action="@{/demo/reiniciar}" method="post"><button type="submit" aria-label="Reiniciar mi demo" title="Reiniciar mi demo: todo vuelve a como estaba al principio">Reiniciar</button></form>
                 </div>
+                <button type="button" class="demo-pres" data-presentar="manual" title="Cuenta la historia completa usando la app real, paso a paso">▶ Presentar</button>
             </div>
             <a class="mi out" th:href="@{/logout}">
                 <svg viewBox="0 0 24 24" aria-hidden="true">

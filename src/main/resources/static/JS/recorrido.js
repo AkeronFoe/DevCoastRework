@@ -2,7 +2,6 @@
 (function () {
     'use strict';
 
-    var CLAVE = 'dc_recorrido_v1';
     var $ = function (s, r) { return (r || document).querySelector(s); };
     var esEmpresa = document.body.classList.contains('empresa');
 
@@ -32,14 +31,9 @@
         return !(s && s.hasAttribute('inert') && s.contains(el));
     }
 
-    function marcarVisto() {
-        try { localStorage.setItem(CLAVE, '1'); } catch (e) { }
-    }
-
     function cerrar() {
         if (!activa) return;
         activa = false;
-        marcarVisto();
         if (resaltado) resaltado.classList.remove('tour-on');
         if (capa) capa.remove();
         if (tarjeta) tarjeta.remove();
@@ -171,15 +165,7 @@
         window.setTimeout(function () { b.disabled = true; b.textContent = 'Reiniciando…'; }, 0);
     });
 
-    function yaVisto() {
-        try { return localStorage.getItem(CLAVE) === '1'; } catch (e) { return false; }
-    }
-
+    // se abre solo únicamente al entrar a la demo de la feria; en la app normal solo se ve si alguien lo pide (botón en Ajustes)
     var side = $('#side');
-    var auto = side && side.getAttribute('data-tour-auto') === '1';
-    var enDashboard = /^\/dashboard\/?$/.test(location.pathname);
-    // entrada a la demo: siempre; personas con cuenta propia: una sola vez, y sin pisar el diálogo de bienvenida del perfil
-    if (side && ((auto) || (enDashboard && !yaVisto() && !$('#ob') && side.getAttribute('data-tour-auto') !== '0'))) {
-        window.setTimeout(iniciar, 700);
-    }
+    if (side && side.getAttribute('data-tour-auto') === '1') window.setTimeout(iniciar, 700);
 })();

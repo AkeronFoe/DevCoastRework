@@ -11,6 +11,10 @@ Se activa con una sola variable: **`DEVCOAST_PERFIL=feria`**. Sin ella la app se
   en la empresa gratis, un cobro de colocación.
 - **Entrada sin registro**: la landing y `/demo` ofrecen «Probar como talento» y «Probar como empresa». Dentro, el menú lateral muestra «MODO DEMO» con
   **Recorrido** (globos guiados, también en Ajustes) y **Reiniciar** (deja las cuentas demo como al principio).
+- **Modo presentación**: cuenta la historia completa usando la **app real** (clics reales, cambiando entre la cuenta del talento y la de la empresa) con un panel que narra cada paso.
+  Se inicia con **▶ Presentar** (menú lateral, avanzas tú con «Siguiente») o con **▶ Ver la demo automática** en `/demo` (avanza sola, con Pausa, y vuelve a empezar al terminar: ideal para una pantalla del stand).
+  Al empezar deja la demo como el primer día. En modo normal no existe.
+- **«✨ Rellenar con un ejemplo»** en *Publicar oferta* (solo en modo feria): llena los pasos con una oferta de muestra y te deja en el resumen para pulsar Publicar.
 - **`/salud`** (estado de la app y la base), páginas de **privacidad** y **términos**, pie de página con contacto y **vista previa al compartir el enlace**.
 
 ## Variables de entorno
@@ -61,7 +65,7 @@ Las variables que usan los scripts (`BASE_URL`, `DEVCOAST_FERIA_TOKEN`, `MONGODB
 4. Revisa en la red real los límites de intentos de login (5 por cuenta y equipo) y de registro (40 cada 15 min por equipo): en una feria muchas personas salen por la misma IP.
 5. Con `FERIA_SIMULADOR=true` el dashboard de la empresa y la campana se ven vivos; apágalo si prefieres una demo estática.
 
-**Durante:** `/salud` te dice si algo se cae; «Reiniciar» en el menú o el script si los visitantes dejan la demo desordenada.
+**Durante:** deja una pantalla con la demo automática (`/demo` → «Ver la demo automática»), o presenta tú con «▶ Presentar»; `/salud` te dice si algo se cae; «Reiniciar» en el menú o el script si los visitantes dejan la demo desordenada.
 
 **Después**
 1. `./feria/respaldo.sh` para conservar lo que pasó (registros, mensajes).

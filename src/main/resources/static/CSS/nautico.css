@@ -1502,3 +1502,169 @@ h2 {
     outline: 3px solid var(--teal);
     outline-offset: 2px;
 }
+
+/* modo presentación de la feria */
+.demo-card .demo-pres {
+    width: 100%;
+    min-height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--acc);
+    background: transparent;
+    color: var(--ink);
+    font: 700 12px var(--font-mono);
+    cursor: pointer;
+}
+
+.demo-card .demo-pres:hover {
+    background: color-mix(in srgb, var(--acc) 16%, transparent);
+}
+
+.pres-on {
+    outline: 3px solid var(--acc);
+    outline-offset: 4px;
+    border-radius: 10px;
+    animation: pres-latido 1.6s ease-in-out infinite;
+}
+
+@keyframes pres-latido {
+    50% { outline-offset: 8px; }
+}
+
+.pres-panel {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 930;
+    width: min(620px, calc(100vw - 24px));
+    padding: 14px 18px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--acc);
+    background: var(--panel2);
+    color: var(--ink);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.pres-panel.pres-arriba {
+    bottom: auto;
+    top: 78px;
+}
+
+.pres-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.pres-top small {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--mute);
+}
+
+.pres-rol {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    color: var(--sky);
+}
+
+.pres-rol.tal {
+    background: var(--orange);
+}
+
+.pres-rol.emp {
+    background: var(--teal);
+}
+
+.pres-panel b {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.pres-panel p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--mute);
+}
+
+.pres-acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+    justify-content: flex-end;
+}
+
+.pres-acts button {
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line2);
+    background: transparent;
+    color: var(--ink);
+    font: 500 13px var(--font-mono);
+    cursor: pointer;
+}
+
+.pres-acts .pres-next {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--sky);
+    font-weight: 700;
+}
+
+.pres-acts .pres-x {
+    padding: 0 12px;
+}
+
+.pres-acts button:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+}
+
+.pres-progreso {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--acc);
+    transform-origin: left;
+    animation: pres-avance linear forwards;
+}
+
+@keyframes pres-avance {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@media (max-width: 600px) {
+    .pres-panel {
+        bottom: 8px;
+        padding: 12px 14px 14px;
+    }
+
+    .pres-panel b {
+        font-size: 17px;
+    }
+
+    .pres-panel p {
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pres-on {
+        animation: none;
+    }
+}

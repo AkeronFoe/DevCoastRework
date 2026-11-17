@@ -17,3 +17,6 @@
 .demo-mas-row button:hover{border-color:var(--teal)}
 .demo-nota{font-family:var(--font-mono);font-size:13px;color:var(--mute);max-width:64ch}
 .formerr{color:#FF9B80;font-family:var(--font-mono);font-size:14px}
+.demo-auto{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;padding:16px 18px;border:1px dashed var(--teal);border-radius:14px;max-width:760px}
+.demo-auto .go{min-height:44px;padding:0 20px;border:0;border-radius:10px;background:var(--teal);color:var(--sky);font:700 15px var(--font-display);cursor:pointer}
+.demo-auto p{flex:1 1 260px;font-family:var(--font-mono);font-size:13px;color:var(--mute)}

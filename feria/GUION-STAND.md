@@ -3,6 +3,9 @@
 Funciona con los datos de ejemplo que trae `feria/datos`. Si cambias los datos, ajusta los nombres. **Antes de abrir el stand** corre
 `./feria/chequeo.sh` y `./feria/reiniciar-demo.sh`: la historia de las cuentas se arma con fechas de «hoy».
 
+**Atajo:** si prefieres que la pantalla cuente la historia sola, abre `/demo` y pulsa **▶ Ver la demo automática** (avanza sola, se puede pausar y vuelve a empezar al terminar).
+Para presentar tú a tu ritmo con los pasos narrados, pulsa **▶ Presentar** en el menú lateral y avanza con «Siguiente». La tabla de abajo es el guion para hacerlo a mano.
+
 **Preparación:** dos ventanas del navegador lado a lado (o laptop + celular), una como talento y otra como empresa.
 Abre `/demo` en ambas (o escanea el QR del stand) y pulsa **Probar como talento** / **Probar como empresa**. El recorrido guiado
 aparece solo; ciérralo con «Saltar» (se vuelve a ver desde el botón «Recorrido» del menú).
