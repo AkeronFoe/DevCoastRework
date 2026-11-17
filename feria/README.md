@@ -17,7 +17,7 @@ Se activa con una sola variable: **`DEVCOAST_PERFIL=feria`**. Sin ella la app se
 
 | Variable | Para qué |
 | --- | --- |
-| `DEVCOAST_PERFIL=feria` | Activa todo lo anterior. |
+| `DEVCOAST_PERFIL=feria` | Activa todo lo anterior. **Además usa su propia base de datos** (`devcoast_feria`, cambiable con `FERIA_BASE_DE_DATOS`) aunque `MONGODB_URI` apunte a otra, y **apaga el seeder** aunque `SEED_ENABLED=true` esté en el `.env`. |
 | `DEVCOAST_FERIA_TOKEN` | Clave para `reiniciar-demo.sh` (POST `/interno/demo/reiniciar`). Sin ella ese endpoint no existe. Usa algo largo y secreto. |
 | `DEVCOAST_FERIA_DATOS` | Carpeta de datos (por defecto `feria/datos`, relativa a donde corres la app). |
 | `DEVCOAST_URL_PUBLICA` | Dirección pública (`https://mi-dominio.example`) para la imagen al compartir el enlace. Si no, se deduce de la petición. |

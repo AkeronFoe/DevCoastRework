@@ -8,6 +8,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 // al arrancar con DEVCOAST_PERFIL=feria carga los datos curados. Si la historia de las cuentas demo no existe aún, la arma.
@@ -19,14 +20,16 @@ public class FeriaArranque implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(FeriaArranque.class);
 
     private final FeriaService feria;
+    private final MongoTemplate mongo;
     private final ApplicationContext contexto;
     private final boolean soloValidar;
     private final boolean reiniciar;
 
-    public FeriaArranque(FeriaService feria, ApplicationContext contexto,
+    public FeriaArranque(FeriaService feria, MongoTemplate mongo, ApplicationContext contexto,
             @Value("${devcoast.feria.solo-validar:false}") boolean soloValidar,
             @Value("${devcoast.feria.reiniciar:false}") boolean reiniciar) {
         this.feria = feria;
+        this.mongo = mongo;
         this.contexto = contexto;
         this.soloValidar = soloValidar;
         this.reiniciar = reiniciar;
@@ -34,6 +37,7 @@ public class FeriaArranque implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        log.info("[Feria] Modo feria activo. Base de datos: {}", mongo.getDb().getName());
         DatosFeria datos = feria.leerDatos();
         datos.avisos.forEach(a -> log.warn("[Feria] {}", a));
         datos.errores.forEach(e -> log.error("[Feria] {}", e));
