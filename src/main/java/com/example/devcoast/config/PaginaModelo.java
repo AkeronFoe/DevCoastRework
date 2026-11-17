@@ -1,13 +1,14 @@
 package com.example.devcoast.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 // datos que comparten las plantillas públicas: la dirección base (para la vista previa al compartir el enlace) y el contacto del equipo
-@ControllerAdvice
+@ControllerAdvice(annotations = Controller.class)
 public class PaginaModelo {
 
     private final String urlPublica;

@@ -54,3 +54,21 @@ test('/salud responde con la hora y los conteos', async ({ request }) => {
   expect(j.estado).toBe('ok');
   expect(j.ofertas).toBeGreaterThan(0);
 });
+
+test('/salud no crea sesiones (se consulta cada pocos segundos)', async ({ request }) => {
+  const r = await request.get('/salud');
+  expect(r.headers()['set-cookie'] || '').not.toContain('JSESSIONID');
+});
+
+test('/privacidad y /terminos son públicas y traen su contenido', async ({ page }) => {
+  await page.goto('/privacidad');
+  await expect(page.locator('main h1')).toHaveText('Privacidad');
+  await page.goto('/terminos');
+  await expect(page.locator('main h1')).toHaveText('Términos de uso');
+});
+
+test('la landing declara la vista previa para compartir (Open Graph)', async ({ request }) => {
+  const html = await (await request.get('/about-us')).text();
+  expect(html).toMatch(/property="og:title"/);
+  expect(html).toMatch(/property="og:image" content="https?:\/\/[^"]+\/img\/og-devcoast\.png"/);
+});
