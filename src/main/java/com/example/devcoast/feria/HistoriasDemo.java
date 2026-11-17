@@ -44,6 +44,7 @@ final class HistoriasDemo {
     private final List<Notificacion> notificaciones = new ArrayList<>();
     private final List<Cobro> cobros = new ArrayList<>();
     private final Set<String> pares = new HashSet<>();
+    private final java.util.Map<String, List<String>> proyectosPorUsuario = new java.util.HashMap<>();
 
     private Usuario t1;
     private Usuario t2;
@@ -87,7 +88,15 @@ final class HistoriasDemo {
         }
         if (!correos.isEmpty())
             otros = mongo.find(Query.query(Criteria.where("correo").in(correos)), Usuario.class);
-        ofertas = mongo.find(Query.query(Criteria.where("estado").is("ACTIVO")), Empleo.class);
+        // solo las ofertas de las empresas de los archivos de la feria: la base puede traer miles de ofertas de otras fuentes
+        List<String> idsEmpresas = new ArrayList<>();
+        for (Fila f : datos.empresas) {
+            Empresa em = empresa(f.get("correo").toLowerCase(Locale.ROOT));
+            if (em != null)
+                idsEmpresas.add(em.getId());
+        }
+        ofertas = idsEmpresas.isEmpty() ? new ArrayList<>()
+                : mongo.find(Query.query(Criteria.where("estado").is("ACTIVO").and("empresaId").in(idsEmpresas)), Empleo.class);
         ofertas.sort(Comparator.comparing(Empleo::getFechaPublicacion).reversed());
     }
 
@@ -278,7 +287,8 @@ final class HistoriasDemo {
         Date decision = "revision".equals(estado) ? null : new Date(Math.min(ahora.getTime() - 3600_000L, fecha.getTime() + 2 * DIA));
         if (decision != null && decision.before(fecha))
             decision = fecha;
-        Solicitud s = Documentos.solicitud(mongo, u, e, estado, fecha, decision, id(fecha));
+        List<String> proyectos = proyectosPorUsuario.computeIfAbsent(u.getId(), k -> Documentos.proyectosPublicados(mongo, u));
+        Solicitud s = Documentos.solicitud(u, e, proyectos, estado, fecha, decision, id(fecha));
         solicitudes.add(s);
         return s;
     }

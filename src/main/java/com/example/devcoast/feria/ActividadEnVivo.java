@@ -127,7 +127,7 @@ public class ActividadEnVivo {
             if (mongo.exists(Query.query(Criteria.where("usuarioId").is(u.getId()).and("empleoId").is(e.getId())), Solicitud.class))
                 continue;
             Date ahora = new Date();
-            Solicitud s = Documentos.solicitud(mongo, u, e, "revision", ahora, null, id(ahora));
+            Solicitud s = Documentos.solicitud(u, e, Documentos.proyectosPublicados(mongo, u), "revision", ahora, null, id(ahora));
             mongo.insert(s);
             mongo.insert(Documentos.notificacion(em.getId(), "NUEVA_SOLICITUD", "Nueva postulación",
                     u.getNombre() + " se postuló a " + e.getTitulo(), ahora, "/empleos/" + e.getId() + "/postulaciones/" + s.getId(), id(ahora)));
@@ -178,7 +178,14 @@ public class ActividadEnVivo {
     private void invitacionNueva() {
         List<Usuario> demos = mongo.find(Query.query(Criteria.where("correo").in(FeriaService.DEMO_TALENTO, FeriaService.DEMO_DISENO)), Usuario.class);
         Usuario t = uno(demos);
-        List<Empresa> otras = mongo.find(Query.query(Criteria.where("correo").nin(FeriaService.DEMO_CORREOS)), Empresa.class);
+        List<String> correosCurados = new ArrayList<>();
+        for (var f : feria.leerDatos().empresas) {
+            String c = f.get("correo").toLowerCase(java.util.Locale.ROOT);
+            if (!FeriaService.DEMO_CORREOS.contains(c))
+                correosCurados.add(c);
+        }
+        List<Empresa> otras = correosCurados.isEmpty() ? List.of()
+                : mongo.find(Query.query(Criteria.where("correo").in(correosCurados)), Empresa.class);
         Empresa em = uno(otras);
         if (t == null || em == null)
             return;

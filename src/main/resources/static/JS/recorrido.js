@@ -162,6 +162,15 @@
         iniciar();
     });
 
+    // «Reiniciar» puede tardar unos segundos: se avisa y se evita el doble clic
+    document.addEventListener('submit', function (e) {
+        var f = e.target;
+        if (!f || !f.closest || !f.closest('.demo-btns')) return;
+        var b = f.querySelector('button');
+        if (!b) return;
+        window.setTimeout(function () { b.disabled = true; b.textContent = 'Reiniciando…'; }, 0);
+    });
+
     function yaVisto() {
         try { return localStorage.getItem(CLAVE) === '1'; } catch (e) { return false; }
     }

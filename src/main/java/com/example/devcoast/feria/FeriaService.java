@@ -87,51 +87,92 @@ public class FeriaService {
         }
     }
 
-    // vuelve a aplicar lo curado: crea lo que falta y actualiza lo que ya existe (por correo / empresa+título / talento+nombre)
+    // vuelve a aplicar lo curado: crea lo que falta y actualiza lo que ya existe (por correo / empresa+título / talento+nombre).
+    // Lee y escribe por lotes (unas 12 consultas en total) para que no dependa de la distancia a la base de datos.
     public synchronized Resultado importar(DatosFeria datos) {
         if (!datos.valido())
             throw new IllegalStateException("Los datos de la feria tienen errores: " + String.join(" | ", datos.errores));
         Date ahora = new Date();
+
+        List<String> correosEmpresa = new ArrayList<>();
+        datos.empresas.forEach(f -> correosEmpresa.add(f.get("correo").toLowerCase(Locale.ROOT)));
+        List<String> correosTalento = new ArrayList<>();
+        datos.talentos.forEach(f -> correosTalento.add(f.get("correo").toLowerCase(Locale.ROOT)));
+        List<String> todosLosCorreos = new ArrayList<>(correosEmpresa);
+        todosLosCorreos.addAll(correosTalento);
+
+        Map<String, Empresa> empresasExistentes = new HashMap<>();
+        Map<String, Usuario> usuariosExistentes = new HashMap<>();
+        if (!todosLosCorreos.isEmpty()) {
+            Query porCorreo = Query.query(Criteria.where("correo").in(todosLosCorreos));
+            mongo.find(porCorreo, Empresa.class).forEach(e -> empresasExistentes.put(e.getCorreo(), e));
+            mongo.find(Query.query(Criteria.where("correo").in(todosLosCorreos)), Usuario.class).forEach(u -> usuariosExistentes.put(u.getCorreo(), u));
+        }
+
         Map<String, Empresa> empresas = new HashMap<>();
         int n = 0;
         for (Fila f : datos.empresas) {
-            Empresa e = importarEmpresa(f, ahora, n++);
-            empresas.put(e.getCorreo(), e);
+            String correo = f.get("correo").toLowerCase(Locale.ROOT);
+            Empresa e = importarEmpresa(f, ahora, n++, empresasExistentes.get(correo), usuariosExistentes.containsKey(correo));
+            empresas.put(correo, e);
         }
-        int nOfertas = 0;
+        guardarPorLotes(new ArrayList<>(empresas.values()), Empresa.class, Empresa::getId);
+
+        Map<String, Empleo> ofertasExistentes = new HashMap<>();
+        if (!empresas.isEmpty())
+            mongo.find(Query.query(Criteria.where("empresaId").in(empresas.values().stream().map(Empresa::getId).toList())), Empleo.class)
+                    .forEach(o -> ofertasExistentes.put(o.getEmpresaId() + "|" + o.getTitulo(), o));
+        List<Empleo> ofertas = new ArrayList<>();
         Map<String, Integer> porEmpresa = new HashMap<>();
         for (Fila f : datos.ofertas) {
             Empresa em = empresas.get(f.get("empresa_correo").toLowerCase(Locale.ROOT));
-            importarOferta(f, em, ahora, porEmpresa.merge(em.getCorreo(), 1, Integer::sum));
-            nOfertas++;
+            ofertas.add(importarOferta(f, em, ahora, porEmpresa.merge(em.getCorreo(), 1, Integer::sum), ofertasExistentes.get(em.getId() + "|" + f.get("titulo"))));
         }
+        guardarPorLotes(ofertas, Empleo.class, Empleo::getId);
+
         Map<String, Usuario> talentos = new HashMap<>();
         n = 0;
         for (Fila f : datos.talentos) {
-            Usuario u = importarTalento(f, ahora, n++);
-            talentos.put(u.getCorreo(), u);
+            String correo = f.get("correo").toLowerCase(Locale.ROOT);
+            talentos.put(correo, importarTalento(f, ahora, n++, usuariosExistentes.get(correo), empresasExistentes.containsKey(correo)));
         }
-        int nProyectos = 0;
+        guardarPorLotes(new ArrayList<>(talentos.values()), Usuario.class, Usuario::getId);
+
+        Map<String, Proyecto> proyectosExistentes = new HashMap<>();
+        if (!talentos.isEmpty())
+            mongo.find(Query.query(Criteria.where("usuarioId").in(talentos.values().stream().map(Usuario::getId).toList())), Proyecto.class)
+                    .forEach(p -> proyectosExistentes.put(p.getUsuarioId() + "|" + p.getNombre(), p));
+        List<Proyecto> proyectos = new ArrayList<>();
         Map<String, Integer> proyPorTalento = new HashMap<>();
         for (Fila f : datos.proyectos) {
             Usuario u = talentos.get(f.get("talento_correo").toLowerCase(Locale.ROOT));
             if (u == null)
                 continue;
-            importarProyecto(f, u, ahora, proyPorTalento.merge(u.getCorreo(), 1, Integer::sum));
-            nProyectos++;
+            proyectos.add(importarProyecto(f, u, ahora, proyPorTalento.merge(u.getCorreo(), 1, Integer::sum), proyectosExistentes.get(u.getId() + "|" + f.get("nombre"))));
         }
+        guardarPorLotes(proyectos, Proyecto.class, Proyecto::getId);
+
         if (mongo.findById("base", Document.class, META) == null)
             mongo.save(new Document("_id", "base").append("fecha", ahora), META);
-        Resultado r = new Resultado(empresas.size(), nOfertas, talentos.size(), nProyectos);
+        Resultado r = new Resultado(empresas.size(), ofertas.size(), talentos.size(), proyectos.size());
         log.info("[Feria] Datos curados aplicados: {}", r);
         return r;
     }
 
-    private Empresa importarEmpresa(Fila f, Date ahora, int orden) {
+    // una sola ida a la base por tipo: reemplaza (o crea) cada documento por su _id
+    private <T> void guardarPorLotes(List<T> docs, Class<T> tipo, java.util.function.Function<T, String> id) {
+        if (docs.isEmpty())
+            return;
+        org.springframework.data.mongodb.core.BulkOperations ops = mongo.bulkOps(org.springframework.data.mongodb.core.BulkOperations.BulkMode.UNORDERED, tipo);
+        for (T d : docs)
+            ops.replaceOne(Query.query(Criteria.where("_id").is(id.apply(d))), d, org.springframework.data.mongodb.core.FindAndReplaceOptions.options().upsert());
+        ops.execute();
+    }
+
+    private Empresa importarEmpresa(Fila f, Date ahora, int orden, Empresa e, boolean existeComoTalento) {
         String correo = f.get("correo").toLowerCase(Locale.ROOT);
-        if (mongo.exists(Query.query(Criteria.where("correo").is(correo)), Usuario.class))
+        if (existeComoTalento)
             throw new IllegalStateException("El correo " + correo + " ya existe como talento; no puede ser también una empresa.");
-        Empresa e = mongo.findOne(Query.query(Criteria.where("correo").is(correo)), Empresa.class);
         boolean nueva = e == null;
         if (nueva) {
             e = new Empresa();
@@ -159,12 +200,11 @@ public class FeriaService {
         boolean pro = "PRO".equalsIgnoreCase(f.get("plan"));
         e.setPlan(pro ? PlanService.PLAN_PRO : PlanService.PLAN_GRATIS);
         e.setPlanVenceEn(pro ? new Date(ahora.getTime() + 45 * DIA) : null);
-        return mongo.save(e);
+        return e;
     }
 
-    private Empleo importarOferta(Fila f, Empresa em, Date ahora, int orden) {
+    private Empleo importarOferta(Fila f, Empresa em, Date ahora, int orden, Empleo e) {
         String titulo = f.get("titulo");
-        Empleo e = mongo.findOne(Query.query(Criteria.where("empresaId").is(em.getId()).and("titulo").is(titulo)), Empleo.class);
         if (e == null) {
             e = new Empleo();
             Integer dias = f.entero("dias_publicado");
@@ -213,14 +253,13 @@ public class FeriaService {
         String fase = f.get("fase").toUpperCase(Locale.ROOT);
         e.setFaseReclutamiento(cerrado ? "CERRADO_PROCESO"
                 : Set.of("ABIERTO", "SCREENING", "ENTREVISTAS", "OFERTA").contains(fase) ? fase : "ABIERTO");
-        return mongo.save(e);
+        return e;
     }
 
-    private Usuario importarTalento(Fila f, Date ahora, int orden) {
+    private Usuario importarTalento(Fila f, Date ahora, int orden, Usuario u, boolean existeComoEmpresa) {
         String correo = f.get("correo").toLowerCase(Locale.ROOT);
-        if (mongo.exists(Query.query(Criteria.where("correo").is(correo)), Empresa.class))
+        if (existeComoEmpresa)
             throw new IllegalStateException("El correo " + correo + " ya existe como empresa; no puede ser también un talento.");
-        Usuario u = mongo.findOne(Query.query(Criteria.where("correo").is(correo)), Usuario.class);
         if (u == null) {
             u = new Usuario();
             u.setTipo("talento");
@@ -265,12 +304,11 @@ public class FeriaService {
         u.setActualizadoEn(ahora);
         if (!f.vacio("foto"))
             u.setFotoUrl(urlImagen(f.get("foto")));
-        return mongo.save(u);
+        return u;
     }
 
-    private Proyecto importarProyecto(Fila f, Usuario u, Date ahora, int orden) {
+    private Proyecto importarProyecto(Fila f, Usuario u, Date ahora, int orden, Proyecto p) {
         String nombre = f.get("nombre");
-        Proyecto p = mongo.findOne(Query.query(Criteria.where("usuarioId").is(u.getId()).and("nombre").is(nombre)), Proyecto.class);
         if (p == null) {
             p = new Proyecto();
             p.setCreadoEn(atras(ahora, 3 + orden * 6));
@@ -300,7 +338,7 @@ public class FeriaService {
         p.setActualizadoEn(ahora);
         if (!f.vacio("imagen"))
             p.setImagenUrl(urlImagen(f.get("imagen")));
-        return mongo.save(p);
+        return p;
     }
 
     // ---------------------------------------------------------------- reinicio de la demo
@@ -310,15 +348,20 @@ public class FeriaService {
     public synchronized String reiniciar(DatosFeria datos, boolean purgarRegistros) {
         long t0 = System.currentTimeMillis();
         importar(datos);
+        long tImportar = System.currentTimeMillis() - t0;
         int purgadas = 0;
         if (purgarRegistros)
             purgadas = purgarRegistros(datos);
+        long t1 = System.currentTimeMillis();
         podarExtrasDemo(datos);
+        long tPodar = System.currentTimeMillis() - t1;
+        long t2 = System.currentTimeMillis();
         String h = new HistoriasDemo(mongo, datos).reconstruir();
+        long tHistorias = System.currentTimeMillis() - t2;
         mongo.save(new Document("_id", "historias").append("fecha", new Date()), META);
         String msg = "Demo reiniciada en " + (System.currentTimeMillis() - t0) + " ms. " + h
                 + (purgarRegistros ? " Cuentas de visitantes borradas: " + purgadas + "." : "");
-        log.info("[Feria] {}", msg);
+        log.info("[Feria] {} (importar {} ms, limpiar {} ms, historias {} ms)", msg, tImportar, tPodar, tHistorias);
         return msg;
     }
 

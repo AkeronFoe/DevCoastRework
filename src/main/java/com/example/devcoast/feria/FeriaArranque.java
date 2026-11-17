@@ -52,6 +52,7 @@ public class FeriaArranque implements ApplicationRunner {
                     feria.carpeta().toAbsolutePath());
             return;
         }
+        avisarSiLaBaseTraeOtrosDatos(datos);
         try {
             if (reiniciar || !feria.hayHistoriaSembrada())
                 feria.reiniciar(datos, false);
@@ -59,6 +60,18 @@ public class FeriaArranque implements ApplicationRunner {
                 feria.importar(datos);
         } catch (RuntimeException e) {
             log.error("[Feria] No se pudo cargar la feria: {}", e.getMessage(), e);
+        }
+    }
+
+    // la feria ya usa su propia base, pero si alguien la apunta a una con datos de otras fuentes conviene saberlo: ahí todo va lento y se mezcla
+    private void avisarSiLaBaseTraeOtrosDatos(DatosFeria datos) {
+        try {
+            long ofertas = mongo.estimatedCount(com.example.devcoast.model.Empleo.class);
+            if (ofertas > datos.ofertas.size() + 200)
+                log.warn("[Feria] La base «{}» tiene {} ofertas y la feria solo trae {}. Parece mezclada con otros datos (¿el seeder masivo?): "
+                        + "todo irá más lento y el directorio mostrará datos que no son de la feria. Usa una base nueva con FERIA_BASE_DE_DATOS.",
+                        mongo.getDb().getName(), ofertas, datos.ofertas.size());
+        } catch (RuntimeException ignorada) {
         }
     }
 }

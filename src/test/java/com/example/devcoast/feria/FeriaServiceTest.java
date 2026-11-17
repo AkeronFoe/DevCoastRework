@@ -170,6 +170,27 @@ class FeriaServiceTest {
     }
 
     @Test
+    void lasOfertasAjenasALaFeriaNoEntranEnLaHistoria() {
+        feria.importar(datos);
+        Empresa ajena = new Empresa();
+        ajena.setCorreo("ajena@example.com");
+        ajena.setNombreEmpresa("Empresa ajena");
+        mongo.save(ajena);
+        Empleo coincide = new Empleo();
+        coincide.setEmpresaId(ajena.getId());
+        coincide.setEmpresaNombre("Empresa ajena");
+        coincide.setTitulo("Java Spring React perfecto");
+        coincide.setEstado("ACTIVO");
+        coincide.setStack("Java, Spring Boot, React, TypeScript, PostgreSQL, Docker, Git");
+        coincide.setFechaPublicacion(new Date());
+        mongo.save(coincide);
+
+        feria.reiniciar(datos, false);
+
+        assertEquals(0, mongo.count(Query.query(Criteria.where("empleoId").is(coincide.getId())), Solicitud.class));
+    }
+
+    @Test
     void laMejorOfertaDeLaEmpresaProQuedaSinPostularParaElGuion() {
         feria.reiniciar(datos, false);
         Usuario carlos = usuario(FeriaService.DEMO_TALENTO);

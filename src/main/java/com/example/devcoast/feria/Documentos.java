@@ -23,8 +23,17 @@ final class Documentos {
     private Documentos() {
     }
 
+    // ids de los dos primeros proyectos publicados de la persona (se calculan una vez y se reutilizan)
+    static List<String> proyectosPublicados(MongoTemplate mongo, Usuario u) {
+        List<String> ids = new ArrayList<>();
+        for (Proyecto p : mongo.find(Query.query(Criteria.where("usuarioId").is(u.getId()).and("publicado").is(true)), Proyecto.class))
+            if (ids.size() < 2)
+                ids.add(p.getId());
+        return ids;
+    }
+
     // id = el que se le va a poner al documento (con la fecha de creación dentro)
-    static Solicitud solicitud(MongoTemplate mongo, Usuario u, Empleo e, String estado, Date fecha, Date decision, String id) {
+    static Solicitud solicitud(Usuario u, Empleo e, List<String> proyectosIds, String estado, Date fecha, Date decision, String id) {
         Solicitud s = new Solicitud();
         s.setUsuarioId(u.getId());
         s.setUsuarioCorreo(u.getCorreo());
@@ -60,11 +69,7 @@ final class Documentos {
         String stack = e.getStack() == null || e.getStack().isBlank() ? "mi stack" : e.getStack().split(",")[0].trim();
         s.setMensajeMotivacion("Me interesa mucho el rol de " + e.getTitulo() + " en " + e.getEmpresaNombre()
                 + ". He trabajado con " + stack + " y creo que puedo aportar desde el primer mes.");
-        List<String> proyectos = new ArrayList<>();
-        for (Proyecto p : mongo.find(Query.query(Criteria.where("usuarioId").is(u.getId()).and("publicado").is(true)), Proyecto.class))
-            if (proyectos.size() < 2)
-                proyectos.add(p.getId());
-        s.setProyectosIds(proyectos);
+        s.setProyectosIds(new ArrayList<>(proyectosIds));
         List<EventoEstado> historial = new ArrayList<>();
         historial.add(new EventoEstado("revision", fecha, "Postulación enviada"));
         if ("aprobada".equals(estado))
