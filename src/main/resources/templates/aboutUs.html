@@ -3,6 +3,7 @@
 
 <head>
   <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+  <th:block th:replace="~{fragments/nautico :: compartir('DevCoast · Tu próximo trabajo en tech', 'DevCoast conecta talento tech (programación, diseño, datos) con empresas: ofertas con match según tu stack, portafolio y seguimiento de solicitudes.')}"></th:block>
   <title>DevCoast</title>
   <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
   <link rel="stylesheet" th:href="@{/CSS/landing.css}">
@@ -85,6 +86,11 @@
       <div id="sea" aria-hidden="true">
         <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
         <div class="seabody"></div>
+      </div>
+      <div class="demo-row fu" style="--d:1.5s" th:if="${feria}">
+        <span class="demo-k">&gt; sin registrarte</span>
+        <form th:action="@{/demo/talento}" method="post"><button class="btn btn-g btn-demo" type="submit">Probar como talento</button></form>
+        <form th:action="@{/demo/empresa}" method="post"><button class="btn btn-g btn-demo" type="submit">Probar como empresa</button></form>
       </div>
     </div>
   </section>
@@ -286,7 +292,9 @@
       <footer class="foot"><span>DevCoast · <span th:text="${#dates.year(#dates.createNow())}">2026</span> · hecho en la
           costa</span>
         <nav><a href="#ruta">ruta</a><a href="#pases" th:if="${!#lists.isEmpty(empleosLanding)}">empleos</a><a
-            href="#muelles">talento / empresas</a><a th:href="@{/login}">ingresar</a></nav>
+            href="#muelles">talento / empresas</a><a th:href="@{/login}">ingresar</a><a th:href="@{/privacidad}">privacidad</a><a
+            th:href="@{/terminos}">términos</a><a th:if="${!#strings.isEmpty(contactoCorreo)}"
+            th:href="'mailto:' + ${contactoCorreo}">contacto</a></nav>
       </footer>
     </section>
 

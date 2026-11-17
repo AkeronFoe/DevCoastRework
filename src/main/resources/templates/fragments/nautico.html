@@ -16,6 +16,34 @@
         <meta name="color-scheme" content="dark">
     </th:block>
 
+    <!-- vista previa al compartir el enlace (WhatsApp, Instagram, LinkedIn...): título, descripción e imagen -->
+    <th:block th:fragment="compartir(titulo, descripcion)">
+        <meta name="description" th:content="${descripcion}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="DevCoast">
+        <meta property="og:locale" content="es_CO">
+        <meta property="og:title" th:content="${titulo}">
+        <meta property="og:description" th:content="${descripcion}">
+        <meta property="og:image" th:content="${urlBase} + '/img/og-devcoast.png'">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="DevCoast: tu próximo trabajo, rumbo a la costa del talento tech">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" th:content="${titulo}">
+        <meta name="twitter:description" th:content="${descripcion}">
+        <meta name="twitter:image" th:content="${urlBase} + '/img/og-devcoast.png'">
+    </th:block>
+
+    <!-- pie de las páginas públicas: legales y contacto (el correo sale solo si está configurado) -->
+    <footer class="pie" th:fragment="pie">
+        <span>DevCoast · hecho en la costa</span>
+        <nav aria-label="Información">
+            <a th:href="@{/privacidad}">Privacidad</a>
+            <a th:href="@{/terminos}">Términos</a>
+            <a th:if="${!#strings.isEmpty(contactoCorreo)}" th:href="'mailto:' + ${contactoCorreo}" th:text="${contactoCorreo}">contacto</a>
+        </nav>
+    </footer>
+
     <th:block th:fragment="fonts">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +58,7 @@
         <script th:src="@{/JS/preferencias.js}"></script>
         <script th:src="@{/JS/i18n.js}" defer></script>
         <script th:src="@{/JS/nautico.js}" defer></script>
+        <script th:src="@{/JS/recorrido.js}" defer></script>
     </th:block>
 
     <th:block th:fragment="boat(clip)">
@@ -168,7 +197,7 @@
         </svg>
     </th:block>
 
-    <aside class="side" id="side" aria-label="Menú principal" th:fragment="sidebar(active)">
+    <aside class="side" id="side" aria-label="Menú principal" th:fragment="sidebar(active)" th:attr="data-tour-auto=${verRecorrido} ? '1'">
         <a class="brand" th:href="@{/dashboard}" aria-label="DevCoast, inicio">
             <th:block th:replace="~{fragments/nautico :: logo}"></th:block>DevCoast
         </a>
@@ -288,6 +317,13 @@
                     aria-valuemax="100" aria-label="Perfil completo"><i
                         th:style="'width:' + ${shellCompletitud} + '%'"></i></div>
                 <a th:href="@{/perfil}" th:if="${shellCompletitud < 100}">Completar perfil</a>
+            </div>
+            <div class="demo-card" th:if="${modoDemo}">
+                <b>MODO DEMO</b>
+                <div class="demo-btns">
+                    <button type="button" data-tour-start>Recorrido</button>
+                    <form th:action="@{/demo/reiniciar}" method="post"><button type="submit" aria-label="Reiniciar mi demo" title="Reiniciar mi demo: todo vuelve a como estaba al principio">Reiniciar</button></form>
+                </div>
             </div>
             <a class="mi out" th:href="@{/logout}">
                 <svg viewBox="0 0 24 24" aria-hidden="true">

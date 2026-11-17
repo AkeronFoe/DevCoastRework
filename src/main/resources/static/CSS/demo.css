@@ -1,0 +1,19 @@
+.demo-main{position:relative;z-index:4;flex:1;display:flex;flex-direction:column;gap:16px;padding:clamp(8px,3vh,36px) var(--gx) 40px;max-width:1040px;width:100%}
+.demo-lead{font-size:clamp(16px,2.2vw,20px);color:var(--mute);max-width:56ch}
+.demo-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px;margin-top:8px}
+.demo-card-big{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:16px;background:var(--paper);color:var(--paper-ink);margin:0}
+.demo-tag{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--orange-ink);letter-spacing:.06em}
+.demo-card-big.emp .demo-tag{color:var(--teal-ink)}
+.demo-card-big h2{font-size:clamp(20px,2.4vw,26px);line-height:1.15;letter-spacing:-.02em}
+.demo-card-big p{color:var(--paper-mute);font-size:15px;line-height:1.45;flex:1}
+.demo-card-big .go{align-self:flex-start;min-height:48px;padding:0 22px;border:0;border-radius:10px;background:var(--orange);color:var(--sky);font:700 16px var(--font-display);cursor:pointer;transition:transform .2s ease}
+.demo-card-big.emp .go{background:var(--teal)}
+.demo-card-big .go:hover{transform:translateY(-2px)}
+.demo-mas{font-family:var(--font-mono);font-size:14px;color:var(--mute)}
+.demo-mas summary{cursor:pointer;width:max-content}
+.demo-mas-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.demo-mas-row form{margin:0}
+.demo-mas-row button{min-height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--ink);font:500 14px var(--font-mono);cursor:pointer}
+.demo-mas-row button:hover{border-color:var(--teal)}
+.demo-nota{font-family:var(--font-mono);font-size:13px;color:var(--mute);max-width:64ch}
+.formerr{color:#FF9B80;font-family:var(--font-mono);font-size:14px}

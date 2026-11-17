@@ -3,9 +3,11 @@
 
 <head>
     <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <th:block th:replace="~{fragments/nautico :: compartir('Crear cuenta | DevCoast', 'DevCoast conecta talento tech (programación, diseño, datos) con empresas: ofertas con match según tu stack, portafolio y seguimiento de solicitudes.')}"></th:block>
     <title>Crear cuenta | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/acceso.css}">
+    <link rel="stylesheet" th:href="@{/CSS/pie.css}">
     <script th:src="@{/JS/i18n.js}" defer></script>
     <script th:src="@{/JS/acceso.js}" defer></script>
 </head>
@@ -290,6 +292,7 @@
         <div class="sea" aria-hidden="true">
             <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
         </div>
+        <th:block th:replace="~{fragments/nautico :: pie}"></th:block>
     </div>
 
 </body>

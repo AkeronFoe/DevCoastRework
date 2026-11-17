@@ -3,9 +3,11 @@
 
 <head>
     <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <th:block th:replace="~{fragments/nautico :: compartir('Ingresar | DevCoast', 'DevCoast conecta talento tech (programación, diseño, datos) con empresas: ofertas con match según tu stack, portafolio y seguimiento de solicitudes.')}"></th:block>
     <title>Ingresar | DevCoast</title>
     <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
     <link rel="stylesheet" th:href="@{/CSS/acceso.css}">
+    <link rel="stylesheet" th:href="@{/CSS/pie.css}">
     <script th:src="@{/JS/i18n.js}" defer></script>
     <script th:src="@{/JS/acceso.js}" defer></script>
 </head>
@@ -44,7 +46,7 @@
                                 stroke="#FF7B4F" stroke-width="5" stroke-linecap="round" />
                         </svg></span>.</h1>
                 <p class="alt fu" style="--d:1.1s">¿Primera vez a bordo? <a th:href="@{/register-options}">Crear
-                        cuenta</a></p>
+                        cuenta</a><th:block th:if="${feria}"> · <a th:href="@{/demo}">Probar la demo</a></th:block></p>
 
                 <div class="zone" id="zone">
                     <div class="pass" id="pass" th:attr="data-error=${flashType == 'error'} ? 'true'">
@@ -114,6 +116,7 @@
         <div class="sea" aria-hidden="true">
             <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
         </div>
+        <th:block th:replace="~{fragments/nautico :: pie}"></th:block>
     </div>
 
 </body>

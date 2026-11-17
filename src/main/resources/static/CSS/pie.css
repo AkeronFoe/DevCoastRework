@@ -1,0 +1,11 @@
+.pie{position:relative;z-index:4;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 22px;padding:16px var(--gx) 24px;border-top:1px solid var(--line);font-family:var(--font-mono);font-size:13px;color:var(--mute);margin-top:auto}
+.pie nav{display:flex;flex-wrap:wrap;gap:8px 22px}
+.pie a{color:var(--mute);text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+.pie a:hover,.pie a:focus-visible{color:var(--ink)}
+.legal{position:relative;z-index:4;flex:1;max-width:760px;width:100%;padding:8px var(--gx) 40px;display:flex;flex-direction:column;gap:14px}
+.legal h1{font-size:clamp(30px,5vw,48px)}
+.legal h2{font-size:20px;margin-top:14px;letter-spacing:-.01em}
+.legal p,.legal li{color:var(--mute);font-size:16px;line-height:1.6}
+.legal ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.legal a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:3px}
+.legal .borrador{font-family:var(--font-mono);font-size:13px;color:var(--teal)}

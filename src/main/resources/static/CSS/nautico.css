@@ -1359,3 +1359,146 @@ h2 {
 .search input {
     text-overflow: ellipsis;
 }
+
+/* modo demo de la feria: tarjeta del menú y recorrido guiado */
+.demo-card {
+    margin: 0 14px 10px;
+    padding: 10px 12px;
+    border: 1px dashed var(--acc);
+    border-radius: 12px;
+    background: var(--panel2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.demo-card b {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--acc);
+}
+
+.demo-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.demo-btns form,
+.demo-btns > button {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+
+.demo-btns button {
+    width: 100%;
+    min-height: 32px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line2);
+    background: transparent;
+    color: var(--ink);
+    font: 500 12px var(--font-mono);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.demo-btns button:hover {
+    border-color: var(--acc);
+}
+
+.demo-btns button:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+}
+
+@media (max-height: 700px) {
+    .demo-card {
+        display: none;
+    }
+}
+
+.tour-capa {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+}
+
+.tour-capa.dim {
+    background: rgba(5, 6, 9, .62);
+}
+
+.tour-on {
+    box-shadow: 0 0 0 3px var(--acc), 0 0 0 8px color-mix(in srgb, var(--acc) 28%, transparent);
+    border-radius: 10px;
+}
+
+.tour-card {
+    position: fixed;
+    z-index: 920;
+    width: min(320px, calc(100vw - 24px));
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line2);
+    background: var(--panel2);
+    color: var(--ink);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .5);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tour-card.centro {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tour-card small {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--acc);
+}
+
+.tour-card b {
+    font-size: 18px;
+}
+
+.tour-card p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--mute);
+}
+
+.tour-acts {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tour-acts button {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line2);
+    background: transparent;
+    color: var(--ink);
+    font: 500 13px var(--font-mono);
+    cursor: pointer;
+}
+
+.tour-acts .tour-next {
+    margin-left: auto;
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--sky);
+    font-weight: 700;
+}
+
+.tour-acts button:focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+}

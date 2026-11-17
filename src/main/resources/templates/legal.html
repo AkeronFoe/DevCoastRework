@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <th:block th:replace="~{fragments/nautico :: compartir(${titulo} + ' | DevCoast', 'Cómo DevCoast cuida tus datos y las reglas básicas para usar la plataforma.')}"></th:block>
+    <title th:text="${titulo} + ' | DevCoast'">Privacidad | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/acceso.css}">
+    <link rel="stylesheet" th:href="@{/CSS/pie.css}">
+</head>
+
+<body class="acceso">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="page" id="page">
+    <svg class="grat" aria-hidden="true"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+
+    <header class="nav">
+        <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
+            <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
+        </a>
+        <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/about-us}">volver al inicio</a><a class="btn btn-g" th:href="@{/login}">ingresar</a></nav>
+    </header>
+
+    <main class="legal" id="main">
+        <p class="borrador">&gt; borrador del equipo · versión de feria · octubre de 2026</p>
+        <h1 th:text="${titulo}">Privacidad</h1>
+
+        <th:block th:if="${seccion == 'privacidad'}">
+            <p>Esta página explica en palabras sencillas qué datos guarda DevCoast, para qué los usa y cómo puedes borrarlos.</p>
+            <h2>Qué datos guardamos</h2>
+            <ul>
+                <li>De tu cuenta: nombre, correo y contraseña. La contraseña se guarda cifrada; nadie del equipo puede leerla.</li>
+                <li>De tu perfil, lo que tú escribas: rol, biografía, stack, ubicación, enlaces, foto, currículum y proyectos.</li>
+                <li>De tu actividad: postulaciones, invitaciones, mensajes con empresas y notificaciones.</li>
+            </ul>
+            <h2>Para qué los usamos</h2>
+            <p>Solo para que la plataforma funcione: calcular qué tan bien encajas con una oferta, mostrar tu perfil a las empresas si lo dejas público, y permitir mensajes y seguimiento de solicitudes. No vendemos tus datos ni mostramos publicidad.</p>
+            <h2>Quién puede ver tu información</h2>
+            <p>Tú decides en Ajustes: si tu perfil es público, si se muestra tu correo y si las empresas pueden escribirte. Tu correo no se muestra si no lo activas.</p>
+            <h2>Dónde se guardan</h2>
+            <p>Los datos están en una base de datos MongoDB y las imágenes (fotos, logos, capturas de proyectos) en Cloudinary. DevCoast no envía correos electrónicos.</p>
+            <h2>Cookies y servicios externos</h2>
+            <p>Usamos una única cookie de sesión, necesaria para que sigas dentro de tu cuenta. No usamos cookies de analítica ni de publicidad. Las tipografías se cargan desde Google Fonts, que puede ver la dirección IP desde la que visitas la página.</p>
+            <h2>Cuentas de demostración</h2>
+            <p>En eventos puede haber cuentas de ejemplo compartidas con datos ficticios. No escribas en ellas datos personales reales: otras personas pueden verlas y la demo se reinicia con frecuencia.</p>
+            <h2>Cómo borrar tus datos</h2>
+            <p>Entra a <b>Ajustes → Zona de peligro → Eliminar cuenta</b>: se borran tu perfil, tus proyectos, tus solicitudes y tus mensajes. Si necesitas ayuda, escríbenos<th:block th:if="${!#strings.isEmpty(contactoCorreo)}"> a <a th:href="'mailto:' + ${contactoCorreo}" th:text="${contactoCorreo}">contacto</a></th:block>.</p>
+        </th:block>
+
+        <th:block th:if="${seccion == 'terminos'}">
+            <p>Al crear una cuenta o usar la demo aceptas estas reglas básicas. Son un borrador de la versión de feria y pueden cambiar.</p>
+            <h2>Qué es DevCoast</h2>
+            <p>Una plataforma que conecta talento tech con empresas: ofertas, postulaciones, invitaciones y mensajes. DevCoast no es parte de la relación laboral entre una empresa y una persona.</p>
+            <h2>Tu cuenta</h2>
+            <ul>
+                <li>Da información verdadera y cuida tu contraseña.</li>
+                <li>Solo publica contenido tuyo o que tengas permiso de mostrar (fotos, logos, proyectos).</li>
+                <li>Trata con respeto a las demás personas: nada de acoso, spam ni suplantación.</li>
+            </ul>
+            <h2>Empresas y planes</h2>
+            <p>Las empresas pueden usar el plan Gratis (con límite de ofertas activas y una tarifa fija por colocación exitosa) o el plan Pro. Las condiciones de cada plan se ven en Ajustes y Facturación.</p>
+            <h2>Versión de feria</h2>
+            <p>Durante la feria la plataforma muestra datos de ejemplo y cuentas de demostración que se reinician. Puede haber interrupciones, y no garantizamos que lo que se haga en la demo se conserve.</p>
+            <h2>Responsabilidad</h2>
+            <p>Hacemos nuestro mejor esfuerzo para que todo funcione, pero la plataforma se ofrece «tal cual». Podemos suspender cuentas que incumplan estas reglas.</p>
+            <h2>Contacto</h2>
+            <p>Escríbenos<th:block th:if="${!#strings.isEmpty(contactoCorreo)}"> a <a th:href="'mailto:' + ${contactoCorreo}" th:text="${contactoCorreo}">contacto</a></th:block> si tienes dudas.</p>
+        </th:block>
+    </main>
+
+    <th:block th:replace="~{fragments/nautico :: pie}"></th:block>
+</div>
+</body>
+
+</html>

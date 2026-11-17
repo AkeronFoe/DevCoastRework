@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/nautico :: meta}"></th:block>
+    <th:block th:replace="~{fragments/nautico :: compartir('Prueba DevCoast sin registrarte', 'DevCoast conecta talento tech (programación, diseño, datos) con empresas: ofertas con match según tu stack, portafolio y seguimiento de solicitudes.')}"></th:block>
+    <title>Probar la demo | DevCoast</title>
+    <th:block th:replace="~{fragments/nautico :: fonts}"></th:block>
+    <link rel="stylesheet" th:href="@{/CSS/acceso.css}">
+    <link rel="stylesheet" th:href="@{/CSS/pie.css}">
+    <link rel="stylesheet" th:href="@{/CSS/demo.css}">
+</head>
+
+<body class="acceso">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="page" id="page">
+    <svg class="grat" aria-hidden="true"><defs><pattern id="graticula" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#1A1C22" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#graticula)"/></svg>
+
+    <header class="nav">
+        <a class="nav-l" th:href="@{/about-us}" aria-label="DevCoast, volver al inicio">
+            <svg th:replace="~{fragments/nautico :: logo}"></svg>DevCoast
+        </a>
+        <nav class="nav-r" aria-label="Acceso"><a class="nl hide-s" th:href="@{/login}">ya tengo cuenta</a><a class="btn btn-g" th:href="@{/register-options}">crear cuenta</a></nav>
+    </header>
+
+    <main class="demo-main" id="main">
+        <div class="kicker">&gt; demo del stand</div>
+        <h1>Entra sin registrarte.</h1>
+        <p class="demo-lead">Elige un rol y recorre DevCoast con datos de ejemplo. En menos de diez segundos estás dentro.</p>
+
+        <p class="formerr" role="alert" th:if="${flashMessage != null and flashType == 'error'}" th:text="${flashMessage}"></p>
+
+        <div class="demo-cards">
+            <form class="demo-card-big" th:action="@{/demo/talento}" method="post">
+                <span class="demo-tag">TALENTO</span>
+                <h2>Carlos, desarrollador full stack</h2>
+                <p>Busca empleos con match alto, se postula, responde invitaciones y chatea con una empresa.</p>
+                <button class="go" type="submit">Probar como talento</button>
+            </form>
+            <form class="demo-card-big emp" th:action="@{/demo/empresa}" method="post">
+                <span class="demo-tag">EMPRESA</span>
+                <h2>DevCoast Labs, plan PRO</h2>
+                <p>Publica ofertas, revisa postulaciones, acepta candidatos, invita talento y conversa con ellos.</p>
+                <button class="go" type="submit">Probar como empresa</button>
+            </form>
+        </div>
+
+        <details class="demo-mas">
+            <summary>Más cuentas de ejemplo</summary>
+            <div class="demo-mas-row">
+                <form th:action="@{/demo/diseno}" method="post"><button type="submit">Laura · diseñadora de producto</button></form>
+                <form th:action="@{/demo/startup}" method="post"><button type="submit">Marea Studio · plan gratis</button></form>
+            </div>
+        </details>
+
+        <p class="demo-nota">Es una demo compartida con datos de ejemplo: cualquier cambio puede reiniciarse. Dentro verás el botón «Reiniciar mi demo».</p>
+    </main>
+    <th:block th:replace="~{fragments/nautico :: pie}"></th:block>
+</div>
+</body>
+
+</html>
