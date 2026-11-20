@@ -7,9 +7,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     # levantamos un Mongo de mentiritas nada mas para que la app pueda arrancar en los tests
     services:
@@ -49,6 +57,7 @@ jobs:
   e2e:
     # fijo en 24.04: ubuntu-latest ya es 26.04 y Playwright 1.56 no soporta Chromium ahí. Al subir de versión Playwright se puede volver a latest
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: build
 
     services:
