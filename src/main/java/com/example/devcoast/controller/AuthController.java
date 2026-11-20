@@ -13,6 +13,7 @@ import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.Credenciales;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -53,6 +54,12 @@ public class AuthController {
         if (limiteIntentos.bloqueado(equipo, correoNorm)) {
             ra.addFlashAttribute("flashMessage",
                     "Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/login";
+        }
+        if (!Credenciales.cabeEnBcrypt(password) || correoNorm.length() > 254) {
+            limiteIntentos.fallo(equipo, correoNorm.length() > 254 ? correoNorm.substring(0, 254) : correoNorm);
+            ra.addFlashAttribute("flashMessage", "Correo o contraseña incorrectos");
             ra.addFlashAttribute("flashType", "error");
             return "redirect:/login";
         }
@@ -97,9 +104,14 @@ public class AuthController {
         return "redirect:/login";
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
+        return "redirect:/login";
+    }
+
+    @GetMapping("/logout")
+    public String logoutViejo() {
         return "redirect:/login";
     }
 

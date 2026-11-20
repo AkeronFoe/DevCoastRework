@@ -159,7 +159,12 @@ if (form) {
 function crearTagChip(texto, array, fieldId) {
     const chip = document.createElement('span');
     chip.className = 'tag-chip';
-    chip.innerHTML = `${texto} <button class="tag-remove" type="button">×</button>`;
+    chip.appendChild(document.createTextNode(texto + ' '));
+    const quitar = document.createElement('button');
+    quitar.className = 'tag-remove';
+    quitar.type = 'button';
+    quitar.textContent = '×';
+    chip.appendChild(quitar);
     chip.querySelector('.tag-remove').addEventListener('click', () => {
         const idx = array.indexOf(texto);
         if (idx > -1) array.splice(idx, 1);

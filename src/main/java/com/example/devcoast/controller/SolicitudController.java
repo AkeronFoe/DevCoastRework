@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Cobro;
 import com.example.devcoast.model.Empleo;
@@ -54,12 +55,14 @@ public class SolicitudController {
     private final EmpresaRepository empresaRepository;
     private final CobroRepository cobroRepository;
     private final PlanService planService;
+    private final LimiteTasa limiteTasa;
 
     public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository,
             UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository,
             InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
             CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository,
-            PlanService planService) {
+            PlanService planService, LimiteTasa limiteTasa) {
+        this.limiteTasa = limiteTasa;
         this.solicitudRepository = solicitudRepository;
         this.empleoRepository = empleoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -213,6 +216,11 @@ public class SolicitudController {
                 ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
                 ra.addFlashAttribute("flashType", "error");
                 return "redirect:/empleos";
+            case DEMASIADAS:
+                ra.addFlashAttribute("flashMessage",
+                        "Estás postulando muy rápido. Espera unos minutos antes de enviar más postulaciones.");
+                ra.addFlashAttribute("flashType", "warning");
+                return "redirect:/empleos/" + id;
             case NO_ACTIVO:
                 ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
                 ra.addFlashAttribute("flashType", "error");
@@ -251,6 +259,9 @@ public class SolicitudController {
             case NO_DISPONIBLE:
                 return ResponseEntity.status(404)
                         .body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
+            case DEMASIADAS:
+                return ResponseEntity.status(429).body(Map.of("ok", false, "mensaje",
+                        "Estás postulando muy rápido. Espera unos minutos antes de enviar más postulaciones."));
             case NO_ACTIVO:
                 return ResponseEntity.status(409)
                         .body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
@@ -268,8 +279,12 @@ public class SolicitudController {
         }
     }
 
+    private static final int MAX_POSTULACIONES = 25;
+    private static final long VENTANA_POSTULACIONES_MS = 10 * 60 * 1000L;
+    private static final int MAX_MOTIVACION = 2000;
+
     private enum Salida {
-        NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA
+        NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, DEMASIADAS, CREADA
     }
 
     private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {
@@ -277,6 +292,8 @@ public class SolicitudController {
 
     private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
             List<String> proyectosIds, String mensajeMotivacion) {
+        if (limiteTasa.excedido("postular|" + usuarioId, MAX_POSTULACIONES, VENTANA_POSTULACIONES_MS))
+            return new ResultadoAplicacion(Salida.DEMASIADAS, null, false);
         Optional<Empleo> empleoOpt = empleoRepository.findById(id);
         if (empleoOpt.isEmpty())
             return new ResultadoAplicacion(Salida.NO_DISPONIBLE, null, false);
@@ -338,7 +355,9 @@ public class SolicitudController {
             solicitud.setProyectosIds(proyectosPropios);
         }
         if (mensajeMotivacion != null && !mensajeMotivacion.isBlank())
-            solicitud.setMensajeMotivacion(mensajeMotivacion.trim());
+            solicitud.setMensajeMotivacion(mensajeMotivacion.trim().length() > MAX_MOTIVACION
+                    ? mensajeMotivacion.trim().substring(0, MAX_MOTIVACION)
+                    : mensajeMotivacion.trim());
 
         Solicitud guardada;
         try {

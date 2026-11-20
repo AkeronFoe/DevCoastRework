@@ -98,4 +98,12 @@ public class Empleo {
         }
         return salary.toString();
     }
+
+    public void setEmpresaWeb(String empresaWeb) {
+        this.empresaWeb = com.example.devcoast.service.UrlSegura.normalizar(empresaWeb);
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = com.example.devcoast.service.UrlSegura.normalizar(logoUrl);
+    }
 }

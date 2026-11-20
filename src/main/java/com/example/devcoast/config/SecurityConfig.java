@@ -38,7 +38,10 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(CSP))
                         .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
                         .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
-                                "camera=(), microphone=(), geolocation=(), payment=(), usb=()")))
+                                "camera=(), microphone=(), geolocation=(), payment=(), usb=()"))
+                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
+                        .addHeaderWriter(new StaticHeadersWriter("Cross-Origin-Opener-Policy", "same-origin"))
+                        .addHeaderWriter(new StaticHeadersWriter("Cross-Origin-Resource-Policy", "same-origin")))
                 // /interno/** lo llaman scripts del equipo (reinicio de la demo) y se protege con un token propio, no con la sesión.
                 // /demo/** solo existe en modo feria y solo entra a cuentas de ejemplo públicas: sin esto, una página de demo que quedó abierta
                 // (la app se reinició, la sesión venció, el botón «atrás») respondería 403 en vez de entrar

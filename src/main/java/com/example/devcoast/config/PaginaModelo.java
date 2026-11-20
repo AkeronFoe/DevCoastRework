@@ -5,11 +5,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import com.example.devcoast.service.UrlSegura;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 // datos que comparten las plantillas públicas: la dirección base (para la vista previa al compartir el enlace) y el contacto del equipo
 @ControllerAdvice(annotations = Controller.class)
 public class PaginaModelo {
+
+    private static final UrlsVista URLS = new UrlsVista();
 
     private final String urlPublica;
     private final String contacto;
@@ -33,5 +37,17 @@ public class PaginaModelo {
     @ModelAttribute("contactoCorreo")
     public String contactoCorreo() {
         return contacto;
+    }
+
+    @ModelAttribute("urls")
+    public UrlsVista urls() {
+        return URLS;
+    }
+
+    public static final class UrlsVista {
+
+        public String segura(String url) {
+            return UrlSegura.paraMostrar(url);
+        }
     }
 }

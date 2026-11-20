@@ -967,7 +967,12 @@
             var btn = document.getElementById('btn-quitar-img');
             if (preview) {
                 preview.style.background = 'transparent';
-                preview.innerHTML = '<img src="' + logoUrl + '" style="width:48px;height:48px;object-fit:cover;border-radius:10px;">';
+                var img = document.createElement('img');
+                img.src = logoUrl;
+                img.alt = '';
+                img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:10px;';
+                preview.textContent = '';
+                preview.appendChild(img);
             }
             if (label) label.textContent = 'Logo actual (haz clic para reemplazar)';
             if (btn) btn.style.display = 'block';

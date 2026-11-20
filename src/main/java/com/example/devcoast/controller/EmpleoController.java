@@ -70,6 +70,8 @@ public class EmpleoController {
     }
 
     private static final int OTRAS_POR_PAGINA = 10;
+    private static final int MAX_BUSQUEDA = 80;
+    private static final int MAX_TERMINOS = 6;
     private static final int CANDIDATOS_LIMITE = 600;
 
     @GetMapping("/empleos")
@@ -92,14 +94,19 @@ public class EmpleoController {
         String modSel = modalidadClave(modalidad);
         boolean soloAlto = "1".equals(hi);
         String qSel = q == null ? "" : q.trim();
+        if (qSel.length() > MAX_BUSQUEDA)
+            qSel = qSel.substring(0, MAX_BUSQUEDA).trim();
 
         Criteria activas = new Criteria().orOperator(
                 Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false));
         List<Criteria> criterios = new ArrayList<>();
         criterios.add(activas);
+        int terminos = 0;
         for (String token : qSel.split("\\s+")) {
             if (token.length() < 2)
                 continue;
+            if (++terminos > MAX_TERMINOS)
+                break;
             String rx = ".*" + Pattern.quote(token) + ".*";
             criterios.add(new Criteria().orOperator(
                     Criteria.where("titulo").regex(rx, "i"),
@@ -501,7 +508,7 @@ public class EmpleoController {
             ra.addFlashAttribute("flashType", "error");
             String idParaEditar = empleoForm.getId();
             return "redirect:/crearEmpleo"
-                    + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
+                    + (idParaEditar != null && idParaEditar.matches("[0-9a-fA-F]{24}") ? "?editar=" + idParaEditar : "");
         }
 
         String empresaId = RoleGuard.getId(session);
@@ -559,23 +566,7 @@ public class EmpleoController {
     }
 
     private String validarEmpleo(Empleo f) {
-        if (esVacio(f.getTitulo()) || esVacio(f.getCategoria()) || esVacio(f.getSeniority())
-                || esVacio(f.getModalidad()) || esVacio(f.getContrato()) || esVacio(f.getEmpresaNombre())
-                || esVacio(f.getEmpresaSector()) || esVacio(f.getEmpresaTamano()) || esVacio(f.getEmpresaDescripcion())
-                || esVacio(f.getStack())) {
-            return "Completa todos los campos obligatorios del empleo";
-        }
-        if (f.getVacantes() == null || f.getVacantes() < 1) {
-            return "Las vacantes disponibles deben ser al menos 1";
-        }
-        if (f.getSalarioMin() != null && f.getSalarioMax() != null && f.getSalarioMin() > f.getSalarioMax()) {
-            return "El salario mínimo no puede ser mayor que el máximo";
-        }
-        return null;
-    }
-
-    private boolean esVacio(String s) {
-        return s == null || s.isBlank();
+        return com.example.devcoast.service.ValidacionEmpleo.validar(f);
     }
 
     private void aplicarCamposFormulario(Empleo target, Empleo form) {
@@ -676,12 +667,34 @@ public class EmpleoController {
         if (RoleGuard.soloEmpresa(session))
             return "redirect:/login";
         empleoRepository.findById(id).ifPresent(e -> {
-            if (Objects.equals(e.getEmpresaId(), RoleGuard.getId(session))) {
-                e.setEstado("ACTIVO");
-                empleoRepository.save(e);
-                ra.addFlashAttribute("flashMessage", "Empleo reabierto correctamente");
-                ra.addFlashAttribute("flashType", "success");
+            String empresaId = RoleGuard.getId(session);
+            if (!Objects.equals(e.getEmpresaId(), empresaId))
+                return;
+            if (e.getEstado() == null || "ACTIVO".equals(e.getEstado())) {
+                ra.addFlashAttribute("flashMessage", "Ese empleo ya está activo");
+                ra.addFlashAttribute("flashType", "info");
+                return;
             }
+            Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+            long activas = empleoRepository.countByEmpresaIdAndEstado(empresaId, "ACTIVO");
+            if (activas >= planService.limiteVacantesActivas(empresa)) {
+                ra.addFlashAttribute("flashMessage",
+                        "Alcanzaste el límite de vacantes activas de tu plan. Cierra otra vacante o actualiza a Pro para reabrir esta.");
+                ra.addFlashAttribute("flashType", "error");
+                return;
+            }
+            boolean sinDestacar = false;
+            if (e.isDestacar() && empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(empresaId,
+                    "ACTIVO") >= planService.limiteDestacados(empresa)) {
+                e.setDestacar(false);
+                sinDestacar = true;
+            }
+            e.setEstado("ACTIVO");
+            empleoRepository.save(e);
+            ra.addFlashAttribute("flashMessage", sinDestacar
+                    ? "Empleo reabierto sin destacar: ya no tienes cupo de vacantes destacadas en tu plan"
+                    : "Empleo reabierto correctamente");
+            ra.addFlashAttribute("flashType", sinDestacar ? "info" : "success");
         });
         return "redirect:/misEmpleos";
     }

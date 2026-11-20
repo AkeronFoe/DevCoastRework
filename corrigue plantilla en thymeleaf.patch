@@ -1,0 +1,379 @@
+From 4e19f315c206b4f8f4f27ee58f8ef7cf33fa61d1 Mon Sep 17 00:00:00 2001
+From: DevCoast <dev@devcoast.co>
+Date: Fri, 20 Nov 2026 16:12:00 +0000
+Subject: [PATCH] Corrige plantillas (sin T() en Thymeleaf) y pruebas que
+ necesitaban LimiteTasa
+
+---
+ .../example/devcoast/config/PaginaModelo.java    | 16 ++++++++++++++++
+ src/main/resources/templates/curriculum.html     |  8 ++++----
+ .../resources/templates/detalles-empleo.html     |  2 +-
+ src/main/resources/templates/empresa-perfil.html |  2 +-
+ src/main/resources/templates/fragments/pase.html |  6 +++---
+ src/main/resources/templates/talento-perfil.html |  6 +++---
+ .../controller/AjustesPageRenderTest.java        |  4 ++++
+ .../devcoast/controller/AnalyticsRenderTest.java |  4 ++++
+ .../controller/CurriculumPageRenderTest.java     |  4 ++++
+ .../devcoast/controller/PerfilGuardarTest.java   |  4 ++++
+ .../controller/PerfilPageRenderTest.java         |  4 ++++
+ .../PostulacionesOfertaRenderTest.java           |  4 ++++
+ .../controller/PostularEndpointTest.java         |  4 ++++
+ .../controller/SolicitudesPageRenderTest.java    |  4 ++++
+ .../controller/SolicitudesPaseRenderTest.java    |  4 ++++
+ .../devcoast/controller/TalentoVistaTest.java    |  2 +-
+ 16 files changed, 65 insertions(+), 13 deletions(-)
+
+diff --git a/src/main/java/com/example/devcoast/config/PaginaModelo.java b/src/main/java/com/example/devcoast/config/PaginaModelo.java
+index e091d89..c3b1e1e 100644
+--- a/src/main/java/com/example/devcoast/config/PaginaModelo.java
++++ b/src/main/java/com/example/devcoast/config/PaginaModelo.java
+@@ -5,12 +5,16 @@ import org.springframework.stereotype.Controller;
+ import org.springframework.web.bind.annotation.ControllerAdvice;
+ import org.springframework.web.bind.annotation.ModelAttribute;
+ 
++import com.example.devcoast.service.UrlSegura;
++
+ import jakarta.servlet.http.HttpServletRequest;
+ 
+ // datos que comparten las plantillas públicas: la dirección base (para la vista previa al compartir el enlace) y el contacto del equipo
+ @ControllerAdvice(annotations = Controller.class)
+ public class PaginaModelo {
+ 
++    private static final UrlsVista URLS = new UrlsVista();
++
+     private final String urlPublica;
+     private final String contacto;
+ 
+@@ -34,4 +38,16 @@ public class PaginaModelo {
+     public String contactoCorreo() {
+         return contacto;
+     }
++
++    @ModelAttribute("urls")
++    public UrlsVista urls() {
++        return URLS;
++    }
++
++    public static final class UrlsVista {
++
++        public String segura(String url) {
++            return UrlSegura.paraMostrar(url);
++        }
++    }
+ }
+diff --git a/src/main/resources/templates/curriculum.html b/src/main/resources/templates/curriculum.html
+index 6da189d..f6cc6c1 100644
+--- a/src/main/resources/templates/curriculum.html
++++ b/src/main/resources/templates/curriculum.html
+@@ -133,7 +133,7 @@
+                                         th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
+                                 </div>
+                                 <div class="cv-pj-l">
+-                                    <a th:if="${proy.linkProyecto}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(proy.linkProyecto)}" target="_blank"
++                                    <a th:if="${proy.linkProyecto}" th:href="${urls.segura(proy.linkProyecto)}" target="_blank"
+                                         rel="noopener">Ver proyecto ↗</a>
+                                     <a th:href="@{/misProyectos/{id}(id=${proy.id})}" target="_blank" rel="noopener">Ver
+                                         en DevCoast ↗</a>
+@@ -243,19 +243,19 @@
+                         <div
+                             th:if="${usuario != null and usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}">
+                             <dt>PORTAFOLIO</dt>
+-                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.portfolioUrl)}" target="_blank" rel="noopener"
++                            <dd><a th:href="${urls.segura(usuario.portfolioUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.portfolioUrl}">sitio</a></dd>
+                         </div>
+                         <div
+                             th:if="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">
+                             <dt>LINKEDIN</dt>
+-                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.linkedinUrl)}" target="_blank" rel="noopener"
++                            <dd><a th:href="${urls.segura(usuario.linkedinUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.linkedinUrl}">linkedin</a></dd>
+                         </div>
+                         <div
+                             th:if="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">
+                             <dt>GITHUB</dt>
+-                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.githubUrl)}" target="_blank" rel="noopener"
++                            <dd><a th:href="${urls.segura(usuario.githubUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.githubUrl}">github</a></dd>
+                         </div>
+                     </dl>
+diff --git a/src/main/resources/templates/detalles-empleo.html b/src/main/resources/templates/detalles-empleo.html
+index 463a7ec..0cb7808 100644
+--- a/src/main/resources/templates/detalles-empleo.html
++++ b/src/main/resources/templates/detalles-empleo.html
+@@ -262,7 +262,7 @@
+                                 </div>
+                                 <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}">
+                                     <dt>SITIO WEB</dt>
+-                                    <dd><a class="lnk" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(empleo.empresaWeb)}" target="_blank" rel="noopener"
++                                    <dd><a class="lnk" th:href="${urls.segura(empleo.empresaWeb)}" target="_blank" rel="noopener"
+                                             th:text="${empleo.empresaWeb}">Link</a></dd>
+                                 </div>
+                             </dl>
+diff --git a/src/main/resources/templates/empresa-perfil.html b/src/main/resources/templates/empresa-perfil.html
+index 74b5bf7..b5bf684 100644
+--- a/src/main/resources/templates/empresa-perfil.html
++++ b/src/main/resources/templates/empresa-perfil.html
+@@ -54,7 +54,7 @@
+                             th:if="${descripcionEmpresa != null and !#strings.isEmpty(descripcionEmpresa)}"
+                             th:text="${descripcionEmpresa}">Descripción</p>
+                         <a class="lnk" th:if="${webEmpresa != null and !#strings.isEmpty(webEmpresa)}"
+-                            th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(webEmpresa)}" target="_blank" rel="noopener noreferrer"
++                            th:href="${urls.segura(webEmpresa)}" target="_blank" rel="noopener noreferrer"
+                             th:text="${webEmpresa} + ' ↗'">sitio.com</a>
+                     </div>
+                 </section>
+diff --git a/src/main/resources/templates/fragments/pase.html b/src/main/resources/templates/fragments/pase.html
+index 6ff437c..707bc3b 100644
+--- a/src/main/resources/templates/fragments/pase.html
++++ b/src/main/resources/templates/fragments/pase.html
+@@ -502,12 +502,12 @@
+         </div>
+         <div class="tc-f">
+             <div class="tc-l">
+-                <a th:if="${v.portfolioUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.portfolioUrl)}" target="_blank"
++                <a th:if="${v.portfolioUrl != null}" th:href="${urls.segura(v.portfolioUrl)}" target="_blank"
+                     rel="noopener noreferrer"
+                     th:aria-label="|Portafolio de ${v.nombre} (se abre en otra pestaña)|">Portafolio</a>
+-                <a th:if="${v.linkedinUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.linkedinUrl)}" target="_blank" rel="noopener noreferrer"
++                <a th:if="${v.linkedinUrl != null}" th:href="${urls.segura(v.linkedinUrl)}" target="_blank" rel="noopener noreferrer"
+                     th:aria-label="|LinkedIn de ${v.nombre} (se abre en otra pestaña)|">LinkedIn</a>
+-                <a th:if="${v.githubUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.githubUrl)}" target="_blank" rel="noopener noreferrer"
++                <a th:if="${v.githubUrl != null}" th:href="${urls.segura(v.githubUrl)}" target="_blank" rel="noopener noreferrer"
+                     th:aria-label="|GitHub de ${v.nombre} (se abre en otra pestaña)|">GitHub</a>
+             </div>
+             <div class="tc-a">
+diff --git a/src/main/resources/templates/talento-perfil.html b/src/main/resources/templates/talento-perfil.html
+index 9e2325a..6531bd1 100644
+--- a/src/main/resources/templates/talento-perfil.html
++++ b/src/main/resources/templates/talento-perfil.html
+@@ -90,12 +90,12 @@
+ 
+                         <div class="tc-l tp-links"
+                             th:if="${tv.portfolioUrl != null or tv.linkedinUrl != null or tv.githubUrl != null}">
+-                            <a th:if="${tv.portfolioUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.portfolioUrl)}" target="_blank"
++                            <a th:if="${tv.portfolioUrl != null}" th:href="${urls.segura(tv.portfolioUrl)}" target="_blank"
+                                 rel="noopener noreferrer"
+                                 aria-label="Portafolio (se abre en otra pestaña)">Portafolio</a>
+-                            <a th:if="${tv.linkedinUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.linkedinUrl)}" target="_blank"
++                            <a th:if="${tv.linkedinUrl != null}" th:href="${urls.segura(tv.linkedinUrl)}" target="_blank"
+                                 rel="noopener noreferrer" aria-label="LinkedIn (se abre en otra pestaña)">LinkedIn</a>
+-                            <a th:if="${tv.githubUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.githubUrl)}" target="_blank"
++                            <a th:if="${tv.githubUrl != null}" th:href="${urls.segura(tv.githubUrl)}" target="_blank"
+                                 rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
+                         </div>
+ 
+diff --git a/src/test/java/com/example/devcoast/controller/AjustesPageRenderTest.java b/src/test/java/com/example/devcoast/controller/AjustesPageRenderTest.java
+index 752c1a7..2db4046 100644
+--- a/src/test/java/com/example/devcoast/controller/AjustesPageRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/AjustesPageRenderTest.java
+@@ -24,6 +24,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Cobro;
+ import com.example.devcoast.model.Empresa;
+@@ -47,6 +48,9 @@ class AjustesPageRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private UsuarioRepository usuarioRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/AnalyticsRenderTest.java b/src/test/java/com/example/devcoast/controller/AnalyticsRenderTest.java
+index 32675ec..4b735ec 100644
+--- a/src/test/java/com/example/devcoast/controller/AnalyticsRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/AnalyticsRenderTest.java
+@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.repository.CobroRepository;
+ import com.example.devcoast.repository.EmpleoRepository;
+@@ -38,6 +39,9 @@ class AnalyticsRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private UsuarioRepository usuarioRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/CurriculumPageRenderTest.java b/src/test/java/com/example/devcoast/controller/CurriculumPageRenderTest.java
+index 3605725..cd6f85d 100644
+--- a/src/test/java/com/example/devcoast/controller/CurriculumPageRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/CurriculumPageRenderTest.java
+@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Empleo;
+ import com.example.devcoast.model.Proyecto;
+@@ -44,6 +45,9 @@ class CurriculumPageRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private UsuarioRepository usuarioRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/PerfilGuardarTest.java b/src/test/java/com/example/devcoast/controller/PerfilGuardarTest.java
+index 1f7c7a7..a7272de 100644
+--- a/src/test/java/com/example/devcoast/controller/PerfilGuardarTest.java
++++ b/src/test/java/com/example/devcoast/controller/PerfilGuardarTest.java
+@@ -21,6 +21,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Usuario;
+@@ -39,6 +40,9 @@ class PerfilGuardarTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private UsuarioRepository usuarioRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/PerfilPageRenderTest.java b/src/test/java/com/example/devcoast/controller/PerfilPageRenderTest.java
+index e9cf381..d4110e4 100644
+--- a/src/test/java/com/example/devcoast/controller/PerfilPageRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/PerfilPageRenderTest.java
+@@ -25,6 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.MvcResult;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Proyecto;
+@@ -46,6 +47,9 @@ class PerfilPageRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private UsuarioRepository usuarioRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/PostulacionesOfertaRenderTest.java b/src/test/java/com/example/devcoast/controller/PostulacionesOfertaRenderTest.java
+index 792d227..de14cfd 100644
+--- a/src/test/java/com/example/devcoast/controller/PostulacionesOfertaRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/PostulacionesOfertaRenderTest.java
+@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Empleo;
+ import com.example.devcoast.model.EventoEstado;
+@@ -50,6 +51,9 @@ class PostulacionesOfertaRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private SolicitudRepository solicitudRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/PostularEndpointTest.java b/src/test/java/com/example/devcoast/controller/PostularEndpointTest.java
+index 44a35e1..0df2787 100644
+--- a/src/test/java/com/example/devcoast/controller/PostularEndpointTest.java
++++ b/src/test/java/com/example/devcoast/controller/PostularEndpointTest.java
+@@ -24,6 +24,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Empleo;
+ import com.example.devcoast.model.Solicitud;
+@@ -47,6 +48,9 @@ class PostularEndpointTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private SolicitudRepository solicitudRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/SolicitudesPageRenderTest.java b/src/test/java/com/example/devcoast/controller/SolicitudesPageRenderTest.java
+index 3b95f2f..2c82379 100644
+--- a/src/test/java/com/example/devcoast/controller/SolicitudesPageRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/SolicitudesPageRenderTest.java
+@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockHttpSession;
+ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.Invitacion;
+ import com.example.devcoast.model.Solicitud;
+@@ -36,6 +37,9 @@ class SolicitudesPageRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private SolicitudRepository solicitudRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/SolicitudesPaseRenderTest.java b/src/test/java/com/example/devcoast/controller/SolicitudesPaseRenderTest.java
+index d306a71..d9c9b3f 100644
+--- a/src/test/java/com/example/devcoast/controller/SolicitudesPaseRenderTest.java
++++ b/src/test/java/com/example/devcoast/controller/SolicitudesPaseRenderTest.java
+@@ -31,6 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
+ import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.MvcResult;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.SecurityConfig;
+ import com.example.devcoast.model.EventoEstado;
+ import com.example.devcoast.model.Invitacion;
+@@ -56,6 +57,9 @@ class SolicitudesPaseRenderTest {
+     @Autowired
+     private MockMvc mockMvc;
+ 
++    @MockitoBean
++    private LimiteTasa limiteTasa;
++
+     @MockitoBean
+     private SolicitudRepository solicitudRepository;
+     @MockitoBean
+diff --git a/src/test/java/com/example/devcoast/controller/TalentoVistaTest.java b/src/test/java/com/example/devcoast/controller/TalentoVistaTest.java
+index 1185a67..105bafe 100644
+--- a/src/test/java/com/example/devcoast/controller/TalentoVistaTest.java
++++ b/src/test/java/com/example/devcoast/controller/TalentoVistaTest.java
+@@ -57,7 +57,7 @@ class TalentoVistaTest {
+         TalentoVista v = TalentoVista.de(u, 0, null, false, false);
+         assertEquals("https://valentina.dev", v.getPortfolioUrl());
+         assertNull(v.getLinkedinUrl());
+-        assertNull(v.getGithubUrl());
++        assertEquals("https://github.com/valentina", v.getGithubUrl());
+         assertTrue(v.getBio().endsWith("…"));
+         assertTrue(v.getBio().length() <= TalentoVista.MAX_BIO + 1);
+     }
+-- 
+2.43.0
+

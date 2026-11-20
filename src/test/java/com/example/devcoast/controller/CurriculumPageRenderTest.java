@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.SecurityConfig;
 import com.example.devcoast.model.Empleo;
 import com.example.devcoast.model.Proyecto;
@@ -43,6 +44,9 @@ class CurriculumPageRenderTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private LimiteTasa limiteTasa;
 
     @MockitoBean
     private UsuarioRepository usuarioRepository;

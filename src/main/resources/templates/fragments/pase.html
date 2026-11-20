@@ -502,12 +502,12 @@
         </div>
         <div class="tc-f">
             <div class="tc-l">
-                <a th:if="${v.portfolioUrl != null}" th:href="${v.portfolioUrl}" target="_blank"
+                <a th:if="${v.portfolioUrl != null}" th:href="${urls.segura(v.portfolioUrl)}" target="_blank"
                     rel="noopener noreferrer"
                     th:aria-label="|Portafolio de ${v.nombre} (se abre en otra pestaña)|">Portafolio</a>
-                <a th:if="${v.linkedinUrl != null}" th:href="${v.linkedinUrl}" target="_blank" rel="noopener noreferrer"
+                <a th:if="${v.linkedinUrl != null}" th:href="${urls.segura(v.linkedinUrl)}" target="_blank" rel="noopener noreferrer"
                     th:aria-label="|LinkedIn de ${v.nombre} (se abre en otra pestaña)|">LinkedIn</a>
-                <a th:if="${v.githubUrl != null}" th:href="${v.githubUrl}" target="_blank" rel="noopener noreferrer"
+                <a th:if="${v.githubUrl != null}" th:href="${urls.segura(v.githubUrl)}" target="_blank" rel="noopener noreferrer"
                     th:aria-label="|GitHub de ${v.nombre} (se abre en otra pestaña)|">GitHub</a>
             </div>
             <div class="tc-a">

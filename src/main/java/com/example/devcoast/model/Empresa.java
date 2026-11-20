@@ -56,4 +56,8 @@ public class Empresa {
 
     @Field("plan_vence_en")
     private Date planVenceEn;
+
+    public void setSitioWeb(String sitioWeb) {
+        this.sitioWeb = com.example.devcoast.service.UrlSegura.normalizar(sitioWeb);
+    }
 }

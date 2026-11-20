@@ -14,6 +14,7 @@ Stack: Java 17 · Spring Boot 4 (MVC, Security, Thymeleaf) · MongoDB · Cloudin
 2. `./mvnw spring-boot:run` y abre <http://localhost:8080>.
 
 Pruebas: `./mvnw verify` (necesita un MongoDB accesible en `MONGODB_URI`, como hace el CI).
+Las pruebas de recorrido con navegador real (`e2e/`) se explican en [`e2e/README.md`](e2e/README.md).
 
 ## Datos de ejemplo
 
@@ -61,13 +62,15 @@ Otras variables útiles en cualquier modo: `DEVCOAST_URL_PUBLICA` (vista previa 
 - `controller/` páginas y endpoints; las clases `*Vista` preparan lo que muestran las plantillas.
 - `service/` reglas de negocio (match entre perfil y oferta, planes, limpieza en cascada).
 - `templates/` Thymeleaf; `fragments/nautico.html` trae el shell (menú, barra superior) y `fragments/pase.html` las tarjetas.
-- `static/CSS` y `static/JS`: el sistema visual náutico está en `nautico*.css` (diseño en `docs/diseno/`).
+- `static/CSS` y `static/JS`: el sistema visual náutico está en `nautico*.css`.
 
 ## Notas de rendimiento y operación
 
 - Los estáticos se sirven con URL versionada por contenido y caché larga; con devtools no se cachean.
 - Los índices de Mongo se crean al arrancar (`MongoIndexInitializer`); si alguno ya existe con otro nombre solo se avisa en el log.
-- La sesión expira tras 7 días de inactividad (`server.servlet.session.timeout`).
+- La sesión expira tras 7 días de inactividad (`server.servlet.session.timeout`). La cookie de sesión es `HttpOnly` y `SameSite=Lax`;
+  en producción con HTTPS define `SESSION_COOKIE_SECURE=true` para que además solo viaje cifrada.
+- Apagado ordenado (`server.shutdown=graceful`): al reiniciar, las peticiones en curso terminan (hasta 20 s) antes de cerrar.
 - Login: tras 5 intentos fallidos seguidos de la misma cuenta desde el mismo equipo se bloquea 15 minutos (también se frenan
   30 fallos desde un mismo equipo o 20 contra una misma cuenta). Es en memoria: se reinicia al reiniciar la app. Si la app
   corre detrás de un proxy, define `server.forward-headers-strategy=framework` para que cuente la IP real de cada persona.
@@ -77,3 +80,9 @@ Otras variables útiles en cualquier modo: `DEVCOAST_URL_PUBLICA` (vista previa 
 - Cabeceras de seguridad (`SecurityConfig`): CSP, Referrer-Policy, Permissions-Policy, no permite meter la app en un iframe.
   La CSP deja scripts y estilos dentro de las páginas (`unsafe-inline`) porque la app los usa; si agregas un servicio externo
   (CDN, mapa, analítica) hay que sumarlo a la CSP o el navegador lo bloqueará.
+- Enlaces escritos por personas (sitio web, portafolio, LinkedIn, GitHub, logo): solo se guardan y se muestran si son `http(s)` (`UrlSegura`).
+- Contraseñas: mínimo 8 caracteres y máximo 72 bytes (límite de BCrypt). Verificar la contraseña en cambiar correo, cambiar contraseña y eliminar cuenta tiene tope de 6 intentos cada 15 minutos.
+- Cierre de sesión por `POST /logout`. Cookie de sesión `HttpOnly` y `SameSite=Lax`; con HTTPS define `DEVCOAST_COOKIE_SEGURA=true`.
+- Imágenes: se validan por su contenido real (JPG, PNG, GIF, WebP; el SVG se rechaza), máximo 5 MB y 20 subidas cada 10 minutos por persona. En modo demo no se suben imágenes.
+- Reabrir una vacante respeta el límite de vacantes activas y destacadas del plan. Las ofertas tienen límites de largo, vacantes y salario (`ValidacionEmpleo`).
+- Las cuentas demo no se pueden eliminar ni cambiar de contraseña o correo, y entrar a la demo tiene tope por equipo.

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empleo;
 import com.example.devcoast.model.Empresa;
@@ -49,12 +50,14 @@ public class PageController {
     private final CleanupService cleanupService;
     private final CobroRepository cobroRepository;
     private final PlanService planService;
+    private final LimiteTasa limiteTasa;
 
     public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository,
             SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository,
             InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository,
             BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService, CobroRepository cobroRepository,
-            PlanService planService) {
+            PlanService planService, LimiteTasa limiteTasa) {
+        this.limiteTasa = limiteTasa;
         this.usuarioRepository = usuarioRepository;
         this.empleoRepository = empleoRepository;
         this.solicitudRepository = solicitudRepository;
@@ -210,11 +213,17 @@ public class PageController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
+        if (RoleGuard.esCuentaDemo(session)) {
+            ra.addFlashAttribute("flashMessage", "Las cuentas de demostración no pueden cambiar su contraseña.");
+            ra.addFlashAttribute("flashType", "info");
+            return "redirect:/ajustes";
+        }
         String id = RoleGuard.getId(session);
         String tipo = RoleGuard.getTipo(session);
 
-        if (passwordNueva == null || passwordNueva.trim().length() < 8) {
-            ra.addFlashAttribute("flashMessage", "La nueva contraseña debe tener al menos 8 caracteres");
+        String problemaPassword = com.example.devcoast.service.Credenciales.problema(passwordNueva);
+        if (problemaPassword != null) {
+            ra.addFlashAttribute("flashMessage", problemaPassword);
             ra.addFlashAttribute("flashType", "error");
             return "redirect:/cambiarPassword";
         }
@@ -224,6 +233,16 @@ public class PageController {
             return "redirect:/cambiarPassword";
         }
 
+        if (limiteTasa.excedido("cambiar-password|" + id, 6, 15 * 60 * 1000L)) {
+            ra.addFlashAttribute("flashMessage", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/cambiarPassword";
+        }
+        if (!com.example.devcoast.service.Credenciales.cabeEnBcrypt(passwordActual)) {
+            ra.addFlashAttribute("flashMessage", "La contraseña actual es incorrecta");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/cambiarPassword";
+        }
         if ("empresa".equals(tipo)) {
             Empresa empresa = empresaRepository.findById(id).orElse(null);
             if (empresa == null || !passwordEncoder.matches(passwordActual, empresa.getPassword())) {
@@ -254,9 +273,24 @@ public class PageController {
         if (RoleGuard.sinSesion(session))
             return "redirect:/login";
 
+        if (RoleGuard.esCuentaDemo(session)) {
+            ra.addFlashAttribute("flashMessage", "Las cuentas de demostración no se pueden eliminar.");
+            ra.addFlashAttribute("flashType", "info");
+            return "redirect:/ajustes";
+        }
         String id = RoleGuard.getId(session);
         String tipo = RoleGuard.getTipo(session);
 
+        if (limiteTasa.excedido("eliminar-cuenta|" + id, 6, 15 * 60 * 1000L)) {
+            ra.addFlashAttribute("flashMessage", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/ajustes";
+        }
+        if (!com.example.devcoast.service.Credenciales.cabeEnBcrypt(password)) {
+            ra.addFlashAttribute("flashMessage", "Contraseña incorrecta. Tu cuenta no fue eliminada.");
+            ra.addFlashAttribute("flashType", "error");
+            return "redirect:/ajustes";
+        }
         if ("empresa".equals(tipo)) {
             Empresa empresa = empresaRepository.findById(id).orElse(null);
             if (empresa == null || !passwordEncoder.matches(password, empresa.getPassword())) {
