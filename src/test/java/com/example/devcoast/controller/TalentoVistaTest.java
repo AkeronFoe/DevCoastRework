@@ -57,7 +57,7 @@ class TalentoVistaTest {
         TalentoVista v = TalentoVista.de(u, 0, null, false, false);
         assertEquals("https://valentina.dev", v.getPortfolioUrl());
         assertNull(v.getLinkedinUrl());
-        assertNull(v.getGithubUrl());
+        assertEquals("https://github.com/valentina", v.getGithubUrl());
         assertTrue(v.getBio().endsWith("…"));
         assertTrue(v.getBio().length() <= TalentoVista.MAX_BIO + 1);
     }
