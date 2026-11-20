@@ -177,7 +177,7 @@
                     if (quitar) quitar.hidden = false;
                     toast(T('Foto actualizada.'));
                     refrescar();
-                } else toast(T('No se pudo subir la foto.'));
+                } else toast(d && d.error ? d.error : T('No se pudo subir la foto.'));
             })
             .catch(function () { toast(T('No se pudo subir la foto.')); })
             .then(function () { file.value = ''; });
@@ -192,7 +192,7 @@
                     quitar.hidden = true;
                     toast(T('Foto eliminada.'));
                     refrescar();
-                } else toast(T('No se pudo quitar la foto.'));
+                } else toast(d && d.error ? d.error : T('No se pudo quitar la foto.'));
             })
             .catch(function () { toast(T('No se pudo quitar la foto.')); });
     });

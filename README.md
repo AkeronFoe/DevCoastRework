@@ -80,3 +80,9 @@ Otras variables útiles en cualquier modo: `DEVCOAST_URL_PUBLICA` (vista previa 
 - Cabeceras de seguridad (`SecurityConfig`): CSP, Referrer-Policy, Permissions-Policy, no permite meter la app en un iframe.
   La CSP deja scripts y estilos dentro de las páginas (`unsafe-inline`) porque la app los usa; si agregas un servicio externo
   (CDN, mapa, analítica) hay que sumarlo a la CSP o el navegador lo bloqueará.
+- Enlaces escritos por personas (sitio web, portafolio, LinkedIn, GitHub, logo): solo se guardan y se muestran si son `http(s)` (`UrlSegura`).
+- Contraseñas: mínimo 8 caracteres y máximo 72 bytes (límite de BCrypt). Verificar la contraseña en cambiar correo, cambiar contraseña y eliminar cuenta tiene tope de 6 intentos cada 15 minutos.
+- Cierre de sesión por `POST /logout`. Cookie de sesión `HttpOnly` y `SameSite=Lax`; con HTTPS define `DEVCOAST_COOKIE_SEGURA=true`.
+- Imágenes: se validan por su contenido real (JPG, PNG, GIF, WebP; el SVG se rechaza), máximo 5 MB y 20 subidas cada 10 minutos por persona. En modo demo no se suben imágenes.
+- Reabrir una vacante respeta el límite de vacantes activas y destacadas del plan. Las ofertas tienen límites de largo, vacantes y salario (`ValidacionEmpleo`).
+- Las cuentas demo no se pueden eliminar ni cambiar de contraseña o correo, y entrar a la demo tiene tope por equipo.

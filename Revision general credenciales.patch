@@ -1,0 +1,1553 @@
+From 3db4f36111914673f8d04364abb8f603026b77b7 Mon Sep 17 00:00:00 2001
+From: DevCoast <dev@devcoast.co>
+Date: Fri, 20 Nov 2026 06:06:13 +0000
+Subject: [PATCH] =?UTF-8?q?Revisi=C3=B3n=20general:=20enlaces=20seguros,?=
+ =?UTF-8?q?=20credenciales,=20subida=20de=20im=C3=A1genes,=20reglas=20de?=
+ =?UTF-8?q?=20empleos=20y=20protecci=C3=B3n=20de=20la=20demo?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .env.example                                  |  1 +
+ README.md                                     |  6 ++
+ .../devcoast/config/ManejadorSubidas.java     | 17 +++++
+ .../example/devcoast/config/RoleGuard.java    |  5 ++
+ .../devcoast/config/SecurityConfig.java       |  5 +-
+ .../devcoast/controller/AuthController.java   | 14 +++-
+ .../controller/CloudinaryController.java      | 60 ++++++++++------
+ .../devcoast/controller/EmpleoController.java | 59 ++++++++++------
+ .../devcoast/controller/PageController.java   | 40 ++++++++++-
+ .../controller/RegistroController.java        |  2 +-
+ .../controller/SolicitudController.java       | 25 ++++++-
+ .../controller/UsuarioController.java         | 19 ++++-
+ .../devcoast/feria/DemoController.java        | 17 ++++-
+ .../com/example/devcoast/model/Empleo.java    |  8 +++
+ .../com/example/devcoast/model/Empresa.java   |  4 ++
+ .../com/example/devcoast/model/Usuario.java   |  6 +-
+ .../devcoast/service/Credenciales.java        | 28 ++++++++
+ .../example/devcoast/service/UrlSegura.java   | 60 ++++++++++++++++
+ .../devcoast/service/ValidacionEmpleo.java    | 70 +++++++++++++++++++
+ .../devcoast/service/ValidadorImagen.java     | 39 +++++++++++
+ ...ura,ValidacionEmpleo,ValidadorImagen}.java |  1 +
+ src/main/resources/application.properties     |  9 ++-
+ .../resources/static/CSS/nautico-ajustes.css  |  9 ++-
+ src/main/resources/static/CSS/nautico.css     | 19 +++++
+ src/main/resources/static/JS/perfil-pase.js   |  4 +-
+ src/main/resources/static/JS/s-proyecto.js    |  9 ++-
+ src/main/resources/static/JS/steps.js         |  7 +-
+ src/main/resources/templates/ajustes.html     |  2 +-
+ src/main/resources/templates/crearEmpleo.html |  7 +-
+ src/main/resources/templates/curriculum.html  |  8 +--
+ .../resources/templates/detalles-empleo.html  |  2 +-
+ .../resources/templates/empresa-perfil.html   |  2 +-
+ .../templates/fragments/nautico.html          | 16 +++--
+ .../resources/templates/fragments/pase.html   |  6 +-
+ .../resources/templates/talento-perfil.html   |  6 +-
+ .../devcoast/service/CredencialesTest.java    | 32 +++++++++
+ .../devcoast/service/UrlSeguraTest.java       | 55 +++++++++++++++
+ .../service/ValidacionEmpleoTest.java         | 68 ++++++++++++++++++
+ .../devcoast/service/ValidadorImagenTest.java | 53 ++++++++++++++
+ 39 files changed, 710 insertions(+), 90 deletions(-)
+ create mode 100644 src/main/java/com/example/devcoast/config/ManejadorSubidas.java
+ create mode 100644 src/main/java/com/example/devcoast/service/Credenciales.java
+ create mode 100644 src/main/java/com/example/devcoast/service/UrlSegura.java
+ create mode 100644 src/main/java/com/example/devcoast/service/ValidacionEmpleo.java
+ create mode 100644 src/main/java/com/example/devcoast/service/ValidadorImagen.java
+ create mode 100644 src/main/java/com/example/devcoast/service/{Credenciales,UrlSegura,ValidacionEmpleo,ValidadorImagen}.java
+ create mode 100644 src/test/java/com/example/devcoast/service/CredencialesTest.java
+ create mode 100644 src/test/java/com/example/devcoast/service/UrlSeguraTest.java
+ create mode 100644 src/test/java/com/example/devcoast/service/ValidacionEmpleoTest.java
+ create mode 100644 src/test/java/com/example/devcoast/service/ValidadorImagenTest.java
+
+diff --git a/.env.example b/.env.example
+index fa54355..8588a6d 100644
+--- a/.env.example
++++ b/.env.example
+@@ -22,3 +22,4 @@ SEED_LIMPIAR_ANTIGUOS=false
+ # DEVCOAST_URL_PUBLICA=https://tu-dominio.example
+ # DEVCOAST_CONTACTO=hola@tu-dominio.example
+ # FERIA_SIMULADOR=false
++# DEVCOAST_COOKIE_SEGURA=true
+diff --git a/README.md b/README.md
+index a07d8fd..cff9d19 100644
+--- a/README.md
++++ b/README.md
+@@ -77,3 +77,9 @@ Otras variables útiles en cualquier modo: `DEVCOAST_URL_PUBLICA` (vista previa
+ - Cabeceras de seguridad (`SecurityConfig`): CSP, Referrer-Policy, Permissions-Policy, no permite meter la app en un iframe.
+   La CSP deja scripts y estilos dentro de las páginas (`unsafe-inline`) porque la app los usa; si agregas un servicio externo
+   (CDN, mapa, analítica) hay que sumarlo a la CSP o el navegador lo bloqueará.
++- Enlaces escritos por personas (sitio web, portafolio, LinkedIn, GitHub, logo): solo se guardan y se muestran si son `http(s)` (`UrlSegura`).
++- Contraseñas: mínimo 8 caracteres y máximo 72 bytes (límite de BCrypt). Verificar la contraseña en cambiar correo, cambiar contraseña y eliminar cuenta tiene tope de 6 intentos cada 15 minutos.
++- Cierre de sesión por `POST /logout`. Cookie de sesión `HttpOnly` y `SameSite=Lax`; con HTTPS define `DEVCOAST_COOKIE_SEGURA=true`.
++- Imágenes: se validan por su contenido real (JPG, PNG, GIF, WebP; el SVG se rechaza), máximo 5 MB y 20 subidas cada 10 minutos por persona. En modo demo no se suben imágenes.
++- Reabrir una vacante respeta el límite de vacantes activas y destacadas del plan. Las ofertas tienen límites de largo, vacantes y salario (`ValidacionEmpleo`).
++- Las cuentas demo no se pueden eliminar ni cambiar de contraseña o correo, y entrar a la demo tiene tope por equipo.
+diff --git a/src/main/java/com/example/devcoast/config/ManejadorSubidas.java b/src/main/java/com/example/devcoast/config/ManejadorSubidas.java
+new file mode 100644
+index 0000000..fba89d7
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/config/ManejadorSubidas.java
+@@ -0,0 +1,17 @@
++package com.example.devcoast.config;
++
++import java.util.Map;
++
++import org.springframework.http.ResponseEntity;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.RestControllerAdvice;
++import org.springframework.web.multipart.MaxUploadSizeExceededException;
++
++@RestControllerAdvice
++public class ManejadorSubidas {
++
++    @ExceptionHandler(MaxUploadSizeExceededException.class)
++    public ResponseEntity<Map<String, Object>> demasiadoGrande() {
++        return ResponseEntity.status(413).body(Map.of("ok", false, "error", "La imagen pesa más de 5 MB"));
++    }
++}
+diff --git a/src/main/java/com/example/devcoast/config/RoleGuard.java b/src/main/java/com/example/devcoast/config/RoleGuard.java
+index e798e0c..34e1616 100644
+--- a/src/main/java/com/example/devcoast/config/RoleGuard.java
++++ b/src/main/java/com/example/devcoast/config/RoleGuard.java
+@@ -44,6 +44,11 @@ public class RoleGuard {
+         return sinSesion(session) || !esTalento(session);
+     }
+ 
++    public static boolean esCuentaDemo(HttpSession session) {
++        return Boolean.TRUE.equals(session.getAttribute("modoDemo"))
++                || com.example.devcoast.feria.FeriaService.DEMO_CORREOS.contains(getCorreo(session).trim().toLowerCase());
++    }
++
+     public static String getTipo(HttpSession session) {
+         Object t = session.getAttribute("usuarioActualTipo");
+         return t == null ? "" : t.toString();
+diff --git a/src/main/java/com/example/devcoast/config/SecurityConfig.java b/src/main/java/com/example/devcoast/config/SecurityConfig.java
+index 3401122..b56edc8 100644
+--- a/src/main/java/com/example/devcoast/config/SecurityConfig.java
++++ b/src/main/java/com/example/devcoast/config/SecurityConfig.java
+@@ -38,7 +38,10 @@ public class SecurityConfig {
+                         .contentSecurityPolicy(csp -> csp.policyDirectives(CSP))
+                         .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
+                         .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy",
+-                                "camera=(), microphone=(), geolocation=(), payment=(), usb=()")))
++                                "camera=(), microphone=(), geolocation=(), payment=(), usb=()"))
++                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
++                        .addHeaderWriter(new StaticHeadersWriter("Cross-Origin-Opener-Policy", "same-origin"))
++                        .addHeaderWriter(new StaticHeadersWriter("Cross-Origin-Resource-Policy", "same-origin")))
+                 // /interno/** lo llaman scripts del equipo (reinicio de la demo) y se protege con un token propio, no con la sesión.
+                 // /demo/** solo existe en modo feria y solo entra a cuentas de ejemplo públicas: sin esto, una página de demo que quedó abierta
+                 // (la app se reinició, la sesión venció, el botón «atrás») respondería 403 en vez de entrar
+diff --git a/src/main/java/com/example/devcoast/controller/AuthController.java b/src/main/java/com/example/devcoast/controller/AuthController.java
+index 19019e4..c7d8c43 100644
+--- a/src/main/java/com/example/devcoast/controller/AuthController.java
++++ b/src/main/java/com/example/devcoast/controller/AuthController.java
+@@ -13,6 +13,7 @@ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Usuario;
+ import com.example.devcoast.repository.EmpresaRepository;
+ import com.example.devcoast.repository.UsuarioRepository;
++import com.example.devcoast.service.Credenciales;
+ 
+ import jakarta.servlet.http.HttpServletRequest;
+ import jakarta.servlet.http.HttpSession;
+@@ -56,6 +57,12 @@ public class AuthController {
+             ra.addFlashAttribute("flashType", "error");
+             return "redirect:/login";
+         }
++        if (!Credenciales.cabeEnBcrypt(password) || correoNorm.length() > 254) {
++            limiteIntentos.fallo(equipo, correoNorm.length() > 254 ? correoNorm.substring(0, 254) : correoNorm);
++            ra.addFlashAttribute("flashMessage", "Correo o contraseña incorrectos");
++            ra.addFlashAttribute("flashType", "error");
++            return "redirect:/login";
++        }
+         Usuario usuario = usuarioRepository.findByCorreo(correoNorm);
+         if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
+             limiteIntentos.exito(equipo, correoNorm);
+@@ -97,12 +104,17 @@ public class AuthController {
+         return "redirect:/login";
+     }
+ 
+-    @GetMapping("/logout")
++    @PostMapping("/logout")
+     public String logout(HttpSession session) {
+         session.invalidate();
+         return "redirect:/login";
+     }
+ 
++    @GetMapping("/logout")
++    public String logoutViejo() {
++        return "redirect:/login";
++    }
++
+     private void poblarSesion(HttpSession session, String id, String correo,
+             String nombre, String tipo, String fotoUrl) {
+         RoleGuard.iniciarSesion(session, id, correo, nombre, tipo, fotoUrl);
+diff --git a/src/main/java/com/example/devcoast/controller/CloudinaryController.java b/src/main/java/com/example/devcoast/controller/CloudinaryController.java
+index 37c04a8..5121aeb 100644
+--- a/src/main/java/com/example/devcoast/controller/CloudinaryController.java
++++ b/src/main/java/com/example/devcoast/controller/CloudinaryController.java
+@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.bind.annotation.RestController;
+ import org.springframework.web.multipart.MultipartFile;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.RoleGuard;
+ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Proyecto;
+@@ -19,6 +20,7 @@ import com.example.devcoast.repository.EmpresaRepository;
+ import com.example.devcoast.repository.ProyectoRepository;
+ import com.example.devcoast.repository.UsuarioRepository;
+ import com.example.devcoast.service.CloudinaryService;
++import com.example.devcoast.service.ValidadorImagen;
+ 
+ import jakarta.servlet.http.HttpSession;
+ 
+@@ -29,9 +31,11 @@ public class CloudinaryController {
+     private final UsuarioRepository usuarioRepository;
+     private final EmpresaRepository empresaRepository;
+     private final ProyectoRepository proyectoRepository;
++    private final LimiteTasa limiteTasa;
+ 
+     public CloudinaryController(CloudinaryService cloudinaryService, UsuarioRepository usuarioRepository,
+-            EmpresaRepository empresaRepository, ProyectoRepository proyectoRepository) {
++            EmpresaRepository empresaRepository, ProyectoRepository proyectoRepository, LimiteTasa limiteTasa) {
++        this.limiteTasa = limiteTasa;
+         this.cloudinaryService = cloudinaryService;
+         this.usuarioRepository = usuarioRepository;
+         this.empresaRepository = empresaRepository;
+@@ -48,9 +52,9 @@ public class CloudinaryController {
+ 
+         if (id == null)
+             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
+-        String problema = problemaConArchivo(file);
+-        if (problema != null)
+-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
++        ResponseEntity<Map<String, Object>> rechazo = rechazarSubida(file, id, session);
++        if (rechazo != null)
++            return rechazo;
+ 
+         try {
+             String url = cloudinaryService.subirFotoPerfil(file, id);
+@@ -74,7 +78,7 @@ public class CloudinaryController {
+ 
+         } catch (IOException e) {
+             return ResponseEntity.status(500)
+-                    .body(Map.of("ok", false, "error", "Error al subir imagen: " + e.getMessage()));
++                    .body(Map.of("ok", false, "error", "No se pudo subir la imagen. Inténtalo de nuevo."));
+         }
+     }
+ 
+@@ -85,6 +89,9 @@ public class CloudinaryController {
+ 
+         if (id == null)
+             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
++        if (Boolean.TRUE.equals(session.getAttribute("modoDemo")))
++            return ResponseEntity.status(403).body(Map.of("ok", false, "error",
++                    "En la demo no se puede cambiar la foto: las cuentas son compartidas."));
+ 
+         if ("empresa".equals(tipo)) {
+             Empresa empresa = empresaRepository.findById(id).orElse(null);
+@@ -113,9 +120,9 @@ public class CloudinaryController {
+         String usuarioId = RoleGuard.getId(session);
+         if (usuarioId == null)
+             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
+-        String problema = problemaConArchivo(file);
+-        if (problema != null)
+-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
++        ResponseEntity<Map<String, Object>> rechazo = rechazarSubida(file, usuarioId, session);
++        if (rechazo != null)
++            return rechazo;
+ 
+         Optional<Proyecto> maybe = proyectoRepository.findByIdAndUsuarioId(id, usuarioId);
+         if (maybe.isEmpty())
+@@ -129,7 +136,7 @@ public class CloudinaryController {
+             return ResponseEntity.ok(Map.of("ok", true, "url", url));
+         } catch (IOException e) {
+             return ResponseEntity.status(500)
+-                    .body(Map.of("ok", false, "error", "Error al subir imagen: " + e.getMessage()));
++                    .body(Map.of("ok", false, "error", "No se pudo subir la imagen. Inténtalo de nuevo."));
+         }
+     }
+ 
+@@ -160,29 +167,40 @@ public class CloudinaryController {
+         String id = (String) session.getAttribute("usuarioActualId");
+         if (id == null)
+             return ResponseEntity.status(401).body(Map.of("ok", false, "error", "No autenticado"));
+-        String problema = problemaConArchivo(file);
+-        if (problema != null)
+-            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
++        ResponseEntity<Map<String, Object>> rechazo = rechazarSubida(file, id, session);
++        if (rechazo != null)
++            return rechazo;
+ 
+         try {
+             String url = cloudinaryService.subirImagenProyecto(file);
+             return ResponseEntity.ok(Map.of("ok", true, "url", url));
+         } catch (IOException e) {
+             return ResponseEntity.status(500)
+-                    .body(Map.of("ok", false, "error", "Error al subir logo: " + e.getMessage()));
++                    .body(Map.of("ok", false, "error", "No se pudo subir el logo. Inténtalo de nuevo."));
+         }
+     }
+ 
+-    private static final long MAX_IMAGEN = 5L * 1024 * 1024;
++    private static final int MAX_SUBIDAS = 20;
++    private static final long VENTANA_SUBIDAS_MS = 10 * 60 * 1000L;
+ 
+-    private static String problemaConArchivo(MultipartFile file) {
++    private ResponseEntity<Map<String, Object>> rechazarSubida(MultipartFile file, String id, HttpSession session) {
++        if (Boolean.TRUE.equals(session.getAttribute("modoDemo")))
++            return ResponseEntity.status(403).body(Map.of("ok", false, "error",
++                    "En la demo no se pueden subir imágenes: las cuentas son compartidas."));
++        if (limiteTasa.excedido("subida|" + id, MAX_SUBIDAS, VENTANA_SUBIDAS_MS))
++            return ResponseEntity.status(429).body(Map.of("ok", false, "error",
++                    "Estás subiendo muchas imágenes seguidas. Espera unos minutos."));
+         if (file.isEmpty())
+-            return "Archivo vacío";
+-        String tipo = file.getContentType();
+-        if (tipo == null || !tipo.toLowerCase().startsWith("image/"))
+-            return "El archivo debe ser una imagen";
+-        if (file.getSize() > MAX_IMAGEN)
+-            return "La imagen pesa más de 5 MB";
++            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "Archivo vacío"));
++        if (file.getSize() > ValidadorImagen.MAX_BYTES)
++            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "La imagen pesa más de 5 MB"));
++        try {
++            String problema = ValidadorImagen.problema(file.getBytes());
++            if (problema != null)
++                return ResponseEntity.badRequest().body(Map.of("ok", false, "error", problema));
++        } catch (IOException e) {
++            return ResponseEntity.badRequest().body(Map.of("ok", false, "error", "No se pudo leer el archivo"));
++        }
+         return null;
+     }
+ }
+diff --git a/src/main/java/com/example/devcoast/controller/EmpleoController.java b/src/main/java/com/example/devcoast/controller/EmpleoController.java
+index 63fadac..5f00270 100644
+--- a/src/main/java/com/example/devcoast/controller/EmpleoController.java
++++ b/src/main/java/com/example/devcoast/controller/EmpleoController.java
+@@ -70,6 +70,8 @@ public class EmpleoController {
+     }
+ 
+     private static final int OTRAS_POR_PAGINA = 10;
++    private static final int MAX_BUSQUEDA = 80;
++    private static final int MAX_TERMINOS = 6;
+     private static final int CANDIDATOS_LIMITE = 600;
+ 
+     @GetMapping("/empleos")
+@@ -92,14 +94,19 @@ public class EmpleoController {
+         String modSel = modalidadClave(modalidad);
+         boolean soloAlto = "1".equals(hi);
+         String qSel = q == null ? "" : q.trim();
++        if (qSel.length() > MAX_BUSQUEDA)
++            qSel = qSel.substring(0, MAX_BUSQUEDA).trim();
+ 
+         Criteria activas = new Criteria().orOperator(
+                 Criteria.where("estado").is("ACTIVO"), Criteria.where("estado").exists(false));
+         List<Criteria> criterios = new ArrayList<>();
+         criterios.add(activas);
++        int terminos = 0;
+         for (String token : qSel.split("\\s+")) {
+             if (token.length() < 2)
+                 continue;
++            if (++terminos > MAX_TERMINOS)
++                break;
+             String rx = ".*" + Pattern.quote(token) + ".*";
+             criterios.add(new Criteria().orOperator(
+                     Criteria.where("titulo").regex(rx, "i"),
+@@ -501,7 +508,7 @@ public class EmpleoController {
+             ra.addFlashAttribute("flashType", "error");
+             String idParaEditar = empleoForm.getId();
+             return "redirect:/crearEmpleo"
+-                    + (idParaEditar != null && !idParaEditar.isBlank() ? "?editar=" + idParaEditar : "");
++                    + (idParaEditar != null && idParaEditar.matches("[0-9a-fA-F]{24}") ? "?editar=" + idParaEditar : "");
+         }
+ 
+         String empresaId = RoleGuard.getId(session);
+@@ -559,23 +566,7 @@ public class EmpleoController {
+     }
+ 
+     private String validarEmpleo(Empleo f) {
+-        if (esVacio(f.getTitulo()) || esVacio(f.getCategoria()) || esVacio(f.getSeniority())
+-                || esVacio(f.getModalidad()) || esVacio(f.getContrato()) || esVacio(f.getEmpresaNombre())
+-                || esVacio(f.getEmpresaSector()) || esVacio(f.getEmpresaTamano()) || esVacio(f.getEmpresaDescripcion())
+-                || esVacio(f.getStack())) {
+-            return "Completa todos los campos obligatorios del empleo";
+-        }
+-        if (f.getVacantes() == null || f.getVacantes() < 1) {
+-            return "Las vacantes disponibles deben ser al menos 1";
+-        }
+-        if (f.getSalarioMin() != null && f.getSalarioMax() != null && f.getSalarioMin() > f.getSalarioMax()) {
+-            return "El salario mínimo no puede ser mayor que el máximo";
+-        }
+-        return null;
+-    }
+-
+-    private boolean esVacio(String s) {
+-        return s == null || s.isBlank();
++        return com.example.devcoast.service.ValidacionEmpleo.validar(f);
+     }
+ 
+     private void aplicarCamposFormulario(Empleo target, Empleo form) {
+@@ -676,12 +667,34 @@ public class EmpleoController {
+         if (RoleGuard.soloEmpresa(session))
+             return "redirect:/login";
+         empleoRepository.findById(id).ifPresent(e -> {
+-            if (Objects.equals(e.getEmpresaId(), RoleGuard.getId(session))) {
+-                e.setEstado("ACTIVO");
+-                empleoRepository.save(e);
+-                ra.addFlashAttribute("flashMessage", "Empleo reabierto correctamente");
+-                ra.addFlashAttribute("flashType", "success");
++            String empresaId = RoleGuard.getId(session);
++            if (!Objects.equals(e.getEmpresaId(), empresaId))
++                return;
++            if (e.getEstado() == null || "ACTIVO".equals(e.getEstado())) {
++                ra.addFlashAttribute("flashMessage", "Ese empleo ya está activo");
++                ra.addFlashAttribute("flashType", "info");
++                return;
++            }
++            Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
++            long activas = empleoRepository.countByEmpresaIdAndEstado(empresaId, "ACTIVO");
++            if (activas >= planService.limiteVacantesActivas(empresa)) {
++                ra.addFlashAttribute("flashMessage",
++                        "Alcanzaste el límite de vacantes activas de tu plan. Cierra otra vacante o actualiza a Pro para reabrir esta.");
++                ra.addFlashAttribute("flashType", "error");
++                return;
++            }
++            boolean sinDestacar = false;
++            if (e.isDestacar() && empleoRepository.countByEmpresaIdAndDestacarTrueAndEstado(empresaId,
++                    "ACTIVO") >= planService.limiteDestacados(empresa)) {
++                e.setDestacar(false);
++                sinDestacar = true;
+             }
++            e.setEstado("ACTIVO");
++            empleoRepository.save(e);
++            ra.addFlashAttribute("flashMessage", sinDestacar
++                    ? "Empleo reabierto sin destacar: ya no tienes cupo de vacantes destacadas en tu plan"
++                    : "Empleo reabierto correctamente");
++            ra.addFlashAttribute("flashType", sinDestacar ? "info" : "success");
+         });
+         return "redirect:/misEmpleos";
+     }
+diff --git a/src/main/java/com/example/devcoast/controller/PageController.java b/src/main/java/com/example/devcoast/controller/PageController.java
+index 1c3522a..9ac99d6 100644
+--- a/src/main/java/com/example/devcoast/controller/PageController.java
++++ b/src/main/java/com/example/devcoast/controller/PageController.java
+@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.RoleGuard;
+ import com.example.devcoast.model.Empleo;
+ import com.example.devcoast.model.Empresa;
+@@ -49,12 +50,14 @@ public class PageController {
+     private final CleanupService cleanupService;
+     private final CobroRepository cobroRepository;
+     private final PlanService planService;
++    private final LimiteTasa limiteTasa;
+ 
+     public PageController(UsuarioRepository usuarioRepository, EmpleoRepository empleoRepository,
+             SolicitudRepository solicitudRepository, ProyectoRepository proyectoRepository,
+             InvitacionRepository invitacionRepository, MongoTemplate mongoTemplate, EmpresaRepository empresaRepository,
+             BCryptPasswordEncoder passwordEncoder, CleanupService cleanupService, CobroRepository cobroRepository,
+-            PlanService planService) {
++            PlanService planService, LimiteTasa limiteTasa) {
++        this.limiteTasa = limiteTasa;
+         this.usuarioRepository = usuarioRepository;
+         this.empleoRepository = empleoRepository;
+         this.solicitudRepository = solicitudRepository;
+@@ -210,11 +213,17 @@ public class PageController {
+         if (RoleGuard.sinSesion(session))
+             return "redirect:/login";
+ 
++        if (RoleGuard.esCuentaDemo(session)) {
++            ra.addFlashAttribute("flashMessage", "Las cuentas de demostración no pueden cambiar su contraseña.");
++            ra.addFlashAttribute("flashType", "info");
++            return "redirect:/ajustes";
++        }
+         String id = RoleGuard.getId(session);
+         String tipo = RoleGuard.getTipo(session);
+ 
+-        if (passwordNueva == null || passwordNueva.trim().length() < 8) {
+-            ra.addFlashAttribute("flashMessage", "La nueva contraseña debe tener al menos 8 caracteres");
++        String problemaPassword = com.example.devcoast.service.Credenciales.problema(passwordNueva);
++        if (problemaPassword != null) {
++            ra.addFlashAttribute("flashMessage", problemaPassword);
+             ra.addFlashAttribute("flashType", "error");
+             return "redirect:/cambiarPassword";
+         }
+@@ -224,6 +233,16 @@ public class PageController {
+             return "redirect:/cambiarPassword";
+         }
+ 
++        if (limiteTasa.excedido("cambiar-password|" + id, 6, 15 * 60 * 1000L)) {
++            ra.addFlashAttribute("flashMessage", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
++            ra.addFlashAttribute("flashType", "error");
++            return "redirect:/cambiarPassword";
++        }
++        if (!com.example.devcoast.service.Credenciales.cabeEnBcrypt(passwordActual)) {
++            ra.addFlashAttribute("flashMessage", "La contraseña actual es incorrecta");
++            ra.addFlashAttribute("flashType", "error");
++            return "redirect:/cambiarPassword";
++        }
+         if ("empresa".equals(tipo)) {
+             Empresa empresa = empresaRepository.findById(id).orElse(null);
+             if (empresa == null || !passwordEncoder.matches(passwordActual, empresa.getPassword())) {
+@@ -254,9 +273,24 @@ public class PageController {
+         if (RoleGuard.sinSesion(session))
+             return "redirect:/login";
+ 
++        if (RoleGuard.esCuentaDemo(session)) {
++            ra.addFlashAttribute("flashMessage", "Las cuentas de demostración no se pueden eliminar.");
++            ra.addFlashAttribute("flashType", "info");
++            return "redirect:/ajustes";
++        }
+         String id = RoleGuard.getId(session);
+         String tipo = RoleGuard.getTipo(session);
+ 
++        if (limiteTasa.excedido("eliminar-cuenta|" + id, 6, 15 * 60 * 1000L)) {
++            ra.addFlashAttribute("flashMessage", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
++            ra.addFlashAttribute("flashType", "error");
++            return "redirect:/ajustes";
++        }
++        if (!com.example.devcoast.service.Credenciales.cabeEnBcrypt(password)) {
++            ra.addFlashAttribute("flashMessage", "Contraseña incorrecta. Tu cuenta no fue eliminada.");
++            ra.addFlashAttribute("flashType", "error");
++            return "redirect:/ajustes";
++        }
+         if ("empresa".equals(tipo)) {
+             Empresa empresa = empresaRepository.findById(id).orElse(null);
+             if (empresa == null || !passwordEncoder.matches(password, empresa.getPassword())) {
+diff --git a/src/main/java/com/example/devcoast/controller/RegistroController.java b/src/main/java/com/example/devcoast/controller/RegistroController.java
+index 2e81dbd..d34ce23 100644
+--- a/src/main/java/com/example/devcoast/controller/RegistroController.java
++++ b/src/main/java/com/example/devcoast/controller/RegistroController.java
+@@ -162,7 +162,7 @@ public class RegistroController {
+     }
+ 
+     private boolean passwordValida(String password) {
+-        return password != null && password.trim().length() >= 8;
++        return com.example.devcoast.service.Credenciales.cumpleReglas(password);
+     }
+ 
+     private void reflashTalento(RedirectAttributes ra, String nombre, String rolTitulo, String bio, String stack,
+diff --git a/src/main/java/com/example/devcoast/controller/SolicitudController.java b/src/main/java/com/example/devcoast/controller/SolicitudController.java
+index 9854dce..8428d40 100644
+--- a/src/main/java/com/example/devcoast/controller/SolicitudController.java
++++ b/src/main/java/com/example/devcoast/controller/SolicitudController.java
+@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.bind.annotation.ResponseBody;
+ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.RoleGuard;
+ import com.example.devcoast.model.Cobro;
+ import com.example.devcoast.model.Empleo;
+@@ -54,12 +55,14 @@ public class SolicitudController {
+     private final EmpresaRepository empresaRepository;
+     private final CobroRepository cobroRepository;
+     private final PlanService planService;
++    private final LimiteTasa limiteTasa;
+ 
+     public SolicitudController(SolicitudRepository solicitudRepository, EmpleoRepository empleoRepository,
+             UsuarioRepository usuarioRepository, ProyectoRepository proyectoRepository,
+             InvitacionRepository invitacionRepository, NotificacionRepository notificacionRepository,
+             CleanupService cleanupService, EmpresaRepository empresaRepository, CobroRepository cobroRepository,
+-            PlanService planService) {
++            PlanService planService, LimiteTasa limiteTasa) {
++        this.limiteTasa = limiteTasa;
+         this.solicitudRepository = solicitudRepository;
+         this.empleoRepository = empleoRepository;
+         this.usuarioRepository = usuarioRepository;
+@@ -213,6 +216,11 @@ public class SolicitudController {
+                 ra.addFlashAttribute("flashMessage", "El empleo ya no está disponible");
+                 ra.addFlashAttribute("flashType", "error");
+                 return "redirect:/empleos";
++            case DEMASIADAS:
++                ra.addFlashAttribute("flashMessage",
++                        "Estás postulando muy rápido. Espera unos minutos antes de enviar más postulaciones.");
++                ra.addFlashAttribute("flashType", "warning");
++                return "redirect:/empleos/" + id;
+             case NO_ACTIVO:
+                 ra.addFlashAttribute("flashMessage", "Esta vacante ya no está activa");
+                 ra.addFlashAttribute("flashType", "error");
+@@ -251,6 +259,9 @@ public class SolicitudController {
+             case NO_DISPONIBLE:
+                 return ResponseEntity.status(404)
+                         .body(Map.of("ok", false, "mensaje", "El empleo ya no está disponible."));
++            case DEMASIADAS:
++                return ResponseEntity.status(429).body(Map.of("ok", false, "mensaje",
++                        "Estás postulando muy rápido. Espera unos minutos antes de enviar más postulaciones."));
+             case NO_ACTIVO:
+                 return ResponseEntity.status(409)
+                         .body(Map.of("ok", false, "mensaje", "Esta vacante ya no está activa."));
+@@ -268,8 +279,12 @@ public class SolicitudController {
+         }
+     }
+ 
++    private static final int MAX_POSTULACIONES = 25;
++    private static final long VENTANA_POSTULACIONES_MS = 10 * 60 * 1000L;
++    private static final int MAX_MOTIVACION = 2000;
++
+     private enum Salida {
+-        NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, CREADA
++        NO_DISPONIBLE, NO_ACTIVO, YA_APLICO, DEMASIADAS, CREADA
+     }
+ 
+     private record ResultadoAplicacion(Salida salida, Solicitud solicitud, boolean descartado) {
+@@ -277,6 +292,8 @@ public class SolicitudController {
+ 
+     private ResultadoAplicacion procesarAplicacion(String id, String usuarioId, String correo,
+             List<String> proyectosIds, String mensajeMotivacion) {
++        if (limiteTasa.excedido("postular|" + usuarioId, MAX_POSTULACIONES, VENTANA_POSTULACIONES_MS))
++            return new ResultadoAplicacion(Salida.DEMASIADAS, null, false);
+         Optional<Empleo> empleoOpt = empleoRepository.findById(id);
+         if (empleoOpt.isEmpty())
+             return new ResultadoAplicacion(Salida.NO_DISPONIBLE, null, false);
+@@ -338,7 +355,9 @@ public class SolicitudController {
+             solicitud.setProyectosIds(proyectosPropios);
+         }
+         if (mensajeMotivacion != null && !mensajeMotivacion.isBlank())
+-            solicitud.setMensajeMotivacion(mensajeMotivacion.trim());
++            solicitud.setMensajeMotivacion(mensajeMotivacion.trim().length() > MAX_MOTIVACION
++                    ? mensajeMotivacion.trim().substring(0, MAX_MOTIVACION)
++                    : mensajeMotivacion.trim());
+ 
+         Solicitud guardada;
+         try {
+diff --git a/src/main/java/com/example/devcoast/controller/UsuarioController.java b/src/main/java/com/example/devcoast/controller/UsuarioController.java
+index 7299496..71f0950 100644
+--- a/src/main/java/com/example/devcoast/controller/UsuarioController.java
++++ b/src/main/java/com/example/devcoast/controller/UsuarioController.java
+@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RestController;
+ 
++import com.example.devcoast.config.LimiteTasa;
++import com.example.devcoast.config.RoleGuard;
+ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Usuario;
+ import com.example.devcoast.model.Usuario.CvEducacion;
+@@ -20,6 +22,7 @@ import com.example.devcoast.model.Usuario.CvExperiencia;
+ import com.example.devcoast.repository.EmpleoRepository;
+ import com.example.devcoast.repository.EmpresaRepository;
+ import com.example.devcoast.repository.UsuarioRepository;
++import com.example.devcoast.service.Credenciales;
+ import com.example.devcoast.service.PlanService;
+ 
+ import jakarta.servlet.http.HttpSession;
+@@ -32,9 +35,12 @@ public class UsuarioController {
+     private final EmpleoRepository empleoRepository;
+     private final BCryptPasswordEncoder passwordEncoder;
+     private final PlanService planService;
++    private final LimiteTasa limiteTasa;
+ 
+     public UsuarioController(UsuarioRepository repository, EmpresaRepository empresaRepository,
+-            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder, PlanService planService) {
++            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder, PlanService planService,
++            LimiteTasa limiteTasa) {
++        this.limiteTasa = limiteTasa;
+         this.repository = repository;
+         this.empresaRepository = empresaRepository;
+         this.empleoRepository = empleoRepository;
+@@ -342,13 +348,22 @@ public class UsuarioController {
+         if (id == null)
+             return ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "No autenticado"));
+ 
++        if (RoleGuard.esCuentaDemo(session))
++            return ResponseEntity.status(403).body(Map.of("ok", false, "mensaje",
++                    "Las cuentas de demostración no pueden cambiar su correo."));
+         String nuevoCorreo = str(datos, "nuevoCorreo").toLowerCase();
+         String password = datos.get("password") == null ? "" : datos.get("password").toString();
+ 
+-        if (nuevoCorreo.isEmpty() || !nuevoCorreo.contains("@"))
++        if (!nuevoCorreo.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") || nuevoCorreo.length() > 254)
+             return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ingresa un correo válido"));
+         if (password.isEmpty())
+             return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ingresa tu contraseña actual"));
++        if (limiteTasa.excedido("cambiar-correo|" + id, 6, 15 * 60 * 1000L))
++            return ResponseEntity.status(429).body(Map.of("ok", false, "mensaje",
++                    "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."));
++        if (!Credenciales.cabeEnBcrypt(password))
++            return ResponseEntity.badRequest()
++                    .body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
+ 
+         String tipo = (String) session.getAttribute("usuarioActualTipo");
+         if ("empresa".equals(tipo)) {
+diff --git a/src/main/java/com/example/devcoast/feria/DemoController.java b/src/main/java/com/example/devcoast/feria/DemoController.java
+index 918e5b9..0062240 100644
+--- a/src/main/java/com/example/devcoast/feria/DemoController.java
++++ b/src/main/java/com/example/devcoast/feria/DemoController.java
+@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.bind.annotation.ResponseBody;
+ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+ 
++import com.example.devcoast.config.LimiteTasa;
+ import com.example.devcoast.config.RoleGuard;
+ import com.example.devcoast.model.Empresa;
+ import com.example.devcoast.model.Usuario;
+@@ -33,13 +34,18 @@ import jakarta.servlet.http.HttpSession;
+ public class DemoController {
+ 
+     private static final long ESPERA_REINICIO_MS = 20_000L;
++    private static final int MAX_ENTRADAS = 200;
++    private static final long VENTANA_ENTRADAS_MS = 5 * 60 * 1000L;
+ 
+     private final MongoTemplate mongo;
+     private final FeriaService feria;
+     private final String token;
+     private final AtomicLong ultimoReinicio = new AtomicLong();
++    private final LimiteTasa limiteTasa;
+ 
+-    public DemoController(MongoTemplate mongo, FeriaService feria, @Value("${devcoast.feria.token:}") String token) {
++    public DemoController(MongoTemplate mongo, FeriaService feria, LimiteTasa limiteTasa,
++            @Value("${devcoast.feria.token:}") String token) {
++        this.limiteTasa = limiteTasa;
+         this.mongo = mongo;
+         this.feria = feria;
+         this.token = token == null ? "" : token.trim();
+@@ -62,6 +68,11 @@ public class DemoController {
+         };
+         if (correo == null)
+             return "redirect:/demo";
++        if (limiteTasa.excedido("demo|" + request.getRemoteAddr(), MAX_ENTRADAS, VENTANA_ENTRADAS_MS)) {
++            ra.addFlashAttribute("flashMessage", "Demasiadas entradas seguidas. Prueba en unos segundos.");
++            ra.addFlashAttribute("flashType", "info");
++            return "redirect:/demo";
++        }
+         boolean esEmpresa = rol.equals("empresa") || rol.equals("startup");
+         String id;
+         String nombre;
+@@ -103,12 +114,12 @@ public class DemoController {
+         if (!Boolean.TRUE.equals(session.getAttribute("modoDemo")))
+             return "redirect:/login";
+         long ahora = System.currentTimeMillis();
+-        if (ahora - ultimoReinicio.get() < ESPERA_REINICIO_MS) {
++        long previo = ultimoReinicio.get();
++        if (ahora - previo < ESPERA_REINICIO_MS || !ultimoReinicio.compareAndSet(previo, ahora)) {
+             ra.addFlashAttribute("flashMessage", "La demo se acaba de reiniciar. Prueba en unos segundos.");
+             ra.addFlashAttribute("flashType", "info");
+             return "redirect:/dashboard";
+         }
+-        ultimoReinicio.set(ahora);
+         try {
+             DatosFeria datos = feria.leerDatos();
+             if (!datos.valido())
+diff --git a/src/main/java/com/example/devcoast/model/Empleo.java b/src/main/java/com/example/devcoast/model/Empleo.java
+index 58bbaf1..8b6f8d4 100644
+--- a/src/main/java/com/example/devcoast/model/Empleo.java
++++ b/src/main/java/com/example/devcoast/model/Empleo.java
+@@ -98,4 +98,12 @@ public class Empleo {
+         }
+         return salary.toString();
+     }
++
++    public void setEmpresaWeb(String empresaWeb) {
++        this.empresaWeb = com.example.devcoast.service.UrlSegura.normalizar(empresaWeb);
++    }
++
++    public void setLogoUrl(String logoUrl) {
++        this.logoUrl = com.example.devcoast.service.UrlSegura.normalizar(logoUrl);
++    }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/example/devcoast/model/Empresa.java b/src/main/java/com/example/devcoast/model/Empresa.java
+index 9938340..4e3bd28 100644
+--- a/src/main/java/com/example/devcoast/model/Empresa.java
++++ b/src/main/java/com/example/devcoast/model/Empresa.java
+@@ -56,4 +56,8 @@ public class Empresa {
+ 
+     @Field("plan_vence_en")
+     private Date planVenceEn;
++
++    public void setSitioWeb(String sitioWeb) {
++        this.sitioWeb = com.example.devcoast.service.UrlSegura.normalizar(sitioWeb);
++    }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/example/devcoast/model/Usuario.java b/src/main/java/com/example/devcoast/model/Usuario.java
+index 569bdfb..c9c64a0 100644
+--- a/src/main/java/com/example/devcoast/model/Usuario.java
++++ b/src/main/java/com/example/devcoast/model/Usuario.java
+@@ -289,15 +289,15 @@ public class Usuario {
+     }
+ 
+     public void setPortfolioUrl(String portfolioUrl) {
+-        this.portfolioUrl = portfolioUrl;
++        this.portfolioUrl = com.example.devcoast.service.UrlSegura.normalizar(portfolioUrl);
+     }
+ 
+     public void setLinkedinUrl(String linkedinUrl) {
+-        this.linkedinUrl = linkedinUrl;
++        this.linkedinUrl = com.example.devcoast.service.UrlSegura.normalizar(linkedinUrl);
+     }
+ 
+     public void setGithubUrl(String githubUrl) {
+-        this.githubUrl = githubUrl;
++        this.githubUrl = com.example.devcoast.service.UrlSegura.normalizar(githubUrl);
+     }
+ 
+     public void setEmpresaId(String empresaId) {
+diff --git a/src/main/java/com/example/devcoast/service/Credenciales.java b/src/main/java/com/example/devcoast/service/Credenciales.java
+new file mode 100644
+index 0000000..d1cdc41
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/service/Credenciales.java
+@@ -0,0 +1,28 @@
++package com.example.devcoast.service;
++
++import java.nio.charset.StandardCharsets;
++
++public final class Credenciales {
++
++    public static final int MIN_CARACTERES = 8;
++    public static final int MAX_BYTES = 72;
++
++    private Credenciales() {
++    }
++
++    public static boolean cumpleReglas(String password) {
++        return password != null && password.trim().length() >= MIN_CARACTERES && cabeEnBcrypt(password);
++    }
++
++    public static boolean cabeEnBcrypt(String password) {
++        return password != null && password.getBytes(StandardCharsets.UTF_8).length <= MAX_BYTES;
++    }
++
++    public static String problema(String password) {
++        if (password == null || password.trim().length() < MIN_CARACTERES)
++            return "La contraseña debe tener al menos " + MIN_CARACTERES + " caracteres";
++        if (!cabeEnBcrypt(password))
++            return "La contraseña es demasiado larga (máximo " + MAX_BYTES + " bytes, unos 70 caracteres)";
++        return null;
++    }
++}
+diff --git a/src/main/java/com/example/devcoast/service/UrlSegura.java b/src/main/java/com/example/devcoast/service/UrlSegura.java
+new file mode 100644
+index 0000000..e1f6eb9
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/service/UrlSegura.java
+@@ -0,0 +1,60 @@
++package com.example.devcoast.service;
++
++import java.net.URI;
++import java.net.URISyntaxException;
++import java.util.Locale;
++import java.util.regex.Pattern;
++
++public final class UrlSegura {
++
++    public static final int MAX_LARGO = 500;
++
++    private static final Pattern TIENE_ESQUEMA = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*:.*$");
++    private static final Pattern CARACTERES_PROHIBIDOS = Pattern.compile("[\\s\"'<>`\\\\\\u0000-\\u001f]");
++
++    private UrlSegura() {
++    }
++
++    public static String normalizar(String entrada) {
++        if (entrada == null)
++            return null;
++        String u = entrada.trim();
++        if (u.isEmpty() || u.length() > MAX_LARGO)
++            return null;
++        if (u.startsWith("//"))
++            return null;
++        if (!TIENE_ESQUEMA.matcher(u).matches() || esHostConPuerto(u))
++            u = "https://" + u;
++        return esSegura(u) ? u : null;
++    }
++
++    public static boolean esSegura(String url) {
++        if (url == null || url.length() > MAX_LARGO)
++            return false;
++        if (CARACTERES_PROHIBIDOS.matcher(url).find())
++            return false;
++        String bajo = url.toLowerCase(Locale.ROOT);
++        if (!bajo.startsWith("http://") && !bajo.startsWith("https://"))
++            return false;
++        try {
++            URI uri = new URI(url);
++            String host = uri.getHost();
++            return host != null && !host.isBlank() && (host.contains(".") || "localhost".equalsIgnoreCase(host));
++        } catch (URISyntaxException e) {
++            return false;
++        }
++    }
++
++    public static String paraMostrar(String url) {
++        return url != null && esSegura(url.trim()) ? url.trim() : null;
++    }
++
++    private static boolean esHostConPuerto(String u) {
++        int dosPuntos = u.indexOf(':');
++        if (dosPuntos <= 0 || dosPuntos + 1 >= u.length())
++            return false;
++        String antes = u.substring(0, dosPuntos);
++        char despues = u.charAt(dosPuntos + 1);
++        return antes.contains(".") && Character.isDigit(despues);
++    }
++}
+diff --git a/src/main/java/com/example/devcoast/service/ValidacionEmpleo.java b/src/main/java/com/example/devcoast/service/ValidacionEmpleo.java
+new file mode 100644
+index 0000000..4c665ea
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/service/ValidacionEmpleo.java
+@@ -0,0 +1,70 @@
++package com.example.devcoast.service;
++
++import com.example.devcoast.model.Empleo;
++
++public final class ValidacionEmpleo {
++
++    public static final int MAX_TITULO = 120;
++    public static final int MAX_CORTO = 120;
++    public static final int MAX_DESCRIPCION_EMPRESA = 1500;
++    public static final int MAX_DESCRIPCION_ROL = 5000;
++    public static final int MAX_REQUISITOS = 3000;
++    public static final int MAX_STACK = 600;
++    public static final int MAX_SOFT = 400;
++    public static final int MAX_KEYWORDS = 400;
++    public static final int MAX_VACANTES = 500;
++    public static final int MAX_SALARIO = 1_000_000_000;
++
++    private ValidacionEmpleo() {
++    }
++
++    public static String validar(Empleo f) {
++        if (vacio(f.getTitulo()) || vacio(f.getCategoria()) || vacio(f.getSeniority())
++                || vacio(f.getModalidad()) || vacio(f.getContrato()) || vacio(f.getEmpresaNombre())
++                || vacio(f.getEmpresaSector()) || vacio(f.getEmpresaTamano()) || vacio(f.getEmpresaDescripcion())
++                || vacio(f.getStack()))
++            return "Completa todos los campos obligatorios del empleo";
++
++        if (largo(f.getTitulo(), MAX_TITULO))
++            return "El título es demasiado largo (máximo " + MAX_TITULO + " caracteres)";
++        for (String corto : new String[] { f.getCategoria(), f.getSeniority(), f.getModalidad(), f.getContrato(),
++                f.getEmpresaNombre(), f.getEmpresaSector(), f.getEmpresaTamano(), f.getMoneda(), f.getSalarioPeriodo(),
++                f.getTimezone(), f.getIngles(), f.getIcono(), f.getColorIcono() })
++            if (largo(corto, MAX_CORTO))
++                return "Hay un campo con demasiado texto (máximo " + MAX_CORTO + " caracteres)";
++        if (largo(f.getEmpresaDescripcion(), MAX_DESCRIPCION_EMPRESA))
++            return "La descripción de la empresa es demasiado larga (máximo " + MAX_DESCRIPCION_EMPRESA + " caracteres)";
++        if (largo(f.getDescripcionRol(), MAX_DESCRIPCION_ROL))
++            return "La descripción del rol es demasiado larga (máximo " + MAX_DESCRIPCION_ROL + " caracteres)";
++        if (largo(f.getRequisitosDeseables(), MAX_REQUISITOS))
++            return "Los requisitos deseables son demasiado largos (máximo " + MAX_REQUISITOS + " caracteres)";
++        if (largo(f.getStack(), MAX_STACK))
++            return "El stack es demasiado largo (máximo " + MAX_STACK + " caracteres)";
++        if (largo(f.getSoftSkills(), MAX_SOFT))
++            return "Las habilidades blandas son demasiado largas (máximo " + MAX_SOFT + " caracteres)";
++        if (largo(f.getScreeningKeywords(), MAX_KEYWORDS))
++            return "Las palabras del filtro automático son demasiado largas (máximo " + MAX_KEYWORDS + " caracteres)";
++
++        if (f.getVacantes() == null || f.getVacantes() < 1)
++            return "Las vacantes disponibles deben ser al menos 1";
++        if (f.getVacantes() > MAX_VACANTES)
++            return "Las vacantes no pueden pasar de " + MAX_VACANTES;
++        if (fueraDeRango(f.getSalarioMin()) || fueraDeRango(f.getSalarioMax()))
++            return "El salario debe ser un valor entre 0 y " + MAX_SALARIO;
++        if (f.getSalarioMin() != null && f.getSalarioMax() != null && f.getSalarioMin() > f.getSalarioMax())
++            return "El salario mínimo no puede ser mayor que el máximo";
++        return null;
++    }
++
++    private static boolean vacio(String s) {
++        return s == null || s.isBlank();
++    }
++
++    private static boolean largo(String s, int max) {
++        return s != null && s.length() > max;
++    }
++
++    private static boolean fueraDeRango(Integer v) {
++        return v != null && (v < 0 || v > MAX_SALARIO);
++    }
++}
+diff --git a/src/main/java/com/example/devcoast/service/ValidadorImagen.java b/src/main/java/com/example/devcoast/service/ValidadorImagen.java
+new file mode 100644
+index 0000000..def9bcd
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/service/ValidadorImagen.java
+@@ -0,0 +1,39 @@
++package com.example.devcoast.service;
++
++public final class ValidadorImagen {
++
++    public static final long MAX_BYTES = 5L * 1024 * 1024;
++
++    private ValidadorImagen() {
++    }
++
++    public enum Tipo {
++        JPEG, PNG, GIF, WEBP
++    }
++
++    public static Tipo detectar(byte[] d) {
++        if (d == null || d.length < 12)
++            return null;
++        if ((d[0] & 0xFF) == 0xFF && (d[1] & 0xFF) == 0xD8 && (d[2] & 0xFF) == 0xFF)
++            return Tipo.JPEG;
++        if ((d[0] & 0xFF) == 0x89 && d[1] == 'P' && d[2] == 'N' && d[3] == 'G'
++                && d[4] == 0x0D && d[5] == 0x0A && d[6] == 0x1A && d[7] == 0x0A)
++            return Tipo.PNG;
++        if (d[0] == 'G' && d[1] == 'I' && d[2] == 'F' && d[3] == '8' && (d[4] == '7' || d[4] == '9') && d[5] == 'a')
++            return Tipo.GIF;
++        if (d[0] == 'R' && d[1] == 'I' && d[2] == 'F' && d[3] == 'F'
++                && d[8] == 'W' && d[9] == 'E' && d[10] == 'B' && d[11] == 'P')
++            return Tipo.WEBP;
++        return null;
++    }
++
++    public static String problema(byte[] datos) {
++        if (datos == null || datos.length == 0)
++            return "Archivo vacío";
++        if (datos.length > MAX_BYTES)
++            return "La imagen pesa más de 5 MB";
++        if (detectar(datos) == null)
++            return "El archivo debe ser una imagen JPG, PNG, GIF o WebP";
++        return null;
++    }
++}
+diff --git a/src/main/java/com/example/devcoast/service/{Credenciales,UrlSegura,ValidacionEmpleo,ValidadorImagen}.java b/src/main/java/com/example/devcoast/service/{Credenciales,UrlSegura,ValidacionEmpleo,ValidadorImagen}.java
+new file mode 100644
+index 0000000..8b13789
+--- /dev/null
++++ b/src/main/java/com/example/devcoast/service/{Credenciales,UrlSegura,ValidacionEmpleo,ValidadorImagen}.java
+@@ -0,0 +1 @@
++
+diff --git a/src/main/resources/application.properties b/src/main/resources/application.properties
+index 816cb61..680cd32 100644
+--- a/src/main/resources/application.properties
++++ b/src/main/resources/application.properties
+@@ -6,6 +6,11 @@ server.port=8080
+ # Antes estaba en -1 (nunca expira): las sesiones abandonadas quedaban abiertas y en memoria para siempre.
+ server.servlet.session.timeout=7d
+ 
++server.servlet.session.cookie.http-only=true
++server.servlet.session.cookie.same-site=lax
++server.servlet.session.cookie.secure=${DEVCOAST_COOKIE_SEGURA:false}
++server.servlet.session.tracking-modes=cookie
++
+ spring.mongodb.uri=${MONGODB_URI}
+ 
+ # DEVCOAST_PERFIL=feria activa además el perfil de Spring «feria» (application-feria.properties): base de datos propia y seeder apagado
+@@ -16,8 +21,8 @@ cloudinary.cloud-name=${CLOUDINARY_CLOUD_NAME}
+ cloudinary.api-key=${CLOUDINARY_API_KEY}
+ cloudinary.api-secret=${CLOUDINARY_API_SECRET}
+ 
+-spring.servlet.multipart.max-file-size=10MB
+-spring.servlet.multipart.max-request-size=10MB
++spring.servlet.multipart.max-file-size=6MB
++spring.servlet.multipart.max-request-size=7MB
+ 
+ server.compression.enabled=true
+ server.compression.mime-types=text/html,text/css,application/javascript,application/json,text/plain,image/svg+xml
+diff --git a/src/main/resources/static/CSS/nautico-ajustes.css b/src/main/resources/static/CSS/nautico-ajustes.css
+index 0ee38c3..87743e5 100644
+--- a/src/main/resources/static/CSS/nautico-ajustes.css
++++ b/src/main/resources/static/CSS/nautico-ajustes.css
+@@ -750,4 +750,11 @@ html[data-theme="light"] .aj-dopt[aria-pressed="true"] {
+     .aj-st {
+         font-size: 26px;
+     }
+-}
+\ No newline at end of file
++}
++
++.out-form .aj-go {
++    width: 100%;
++    border: 0;
++    cursor: pointer;
++    font: inherit;
++}
+diff --git a/src/main/resources/static/CSS/nautico.css b/src/main/resources/static/CSS/nautico.css
+index 663af3b..36fe157 100644
+--- a/src/main/resources/static/CSS/nautico.css
++++ b/src/main/resources/static/CSS/nautico.css
+@@ -1668,3 +1668,22 @@ h2 {
+         animation: none;
+     }
+ }
++
++
++.out-form {
++    display: contents;
++}
++
++button.mi {
++    width: 100%;
++    border: 0;
++    background: transparent;
++    cursor: pointer;
++    text-align: left;
++    appearance: none;
++}
++
++button.mi:focus-visible {
++    outline: 2px solid var(--ink);
++    outline-offset: 2px;
++}
+diff --git a/src/main/resources/static/JS/perfil-pase.js b/src/main/resources/static/JS/perfil-pase.js
+index f91f1a1..4cea19d 100644
+--- a/src/main/resources/static/JS/perfil-pase.js
++++ b/src/main/resources/static/JS/perfil-pase.js
+@@ -177,7 +177,7 @@
+                     if (quitar) quitar.hidden = false;
+                     toast(T('Foto actualizada.'));
+                     refrescar();
+-                } else toast(T('No se pudo subir la foto.'));
++                } else toast(d && d.error ? d.error : T('No se pudo subir la foto.'));
+             })
+             .catch(function () { toast(T('No se pudo subir la foto.')); })
+             .then(function () { file.value = ''; });
+@@ -192,7 +192,7 @@
+                     quitar.hidden = true;
+                     toast(T('Foto eliminada.'));
+                     refrescar();
+-                } else toast(T('No se pudo quitar la foto.'));
++                } else toast(d && d.error ? d.error : T('No se pudo quitar la foto.'));
+             })
+             .catch(function () { toast(T('No se pudo quitar la foto.')); });
+     });
+diff --git a/src/main/resources/static/JS/s-proyecto.js b/src/main/resources/static/JS/s-proyecto.js
+index c3a82fa..f94927c 100644
+--- a/src/main/resources/static/JS/s-proyecto.js
++++ b/src/main/resources/static/JS/s-proyecto.js
+@@ -187,7 +187,7 @@ document.getElementById('logo-input').addEventListener('change', async function
+             logoSubido = true;
+             showProjectToast('Logo subido correctamente', 'success');
+         } else {
+-            showProjectToast('Error al subir el logo', 'error');
++            showProjectToast(data.error || 'Error al subir el logo', 'error');
+             document.getElementById('logo-upload-label').textContent = 'Subir ícono personalizado (opcional)';
+         }
+     } catch {
+@@ -208,7 +208,12 @@ document.getElementById('btn-quitar-logo').addEventListener('click', () => {
+ function crearChip(texto, array, fieldId) {
+     const chip = document.createElement('span');
+     chip.className = 'tag-chip';
+-    chip.innerHTML = `${texto} <button class="tag-remove" type="button">×</button>`;
++    chip.appendChild(document.createTextNode(texto + ' '));
++    const quitar = document.createElement('button');
++    quitar.className = 'tag-remove';
++    quitar.type = 'button';
++    quitar.textContent = '×';
++    chip.appendChild(quitar);
+     chip.querySelector('.tag-remove').addEventListener('click', () => {
+         const idx = array.indexOf(texto);
+         if (idx > -1) array.splice(idx, 1);
+diff --git a/src/main/resources/static/JS/steps.js b/src/main/resources/static/JS/steps.js
+index 38af165..1ca2517 100644
+--- a/src/main/resources/static/JS/steps.js
++++ b/src/main/resources/static/JS/steps.js
+@@ -159,7 +159,12 @@ if (form) {
+ function crearTagChip(texto, array, fieldId) {
+     const chip = document.createElement('span');
+     chip.className = 'tag-chip';
+-    chip.innerHTML = `${texto} <button class="tag-remove" type="button">×</button>`;
++    chip.appendChild(document.createTextNode(texto + ' '));
++    const quitar = document.createElement('button');
++    quitar.className = 'tag-remove';
++    quitar.type = 'button';
++    quitar.textContent = '×';
++    chip.appendChild(quitar);
+     chip.querySelector('.tag-remove').addEventListener('click', () => {
+         const idx = array.indexOf(texto);
+         if (idx > -1) array.splice(idx, 1);
+diff --git a/src/main/resources/templates/ajustes.html b/src/main/resources/templates/ajustes.html
+index 6d31415..c13f949 100644
+--- a/src/main/resources/templates/ajustes.html
++++ b/src/main/resources/templates/ajustes.html
+@@ -427,7 +427,7 @@
+                         <div class="jt-stub gr">
+                             <span class="mt-k">ESTADO</span>
+                             <div class="aj-st sm">Reversible</div>
+-                            <a class="apply aj-go" th:href="@{/logout}">Cerrar sesión</a>
++                            <form class="out-form" th:action="@{/logout}" method="post"><button type="submit" class="apply aj-go">Cerrar sesión</button></form>
+                         </div>
+                     </article>
+                     <article class="jt aj-dz">
+diff --git a/src/main/resources/templates/crearEmpleo.html b/src/main/resources/templates/crearEmpleo.html
+index 1ad36a3..ba4da81 100644
+--- a/src/main/resources/templates/crearEmpleo.html
++++ b/src/main/resources/templates/crearEmpleo.html
+@@ -967,7 +967,12 @@
+             var btn = document.getElementById('btn-quitar-img');
+             if (preview) {
+                 preview.style.background = 'transparent';
+-                preview.innerHTML = '<img src="' + logoUrl + '" style="width:48px;height:48px;object-fit:cover;border-radius:10px;">';
++                var img = document.createElement('img');
++                img.src = logoUrl;
++                img.alt = '';
++                img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:10px;';
++                preview.textContent = '';
++                preview.appendChild(img);
+             }
+             if (label) label.textContent = 'Logo actual (haz clic para reemplazar)';
+             if (btn) btn.style.display = 'block';
+diff --git a/src/main/resources/templates/curriculum.html b/src/main/resources/templates/curriculum.html
+index 1f85481..6da189d 100644
+--- a/src/main/resources/templates/curriculum.html
++++ b/src/main/resources/templates/curriculum.html
+@@ -133,7 +133,7 @@
+                                         th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
+                                 </div>
+                                 <div class="cv-pj-l">
+-                                    <a th:if="${proy.linkProyecto}" th:href="${proy.linkProyecto}" target="_blank"
++                                    <a th:if="${proy.linkProyecto}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(proy.linkProyecto)}" target="_blank"
+                                         rel="noopener">Ver proyecto ↗</a>
+                                     <a th:href="@{/misProyectos/{id}(id=${proy.id})}" target="_blank" rel="noopener">Ver
+                                         en DevCoast ↗</a>
+@@ -243,19 +243,19 @@
+                         <div
+                             th:if="${usuario != null and usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}">
+                             <dt>PORTAFOLIO</dt>
+-                            <dd><a th:href="${usuario.portfolioUrl}" target="_blank" rel="noopener"
++                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.portfolioUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.portfolioUrl}">sitio</a></dd>
+                         </div>
+                         <div
+                             th:if="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">
+                             <dt>LINKEDIN</dt>
+-                            <dd><a th:href="${usuario.linkedinUrl}" target="_blank" rel="noopener"
++                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.linkedinUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.linkedinUrl}">linkedin</a></dd>
+                         </div>
+                         <div
+                             th:if="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">
+                             <dt>GITHUB</dt>
+-                            <dd><a th:href="${usuario.githubUrl}" target="_blank" rel="noopener"
++                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.githubUrl)}" target="_blank" rel="noopener"
+                                     th:text="${usuario.githubUrl}">github</a></dd>
+                         </div>
+                     </dl>
+diff --git a/src/main/resources/templates/detalles-empleo.html b/src/main/resources/templates/detalles-empleo.html
+index afbb557..463a7ec 100644
+--- a/src/main/resources/templates/detalles-empleo.html
++++ b/src/main/resources/templates/detalles-empleo.html
+@@ -262,7 +262,7 @@
+                                 </div>
+                                 <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}">
+                                     <dt>SITIO WEB</dt>
+-                                    <dd><a class="lnk" th:href="${empleo.empresaWeb}" target="_blank" rel="noopener"
++                                    <dd><a class="lnk" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(empleo.empresaWeb)}" target="_blank" rel="noopener"
+                                             th:text="${empleo.empresaWeb}">Link</a></dd>
+                                 </div>
+                             </dl>
+diff --git a/src/main/resources/templates/empresa-perfil.html b/src/main/resources/templates/empresa-perfil.html
+index 6ac47c3..74b5bf7 100644
+--- a/src/main/resources/templates/empresa-perfil.html
++++ b/src/main/resources/templates/empresa-perfil.html
+@@ -54,7 +54,7 @@
+                             th:if="${descripcionEmpresa != null and !#strings.isEmpty(descripcionEmpresa)}"
+                             th:text="${descripcionEmpresa}">Descripción</p>
+                         <a class="lnk" th:if="${webEmpresa != null and !#strings.isEmpty(webEmpresa)}"
+-                            th:href="${webEmpresa}" target="_blank" rel="noopener noreferrer"
++                            th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(webEmpresa)}" target="_blank" rel="noopener noreferrer"
+                             th:text="${webEmpresa} + ' ↗'">sitio.com</a>
+                     </div>
+                 </section>
+diff --git a/src/main/resources/templates/fragments/nautico.html b/src/main/resources/templates/fragments/nautico.html
+index 0a0b901..fe76bed 100644
+--- a/src/main/resources/templates/fragments/nautico.html
++++ b/src/main/resources/templates/fragments/nautico.html
+@@ -327,13 +327,15 @@
+                 </div>
+                 <button type="button" class="demo-pres" data-presentar="manual" title="Cuenta la historia completa usando la app real, paso a paso">▶ Presentar</button>
+             </div>
+-            <a class="mi out" th:href="@{/logout}">
+-                <svg viewBox="0 0 24 24" aria-hidden="true">
+-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+-                    <path d="M16 17l5-5-5-5" />
+-                    <path d="M21 12H9" />
+-                </svg>
+-                Cerrar sesión</a>
++            <form class="out-form" th:action="@{/logout}" method="post">
++                <button type="submit" class="mi out">
++                    <svg viewBox="0 0 24 24" aria-hidden="true">
++                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
++                        <path d="M16 17l5-5-5-5" />
++                        <path d="M21 12H9" />
++                    </svg>
++                    Cerrar sesión</button>
++            </form>
+             <div class="dock" aria-hidden="true">
+                 <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
+                 <th:block th:replace="~{fragments/nautico :: sea}"></th:block>
+diff --git a/src/main/resources/templates/fragments/pase.html b/src/main/resources/templates/fragments/pase.html
+index b65b0fa..6ff437c 100644
+--- a/src/main/resources/templates/fragments/pase.html
++++ b/src/main/resources/templates/fragments/pase.html
+@@ -502,12 +502,12 @@
+         </div>
+         <div class="tc-f">
+             <div class="tc-l">
+-                <a th:if="${v.portfolioUrl != null}" th:href="${v.portfolioUrl}" target="_blank"
++                <a th:if="${v.portfolioUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.portfolioUrl)}" target="_blank"
+                     rel="noopener noreferrer"
+                     th:aria-label="|Portafolio de ${v.nombre} (se abre en otra pestaña)|">Portafolio</a>
+-                <a th:if="${v.linkedinUrl != null}" th:href="${v.linkedinUrl}" target="_blank" rel="noopener noreferrer"
++                <a th:if="${v.linkedinUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.linkedinUrl)}" target="_blank" rel="noopener noreferrer"
+                     th:aria-label="|LinkedIn de ${v.nombre} (se abre en otra pestaña)|">LinkedIn</a>
+-                <a th:if="${v.githubUrl != null}" th:href="${v.githubUrl}" target="_blank" rel="noopener noreferrer"
++                <a th:if="${v.githubUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(v.githubUrl)}" target="_blank" rel="noopener noreferrer"
+                     th:aria-label="|GitHub de ${v.nombre} (se abre en otra pestaña)|">GitHub</a>
+             </div>
+             <div class="tc-a">
+diff --git a/src/main/resources/templates/talento-perfil.html b/src/main/resources/templates/talento-perfil.html
+index 78c0a33..9e2325a 100644
+--- a/src/main/resources/templates/talento-perfil.html
++++ b/src/main/resources/templates/talento-perfil.html
+@@ -90,12 +90,12 @@
+ 
+                         <div class="tc-l tp-links"
+                             th:if="${tv.portfolioUrl != null or tv.linkedinUrl != null or tv.githubUrl != null}">
+-                            <a th:if="${tv.portfolioUrl != null}" th:href="${tv.portfolioUrl}" target="_blank"
++                            <a th:if="${tv.portfolioUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.portfolioUrl)}" target="_blank"
+                                 rel="noopener noreferrer"
+                                 aria-label="Portafolio (se abre en otra pestaña)">Portafolio</a>
+-                            <a th:if="${tv.linkedinUrl != null}" th:href="${tv.linkedinUrl}" target="_blank"
++                            <a th:if="${tv.linkedinUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.linkedinUrl)}" target="_blank"
+                                 rel="noopener noreferrer" aria-label="LinkedIn (se abre en otra pestaña)">LinkedIn</a>
+-                            <a th:if="${tv.githubUrl != null}" th:href="${tv.githubUrl}" target="_blank"
++                            <a th:if="${tv.githubUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.githubUrl)}" target="_blank"
+                                 rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
+                         </div>
+ 
+diff --git a/src/test/java/com/example/devcoast/service/CredencialesTest.java b/src/test/java/com/example/devcoast/service/CredencialesTest.java
+new file mode 100644
+index 0000000..4ca5fea
+--- /dev/null
++++ b/src/test/java/com/example/devcoast/service/CredencialesTest.java
+@@ -0,0 +1,32 @@
++package com.example.devcoast.service;
++
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertNotNull;
++import static org.junit.jupiter.api.Assertions.assertNull;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import org.junit.jupiter.api.Test;
++
++class CredencialesTest {
++
++    @Test
++    void aceptaContrasenaNormal() {
++        assertTrue(Credenciales.cumpleReglas("demo1234"));
++        assertNull(Credenciales.problema("demo1234"));
++    }
++
++    @Test
++    void rechazaCortasYNulas() {
++        assertFalse(Credenciales.cumpleReglas("corta"));
++        assertFalse(Credenciales.cumpleReglas(null));
++        assertNotNull(Credenciales.problema("       "));
++    }
++
++    @Test
++    void rechazaLasQueNoCabenEnBcrypt() {
++        assertTrue(Credenciales.cabeEnBcrypt("a".repeat(72)));
++        assertFalse(Credenciales.cabeEnBcrypt("a".repeat(73)));
++        assertFalse(Credenciales.cabeEnBcrypt("ñ".repeat(40)));
++        assertNotNull(Credenciales.problema("a".repeat(100)));
++    }
++}
+diff --git a/src/test/java/com/example/devcoast/service/UrlSeguraTest.java b/src/test/java/com/example/devcoast/service/UrlSeguraTest.java
+new file mode 100644
+index 0000000..b2a0453
+--- /dev/null
++++ b/src/test/java/com/example/devcoast/service/UrlSeguraTest.java
+@@ -0,0 +1,55 @@
++package com.example.devcoast.service;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertNull;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import org.junit.jupiter.api.Test;
++
++class UrlSeguraTest {
++
++    @Test
++    void rechazaEsquemasPeligrosos() {
++        assertNull(UrlSegura.normalizar("javascript:alert(1)"));
++        assertNull(UrlSegura.normalizar("JaVaScRiPt:alert(1)"));
++        assertNull(UrlSegura.normalizar("data:text/html,<script>alert(1)</script>"));
++        assertNull(UrlSegura.normalizar("vbscript:x"));
++        assertNull(UrlSegura.normalizar("//evil.com"));
++    }
++
++    @Test
++    void rechazaCaracteresQueRompenUnAtributo() {
++        assertNull(UrlSegura.normalizar("http://a.com\" onmouseover=\"x"));
++        assertNull(UrlSegura.normalizar("https://exa mple.com"));
++        assertNull(UrlSegura.normalizar("https://a.com/<b>"));
++    }
++
++    @Test
++    void agregaHttpsCuandoFalta() {
++        assertEquals("https://miweb.com", UrlSegura.normalizar("miweb.com"));
++        assertEquals("https://www.linkedin.com/in/yo", UrlSegura.normalizar("  www.linkedin.com/in/yo "));
++        assertEquals("https://miweb.com:8080/ruta", UrlSegura.normalizar("miweb.com:8080/ruta"));
++    }
++
++    @Test
++    void respetaEnlacesValidos() {
++        assertEquals("https://a.co/x?y=1", UrlSegura.normalizar("https://a.co/x?y=1"));
++        assertEquals("http://a.co", UrlSegura.normalizar("http://a.co"));
++    }
++
++    @Test
++    void vacioONuloDaNulo() {
++        assertNull(UrlSegura.normalizar(null));
++        assertNull(UrlSegura.normalizar("   "));
++        assertNull(UrlSegura.normalizar("https://"));
++    }
++
++    @Test
++    void paraMostrarFiltraDatosViejos() {
++        assertNull(UrlSegura.paraMostrar("javascript:alert(1)"));
++        assertEquals("https://a.co", UrlSegura.paraMostrar(" https://a.co "));
++        assertFalse(UrlSegura.esSegura("ftp://a.co"));
++        assertTrue(UrlSegura.esSegura("https://a.co"));
++    }
++}
+diff --git a/src/test/java/com/example/devcoast/service/ValidacionEmpleoTest.java b/src/test/java/com/example/devcoast/service/ValidacionEmpleoTest.java
+new file mode 100644
+index 0000000..ce27973
+--- /dev/null
++++ b/src/test/java/com/example/devcoast/service/ValidacionEmpleoTest.java
+@@ -0,0 +1,68 @@
++package com.example.devcoast.service;
++
++import static org.junit.jupiter.api.Assertions.assertNotNull;
++import static org.junit.jupiter.api.Assertions.assertNull;
++
++import org.junit.jupiter.api.Test;
++
++import com.example.devcoast.model.Empleo;
++
++class ValidacionEmpleoTest {
++
++    private static Empleo valido() {
++        Empleo e = new Empleo();
++        e.setTitulo("Backend Java");
++        e.setCategoria("Backend");
++        e.setSeniority("Senior");
++        e.setModalidad("Remoto");
++        e.setContrato("Indefinido");
++        e.setEmpresaNombre("Costa Tech");
++        e.setEmpresaSector("Software");
++        e.setEmpresaTamano("11-50");
++        e.setEmpresaDescripcion("Equipo de producto");
++        e.setStack("Java, Spring");
++        e.setVacantes(2);
++        e.setSalarioMin(1000);
++        e.setSalarioMax(2000);
++        return e;
++    }
++
++    @Test
++    void aceptaUnaOfertaCompleta() {
++        assertNull(ValidacionEmpleo.validar(valido()));
++    }
++
++    @Test
++    void exigeLosCamposObligatorios() {
++        Empleo e = valido();
++        e.setTitulo("  ");
++        assertNotNull(ValidacionEmpleo.validar(e));
++    }
++
++    @Test
++    void rechazaTextosDemasiadoLargos() {
++        Empleo e = valido();
++        e.setTitulo("x".repeat(ValidacionEmpleo.MAX_TITULO + 1));
++        assertNotNull(ValidacionEmpleo.validar(e));
++        e = valido();
++        e.setDescripcionRol("x".repeat(ValidacionEmpleo.MAX_DESCRIPCION_ROL + 1));
++        assertNotNull(ValidacionEmpleo.validar(e));
++    }
++
++    @Test
++    void rechazaVacantesYSalariosFueraDeRango() {
++        Empleo e = valido();
++        e.setVacantes(ValidacionEmpleo.MAX_VACANTES + 1);
++        assertNotNull(ValidacionEmpleo.validar(e));
++        e = valido();
++        e.setVacantes(0);
++        assertNotNull(ValidacionEmpleo.validar(e));
++        e = valido();
++        e.setSalarioMin(-5);
++        assertNotNull(ValidacionEmpleo.validar(e));
++        e = valido();
++        e.setSalarioMin(3000);
++        e.setSalarioMax(2000);
++        assertNotNull(ValidacionEmpleo.validar(e));
++    }
++}
+diff --git a/src/test/java/com/example/devcoast/service/ValidadorImagenTest.java b/src/test/java/com/example/devcoast/service/ValidadorImagenTest.java
+new file mode 100644
+index 0000000..615af7e
+--- /dev/null
++++ b/src/test/java/com/example/devcoast/service/ValidadorImagenTest.java
+@@ -0,0 +1,53 @@
++package com.example.devcoast.service;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertNotNull;
++import static org.junit.jupiter.api.Assertions.assertNull;
++
++import java.nio.charset.StandardCharsets;
++
++import org.junit.jupiter.api.Test;
++
++class ValidadorImagenTest {
++
++    private static byte[] con(byte[] cabecera) {
++        byte[] d = new byte[64];
++        System.arraycopy(cabecera, 0, d, 0, cabecera.length);
++        return d;
++    }
++
++    @Test
++    void reconoceLosFormatosPermitidos() {
++        assertEquals(ValidadorImagen.Tipo.JPEG, ValidadorImagen.detectar(con(new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF })));
++        assertEquals(ValidadorImagen.Tipo.PNG,
++                ValidadorImagen.detectar(con(new byte[] { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A })));
++        assertEquals(ValidadorImagen.Tipo.GIF, ValidadorImagen.detectar(con("GIF89a".getBytes(StandardCharsets.US_ASCII))));
++        byte[] webp = con("RIFF".getBytes(StandardCharsets.US_ASCII));
++        System.arraycopy("WEBP".getBytes(StandardCharsets.US_ASCII), 0, webp, 8, 4);
++        assertEquals(ValidadorImagen.Tipo.WEBP, ValidadorImagen.detectar(webp));
++    }
++
++    @Test
++    void rechazaSvgYOtrosArchivos() {
++        byte[] svg = "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(1)</script></svg>".getBytes(StandardCharsets.UTF_8);
++        assertNull(ValidadorImagen.detectar(svg));
++        assertNotNull(ValidadorImagen.problema(svg));
++        assertNotNull(ValidadorImagen.problema("<html></html>".getBytes(StandardCharsets.UTF_8)));
++    }
++
++    @Test
++    void rechazaVaciosYDemasiadoGrandes() {
++        assertNotNull(ValidadorImagen.problema(new byte[0]));
++        assertNotNull(ValidadorImagen.problema(null));
++        byte[] grande = new byte[(int) ValidadorImagen.MAX_BYTES + 1];
++        grande[0] = (byte) 0xFF;
++        grande[1] = (byte) 0xD8;
++        grande[2] = (byte) 0xFF;
++        assertNotNull(ValidadorImagen.problema(grande));
++    }
++
++    @Test
++    void aceptaUnaImagenValida() {
++        assertNull(ValidadorImagen.problema(con(new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF })));
++    }
++}
+-- 
+2.43.0
+

@@ -133,7 +133,7 @@
                                         th:text="'+' + (${#lists.size(proy.stack)} - 4)">+n</span>
                                 </div>
                                 <div class="cv-pj-l">
-                                    <a th:if="${proy.linkProyecto}" th:href="${proy.linkProyecto}" target="_blank"
+                                    <a th:if="${proy.linkProyecto}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(proy.linkProyecto)}" target="_blank"
                                         rel="noopener">Ver proyecto ↗</a>
                                     <a th:href="@{/misProyectos/{id}(id=${proy.id})}" target="_blank" rel="noopener">Ver
                                         en DevCoast ↗</a>
@@ -243,19 +243,19 @@
                         <div
                             th:if="${usuario != null and usuario.portfolioUrl != null and !#strings.isEmpty(usuario.portfolioUrl)}">
                             <dt>PORTAFOLIO</dt>
-                            <dd><a th:href="${usuario.portfolioUrl}" target="_blank" rel="noopener"
+                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.portfolioUrl)}" target="_blank" rel="noopener"
                                     th:text="${usuario.portfolioUrl}">sitio</a></dd>
                         </div>
                         <div
                             th:if="${usuario != null and usuario.linkedinUrl != null and !#strings.isEmpty(usuario.linkedinUrl)}">
                             <dt>LINKEDIN</dt>
-                            <dd><a th:href="${usuario.linkedinUrl}" target="_blank" rel="noopener"
+                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.linkedinUrl)}" target="_blank" rel="noopener"
                                     th:text="${usuario.linkedinUrl}">linkedin</a></dd>
                         </div>
                         <div
                             th:if="${usuario != null and usuario.githubUrl != null and !#strings.isEmpty(usuario.githubUrl)}">
                             <dt>GITHUB</dt>
-                            <dd><a th:href="${usuario.githubUrl}" target="_blank" rel="noopener"
+                            <dd><a th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(usuario.githubUrl)}" target="_blank" rel="noopener"
                                     th:text="${usuario.githubUrl}">github</a></dd>
                         </div>
                     </dl>

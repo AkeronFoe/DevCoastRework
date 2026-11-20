@@ -751,3 +751,10 @@ html[data-theme="light"] .aj-dopt[aria-pressed="true"] {
         font-size: 26px;
     }
 }
+
+.out-form .aj-go {
+    width: 100%;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+}

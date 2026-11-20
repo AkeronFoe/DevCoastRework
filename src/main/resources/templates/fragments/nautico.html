@@ -327,13 +327,15 @@
                 </div>
                 <button type="button" class="demo-pres" data-presentar="manual" title="Cuenta la historia completa usando la app real, paso a paso">▶ Presentar</button>
             </div>
-            <a class="mi out" th:href="@{/logout}">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <path d="M16 17l5-5-5-5" />
-                    <path d="M21 12H9" />
-                </svg>
-                Cerrar sesión</a>
+            <form class="out-form" th:action="@{/logout}" method="post">
+                <button type="submit" class="mi out">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <path d="M16 17l5-5-5-5" />
+                        <path d="M21 12H9" />
+                    </svg>
+                    Cerrar sesión</button>
+            </form>
             <div class="dock" aria-hidden="true">
                 <th:block th:replace="~{fragments/nautico :: boat('hullclip')}"></th:block>
                 <th:block th:replace="~{fragments/nautico :: sea}"></th:block>

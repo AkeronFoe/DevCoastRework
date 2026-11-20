@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.devcoast.config.LimiteTasa;
 import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
@@ -33,13 +34,18 @@ import jakarta.servlet.http.HttpSession;
 public class DemoController {
 
     private static final long ESPERA_REINICIO_MS = 20_000L;
+    private static final int MAX_ENTRADAS = 200;
+    private static final long VENTANA_ENTRADAS_MS = 5 * 60 * 1000L;
 
     private final MongoTemplate mongo;
     private final FeriaService feria;
     private final String token;
     private final AtomicLong ultimoReinicio = new AtomicLong();
+    private final LimiteTasa limiteTasa;
 
-    public DemoController(MongoTemplate mongo, FeriaService feria, @Value("${devcoast.feria.token:}") String token) {
+    public DemoController(MongoTemplate mongo, FeriaService feria, LimiteTasa limiteTasa,
+            @Value("${devcoast.feria.token:}") String token) {
+        this.limiteTasa = limiteTasa;
         this.mongo = mongo;
         this.feria = feria;
         this.token = token == null ? "" : token.trim();
@@ -62,6 +68,11 @@ public class DemoController {
         };
         if (correo == null)
             return "redirect:/demo";
+        if (limiteTasa.excedido("demo|" + request.getRemoteAddr(), MAX_ENTRADAS, VENTANA_ENTRADAS_MS)) {
+            ra.addFlashAttribute("flashMessage", "Demasiadas entradas seguidas. Prueba en unos segundos.");
+            ra.addFlashAttribute("flashType", "info");
+            return "redirect:/demo";
+        }
         boolean esEmpresa = rol.equals("empresa") || rol.equals("startup");
         String id;
         String nombre;
@@ -103,12 +114,12 @@ public class DemoController {
         if (!Boolean.TRUE.equals(session.getAttribute("modoDemo")))
             return "redirect:/login";
         long ahora = System.currentTimeMillis();
-        if (ahora - ultimoReinicio.get() < ESPERA_REINICIO_MS) {
+        long previo = ultimoReinicio.get();
+        if (ahora - previo < ESPERA_REINICIO_MS || !ultimoReinicio.compareAndSet(previo, ahora)) {
             ra.addFlashAttribute("flashMessage", "La demo se acaba de reiniciar. Prueba en unos segundos.");
             ra.addFlashAttribute("flashType", "info");
             return "redirect:/dashboard";
         }
-        ultimoReinicio.set(ahora);
         try {
             DatosFeria datos = feria.leerDatos();
             if (!datos.valido())

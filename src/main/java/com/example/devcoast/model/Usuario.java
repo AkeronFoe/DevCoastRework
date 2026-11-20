@@ -289,15 +289,15 @@ public class Usuario {
     }
 
     public void setPortfolioUrl(String portfolioUrl) {
-        this.portfolioUrl = portfolioUrl;
+        this.portfolioUrl = com.example.devcoast.service.UrlSegura.normalizar(portfolioUrl);
     }
 
     public void setLinkedinUrl(String linkedinUrl) {
-        this.linkedinUrl = linkedinUrl;
+        this.linkedinUrl = com.example.devcoast.service.UrlSegura.normalizar(linkedinUrl);
     }
 
     public void setGithubUrl(String githubUrl) {
-        this.githubUrl = githubUrl;
+        this.githubUrl = com.example.devcoast.service.UrlSegura.normalizar(githubUrl);
     }
 
     public void setEmpresaId(String empresaId) {

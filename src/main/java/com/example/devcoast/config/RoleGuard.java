@@ -44,6 +44,11 @@ public class RoleGuard {
         return sinSesion(session) || !esTalento(session);
     }
 
+    public static boolean esCuentaDemo(HttpSession session) {
+        return Boolean.TRUE.equals(session.getAttribute("modoDemo"))
+                || com.example.devcoast.feria.FeriaService.DEMO_CORREOS.contains(getCorreo(session).trim().toLowerCase());
+    }
+
     public static String getTipo(HttpSession session) {
         Object t = session.getAttribute("usuarioActualTipo");
         return t == null ? "" : t.toString();

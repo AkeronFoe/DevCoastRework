@@ -262,7 +262,7 @@
                                 </div>
                                 <div th:if="${empleo.empresaWeb != null and !#strings.isEmpty(empleo.empresaWeb)}">
                                     <dt>SITIO WEB</dt>
-                                    <dd><a class="lnk" th:href="${empleo.empresaWeb}" target="_blank" rel="noopener"
+                                    <dd><a class="lnk" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(empleo.empresaWeb)}" target="_blank" rel="noopener"
                                             th:text="${empleo.empresaWeb}">Link</a></dd>
                                 </div>
                             </dl>

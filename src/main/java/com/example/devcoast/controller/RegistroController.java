@@ -162,7 +162,7 @@ public class RegistroController {
     }
 
     private boolean passwordValida(String password) {
-        return password != null && password.trim().length() >= 8;
+        return com.example.devcoast.service.Credenciales.cumpleReglas(password);
     }
 
     private void reflashTalento(RedirectAttributes ra, String nombre, String rolTitulo, String bio, String stack,

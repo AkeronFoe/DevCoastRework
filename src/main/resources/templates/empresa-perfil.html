@@ -54,7 +54,7 @@
                             th:if="${descripcionEmpresa != null and !#strings.isEmpty(descripcionEmpresa)}"
                             th:text="${descripcionEmpresa}">Descripción</p>
                         <a class="lnk" th:if="${webEmpresa != null and !#strings.isEmpty(webEmpresa)}"
-                            th:href="${webEmpresa}" target="_blank" rel="noopener noreferrer"
+                            th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(webEmpresa)}" target="_blank" rel="noopener noreferrer"
                             th:text="${webEmpresa} + ' ↗'">sitio.com</a>
                     </div>
                 </section>

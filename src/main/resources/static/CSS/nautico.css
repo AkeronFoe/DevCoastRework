@@ -1668,3 +1668,22 @@ h2 {
         animation: none;
     }
 }
+
+
+.out-form {
+    display: contents;
+}
+
+button.mi {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    appearance: none;
+}
+
+button.mi:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}

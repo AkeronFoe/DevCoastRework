@@ -90,12 +90,12 @@
 
                         <div class="tc-l tp-links"
                             th:if="${tv.portfolioUrl != null or tv.linkedinUrl != null or tv.githubUrl != null}">
-                            <a th:if="${tv.portfolioUrl != null}" th:href="${tv.portfolioUrl}" target="_blank"
+                            <a th:if="${tv.portfolioUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.portfolioUrl)}" target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label="Portafolio (se abre en otra pestaña)">Portafolio</a>
-                            <a th:if="${tv.linkedinUrl != null}" th:href="${tv.linkedinUrl}" target="_blank"
+                            <a th:if="${tv.linkedinUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.linkedinUrl)}" target="_blank"
                                 rel="noopener noreferrer" aria-label="LinkedIn (se abre en otra pestaña)">LinkedIn</a>
-                            <a th:if="${tv.githubUrl != null}" th:href="${tv.githubUrl}" target="_blank"
+                            <a th:if="${tv.githubUrl != null}" th:href="${T(com.example.devcoast.service.UrlSegura).paraMostrar(tv.githubUrl)}" target="_blank"
                                 rel="noopener noreferrer" aria-label="GitHub (se abre en otra pestaña)">GitHub</a>
                         </div>
 

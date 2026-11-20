@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.devcoast.config.LimiteTasa;
+import com.example.devcoast.config.RoleGuard;
 import com.example.devcoast.model.Empresa;
 import com.example.devcoast.model.Usuario;
 import com.example.devcoast.model.Usuario.CvEducacion;
@@ -20,6 +22,7 @@ import com.example.devcoast.model.Usuario.CvExperiencia;
 import com.example.devcoast.repository.EmpleoRepository;
 import com.example.devcoast.repository.EmpresaRepository;
 import com.example.devcoast.repository.UsuarioRepository;
+import com.example.devcoast.service.Credenciales;
 import com.example.devcoast.service.PlanService;
 
 import jakarta.servlet.http.HttpSession;
@@ -32,9 +35,12 @@ public class UsuarioController {
     private final EmpleoRepository empleoRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final PlanService planService;
+    private final LimiteTasa limiteTasa;
 
     public UsuarioController(UsuarioRepository repository, EmpresaRepository empresaRepository,
-            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder, PlanService planService) {
+            EmpleoRepository empleoRepository, BCryptPasswordEncoder passwordEncoder, PlanService planService,
+            LimiteTasa limiteTasa) {
+        this.limiteTasa = limiteTasa;
         this.repository = repository;
         this.empresaRepository = empresaRepository;
         this.empleoRepository = empleoRepository;
@@ -342,13 +348,22 @@ public class UsuarioController {
         if (id == null)
             return ResponseEntity.status(401).body(Map.of("ok", false, "mensaje", "No autenticado"));
 
+        if (RoleGuard.esCuentaDemo(session))
+            return ResponseEntity.status(403).body(Map.of("ok", false, "mensaje",
+                    "Las cuentas de demostración no pueden cambiar su correo."));
         String nuevoCorreo = str(datos, "nuevoCorreo").toLowerCase();
         String password = datos.get("password") == null ? "" : datos.get("password").toString();
 
-        if (nuevoCorreo.isEmpty() || !nuevoCorreo.contains("@"))
+        if (!nuevoCorreo.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") || nuevoCorreo.length() > 254)
             return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ingresa un correo válido"));
         if (password.isEmpty())
             return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Ingresa tu contraseña actual"));
+        if (limiteTasa.excedido("cambiar-correo|" + id, 6, 15 * 60 * 1000L))
+            return ResponseEntity.status(429).body(Map.of("ok", false, "mensaje",
+                    "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."));
+        if (!Credenciales.cabeEnBcrypt(password))
+            return ResponseEntity.badRequest()
+                    .body(Map.of("ok", false, "mensaje", "La contraseña actual es incorrecta"));
 
         String tipo = (String) session.getAttribute("usuarioActualTipo");
         if ("empresa".equals(tipo)) {

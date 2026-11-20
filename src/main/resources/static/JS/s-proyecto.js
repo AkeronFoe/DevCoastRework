@@ -187,7 +187,7 @@ document.getElementById('logo-input').addEventListener('change', async function 
             logoSubido = true;
             showProjectToast('Logo subido correctamente', 'success');
         } else {
-            showProjectToast('Error al subir el logo', 'error');
+            showProjectToast(data.error || 'Error al subir el logo', 'error');
             document.getElementById('logo-upload-label').textContent = 'Subir ícono personalizado (opcional)';
         }
     } catch {
@@ -208,7 +208,12 @@ document.getElementById('btn-quitar-logo').addEventListener('click', () => {
 function crearChip(texto, array, fieldId) {
     const chip = document.createElement('span');
     chip.className = 'tag-chip';
-    chip.innerHTML = `${texto} <button class="tag-remove" type="button">×</button>`;
+    chip.appendChild(document.createTextNode(texto + ' '));
+    const quitar = document.createElement('button');
+    quitar.className = 'tag-remove';
+    quitar.type = 'button';
+    quitar.textContent = '×';
+    chip.appendChild(quitar);
     chip.querySelector('.tag-remove').addEventListener('click', () => {
         const idx = array.indexOf(texto);
         if (idx > -1) array.splice(idx, 1);
